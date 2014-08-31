@@ -1,0 +1,70 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump com.jolla.settings.system 1.0'.
+
+Module {
+    Component {
+        name: "BluetoothInfo"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.system/BluetoothInfo 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "adapterAddress"; type: "string"; isReadonly: true }
+    }
+    Component {
+        name: "DeviceLockSettings"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.system/DeviceLockSettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "automaticLocking"; type: "string"; isReadonly: true }
+        Property { name: "maximumAttempts"; type: "string"; isReadonly: true }
+        Property { name: "peekingAllowed"; type: "string"; isReadonly: true }
+        Property { name: "sideloadingAllowed"; type: "string"; isReadonly: true }
+        Property { name: "codeMaxLength"; type: "string"; isReadonly: true }
+        Property { name: "codeMinLength"; type: "string"; isReadonly: true }
+        Property { name: "codeCurrentLength"; type: "string"; isReadonly: true }
+        Method {
+            name: "setAutomaticLocking"
+            type: "bool"
+            Parameter { name: "code"; type: "string" }
+            Parameter { name: "value"; type: "string" }
+        }
+        Method {
+            name: "setMaximumAttempts"
+            type: "bool"
+            Parameter { name: "code"; type: "string" }
+            Parameter { name: "value"; type: "string" }
+        }
+        Method {
+            name: "setPeekingAllowed"
+            type: "bool"
+            Parameter { name: "code"; type: "string" }
+            Parameter { name: "value"; type: "string" }
+        }
+        Method {
+            name: "setSideloadingAllowed"
+            type: "bool"
+            Parameter { name: "code"; type: "string" }
+            Parameter { name: "value"; type: "string" }
+        }
+    }
+    Component {
+        name: "LocationSettings"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.system/LocationSettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "agreementText"; type: "string"; isReadonly: true }
+        Property { name: "agreementAccepted"; type: "bool" }
+        Property { name: "locationEnabled"; type: "bool" }
+    }
+    Component {
+        name: "TohInfo"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.system/TohInfo 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "tohId"; type: "string"; isReadonly: true }
+        Property { name: "tohReady"; type: "bool"; isReadonly: true }
+    }
+}

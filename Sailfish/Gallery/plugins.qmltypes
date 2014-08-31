@@ -1,0 +1,88 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable Sailfish.Gallery 1.0'.
+
+Module {
+    Component {
+        name: "DeclarativeAvatarFileHandler"
+        prototype: "QObject"
+        exports: ["Sailfish.Gallery.private/AvatarFileHandler 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "createNewAvatarFileName"
+            type: "QUrl"
+            Parameter { name: "id"; type: "string" }
+        }
+        Method {
+            name: "removeOldAvatars"
+            type: "bool"
+            Parameter { name: "id"; type: "string" }
+            Parameter { name: "excludedFile"; type: "QUrl" }
+        }
+    }
+    Component {
+        name: "DeclarativeImageEditor"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        exports: ["Sailfish.Gallery.private/ImageEditor 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "EditOperationType"
+            values: {
+                "None": 0,
+                "Crop": 1,
+                "Rotate": 2
+            }
+        }
+        Property { name: "source"; type: "QUrl" }
+        Property { name: "target"; type: "QUrl" }
+        Signal {
+            name: "cropped"
+            Parameter { name: "success"; type: "bool" }
+        }
+        Signal {
+            name: "rotated"
+            Parameter { name: "success"; type: "bool" }
+        }
+        Method {
+            name: "crop"
+            Parameter { name: "cropSize"; type: "QSizeF" }
+            Parameter { name: "imageSize"; type: "QSizeF" }
+            Parameter { name: "position"; type: "QPointF" }
+        }
+        Method {
+            name: "rotate"
+            Parameter { name: "rotation"; type: "int" }
+        }
+    }
+    Component {
+        name: "DeclarativeImageMetadata"
+        prototype: "QObject"
+        exports: ["Sailfish.Gallery.private/ImageMetadata 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "source"; type: "QUrl" }
+        Property { name: "autoUpdate"; type: "bool" }
+        Property { name: "orientation"; type: "int"; isReadonly: true }
+        Property { name: "width"; type: "int"; isReadonly: true }
+        Property { name: "height"; type: "int"; isReadonly: true }
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "hasExif"; type: "bool"; isReadonly: true }
+        Property { name: "hasXmp"; type: "bool"; isReadonly: true }
+    }
+    Component {
+        name: "FitNamespace"
+        prototype: "QObject"
+        exports: ["Sailfish.Gallery/Fit 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Fit"
+            values: {
+                "Width": 0,
+                "Height": 1
+            }
+        }
+    }
+}

@@ -1,0 +1,213 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable org.nemomobile.calendar 1.0'.
+
+Module {
+    Component {
+        name: "NemoCalendarAgendaModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.calendar/AgendaModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "AgendaRoles"
+            values: {
+                "EventObjectRole": 256,
+                "OccurrenceObjectRole": 257,
+                "SectionBucketRole": 258
+            }
+        }
+        Enum {
+            name: "FilterMode"
+            values: {
+                "FilterNone": 0,
+                "FilterNonAllDay": 1
+            }
+        }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "startDate"; type: "QDate" }
+        Property { name: "endDate"; type: "QDate" }
+        Property { name: "filterMode"; type: "int" }
+        Signal { name: "updated" }
+        Method {
+            name: "get"
+            type: "QVariant"
+            Parameter { name: "index"; type: "int" }
+            Parameter { name: "role"; type: "int" }
+        }
+    }
+    Component {
+        name: "NemoCalendarApi"
+        prototype: "QObject"
+        exports: ["org.nemomobile.calendar/Calendar 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "excludedNotebooks"; type: "QStringList" }
+        Property { name: "defaultNotebook"; type: "string" }
+        Method { name: "createEvent"; type: "NemoCalendarEvent*" }
+        Method {
+            name: "remove"
+            Parameter { type: "string" }
+        }
+        Method {
+            name: "remove"
+            Parameter { type: "string" }
+            Parameter { type: "QDateTime" }
+        }
+    }
+    Component {
+        name: "NemoCalendarEvent"
+        prototype: "QObject"
+        exports: ["org.nemomobile.calendar/CalendarEvent 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Recur"
+            values: {
+                "RecurOnce": 0,
+                "RecurDaily": 1,
+                "RecurWeekly": 2,
+                "RecurBiweekly": 3,
+                "RecurMonthly": 4,
+                "RecurYearly": 5,
+                "RecurCustom": 6
+            }
+        }
+        Enum {
+            name: "Reminder"
+            values: {
+                "ReminderNone": 0,
+                "ReminderTime": 1,
+                "Reminder5Min": 2,
+                "Reminder15Min": 3,
+                "Reminder30Min": 4,
+                "Reminder1Hour": 5,
+                "Reminder2Hour": 6,
+                "Reminder1Day": 7,
+                "Reminder2Day": 8
+            }
+        }
+        Enum {
+            name: "TimeSpec"
+            values: {
+                "SpecLocalZone": 0,
+                "SpecClockTime": 1
+            }
+        }
+        Property { name: "displayLabel"; type: "string" }
+        Property { name: "description"; type: "string" }
+        Property { name: "startTime"; type: "QDateTime"; isReadonly: true }
+        Property { name: "endTime"; type: "QDateTime"; isReadonly: true }
+        Property { name: "allDay"; type: "bool" }
+        Property { name: "recur"; type: "Recur" }
+        Property { name: "recurEndDate"; type: "QDateTime"; isReadonly: true }
+        Property { name: "hasRecurEndDate"; type: "bool"; isReadonly: true }
+        Property { name: "recurExceptions"; type: "int"; isReadonly: true }
+        Property { name: "reminder"; type: "Reminder" }
+        Property { name: "uniqueId"; type: "string"; isReadonly: true }
+        Property { name: "color"; type: "string"; isReadonly: true }
+        Property { name: "readonly"; type: "bool"; isReadonly: true }
+        Property { name: "calendarUid"; type: "string"; isReadonly: true }
+        Property { name: "location"; type: "string" }
+        Method {
+            name: "setStartTime"
+            Parameter { name: "startTime"; type: "QDateTime" }
+            Parameter { name: "spec"; type: "int" }
+        }
+        Method {
+            name: "setEndTime"
+            Parameter { name: "endTime"; type: "QDateTime" }
+            Parameter { name: "spec"; type: "int" }
+        }
+        Method {
+            name: "setRecurEndDate"
+            Parameter { name: "dateTime"; type: "QDateTime" }
+        }
+        Method { name: "unsetRecurEndDate" }
+        Method {
+            name: "removeException"
+            Parameter { type: "int" }
+        }
+        Method {
+            name: "addException"
+            Parameter { type: "QDateTime" }
+        }
+        Method {
+            name: "recurException"
+            type: "QDateTime"
+            Parameter { type: "int" }
+        }
+        Method {
+            name: "save"
+            Parameter { name: "calendarUid"; type: "string" }
+        }
+        Method { name: "save" }
+        Method { name: "remove" }
+        Method {
+            name: "vCalendar"
+            type: "string"
+            Parameter { name: "prodId"; type: "string" }
+        }
+        Method { name: "vCalendar"; type: "string" }
+    }
+    Component {
+        name: "NemoCalendarEventQuery"
+        prototype: "QObject"
+        exports: ["org.nemomobile.calendar/EventQuery 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "uniqueId"; type: "string" }
+        Property { name: "startTime"; type: "QDateTime" }
+        Property { name: "event"; type: "QObject"; isReadonly: true; isPointer: true }
+        Property { name: "occurrence"; type: "QObject"; isReadonly: true; isPointer: true }
+        Signal {
+            name: "newUniqueId"
+            Parameter { name: "newUid"; type: "string" }
+        }
+    }
+    Component {
+        name: "NemoCalendarNotebookModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.calendar/NotebookModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method { name: "notebooksAboutToChange" }
+        Method { name: "notebooksChanged" }
+    }
+    Component {
+        name: "NemoCalendarNotebookQuery"
+        prototype: "QObject"
+        exports: ["org.nemomobile.calendar/NotebookQuery 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "targetUid"; type: "string" }
+        Property { name: "isValid"; type: "bool"; isReadonly: true }
+        Property { name: "name"; type: "string"; isReadonly: true }
+        Property { name: "description"; type: "string"; isReadonly: true }
+        Property { name: "color"; type: "string"; isReadonly: true }
+        Property { name: "isDefault"; type: "bool"; isReadonly: true }
+        Property { name: "localCalendar"; type: "bool"; isReadonly: true }
+        Property { name: "isReadOnly"; type: "bool"; isReadonly: true }
+    }
+    Component {
+        name: "QtDate"
+        prototype: "QObject"
+        exports: ["org.nemomobile.calendar/QtDate 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "daysTo"
+            type: "int"
+            Parameter { type: "QDate" }
+            Parameter { type: "QDate" }
+        }
+        Method {
+            name: "addDays"
+            type: "QDate"
+            Parameter { type: "QDate" }
+            Parameter { type: "int" }
+        }
+        Method {
+            name: "New"
+            type: "QObject*"
+            Parameter { name: "e"; type: "QQmlEngine"; isPointer: true }
+            Parameter { type: "QJSEngine"; isPointer: true }
+        }
+    }
+}

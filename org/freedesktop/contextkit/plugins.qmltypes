@@ -1,0 +1,21 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable org.freedesktop.contextkit 1.0'.
+
+Module {
+    Component {
+        name: "ContextKitQml::Property"
+        defaultProperty: "value"
+        prototype: "QObject"
+        exports: ["org.freedesktop.contextkit/ContextProperty 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "key"; type: "string" }
+        Property { name: "value"; type: "QVariant" }
+        Property { name: "subscribed"; type: "bool" }
+        Method { name: "subscribe" }
+        Method { name: "unsubscribe" }
+    }
+}

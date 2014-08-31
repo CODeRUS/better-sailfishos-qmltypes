@@ -1,0 +1,78 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable org.nemomobile.dbus 1.0'.
+
+Module {
+    Component {
+        name: "DeclarativeDBusAdaptor"
+        prototype: "QDBusVirtualObject"
+        exports: ["org.nemomobile.dbus/DBusAdaptor 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "BusType"
+            values: {
+                "SystemBus": 0,
+                "SessionBus": 1
+            }
+        }
+        Property { name: "service"; type: "string" }
+        Property { name: "path"; type: "string" }
+        Property { name: "iface"; type: "string" }
+        Property { name: "xml"; type: "string" }
+        Property { name: "busType"; type: "BusType" }
+        Signal { name: "interfaceChanged" }
+        Method {
+            name: "emitSignal"
+            Parameter { name: "name"; type: "string" }
+        }
+        Method {
+            name: "emitSignalWithArguments"
+            Parameter { name: "name"; type: "string" }
+            Parameter { name: "arguments"; type: "QJSValue" }
+        }
+    }
+    Component {
+        name: "DeclarativeDBusInterface"
+        prototype: "QObject"
+        exports: ["org.nemomobile.dbus/DBusInterface 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "BusType"
+            values: {
+                "SystemBus": 0,
+                "SessionBus": 1
+            }
+        }
+        Property { name: "destination"; type: "string" }
+        Property { name: "path"; type: "string" }
+        Property { name: "iface"; type: "string" }
+        Property { name: "busType"; type: "BusType" }
+        Property { name: "signalsEnabled"; type: "bool" }
+        Signal { name: "interfaceChanged" }
+        Method {
+            name: "call"
+            Parameter { name: "method"; type: "string" }
+            Parameter { name: "arguments"; type: "QJSValue" }
+        }
+        Method {
+            name: "typedCall"
+            Parameter { name: "method"; type: "string" }
+            Parameter { name: "arguments"; type: "QJSValue" }
+        }
+        Method {
+            name: "typedCallWithReturn"
+            Parameter { name: "method"; type: "string" }
+            Parameter { name: "arguments"; type: "QJSValue" }
+            Parameter { name: "callback"; type: "QJSValue" }
+        }
+        Method {
+            name: "getProperty"
+            type: "QVariant"
+            Parameter { name: "name"; type: "string" }
+        }
+    }
+    Component { name: "QDBusVirtualObject"; prototype: "QObject" }
+}

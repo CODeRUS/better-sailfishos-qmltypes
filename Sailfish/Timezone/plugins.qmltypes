@@ -1,0 +1,49 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable Sailfish.Timezone 1.0'.
+
+Module {
+    Component {
+        name: "JollaCountryModel"
+        prototype: "JollaFilteredListModel"
+        exports: ["Sailfish.Timezone/CountryModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "indexOf"
+            type: "int"
+            Parameter { name: "countryCode"; type: "string" }
+        }
+        Method {
+            name: "countryName"
+            type: "string"
+            Parameter { name: "index"; type: "int" }
+        }
+    }
+    Component {
+        name: "JollaFilteredListModel"
+        prototype: "QAbstractListModel"
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "filter"; type: "string" }
+    }
+    Component {
+        name: "JollaTimezoneLocalizer"
+        prototype: "QObject"
+        exports: ["Sailfish.Timezone/TimezoneLocalizer 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "timezone"; type: "string" }
+        Property { name: "country"; type: "string"; isReadonly: true }
+        Property { name: "city"; type: "string"; isReadonly: true }
+    }
+    Component {
+        name: "JollaTimezoneModel"
+        prototype: "JollaFilteredListModel"
+        exports: ["Sailfish.Timezone/TimezoneModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "timezone"; type: "string"; isReadonly: true }
+        Signal { name: "countChanged" }
+        Signal { name: "filterChanged" }
+    }
+}

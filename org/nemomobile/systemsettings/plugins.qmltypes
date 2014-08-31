@@ -1,0 +1,261 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable org.nemomobile.systemsettings 1.0'.
+
+Module {
+    Component {
+        name: "AboutSettings"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/AboutSettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "bluetoothAddress"; type: "string"; isReadonly: true }
+        Property { name: "wlanMacAddress"; type: "string"; isReadonly: true }
+        Property { name: "imei"; type: "string"; isReadonly: true }
+        Property { name: "softwareVersion"; type: "string"; isReadonly: true }
+        Method { name: "totalDiskSpace"; type: "qlonglong" }
+        Method { name: "availableDiskSpace"; type: "qlonglong" }
+    }
+    Component {
+        name: "AlarmToneModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.systemsettings/AlarmToneModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Signal { name: "selectedFileChanged" }
+        Signal { name: "currentIndexChanged" }
+        Method {
+            name: "get"
+            type: "QJSValue"
+            Parameter { name: "index"; type: "int" }
+        }
+    }
+    Component {
+        name: "DateTimeSettings"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/DateTimeSettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "HourMode"
+            values: {
+                "TwentyFourHours": 0,
+                "TwelveHours": 1
+            }
+        }
+        Property { name: "automaticTimeUpdate"; type: "bool" }
+        Property { name: "automaticTimezoneUpdate"; type: "bool" }
+        Property { name: "timezone"; type: "string" }
+        Signal { name: "timeChanged" }
+        Method {
+            name: "setTime"
+            Parameter { name: "hour"; type: "int" }
+            Parameter { name: "minute"; type: "int" }
+        }
+        Method {
+            name: "setDate"
+            Parameter { name: "date"; type: "QDate" }
+        }
+        Method {
+            name: "setHourMode"
+            Parameter { name: "mode"; type: "HourMode" }
+        }
+    }
+    Component {
+        name: "DeveloperModeSettings"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/DeveloperModeSettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Status"
+            values: {
+                "Idle": 0,
+                "CheckingStatus": 1,
+                "Installing": 2,
+                "Removing": 3,
+                "Success": 4,
+                "Failure": 5
+            }
+        }
+        Property { name: "wlanIpAddress"; type: "string"; isReadonly: true }
+        Property { name: "usbIpAddress"; type: "string"; isReadonly: true }
+        Property { name: "developerModeEnabled"; type: "bool"; isReadonly: true }
+        Property { name: "remoteLoginEnabled"; type: "bool"; isReadonly: true }
+        Property { name: "workerWorking"; type: "bool"; isReadonly: true }
+        Property { name: "workerStatus"; type: "DeveloperModeSettings::Status"; isReadonly: true }
+        Property { name: "workerProgress"; type: "int"; isReadonly: true }
+        Signal { name: "workerRetrieveDeveloperModeStatus" }
+        Signal { name: "workerEnableDeveloperMode" }
+        Signal { name: "workerDisableDeveloperMode" }
+        Method {
+            name: "setDeveloperMode"
+            Parameter { name: "enabled"; type: "bool" }
+        }
+        Method {
+            name: "setRemoteLogin"
+            Parameter { name: "enabled"; type: "bool" }
+        }
+        Method {
+            name: "setUsbIpAddress"
+            Parameter { name: "usbIpAddress"; type: "string" }
+        }
+        Method { name: "refresh" }
+    }
+    Component {
+        name: "DeviceLockInterface"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/DeviceLockInterface 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "isSet"; type: "bool"; isReadonly: true }
+        Method {
+            name: "checkCode"
+            type: "bool"
+            Parameter { name: "code"; type: "string" }
+        }
+        Method {
+            name: "setCode"
+            type: "bool"
+            Parameter { name: "oldCode"; type: "string" }
+            Parameter { name: "newCode"; type: "string" }
+        }
+        Method {
+            name: "clearCode"
+            type: "bool"
+            Parameter { name: "currentCode"; type: "string" }
+        }
+        Method { name: "isSet"; type: "bool" }
+        Method { name: "refresh" }
+        Method {
+            name: "clearDevice"
+            type: "bool"
+            Parameter { name: "code"; type: "string" }
+        }
+    }
+    Component {
+        name: "DisplaySettings"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/DisplaySettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "DoubleTapMode"
+            values: {
+                "DoubleTapWakeupNever": 0,
+                "DoubleTapWakeupAlways": 1,
+                "DoubleTapWakeupNoProximity": 2
+            }
+        }
+        Property { name: "brightness"; type: "int" }
+        Property { name: "maximumBrightness"; type: "int"; isReadonly: true }
+        Property { name: "dimTimeout"; type: "int" }
+        Property { name: "blankTimeout"; type: "int" }
+        Property { name: "adaptiveDimmingEnabled"; type: "bool" }
+        Property { name: "lowPowerModeEnabled"; type: "bool" }
+        Property { name: "ambientLightSensorEnabled"; type: "bool" }
+        Property { name: "doubleTapMode"; type: "int" }
+        Property { name: "orientationLock"; type: "QVariant" }
+    }
+    Component {
+        name: "LanguageModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.systemsettings/LanguageModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "LocaleUpdateMode"
+            values: {
+                "UpdateAndReboot": 0,
+                "UpdateWithoutReboot": 1
+            }
+        }
+        Property { name: "currentIndex"; type: "int"; isReadonly: true }
+        Method {
+            name: "languageName"
+            type: "string"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "locale"
+            type: "string"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "setSystemLocale"
+            Parameter { name: "localeCode"; type: "string" }
+            Parameter { name: "updateMode"; type: "LocaleUpdateMode" }
+        }
+    }
+    Component {
+        name: "ProfileControl"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/ProfileControl 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "VibraMode"
+            values: {
+                "VibraAlways": 0,
+                "VibraSilent": 1,
+                "VibraNormal": 2,
+                "VibraNever": 3
+            }
+        }
+        Property { name: "profile"; type: "string" }
+        Property { name: "ringerVolume"; type: "int" }
+        Property { name: "vibraMode"; type: "int" }
+        Property { name: "systemSoundLevel"; type: "int" }
+        Property { name: "touchscreenToneLevel"; type: "int" }
+        Property { name: "touchscreenVibrationLevel"; type: "int" }
+        Property { name: "ringerToneFile"; type: "string" }
+        Property { name: "messageToneFile"; type: "string" }
+        Property { name: "chatToneFile"; type: "string" }
+        Property { name: "mailToneFile"; type: "string" }
+        Property { name: "internetCallToneFile"; type: "string" }
+        Property { name: "calendarToneFile"; type: "string" }
+        Property { name: "clockAlarmToneFile"; type: "string" }
+        Property { name: "ringerToneEnabled"; type: "bool" }
+        Property { name: "messageToneEnabled"; type: "bool" }
+        Property { name: "chatToneEnabled"; type: "bool" }
+        Property { name: "mailToneEnabled"; type: "bool" }
+        Property { name: "internetCallToneEnabled"; type: "bool" }
+        Property { name: "calendarToneEnabled"; type: "bool" }
+        Property { name: "clockAlarmToneEnabled"; type: "bool" }
+        Signal {
+            name: "profileChanged"
+            Parameter { name: "profile"; type: "string" }
+        }
+        Signal { name: "messageToneVolumeChanged" }
+    }
+    Component {
+        name: "USBSettings"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/USBSettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Mode"
+            values: {
+                "Connected": 0,
+                "DataInUse": 1,
+                "Disconnected": 2,
+                "MassStorage": 3,
+                "ChargingOnly": 4,
+                "OviSuite": 5,
+                "ModeRequest": 6,
+                "Ask": 7,
+                "Undefined": 8,
+                "SDK": 9,
+                "Developer": 10,
+                "MTP": 11,
+                "Adb": 12,
+                "Diag": 13,
+                "Host": 15,
+                "ConnectionSharing": 14
+            }
+        }
+        Property { name: "currentMode"; type: "Mode"; isReadonly: true }
+        Property { name: "defaultMode"; type: "Mode" }
+        Property { name: "supportedUSBModes"; type: "QList<int>"; isReadonly: true }
+        Method {
+            name: "setDefaultMode"
+            Parameter { name: "mode"; type: "Mode" }
+        }
+    }
+}

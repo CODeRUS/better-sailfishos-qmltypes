@@ -1,0 +1,21 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump com.jolla.email 1.1'.
+
+Module {
+    Component {
+        name: "TempFileWriter"
+        prototype: "QObject"
+        exports: ["com.jolla.email/TempFileWriter 1.1"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "writeToFile"
+            type: "string"
+            Parameter { name: "text"; type: "string" }
+            Parameter { name: "extension"; type: "string" }
+        }
+    }
+}

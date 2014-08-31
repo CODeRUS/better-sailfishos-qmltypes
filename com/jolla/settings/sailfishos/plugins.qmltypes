@@ -1,0 +1,50 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump com.jolla.settings.sailfishos 1.0'.
+
+Module {
+    Component {
+        name: "StoreInterface"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.sailfishos/StoreInterface 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "UpdateStatus"
+            values: {
+                "Unknown": 0,
+                "WaitingForConnection": 1,
+                "Checking": 2,
+                "UpToDate": 3,
+                "UpdateAvailable": 4
+            }
+        }
+        Enum {
+            name: "AccountStatus"
+            values: {
+                "AccountUnknown": 0,
+                "AccountNotAvailable": 1,
+                "AccountNeedsUpdate": 2,
+                "AccountAvailable": 3
+            }
+        }
+        Property { name: "updateStatus"; type: "UpdateStatus"; isReadonly: true }
+        Property { name: "updateProgress"; type: "int"; isReadonly: true }
+        Property { name: "osVersion"; type: "string"; isReadonly: true }
+        Property { name: "osCodeName"; type: "string"; isReadonly: true }
+        Property { name: "osSummary"; type: "string"; isReadonly: true }
+        Property { name: "osCover"; type: "string"; isReadonly: true }
+        Property { name: "osWebsite"; type: "string"; isReadonly: true }
+        Property { name: "osSize"; type: "int"; isReadonly: true }
+        Property { name: "checked"; type: "bool"; isReadonly: true }
+        Property { name: "lastChecked"; type: "QDateTime"; isReadonly: true }
+        Property { name: "accountStatus"; type: "AccountStatus"; isReadonly: true }
+        Signal { name: "updateInfoChanged" }
+        Signal { name: "upgradeCheckCacheCleared" }
+        Method { name: "checkForUpdate" }
+        Method { name: "downloadUpdate" }
+        Method { name: "clearUpgradeCheckCache" }
+    }
+}

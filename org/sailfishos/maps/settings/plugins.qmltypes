@@ -1,0 +1,24 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable org.sailfishos.maps.settings 1.0'.
+
+Module {
+    Component {
+        name: "MapsSettings"
+        prototype: "QObject"
+        exports: ["org.sailfishos.maps.settings/MapsSettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "DistanceUnits"
+            values: {
+                "BasedOnLocation": 0,
+                "Metric": 1,
+                "Imperial": 2
+            }
+        }
+        Property { name: "distanceUnits"; type: "DistanceUnits" }
+    }
+}

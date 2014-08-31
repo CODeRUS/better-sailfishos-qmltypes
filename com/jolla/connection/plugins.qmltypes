@@ -1,0 +1,67 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump com.jolla.connection 1.0'.
+
+Module {
+    Component {
+        name: "ConnectionAgentPlugin"
+        prototype: "QObject"
+        exports: ["com.jolla.connection/ConnectionAgent 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "askRoaming"; type: "bool" }
+        Signal {
+            name: "userInputRequested"
+            Parameter { name: "servicePath"; type: "string" }
+            Parameter { name: "fields"; type: "QVariantMap" }
+        }
+        Signal { name: "userInputCanceled" }
+        Signal {
+            name: "errorReported"
+            Parameter { name: "servicePath"; type: "string" }
+            Parameter { name: "error"; type: "string" }
+        }
+        Signal { name: "connectionRequest" }
+        Signal {
+            name: "configurationNeeded"
+            Parameter { name: "type"; type: "string" }
+        }
+        Signal {
+            name: "connectionState"
+            Parameter { name: "state"; type: "string" }
+            Parameter { name: "type"; type: "string" }
+        }
+        Signal {
+            name: "browserRequested"
+            Parameter { name: "url"; type: "string" }
+        }
+        Signal {
+            name: "tetheringFinished"
+            Parameter { type: "bool" }
+        }
+        Method {
+            name: "sendUserReply"
+            Parameter { name: "input"; type: "QVariantMap" }
+        }
+        Method {
+            name: "sendConnectReply"
+            Parameter { name: "replyMessage"; type: "string" }
+            Parameter { name: "timeout"; type: "int" }
+        }
+        Method {
+            name: "sendConnectReply"
+            Parameter { name: "replyMessage"; type: "string" }
+        }
+        Method {
+            name: "connectToType"
+            Parameter { name: "type"; type: "string" }
+        }
+        Method {
+            name: "startTethering"
+            Parameter { name: "type"; type: "string" }
+        }
+        Method { name: "stopTethering" }
+    }
+}

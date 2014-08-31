@@ -1,0 +1,170 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable org.nemomobile.grilo 0.1'.
+
+Module {
+    Component {
+        name: "GriloBrowse"
+        prototype: "GriloDataSource"
+        exports: ["org.nemomobile.grilo/GriloBrowse 0.1"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "source"; type: "string" }
+        Property { name: "supportedKeys"; type: "QVariantList"; isReadonly: true }
+        Property { name: "slowKeys"; type: "QVariantList"; isReadonly: true }
+        Property { name: "available"; type: "bool"; isReadonly: true }
+        Property { name: "baseMedia"; type: "string" }
+        Signal { name: "availabilityChanged" }
+    }
+    Component {
+        name: "GriloDataSource"
+        prototype: "QObject"
+        Enum {
+            name: "MetadataKeys"
+            values: {
+                "Album": 1,
+                "Artist": 2,
+                "Author": 3,
+                "Bitrate": 4,
+                "Certificate": 5,
+                "Childcount": 6,
+                "PublicationDate": 7,
+                "Description": 8,
+                "Duration": 9,
+                "ExternalPlayer": 10,
+                "ExternalUrl": 11,
+                "Framerate": 12,
+                "Genre": 13,
+                "Height": 14,
+                "Id": 15,
+                "LastPlayed": 16,
+                "LastPosition": 17,
+                "License": 18,
+                "Lyrics": 19,
+                "Mime": 20,
+                "PlayCount": 21,
+                "Rating": 22,
+                "Site": 23,
+                "Source": 24,
+                "Studio": 25,
+                "Thumbnail": 26,
+                "ThumbnailBinary": 27,
+                "Title": 28,
+                "Url": 29,
+                "Width": 30,
+                "Season": 31,
+                "Episode": 32,
+                "Show": 33,
+                "CreationDate": 34,
+                "CameraModel": 35,
+                "Orientation": 36,
+                "FlashUsed": 37,
+                "ExposureTime": 38,
+                "IsoSpeed": 39,
+                "TrackNumber": 40,
+                "ModificationDate": 41,
+                "StartTime": 42
+            }
+        }
+        Enum {
+            name: "TypeFilter"
+            values: {
+                "None": 0,
+                "Audio": 1,
+                "Video": 2,
+                "Image": 4,
+                "All": 7
+            }
+        }
+        Property { name: "registry"; type: "GriloRegistry"; isPointer: true }
+        Property { name: "count"; type: "int" }
+        Property { name: "skip"; type: "int" }
+        Property { name: "metadataKeys"; type: "QVariantList" }
+        Property { name: "typeFilter"; type: "QVariantList" }
+        Signal { name: "finished" }
+        Signal { name: "contentUpdated" }
+        Method { name: "cancelRefresh" }
+        Method { name: "availableSourcesChanged" }
+        Method { name: "refresh"; type: "bool" }
+    }
+    Component {
+        name: "GriloMedia"
+        prototype: "QObject"
+        exports: ["org.nemomobile.grilo/GriloMedia 0.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "id"; type: "string"; isReadonly: true }
+        Property { name: "title"; type: "string"; isReadonly: true }
+        Property { name: "url"; type: "QUrl"; isReadonly: true }
+        Property { name: "container"; type: "bool"; isReadonly: true }
+        Property { name: "duration"; type: "int"; isReadonly: true }
+        Property { name: "author"; type: "string"; isReadonly: true }
+        Property { name: "album"; type: "string"; isReadonly: true }
+        Property { name: "artist"; type: "string"; isReadonly: true }
+        Property { name: "genre"; type: "string"; isReadonly: true }
+        Property { name: "thumbnail"; type: "QUrl"; isReadonly: true }
+        Property { name: "year"; type: "int"; isReadonly: true }
+        Property { name: "trackNumber"; type: "int"; isReadonly: true }
+        Property { name: "childCount"; type: "int"; isReadonly: true }
+        Property { name: "mimeType"; type: "string"; isReadonly: true }
+        Method { name: "serialize"; type: "string" }
+    }
+    Component {
+        name: "GriloModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.grilo/GriloModel 0.1"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "source"; type: "GriloDataSource"; isPointer: true }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Method {
+            name: "get"
+            type: "QObject*"
+            Parameter { name: "index"; type: "int" }
+        }
+    }
+    Component {
+        name: "GriloQuery"
+        prototype: "GriloDataSource"
+        exports: ["org.nemomobile.grilo/GriloQuery 0.1"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "source"; type: "string" }
+        Property { name: "query"; type: "string" }
+        Property { name: "supportedKeys"; type: "QVariantList"; isReadonly: true }
+        Property { name: "slowKeys"; type: "QVariantList"; isReadonly: true }
+        Property { name: "available"; type: "bool"; isReadonly: true }
+        Signal { name: "availabilityChanged" }
+    }
+    Component {
+        name: "GriloRegistry"
+        prototype: "QObject"
+        exports: ["org.nemomobile.grilo/GriloRegistry 0.1"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "availableSources"; type: "QStringList"; isReadonly: true }
+        Property { name: "configurationFile"; type: "string" }
+        Signal {
+            name: "contentChanged"
+            Parameter { name: "source"; type: "string" }
+            Parameter { name: "change_type"; type: "GrlSourceChangeType" }
+            Parameter { name: "changed_media"; type: "GPtrArray"; isPointer: true }
+        }
+        Method { name: "loadAll"; type: "bool" }
+        Method {
+            name: "loadPluginById"
+            type: "bool"
+            Parameter { name: "pluginId"; type: "string" }
+        }
+    }
+    Component {
+        name: "GriloSearch"
+        prototype: "GriloDataSource"
+        exports: ["org.nemomobile.grilo/GriloSearch 0.1"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "source"; type: "string" }
+        Property { name: "text"; type: "string" }
+        Property { name: "supportedKeys"; type: "QVariantList"; isReadonly: true }
+        Property { name: "slowKeys"; type: "QVariantList"; isReadonly: true }
+        Property { name: "available"; type: "bool"; isReadonly: true }
+        Signal { name: "availabilityChanged" }
+    }
+}

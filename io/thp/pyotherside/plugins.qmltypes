@@ -1,0 +1,96 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable io.thp.pyotherside 1.0'.
+
+Module {
+    Component {
+        name: "QPython"
+        prototype: "QObject"
+        Signal {
+            name: "received"
+            Parameter { name: "data"; type: "QVariant" }
+        }
+        Signal {
+            name: "error"
+            Parameter { name: "traceback"; type: "string" }
+        }
+        Signal {
+            name: "process"
+            Parameter { name: "func"; type: "string" }
+            Parameter { name: "args"; type: "QVariant" }
+            Parameter { name: "callback"; type: "QJSValue"; isPointer: true }
+        }
+        Signal {
+            name: "import"
+            Parameter { name: "name"; type: "string" }
+            Parameter { name: "callback"; type: "QJSValue"; isPointer: true }
+        }
+        Method {
+            name: "addImportPath"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "setHandler"
+            Parameter { name: "event"; type: "string" }
+            Parameter { name: "callback"; type: "QJSValue" }
+        }
+        Method {
+            name: "evaluate"
+            type: "QVariant"
+            Parameter { name: "expr"; type: "string" }
+        }
+        Method {
+            name: "importModule"
+            Parameter { name: "name"; type: "string" }
+            Parameter { name: "callback"; type: "QJSValue" }
+        }
+        Method {
+            name: "importModule_sync"
+            type: "bool"
+            Parameter { name: "name"; type: "string" }
+        }
+        Method {
+            name: "call"
+            Parameter { name: "func"; type: "string" }
+            Parameter { name: "args"; type: "QVariant" }
+            Parameter { name: "callback"; type: "QJSValue" }
+        }
+        Method {
+            name: "call"
+            Parameter { name: "func"; type: "string" }
+            Parameter { name: "args"; type: "QVariant" }
+        }
+        Method {
+            name: "call"
+            Parameter { name: "func"; type: "string" }
+        }
+        Method {
+            name: "call_sync"
+            type: "QVariant"
+            Parameter { name: "func"; type: "string" }
+            Parameter { name: "args"; type: "QVariant" }
+        }
+        Method {
+            name: "call_sync"
+            type: "QVariant"
+            Parameter { name: "func"; type: "string" }
+        }
+        Method { name: "pluginVersion"; type: "string" }
+        Method { name: "pythonVersion"; type: "string" }
+    }
+    Component {
+        name: "QPython10"
+        prototype: "QPython"
+        exports: ["io.thp.pyotherside/Python 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
+    Component {
+        name: "QPython12"
+        prototype: "QPython"
+        exports: ["io.thp.pyotherside/Python 1.2"]
+        exportMetaObjectRevisions: [0]
+    }
+}

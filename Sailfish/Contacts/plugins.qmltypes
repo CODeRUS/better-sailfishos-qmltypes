@@ -1,0 +1,492 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable Sailfish.Contacts 1.0'.
+
+Module {
+    Component {
+        name: "ContactImporter"
+        prototype: "QObject"
+        exports: ["Sailfish.Contacts/ContactImporter 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "importing"; type: "bool"; isReadonly: true }
+        Signal { name: "managerChanged" }
+        Signal {
+            name: "importFinished"
+            Parameter { name: "readCount"; type: "int" }
+            Parameter { name: "savedCount"; type: "int" }
+        }
+        Signal { name: "importFailed" }
+        Signal {
+            name: "fetchFirstSavedContactFinished"
+            Parameter { name: "firstSavedContactId"; type: "int" }
+        }
+        Signal { name: "fetchFirstSavedContactFailed" }
+        Method {
+            name: "importContacts"
+            Parameter { name: "source"; type: "QUrl" }
+        }
+        Method {
+            name: "importContactsData"
+            Parameter { name: "vcard"; type: "string" }
+        }
+        Method { name: "cancel" }
+        Method { name: "fetchFirstSavedContact" }
+    }
+    Component {
+        name: "ContactsRemover"
+        prototype: "QObject"
+        exports: ["Sailfish.Contacts/ContactsRemover 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "removing"; type: "bool"; isReadonly: true }
+        Signal {
+            name: "removingFinished"
+            Parameter { name: "removedCount"; type: "int" }
+        }
+        Signal { name: "removingFailed" }
+        Method { name: "removeDeviceContacts" }
+        Method { name: "cancel" }
+    }
+    Component {
+        name: "FilterType"
+        prototype: "QObject"
+        exports: ["Sailfish.Contacts/FilterType 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Type"
+            values: {
+                "All": 0,
+                "FavoritesOnly": 1,
+                "OnlineOnly": 2
+            }
+        }
+    }
+    Component {
+        name: "SeasideFilteredModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.contacts/PeopleModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "FilterType"
+            values: {
+                "FilterNone": 0,
+                "FilterAll": 1,
+                "FilterFavorites": 2,
+                "FilterOnline": 3,
+                "FilterTypesCount": 4
+            }
+        }
+        Enum {
+            name: "RequiredPropertyType"
+            values: {
+                "NoPropertyRequired": 0,
+                "AccountUriRequired": 1,
+                "PhoneNumberRequired": 2,
+                "EmailAddressRequired": 4
+            }
+        }
+        Enum {
+            name: "SearchablePropertyType"
+            values: {
+                "NoPropertySearchable": 0,
+                "AccountUriSearchable": 1,
+                "PhoneNumberSearchable": 2,
+                "EmailAddressSearchable": 4,
+                "OrganizationSearchable": 8
+            }
+        }
+        Enum {
+            name: "DisplayLabelOrder"
+            values: {
+                "FirstNameFirst": 0,
+                "LastNameFirst": 1
+            }
+        }
+        Property { name: "populated"; type: "bool"; isReadonly: true }
+        Property { name: "filterType"; type: "FilterType" }
+        Property { name: "displayLabelOrder"; type: "DisplayLabelOrder" }
+        Property { name: "sortProperty"; type: "string"; isReadonly: true }
+        Property { name: "groupProperty"; type: "string"; isReadonly: true }
+        Property { name: "filterPattern"; type: "string" }
+        Property { name: "requiredProperty"; type: "int" }
+        Property { name: "searchableProperty"; type: "int" }
+        Property { name: "searchByFirstNameCharacter"; type: "bool" }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Method {
+            name: "get"
+            type: "QVariantMap"
+            Parameter { name: "row"; type: "int" }
+        }
+        Method {
+            name: "get"
+            type: "QVariant"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "role"; type: "int" }
+        }
+        Method {
+            name: "savePerson"
+            type: "bool"
+            Parameter { name: "person"; type: "SeasidePerson"; isPointer: true }
+        }
+        Method {
+            name: "personByRow"
+            type: "SeasidePerson*"
+            Parameter { name: "row"; type: "int" }
+        }
+        Method {
+            name: "personById"
+            type: "SeasidePerson*"
+            Parameter { name: "id"; type: "int" }
+        }
+        Method {
+            name: "personByPhoneNumber"
+            type: "SeasidePerson*"
+            Parameter { name: "number"; type: "string" }
+            Parameter { name: "requireComplete"; type: "bool" }
+        }
+        Method {
+            name: "personByPhoneNumber"
+            type: "SeasidePerson*"
+            Parameter { name: "number"; type: "string" }
+        }
+        Method {
+            name: "personByEmailAddress"
+            type: "SeasidePerson*"
+            Parameter { name: "email"; type: "string" }
+            Parameter { name: "requireComplete"; type: "bool" }
+        }
+        Method {
+            name: "personByEmailAddress"
+            type: "SeasidePerson*"
+            Parameter { name: "email"; type: "string" }
+        }
+        Method {
+            name: "personByOnlineAccount"
+            type: "SeasidePerson*"
+            Parameter { name: "localUid"; type: "string" }
+            Parameter { name: "remoteUid"; type: "string" }
+            Parameter { name: "requireComplete"; type: "bool" }
+        }
+        Method {
+            name: "personByOnlineAccount"
+            type: "SeasidePerson*"
+            Parameter { name: "localUid"; type: "string" }
+            Parameter { name: "remoteUid"; type: "string" }
+        }
+        Method { name: "selfPerson"; type: "SeasidePerson*" }
+        Method {
+            name: "removePerson"
+            Parameter { name: "person"; type: "SeasidePerson"; isPointer: true }
+        }
+        Method {
+            name: "importContacts"
+            type: "int"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method { name: "exportContacts"; type: "string" }
+        Method { name: "prepareSearchFilters" }
+        Method {
+            name: "setFilter"
+            Parameter { name: "type"; type: "FilterType" }
+        }
+        Method {
+            name: "search"
+            Parameter { name: "pattern"; type: "string" }
+        }
+    }
+    Component {
+        name: "SeasideNameGroupModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.contacts/PeopleNameGroupModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "RequiredPropertyType"
+            values: {
+                "NoPropertyRequired": 0,
+                "AccountUriRequired": 1,
+                "PhoneNumberRequired": 2,
+                "EmailAddressRequired": 4
+            }
+        }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "requiredProperty"; type: "int" }
+    }
+    Component {
+        name: "SeasidePerson"
+        prototype: "QObject"
+        exports: ["org.nemomobile.contacts/Person 1.0"]
+        exportMetaObjectRevisions: [0]
+        attachedType: "SeasidePersonAttached"
+        Enum {
+            name: "DetailType"
+            values: {
+                "NoType": 0,
+                "FirstNameType": 1,
+                "LastNameType": 2,
+                "MiddleNameType": 3,
+                "PrefixType": 4,
+                "SuffixType": 5,
+                "CompanyType": 6,
+                "TitleType": 7,
+                "RoleType": 8,
+                "DepartmentType": 9,
+                "NicknameType": 10,
+                "PhoneNumberType": 11,
+                "EmailAddressType": 12,
+                "OnlineAccountType": 13,
+                "AddressType": 14,
+                "WebsiteType": 15,
+                "BirthdayType": 16,
+                "AnniversaryType": 17,
+                "GlobalPresenceStateType": 18
+            }
+        }
+        Enum {
+            name: "DetailSubType"
+            values: {
+                "NoSubType": 0,
+                "PhoneSubTypeLandline": 1,
+                "PhoneSubTypeMobile": 2,
+                "PhoneSubTypeFax": 3,
+                "PhoneSubTypePager": 4,
+                "PhoneSubTypeVoice": 5,
+                "PhoneSubTypeModem": 6,
+                "PhoneSubTypeVideo": 7,
+                "PhoneSubTypeCar": 8,
+                "PhoneSubTypeBulletinBoardSystem": 9,
+                "PhoneSubTypeMessagingCapable": 10,
+                "PhoneSubTypeAssistant": 11,
+                "PhoneSubTypeDtmfMenu": 12,
+                "AddressSubTypeParcel": 13,
+                "AddressSubTypePostal": 14,
+                "AddressSubTypeDomestic": 15,
+                "AddressSubTypeInternational": 16,
+                "OnlineAccountSubTypeSip": 17,
+                "OnlineAccountSubTypeSipVoip": 18,
+                "OnlineAccountSubTypeImpp": 19,
+                "OnlineAccountSubTypeVideoShare": 20,
+                "WebsiteSubTypeHomePage": 21,
+                "WebsiteSubTypeBlog": 22,
+                "WebsiteSubTypeFavorite": 23,
+                "AnniversarySubTypeWedding": 24,
+                "AnniversarySubTypeEngagement": 25,
+                "AnniversarySubTypeHouse": 26,
+                "AnniversarySubTypeEmployment": 27,
+                "AnniversarySubTypeMemorial": 28
+            }
+        }
+        Enum {
+            name: "AddressField"
+            values: {
+                "AddressStreetField": 0,
+                "AddressLocalityField": 1,
+                "AddressRegionField": 2,
+                "AddressPostcodeField": 3,
+                "AddressCountryField": 4,
+                "AddressPOBoxField": 5
+            }
+        }
+        Enum {
+            name: "DetailLabel"
+            values: {
+                "NoLabel": 0,
+                "HomeLabel": 1,
+                "WorkLabel": 2,
+                "OtherLabel": 3
+            }
+        }
+        Enum {
+            name: "PresenceState"
+            values: {
+                "PresenceUnknown": 0,
+                "PresenceAvailable": 1,
+                "PresenceHidden": 2,
+                "PresenceBusy": 3,
+                "PresenceAway": 4,
+                "PresenceExtendedAway": 5,
+                "PresenceOffline": 6
+            }
+        }
+        Property { name: "id"; type: "int"; isReadonly: true }
+        Property { name: "complete"; type: "bool"; isReadonly: true }
+        Property { name: "firstName"; type: "string" }
+        Property { name: "lastName"; type: "string" }
+        Property { name: "middleName"; type: "string" }
+        Property { name: "namePrefix"; type: "string" }
+        Property { name: "nameSuffix"; type: "string" }
+        Property { name: "sectionBucket"; type: "string"; isReadonly: true }
+        Property { name: "displayLabel"; type: "string"; isReadonly: true }
+        Property { name: "primaryName"; type: "string"; isReadonly: true }
+        Property { name: "secondaryName"; type: "string"; isReadonly: true }
+        Property { name: "companyName"; type: "string" }
+        Property { name: "title"; type: "string" }
+        Property { name: "role"; type: "string" }
+        Property { name: "department"; type: "string" }
+        Property { name: "favorite"; type: "bool" }
+        Property { name: "avatarPath"; type: "QUrl" }
+        Property { name: "avatarUrl"; type: "QUrl" }
+        Property { name: "nicknameDetails"; type: "QVariantList" }
+        Property { name: "phoneDetails"; type: "QVariantList" }
+        Property { name: "emailDetails"; type: "QVariantList" }
+        Property { name: "addressDetails"; type: "QVariantList" }
+        Property { name: "websiteDetails"; type: "QVariantList" }
+        Property { name: "birthday"; type: "QDateTime" }
+        Property { name: "anniversaryDetails"; type: "QVariantList" }
+        Property { name: "globalPresenceState"; type: "PresenceState"; isReadonly: true }
+        Property { name: "accountDetails"; type: "QVariantList" }
+        Property { name: "syncTarget"; type: "string"; isReadonly: true }
+        Property { name: "constituents"; type: "QList<int>"; isReadonly: true }
+        Property { name: "mergeCandidates"; type: "QList<int>"; isReadonly: true }
+        Signal { name: "contactChanged" }
+        Signal { name: "contactRemoved" }
+        Signal { name: "aggregationOperationFinished" }
+        Signal { name: "addressResolved" }
+        Signal { name: "dataChanged" }
+        Method {
+            name: "recalculateDisplayLabel"
+            Parameter { name: "order"; type: "SeasideCache::DisplayLabelOrder" }
+        }
+        Method { name: "recalculateDisplayLabel" }
+        Method {
+            name: "filteredAvatarUrl"
+            type: "QUrl"
+            Parameter { name: "metadataFragments"; type: "QStringList" }
+        }
+        Method { name: "filteredAvatarUrl"; type: "QUrl" }
+        Method { name: "ensureComplete" }
+        Method { name: "contactData"; type: "QVariant" }
+        Method {
+            name: "setContactData"
+            Parameter { name: "data"; type: "QVariant" }
+        }
+        Method { name: "resetContactData" }
+        Method { name: "vCard"; type: "string" }
+        Method { name: "avatarUrls"; type: "QStringList" }
+        Method {
+            name: "avatarUrlsExcluding"
+            type: "QStringList"
+            Parameter { name: "excludeMetadata"; type: "QStringList" }
+        }
+        Method {
+            name: "aggregateInto"
+            Parameter { name: "person"; type: "SeasidePerson"; isPointer: true }
+        }
+        Method {
+            name: "disaggregateFrom"
+            Parameter { name: "person"; type: "SeasidePerson"; isPointer: true }
+        }
+        Method { name: "fetchConstituents" }
+        Method { name: "fetchMergeCandidates" }
+        Method {
+            name: "resolvePhoneNumber"
+            Parameter { name: "number"; type: "string" }
+            Parameter { name: "requireComplete"; type: "bool" }
+        }
+        Method {
+            name: "resolvePhoneNumber"
+            Parameter { name: "number"; type: "string" }
+        }
+        Method {
+            name: "resolveEmailAddress"
+            Parameter { name: "address"; type: "string" }
+            Parameter { name: "requireComplete"; type: "bool" }
+        }
+        Method {
+            name: "resolveEmailAddress"
+            Parameter { name: "address"; type: "string" }
+        }
+        Method {
+            name: "resolveOnlineAccount"
+            Parameter { name: "localUid"; type: "string" }
+            Parameter { name: "remoteUid"; type: "string" }
+            Parameter { name: "requireComplete"; type: "bool" }
+        }
+        Method {
+            name: "resolveOnlineAccount"
+            Parameter { name: "localUid"; type: "string" }
+            Parameter { name: "remoteUid"; type: "string" }
+        }
+        Method {
+            name: "removeDuplicatePhoneNumbers"
+            type: "QVariantList"
+            Parameter { name: "phoneNumbers"; type: "QVariantList" }
+        }
+        Method {
+            name: "removeDuplicateOnlineAccounts"
+            type: "QVariantList"
+            Parameter { name: "onlineAccounts"; type: "QVariantList" }
+        }
+        Method {
+            name: "removeDuplicateEmailAddresses"
+            type: "QVariantList"
+            Parameter { name: "emailAddresses"; type: "QVariantList" }
+        }
+    }
+    Component {
+        name: "SeasidePersonAttached"
+        prototype: "QObject"
+        Property { name: "selfPerson"; type: "SeasidePerson"; isReadonly: true; isPointer: true }
+        Method {
+            name: "normalizePhoneNumber"
+            type: "string"
+            Parameter { name: "input"; type: "string" }
+        }
+        Method {
+            name: "minimizePhoneNumber"
+            type: "string"
+            Parameter { name: "input"; type: "string" }
+        }
+        Method {
+            name: "validatePhoneNumber"
+            type: "string"
+            Parameter { name: "input"; type: "string" }
+        }
+        Method {
+            name: "removeDuplicatePhoneNumbers"
+            type: "QVariantList"
+            Parameter { name: "phoneNumbers"; type: "QVariantList" }
+        }
+        Method {
+            name: "removeDuplicateOnlineAccounts"
+            type: "QVariantList"
+            Parameter { name: "onlineAccounts"; type: "QVariantList" }
+        }
+        Method {
+            name: "removeDuplicateEmailAddresses"
+            type: "QVariantList"
+            Parameter { name: "emailAddresses"; type: "QVariantList" }
+        }
+    }
+    Component {
+        name: "SeasideVCardModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.contacts/PeopleVCardModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "VCardRoles"
+            values: {
+                "PrimaryNameRole": 256,
+                "SecondaryNameRole": 257,
+                "AvatarRole": 258,
+                "AvatarUrlRole": 259,
+                "PhoneNumbersRole": 260,
+                "EmailAddressesRole": 261,
+                "NicknameDetailsRole": 262,
+                "PhoneDetailsRole": 263,
+                "EmailDetailsRole": 264,
+                "PersonRole": 265
+            }
+        }
+        Property { name: "source"; type: "QUrl" }
+        Property { name: "displayLabelOrder"; type: "DisplayLabelOrder"; isReadonly: true }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "defaultCodec"; type: "string" }
+        Method {
+            name: "getPerson"
+            type: "SeasidePerson*"
+            Parameter { name: "index"; type: "int" }
+        }
+    }
+}

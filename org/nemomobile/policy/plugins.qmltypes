@@ -1,0 +1,55 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable org.nemomobile.policy 1.0'.
+
+Module {
+    Component {
+        name: "Permissions"
+        defaultProperty: "resources"
+        prototype: "QObject"
+        exports: ["org.nemomobile.policy/Permissions 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "applicationClass"; type: "string" }
+        Property { name: "autoRelease"; type: "bool" }
+        Property { name: "resources"; type: "Resource"; isList: true; isReadonly: true }
+        Property { name: "enabled"; type: "bool" }
+        Property { name: "acquired"; type: "bool"; isReadonly: true }
+        Signal { name: "granted" }
+        Signal { name: "denied" }
+        Signal { name: "lost" }
+        Signal { name: "released" }
+        Signal { name: "releasedByManager" }
+        Method { name: "release" }
+    }
+    Component {
+        name: "Resource"
+        prototype: "QObject"
+        exports: ["org.nemomobile.policy/Resource 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Type"
+            values: {
+                "AudioPlayback": 0,
+                "VideoPlayback": 1,
+                "AudioRecorder": 2,
+                "VideoRecorder": 3,
+                "Vibra": 4,
+                "Led": 5,
+                "Backlight": 6,
+                "SystemButton": 7,
+                "LockButton": 8,
+                "ScaleButton": 9,
+                "SnapButton": 10,
+                "LensCover": 11,
+                "HeadsetButtons": 12
+            }
+        }
+        Property { name: "type"; type: "Type" }
+        Property { name: "optional"; type: "bool" }
+        Property { name: "required"; type: "bool" }
+        Property { name: "acquired"; type: "bool"; isReadonly: true }
+    }
+}

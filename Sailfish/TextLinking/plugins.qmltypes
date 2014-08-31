@@ -1,0 +1,19 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable Sailfish.TextLinking 1.0'.
+
+Module {
+    Component {
+        name: "LinkParser"
+        prototype: "QObject"
+        exports: ["Sailfish.TextLinking/LinkParser 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "text"; type: "string" }
+        Property { name: "shortenUrl"; type: "bool" }
+        Property { name: "linkedText"; type: "string"; isReadonly: true }
+        Property { name: "parsing"; type: "bool"; isReadonly: true }
+    }
+}

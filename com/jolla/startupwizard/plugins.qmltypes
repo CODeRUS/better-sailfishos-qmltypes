@@ -1,0 +1,44 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable com.jolla.startupwizard 1.0'.
+
+Module {
+    Component {
+        name: "ScreenBlank"
+        prototype: "QObject"
+        exports: ["com.jolla.startupwizard/ScreenBlank 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method { name: "disable" }
+    }
+    Component {
+        name: "StartupWizardManager"
+        prototype: "QObject"
+        exports: ["com.jolla.startupwizard/StartupWizardManager 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method { name: "processId"; type: "int" }
+        Method { name: "defaultPrimaryColor"; type: "QColor" }
+        Method { name: "defaultSecondaryColor"; type: "QColor" }
+        Method { name: "defaultHighlightColor"; type: "QColor" }
+        Method { name: "defaultSecondaryHighlightColor"; type: "QColor" }
+        Method { name: "defaultHighlightBackgroundColor"; type: "QColor" }
+        Method { name: "writePreUserSessionMarker" }
+        Method { name: "triggerRestart" }
+        Method { name: "triggerShutdown" }
+        Method { name: "exitApp" }
+        Method {
+            name: "reloadTranslations"
+            type: "string"
+            Parameter { name: "localeName"; type: "string" }
+        }
+        Method {
+            name: "translatedText"
+            type: "string"
+            Parameter { name: "translationId"; type: "string" }
+            Parameter { name: "locale"; type: "string" }
+        }
+        Method { name: "termsOfUse"; type: "QStringList" }
+    }
+}

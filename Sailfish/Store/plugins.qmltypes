@@ -1,0 +1,25 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable Sailfish.Store 1.0'.
+
+Module {
+    Component {
+        name: "StartupApplicationModel"
+        prototype: "QAbstractListModel"
+        exports: ["Sailfish.Store/StartupApplicationModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "category"; type: "string" }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Method {
+            name: "setCategory"
+            Parameter { name: "category"; type: "string" }
+        }
+        Method {
+            name: "populate"
+            Parameter { name: "providers"; type: "QStringList" }
+        }
+    }
+}

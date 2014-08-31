@@ -1,0 +1,656 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable MeeGo.Connman 0.2'.
+
+Module {
+    Component {
+        name: "ClockModel"
+        prototype: "QObject"
+        exports: ["MeeGo.Connman/ClockModel 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "timezone"; type: "string" }
+        Property { name: "timezoneUpdates"; type: "string" }
+        Property { name: "timeUpdates"; type: "string" }
+        Property { name: "timeservers"; type: "QStringList" }
+        Method { name: "timezone"; type: "string" }
+        Method {
+            name: "setTimezone"
+            Parameter { name: "val"; type: "string" }
+        }
+        Method { name: "timezoneUpdates"; type: "string" }
+        Method {
+            name: "setTimezoneUpdates"
+            Parameter { name: "val"; type: "string" }
+        }
+        Method { name: "timeUpdates"; type: "string" }
+        Method {
+            name: "setTimeUpdates"
+            Parameter { name: "val"; type: "string" }
+        }
+        Method { name: "timeservers"; type: "QStringList" }
+        Method {
+            name: "setTimeservers"
+            Parameter { name: "val"; type: "QStringList" }
+        }
+        Method {
+            name: "setDate"
+            Parameter { name: "date"; type: "QDate" }
+        }
+        Method {
+            name: "setTime"
+            Parameter { name: "time"; type: "QTime" }
+        }
+        Method {
+            name: "time"
+            type: "QTime"
+            Parameter { name: "h"; type: "string" }
+            Parameter { name: "m"; type: "string" }
+        }
+    }
+    Component {
+        name: "Counter"
+        prototype: "QObject"
+        exports: ["MeeGo.Connman/NetworkCounter 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "bytesReceived"; type: "qulonglong"; isReadonly: true }
+        Property { name: "bytesTransmitted"; type: "qulonglong"; isReadonly: true }
+        Property { name: "secondsOnline"; type: "uint"; isReadonly: true }
+        Property { name: "roaming"; type: "bool"; isReadonly: true }
+        Property { name: "accuracy"; type: "uint" }
+        Property { name: "interval"; type: "uint" }
+        Property { name: "running"; type: "bool" }
+        Signal {
+            name: "counterChanged"
+            Parameter { name: "servicePath"; type: "string" }
+            Parameter { name: "counters"; type: "QVariantMap" }
+            Parameter { name: "roaming"; type: "bool" }
+        }
+        Signal {
+            name: "bytesReceivedChanged"
+            Parameter { name: "bytesRx"; type: "qulonglong" }
+        }
+        Signal {
+            name: "bytesTransmittedChanged"
+            Parameter { name: "bytesTx"; type: "qulonglong" }
+        }
+        Signal {
+            name: "secondsOnlineChanged"
+            Parameter { name: "seconds"; type: "uint" }
+        }
+        Signal {
+            name: "roamingChanged"
+            Parameter { name: "roaming"; type: "bool" }
+        }
+        Signal {
+            name: "accuracyChanged"
+            Parameter { name: "accuracy"; type: "uint" }
+        }
+        Signal {
+            name: "intervalChanged"
+            Parameter { name: "interval"; type: "uint" }
+        }
+        Signal {
+            name: "runningChanged"
+            Parameter { name: "running"; type: "bool" }
+        }
+    }
+    Component {
+        name: "NetworkManager"
+        prototype: "QObject"
+        exports: ["MeeGo.Connman/NetworkManager 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "available"; type: "bool"; isReadonly: true }
+        Property { name: "state"; type: "string"; isReadonly: true }
+        Property { name: "offlineMode"; type: "bool" }
+        Property { name: "defaultRoute"; type: "NetworkService"; isReadonly: true; isPointer: true }
+        Property { name: "sessionMode"; type: "bool" }
+        Property { name: "servicesEnabled"; type: "bool" }
+        Property { name: "technologiesEnabled"; type: "bool" }
+        Signal {
+            name: "availabilityChanged"
+            Parameter { name: "available"; type: "bool" }
+        }
+        Signal {
+            name: "stateChanged"
+            Parameter { name: "state"; type: "string" }
+        }
+        Signal {
+            name: "offlineModeChanged"
+            Parameter { name: "offlineMode"; type: "bool" }
+        }
+        Signal { name: "technologiesChanged" }
+        Signal { name: "servicesChanged" }
+        Signal { name: "savedServicesChanged" }
+        Signal {
+            name: "defaultRouteChanged"
+            Parameter { name: "defaultRoute"; type: "NetworkService"; isPointer: true }
+        }
+        Signal {
+            name: "sessionModeChanged"
+            Parameter { type: "bool" }
+        }
+        Signal {
+            name: "servicesListChanged"
+            Parameter { name: "list"; type: "QStringList" }
+        }
+        Signal {
+            name: "serviceAdded"
+            Parameter { name: "servicePath"; type: "string" }
+        }
+        Signal {
+            name: "serviceRemoved"
+            Parameter { name: "servicePath"; type: "string" }
+        }
+        Method {
+            name: "setOfflineMode"
+            Parameter { name: "offlineMode"; type: "bool" }
+        }
+        Method {
+            name: "registerAgent"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "unregisterAgent"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "registerCounter"
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "accuracy"; type: "uint" }
+            Parameter { name: "period"; type: "uint" }
+        }
+        Method {
+            name: "unregisterCounter"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "createSession"
+            type: "QDBusObjectPath"
+            Parameter { name: "settings"; type: "QVariantMap" }
+            Parameter { name: "sessionNotifierPath"; type: "string" }
+        }
+        Method {
+            name: "destroySession"
+            Parameter { name: "sessionAgentPath"; type: "string" }
+        }
+        Method {
+            name: "setSessionMode"
+            Parameter { name: "sessionMode"; type: "bool" }
+        }
+        Method {
+            name: "getTechnology"
+            type: "NetworkTechnology*"
+            Parameter { name: "type"; type: "string" }
+        }
+        Method {
+            name: "servicesList"
+            type: "QStringList"
+            Parameter { name: "tech"; type: "string" }
+        }
+        Method { name: "technologiesList"; type: "QStringList" }
+        Method {
+            name: "technologyPathForService"
+            type: "string"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "technologyPathForType"
+            type: "string"
+            Parameter { name: "type"; type: "string" }
+        }
+        Method {
+            name: "resetCountersForType"
+            Parameter { name: "type"; type: "string" }
+        }
+    }
+    Component {
+        name: "NetworkManagerFactory"
+        prototype: "QObject"
+        exports: ["MeeGo.Connman/NetworkManagerFactory 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "instance"; type: "NetworkManager"; isReadonly: true; isPointer: true }
+    }
+    Component {
+        name: "NetworkService"
+        prototype: "QObject"
+        exports: ["MeeGo.Connman/NetworkService 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "name"; type: "string"; isReadonly: true }
+        Property { name: "state"; type: "string"; isReadonly: true }
+        Property { name: "type"; type: "string"; isReadonly: true }
+        Property { name: "error"; type: "string"; isReadonly: true }
+        Property { name: "security"; type: "QStringList"; isReadonly: true }
+        Property { name: "strength"; type: "uint"; isReadonly: true }
+        Property { name: "favorite"; type: "bool"; isReadonly: true }
+        Property { name: "autoConnect"; type: "bool" }
+        Property { name: "path"; type: "string" }
+        Property { name: "ipv4"; type: "QVariantMap"; isReadonly: true }
+        Property { name: "ipv4Config"; type: "QVariantMap" }
+        Property { name: "ipv6"; type: "QVariantMap"; isReadonly: true }
+        Property { name: "ipv6Config"; type: "QVariantMap" }
+        Property { name: "nameservers"; type: "QStringList"; isReadonly: true }
+        Property { name: "nameserversConfig"; type: "QStringList" }
+        Property { name: "domains"; type: "QStringList"; isReadonly: true }
+        Property { name: "domainsConfig"; type: "QStringList" }
+        Property { name: "proxy"; type: "QVariantMap"; isReadonly: true }
+        Property { name: "proxyConfig"; type: "QVariantMap" }
+        Property { name: "ethernet"; type: "QVariantMap"; isReadonly: true }
+        Property { name: "roaming"; type: "bool"; isReadonly: true }
+        Property { name: "connected"; type: "bool"; isReadonly: true }
+        Property { name: "timeservers"; type: "QStringList"; isReadonly: true }
+        Property { name: "timeserversConfig"; type: "QStringList" }
+        Signal {
+            name: "nameChanged"
+            Parameter { name: "name"; type: "string" }
+        }
+        Signal {
+            name: "stateChanged"
+            Parameter { name: "state"; type: "string" }
+        }
+        Signal {
+            name: "errorChanged"
+            Parameter { name: "error"; type: "string" }
+        }
+        Signal {
+            name: "securityChanged"
+            Parameter { name: "security"; type: "QStringList" }
+        }
+        Signal {
+            name: "strengthChanged"
+            Parameter { name: "strength"; type: "uint" }
+        }
+        Signal {
+            name: "favoriteChanged"
+            Parameter { name: "favorite"; type: "bool" }
+        }
+        Signal {
+            name: "autoConnectChanged"
+            Parameter { name: "autoconnect"; type: "bool" }
+        }
+        Signal {
+            name: "pathChanged"
+            Parameter { name: "path"; type: "string" }
+        }
+        Signal {
+            name: "ipv4Changed"
+            Parameter { name: "ipv4"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "ipv4ConfigChanged"
+            Parameter { name: "ipv4"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "ipv6Changed"
+            Parameter { name: "ipv6"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "ipv6ConfigChanged"
+            Parameter { name: "ipv6"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "nameserversChanged"
+            Parameter { name: "nameservers"; type: "QStringList" }
+        }
+        Signal {
+            name: "nameserversConfigChanged"
+            Parameter { name: "nameservers"; type: "QStringList" }
+        }
+        Signal {
+            name: "domainsChanged"
+            Parameter { name: "domains"; type: "QStringList" }
+        }
+        Signal {
+            name: "domainsConfigChanged"
+            Parameter { name: "domains"; type: "QStringList" }
+        }
+        Signal {
+            name: "proxyChanged"
+            Parameter { name: "proxy"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "proxyConfigChanged"
+            Parameter { name: "proxy"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "ethernetChanged"
+            Parameter { name: "ethernet"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "connectRequestFailed"
+            Parameter { name: "error"; type: "string" }
+        }
+        Signal {
+            name: "typeChanged"
+            Parameter { name: "type"; type: "string" }
+        }
+        Signal {
+            name: "roamingChanged"
+            Parameter { name: "roaming"; type: "bool" }
+        }
+        Signal {
+            name: "timeserversChanged"
+            Parameter { name: "timeservers"; type: "QStringList" }
+        }
+        Signal {
+            name: "timeserversConfigChanged"
+            Parameter { name: "timeservers"; type: "QStringList" }
+        }
+        Signal { name: "serviceConnectionStarted" }
+        Signal { name: "serviceDisconnectionStarted" }
+        Signal {
+            name: "connectedChanged"
+            Parameter { name: "connected"; type: "bool" }
+        }
+        Signal { name: "propertiesReady" }
+        Method { name: "requestConnect" }
+        Method { name: "requestDisconnect" }
+        Method { name: "remove" }
+        Method {
+            name: "setAutoConnect"
+            Parameter { name: "autoconnect"; type: "bool" }
+        }
+        Method {
+            name: "setIpv4Config"
+            Parameter { name: "ipv4"; type: "QVariantMap" }
+        }
+        Method {
+            name: "setIpv6Config"
+            Parameter { name: "ipv6"; type: "QVariantMap" }
+        }
+        Method {
+            name: "setNameserversConfig"
+            Parameter { name: "nameservers"; type: "QStringList" }
+        }
+        Method {
+            name: "setDomainsConfig"
+            Parameter { name: "domains"; type: "QStringList" }
+        }
+        Method {
+            name: "setProxyConfig"
+            Parameter { name: "proxy"; type: "QVariantMap" }
+        }
+        Method { name: "resetCounters" }
+    }
+    Component {
+        name: "NetworkSession"
+        prototype: "QObject"
+        exports: ["MeeGo.Connman/NetworkSession 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "state"; type: "string"; isReadonly: true }
+        Property { name: "name"; type: "string"; isReadonly: true }
+        Property { name: "bearer"; type: "string"; isReadonly: true }
+        Property { name: "sessionInterface"; type: "string"; isReadonly: true }
+        Property { name: "ipv4"; type: "QVariantMap"; isReadonly: true }
+        Property { name: "ipv6"; type: "QVariantMap"; isReadonly: true }
+        Property { name: "path"; type: "string" }
+        Property { name: "allowedBearers"; type: "QStringList" }
+        Property { name: "connectionType"; type: "string" }
+        Signal {
+            name: "allowedBearersChanged"
+            Parameter { name: "bearers"; type: "QStringList" }
+        }
+        Signal {
+            name: "connectionTypeChanged"
+            Parameter { name: "type"; type: "string" }
+        }
+        Signal {
+            name: "settingsChanged"
+            Parameter { name: "settings"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "stateChanged"
+            Parameter { name: "state"; type: "string" }
+        }
+        Signal {
+            name: "nameChanged"
+            Parameter { name: "name"; type: "string" }
+        }
+        Signal {
+            name: "bearerChanged"
+            Parameter { name: "bearer"; type: "string" }
+        }
+        Signal {
+            name: "sessionInterfaceChanged"
+            Parameter { name: "sessionInterface"; type: "string" }
+        }
+        Signal {
+            name: "ipv4Changed"
+            Parameter { name: "settings"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "ipv6Changed"
+            Parameter { name: "settings"; type: "QVariantMap" }
+        }
+        Method { name: "requestDestroy" }
+        Method { name: "requestConnect" }
+        Method { name: "requestDisconnect" }
+        Method {
+            name: "sessionSettingsUpdated"
+            Parameter { name: "settings"; type: "QVariantMap" }
+        }
+        Method {
+            name: "setPath"
+            Parameter { name: "path"; type: "string" }
+        }
+    }
+    Component {
+        name: "NetworkTechnology"
+        prototype: "QObject"
+        exports: ["MeeGo.Connman/NetworkTechnology 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "name"; type: "string"; isReadonly: true }
+        Property { name: "type"; type: "string"; isReadonly: true }
+        Property { name: "powered"; type: "bool" }
+        Property { name: "connected"; type: "bool"; isReadonly: true }
+        Property { name: "path"; type: "string" }
+        Property { name: "idleTimeout"; type: "uint" }
+        Property { name: "tethering"; type: "bool" }
+        Property { name: "tetheringId"; type: "string" }
+        Property { name: "tetheringPassphrase"; type: "string" }
+        Signal {
+            name: "poweredChanged"
+            Parameter { name: "powered"; type: "bool" }
+        }
+        Signal {
+            name: "connectedChanged"
+            Parameter { name: "connected"; type: "bool" }
+        }
+        Signal { name: "scanFinished" }
+        Signal {
+            name: "idleTimeoutChanged"
+            Parameter { name: "timeout"; type: "uint" }
+        }
+        Signal {
+            name: "tetheringChanged"
+            Parameter { name: "tetheringEnabled"; type: "bool" }
+        }
+        Signal {
+            name: "tetheringIdChanged"
+            Parameter { name: "tetheringId"; type: "string" }
+        }
+        Signal {
+            name: "tetheringPassphraseChanged"
+            Parameter { name: "passphrase"; type: "string" }
+        }
+        Signal {
+            name: "pathChanged"
+            Parameter { name: "path"; type: "string" }
+        }
+        Signal { name: "propertiesReady" }
+        Method {
+            name: "setPowered"
+            Parameter { name: "powered"; type: "bool" }
+        }
+        Method { name: "scan" }
+        Method {
+            name: "setPath"
+            Parameter { name: "path"; type: "string" }
+        }
+    }
+    Component {
+        name: "NetworkingModel"
+        prototype: "QObject"
+        exports: ["MeeGo.Connman/NetworkingModel 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "available"; type: "bool"; isReadonly: true }
+        Property { name: "wifiPowered"; type: "bool" }
+        Property { name: "networks"; type: "QList<QObject*>"; isReadonly: true }
+        Signal {
+            name: "availabilityChanged"
+            Parameter { name: "available"; type: "bool" }
+        }
+        Signal {
+            name: "wifiPoweredChanged"
+            Parameter { name: "wifiPowered"; type: "bool" }
+        }
+        Signal { name: "technologiesChanged" }
+        Signal {
+            name: "userInputRequested"
+            Parameter { name: "fields"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "errorReported"
+            Parameter { name: "error"; type: "string" }
+        }
+        Signal { name: "scanRequestFinished" }
+        Method {
+            name: "setWifiPowered"
+            Parameter { name: "wifiPowered"; type: "bool" }
+        }
+        Method { name: "requestScan" }
+        Method {
+            name: "sendUserReply"
+            Parameter { name: "input"; type: "QVariantMap" }
+        }
+    }
+    Component {
+        name: "SavedServiceModel"
+        prototype: "QAbstractListModel"
+        exports: ["MeeGo.Connman/SavedServiceModel 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "name"; type: "string" }
+        Signal {
+            name: "nameChanged"
+            Parameter { name: "name"; type: "string" }
+        }
+        Method {
+            name: "indexOf"
+            type: "int"
+            Parameter { name: "dbusObjectPath"; type: "string" }
+        }
+        Method {
+            name: "get"
+            type: "NetworkService*"
+            Parameter { name: "index"; type: "int" }
+        }
+    }
+    Component {
+        name: "TechnologyModel"
+        prototype: "QAbstractListModel"
+        exports: ["MeeGo.Connman/TechnologyModel 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "name"; type: "string" }
+        Property { name: "available"; type: "bool"; isReadonly: true }
+        Property { name: "connected"; type: "bool"; isReadonly: true }
+        Property { name: "powered"; type: "bool" }
+        Property { name: "scanning"; type: "bool"; isReadonly: true }
+        Property { name: "changesInhibited"; type: "bool" }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Signal {
+            name: "nameChanged"
+            Parameter { name: "name"; type: "string" }
+        }
+        Signal {
+            name: "availabilityChanged"
+            Parameter { name: "available"; type: "bool" }
+        }
+        Signal {
+            name: "connectedChanged"
+            Parameter { name: "connected"; type: "bool" }
+        }
+        Signal {
+            name: "poweredChanged"
+            Parameter { name: "powered"; type: "bool" }
+        }
+        Signal {
+            name: "scanningChanged"
+            Parameter { name: "scanning"; type: "bool" }
+        }
+        Signal {
+            name: "changesInhibitedChanged"
+            Parameter { name: "changesInhibited"; type: "bool" }
+        }
+        Signal { name: "technologiesChanged" }
+        Signal { name: "scanRequestFinished" }
+        Method {
+            name: "setPowered"
+            Parameter { name: "powered"; type: "bool" }
+        }
+        Method { name: "requestScan" }
+        Method {
+            name: "indexOf"
+            type: "int"
+            Parameter { name: "dbusObjectPath"; type: "string" }
+        }
+        Method {
+            name: "get"
+            type: "NetworkService*"
+            Parameter { name: "index"; type: "int" }
+        }
+    }
+    Component {
+        name: "UserAgent"
+        prototype: "QObject"
+        exports: ["MeeGo.Connman/UserAgent 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "connectionRequestType"; type: "string" }
+        Property { name: "path"; type: "string" }
+        Signal {
+            name: "userInputRequested"
+            Parameter { name: "servicePath"; type: "string" }
+            Parameter { name: "fields"; type: "QVariantMap" }
+        }
+        Signal { name: "userInputCanceled" }
+        Signal {
+            name: "errorReported"
+            Parameter { name: "servicePath"; type: "string" }
+            Parameter { name: "error"; type: "string" }
+        }
+        Signal {
+            name: "browserRequested"
+            Parameter { name: "servicePath"; type: "string" }
+            Parameter { name: "url"; type: "string" }
+        }
+        Signal {
+            name: "userConnectRequested"
+            Parameter { name: "message"; type: "QDBusMessage" }
+        }
+        Signal { name: "connectionRequest" }
+        Method {
+            name: "sendUserReply"
+            Parameter { name: "input"; type: "QVariantMap" }
+        }
+        Method {
+            name: "sendConnectReply"
+            Parameter { name: "replyMessage"; type: "string" }
+            Parameter { name: "timeout"; type: "int" }
+        }
+        Method {
+            name: "sendConnectReply"
+            Parameter { name: "replyMessage"; type: "string" }
+        }
+        Method {
+            name: "setConnectionRequestType"
+            Parameter { name: "type"; type: "string" }
+        }
+        Method { name: "connectionRequestType"; type: "string" }
+        Method { name: "path"; type: "string" }
+        Method {
+            name: "setAgentPath"
+            Parameter { name: "path"; type: "QString&" }
+        }
+    }
+}

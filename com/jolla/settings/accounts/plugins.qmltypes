@@ -1,0 +1,218 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump com.jolla.settings.accounts 1.0'.
+
+Module {
+    Component {
+        name: "AccountFactory"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.accounts/AccountFactory 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "ErrorCode"
+            values: {
+                "NoError": 0,
+                "UnknownError": 1,
+                "InternalError": 2,
+                "NetworkError": 3,
+                "LoginError": 4,
+                "BadParametersError": 5,
+                "ImeiError": 6,
+                "SslError": 7
+            }
+        }
+        Enum {
+            name: "UsernameCheckResult"
+            values: {
+                "UsernameNotChecked": 0,
+                "UsernameAvailable": 1,
+                "UsernameNotAvailable": 2,
+                "UsernameInvalid": 3,
+                "UsernameCheckError": 4,
+                "UsernameCheckSslError": 5
+            }
+        }
+        Signal { name: "networkConnectivityEstablished" }
+        Signal { name: "networkConnectivityUnavailable" }
+        Signal {
+            name: "error"
+            Parameter { name: "errorCode"; type: "int" }
+            Parameter { name: "message"; type: "string" }
+        }
+        Signal {
+            name: "success"
+            Parameter { name: "newAccountId"; type: "int" }
+            Parameter { name: "responseData"; type: "QVariantMap" }
+        }
+        Method { name: "haveNetworkConnectivity"; type: "bool" }
+        Method { name: "attemptToConnectNetwork" }
+        Method {
+            name: "createAccount"
+            Parameter { name: "providerName"; type: "string" }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "username"; type: "string" }
+            Parameter { name: "password"; type: "string" }
+            Parameter { name: "displayName"; type: "string" }
+            Parameter { name: "configuration"; type: "QVariantMap" }
+            Parameter { name: "applicationName"; type: "string" }
+            Parameter { name: "symmetricKey"; type: "string" }
+            Parameter { name: "credentialsName"; type: "string" }
+        }
+        Method {
+            name: "createAccount"
+            Parameter { name: "providerName"; type: "string" }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "username"; type: "string" }
+            Parameter { name: "password"; type: "string" }
+            Parameter { name: "displayName"; type: "string" }
+            Parameter { name: "configuration"; type: "QVariantMap" }
+            Parameter { name: "applicationName"; type: "string" }
+            Parameter { name: "symmetricKey"; type: "string" }
+        }
+        Method {
+            name: "createOAuthAccount"
+            Parameter { name: "providerName"; type: "string" }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "params"; type: "QVariantMap" }
+            Parameter { name: "applicationName"; type: "string" }
+            Parameter { name: "credentialsName"; type: "string" }
+        }
+        Method {
+            name: "createOAuthAccount"
+            Parameter { name: "providerName"; type: "string" }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "params"; type: "QVariantMap" }
+            Parameter { name: "applicationName"; type: "string" }
+        }
+        Method { name: "jollaAccountExists"; type: "bool" }
+        Method {
+            name: "createNewJollaAccount"
+            Parameter { name: "username"; type: "string" }
+            Parameter { name: "password"; type: "string" }
+            Parameter { name: "email"; type: "string" }
+            Parameter { name: "firstName"; type: "string" }
+            Parameter { name: "lastName"; type: "string" }
+            Parameter { name: "birthday"; type: "QDateTime" }
+            Parameter { name: "phone"; type: "string" }
+            Parameter { name: "countryCode"; type: "string" }
+            Parameter { name: "applicationName"; type: "string" }
+            Parameter { name: "credentialsName"; type: "string" }
+        }
+        Method {
+            name: "createExistingJollaAccount"
+            Parameter { name: "username"; type: "string" }
+            Parameter { name: "password"; type: "string" }
+            Parameter { name: "applicationName"; type: "string" }
+            Parameter { name: "credentialsName"; type: "string" }
+        }
+        Method { name: "cancel" }
+    }
+    Component {
+        name: "CaldavAccountCalendarUpdater"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.accounts/CaldavAccountCalendarUpdater 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Error"
+            values: {
+                "NoError": 0,
+                "InternalError": 1,
+                "InvalidUrlError": 2,
+                "SignInError": 3,
+                "NetworkRequestFailedError": 4,
+                "ContentNotFoundError": 5,
+                "ServiceUnavailableError": 6,
+                "InvalidServerResponseError": 7,
+                "CurrentUserPrincipalNotFoundError": 8,
+                "CalendarHomeNotFoundError": 9
+            }
+        }
+        Signal { name: "success" }
+        Signal {
+            name: "error"
+            Parameter { name: "errorCode"; type: "int" }
+            Parameter { name: "errorString"; type: "string" }
+        }
+        Signal { name: "statusChanged" }
+        Method {
+            name: "start"
+            Parameter { name: "account"; type: "Account"; isPointer: true }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "serverAddress"; type: "string" }
+            Parameter { name: "calendarHomePath"; type: "string" }
+        }
+        Method {
+            name: "start"
+            Parameter { name: "account"; type: "Account"; isPointer: true }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "serverAddress"; type: "string" }
+        }
+        Method { name: "statusText"; type: "string" }
+    }
+    Component {
+        name: "JollaAccountUtilities"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.accounts/JollaAccountUtilities 1.0"]
+        exportMetaObjectRevisions: [0]
+        Signal {
+            name: "usernameCheckFinished"
+            Parameter { name: "result"; type: "int" }
+        }
+        Method {
+            name: "termsOfService"
+            type: "QStringList"
+            Parameter { name: "locale"; type: "string" }
+        }
+        Method {
+            name: "privacyPolicy"
+            type: "QStringList"
+            Parameter { name: "locale"; type: "string" }
+        }
+        Method {
+            name: "mobileCountryCodeToAlpha2CountryCode"
+            type: "string"
+            Parameter { name: "mcc"; type: "int" }
+        }
+        Method {
+            name: "checkUsernameAvailability"
+            Parameter { name: "username"; type: "string" }
+        }
+    }
+    Component {
+        name: "OnlineCalendarModel"
+        prototype: "QAbstractListModel"
+        exports: ["com.jolla.settings.accounts/OnlineCalendarModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "profileId"; type: "string" }
+        Method {
+            name: "setCalendarEnabled"
+            Parameter { name: "index"; type: "int" }
+            Parameter { name: "enabled"; type: "bool" }
+        }
+        Method {
+            name: "setCalendarColor"
+            Parameter { name: "index"; type: "int" }
+            Parameter { name: "color"; type: "QColor" }
+        }
+        Method {
+            name: "applyChanges"
+            Parameter { name: "account"; type: "Account"; isPointer: true }
+        }
+    }
+    Component {
+        name: "StoredKeyProvider"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.accounts/StoredKeyProvider 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "storedKey"
+            type: "string"
+            Parameter { name: "providerName"; type: "string" }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "keyName"; type: "string" }
+        }
+    }
+}

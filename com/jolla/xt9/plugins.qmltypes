@@ -1,0 +1,149 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable com.jolla.xt9 1.0'.
+
+Module {
+    Component {
+        name: "QThread"
+        prototype: "QObject"
+        Signal { name: "started" }
+        Signal { name: "finished" }
+        Method {
+            name: "start"
+            Parameter { type: "Priority" }
+        }
+        Method { name: "start" }
+        Method { name: "terminate" }
+        Method { name: "quit" }
+    }
+    Component {
+        name: "Xt9EngineThread"
+        prototype: "QThread"
+        exports: ["com.jolla.xt9/Xt9EngineThread 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "engine"; type: "Xt9Model"; isReadonly: true; isPointer: true }
+        Property { name: "language"; type: "string" }
+        Property { name: "debug"; type: "bool" }
+        Signal { name: "debugEnabledChanged" }
+        Method {
+            name: "processSymbol"
+            Parameter { name: "symbol"; type: "string" }
+            Parameter { name: "forceExplicitAdd"; type: "bool" }
+        }
+        Method {
+            name: "processSymbol"
+            Parameter { name: "symbol"; type: "string" }
+        }
+        Method { name: "processBackspace" }
+        Method {
+            name: "reactivateWord"
+            Parameter { name: "word"; type: "string" }
+        }
+        Method { name: "reset" }
+        Method {
+            name: "acceptWord"
+            Parameter { name: "word"; type: "string" }
+            Parameter { name: "appendSpace"; type: "bool" }
+        }
+        Method {
+            name: "acceptPrediction"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "setShiftState"
+            Parameter { name: "shiftState"; type: "int" }
+        }
+        Method {
+            name: "isLetter"
+            type: "bool"
+            Parameter { name: "character"; type: "string" }
+        }
+        Method {
+            name: "startLayout"
+            Parameter { name: "width"; type: "int" }
+            Parameter { name: "height"; type: "int" }
+        }
+        Method {
+            name: "addLayoutButton"
+            Parameter { name: "x"; type: "int" }
+            Parameter { name: "y"; type: "int" }
+            Parameter { name: "width"; type: "int" }
+            Parameter { name: "height"; type: "int" }
+            Parameter { name: "text"; type: "string" }
+            Parameter { name: "shiftText"; type: "string" }
+        }
+        Method { name: "finishLayout" }
+        Method {
+            name: "setContext"
+            Parameter { name: "text"; type: "string" }
+        }
+    }
+    Component {
+        name: "Xt9Model"
+        prototype: "QAbstractListModel"
+        exports: ["com.jolla.xt9/Xt9Model 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "ShiftState"
+            values: {
+                "NoShift": 0,
+                "ShiftLatched": 1,
+                "ShiftLocked": 2
+            }
+        }
+        Property { name: "shiftState"; type: "ShiftState" }
+        Property { name: "preedit"; type: "string"; isReadonly: true }
+        Property { name: "language"; type: "string" }
+        Property { name: "debug"; type: "bool" }
+        Property { name: "contextString"; type: "string" }
+        Signal { name: "debugEnabledChanged" }
+        Signal { name: "predictionsChanged" }
+        Signal { name: "contextChanged" }
+        Method {
+            name: "processSymbol"
+            Parameter { name: "symbol"; type: "string" }
+            Parameter { name: "forceExplicitAdd"; type: "bool" }
+        }
+        Method {
+            name: "processSymbol"
+            Parameter { name: "symbol"; type: "string" }
+        }
+        Method { name: "processBackspace" }
+        Method {
+            name: "reactivateWord"
+            Parameter { name: "word"; type: "string" }
+        }
+        Method {
+            name: "acceptWord"
+            Parameter { name: "appendSpace"; type: "bool" }
+        }
+        Method {
+            name: "acceptWord"
+            Parameter { name: "word"; type: "string" }
+            Parameter { name: "appendSpace"; type: "bool" }
+        }
+        Method {
+            name: "acceptPrediction"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method { name: "resetState" }
+        Method {
+            name: "startLayout"
+            Parameter { name: "width"; type: "int" }
+            Parameter { name: "height"; type: "int" }
+        }
+        Method {
+            name: "addLayoutButton"
+            Parameter { name: "x"; type: "int" }
+            Parameter { name: "y"; type: "int" }
+            Parameter { name: "width"; type: "int" }
+            Parameter { name: "height"; type: "int" }
+            Parameter { name: "text"; type: "string" }
+            Parameter { name: "shiftText"; type: "string" }
+        }
+        Method { name: "finishLayout" }
+    }
+}

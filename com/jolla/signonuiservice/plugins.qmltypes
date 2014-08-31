@@ -1,0 +1,36 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable com.jolla.signonuiservice 1.0'.
+
+Module {
+    Component {
+        name: "SignonUiService"
+        prototype: "QObject"
+        Property { name: "inProcessParent"; type: "QQuickItem"; isPointer: true }
+        Property { name: "inProcessServiceName"; type: "string" }
+        Property { name: "inProcessObjectPath"; type: "string" }
+        Method {
+            name: "queryDialog"
+            type: "QVariantMap"
+            Parameter { name: "parameters"; type: "QVariantMap" }
+        }
+        Method {
+            name: "refreshDialog"
+            type: "QVariantMap"
+            Parameter { name: "parameters"; type: "QVariantMap" }
+        }
+        Method {
+            name: "cancelUiRequest"
+            Parameter { name: "dialogId"; type: "string" }
+        }
+    }
+    Component {
+        name: "SignonUiServiceType"
+        prototype: "SignonUiService"
+        exports: ["com.jolla.signonuiservice/SignonUiService 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
+}

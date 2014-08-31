@@ -1,0 +1,174 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable org.nemomobile.socialcache 1.0'.
+
+Module {
+    Component {
+        name: "AbstractImageDownloader"
+        prototype: "QObject"
+        Signal {
+            name: "imageDownloaded"
+            Parameter { name: "url"; type: "string" }
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "metadata"; type: "QVariantMap" }
+        }
+        Method {
+            name: "queue"
+            Parameter { name: "url"; type: "string" }
+            Parameter { name: "data"; type: "QVariantMap" }
+        }
+    }
+    Component {
+        name: "AbstractSocialCacheModel"
+        prototype: "QAbstractListModel"
+        Property { name: "nodeIdentifier"; type: "string" }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Signal { name: "modelUpdated" }
+        Method { name: "refresh" }
+        Method {
+            name: "getField"
+            type: "QVariant"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "role"; type: "int" }
+        }
+    }
+    Component {
+        name: "FacebookImageCacheModel"
+        prototype: "AbstractSocialCacheModel"
+        exports: ["org.nemomobile.socialcache/FacebookImageCacheModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "FacebookGalleryRole"
+            values: {
+                "FacebookId": 0,
+                "Thumbnail": 1,
+                "Image": 2,
+                "Title": 3,
+                "DateTaken": 4,
+                "Width": 5,
+                "Height": 6,
+                "Count": 7,
+                "MimeType": 8,
+                "AccountId": 9,
+                "UserId": 10
+            }
+        }
+        Enum {
+            name: "ModelDataType"
+            values: {
+                "None": 0,
+                "Users": 1,
+                "Albums": 2,
+                "Images": 3
+            }
+        }
+        Property { name: "type"; type: "FacebookImageCacheModel::ModelDataType" }
+        Property { name: "downloader"; type: "FacebookImageDownloader"; isPointer: true }
+        Method { name: "loadImages" }
+        Method { name: "refresh" }
+    }
+    Component {
+        name: "FacebookImageDownloader"
+        prototype: "AbstractImageDownloader"
+        exports: ["org.nemomobile.socialcache/FacebookImageDownloader 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
+    Component {
+        name: "FacebookNotificationsModel"
+        prototype: "AbstractSocialCacheModel"
+        exports: ["org.nemomobile.socialcache/FacebookNotificationsModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "FacebookNotificationsRole"
+            values: {
+                "NotificationId": 0,
+                "From": 1,
+                "To": 2,
+                "Timestamp": 3,
+                "Title": 4,
+                "Link": 5,
+                "AppId": 6,
+                "Object": 7,
+                "Accounts": 8,
+                "ClientId": 9,
+                "Unread": 10
+            }
+        }
+    }
+    Component {
+        name: "FacebookPostsModel"
+        prototype: "AbstractSocialCacheModel"
+        exports: ["org.nemomobile.socialcache/FacebookPostsModel 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
+    Component {
+        name: "KeyProviderHelper"
+        prototype: "QObject"
+        exports: ["org.nemomobile.socialcache/KeyProviderHelper 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "facebookClientId"; type: "string"; isReadonly: true }
+        Property { name: "twitterConsumerKey"; type: "string"; isReadonly: true }
+        Property { name: "twitterConsumerSecret"; type: "string"; isReadonly: true }
+    }
+    Component {
+        name: "SocialSyncInterface"
+        prototype: "QObject"
+        exports: ["org.nemomobile.socialcache/SocialSync 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "SocialNetwork"
+            values: {
+                "InvalidSocialNetwork": 0,
+                "Facebook": 1,
+                "Twitter": 2,
+                "Google": 3,
+                "VK": 4,
+                "Diaspora": 5,
+                "CalDAV": 6
+            }
+        }
+        Enum {
+            name: "DataType"
+            values: {
+                "InvalidDataType": 0,
+                "Contacts": 1,
+                "Calendars": 2,
+                "Notifications": 3,
+                "Images": 4,
+                "Videos": 5,
+                "Posts": 6,
+                "Messages": 7,
+                "Emails": 8
+            }
+        }
+        Method {
+            name: "socialNetwork"
+            type: "string"
+            Parameter { name: "sn"; type: "SocialNetwork" }
+        }
+        Method {
+            name: "dataType"
+            type: "string"
+            Parameter { name: "t"; type: "DataType" }
+        }
+    }
+    Component {
+        name: "SyncHelper"
+        prototype: "QObject"
+        exports: ["org.nemomobile.socialcache/SyncHelper 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "socialNetwork"; type: "SocialSyncInterface::SocialNetwork" }
+        Property { name: "dataType"; type: "SocialSyncInterface::DataType" }
+        Property { name: "loading"; type: "bool"; isReadonly: true }
+        Method { name: "sync" }
+    }
+    Component {
+        name: "TwitterPostsModel"
+        prototype: "AbstractSocialCacheModel"
+        exports: ["org.nemomobile.socialcache/TwitterPostsModel 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
+}

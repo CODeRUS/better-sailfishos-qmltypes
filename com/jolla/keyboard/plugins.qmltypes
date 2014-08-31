@@ -1,0 +1,129 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump com.jolla.keyboard 1.0'.
+
+Module {
+    Component {
+        name: "InputHandlerManager"
+        prototype: "QObject"
+        exports: ["com.jolla.keyboard/InputHandlerManager 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "createInstance"
+            type: "QQuickItem*"
+            Parameter { name: "component"; type: "QQmlComponent"; isPointer: true }
+            Parameter { name: "componentParent"; type: "QObject"; isPointer: true }
+        }
+        Method {
+            name: "deleteInstance"
+            Parameter { name: "item"; type: "QQuickItem"; isPointer: true }
+        }
+        Method { name: "clearHandlerData" }
+    }
+    Component {
+        name: "LayoutModel"
+        prototype: "QAbstractListModel"
+        exports: ["com.jolla.keyboard/LayoutModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "enabledCount"; type: "int"; isReadonly: true }
+        Signal { name: "enabledLayoutsChanged" }
+        Method {
+            name: "getLayoutIndex"
+            type: "int"
+            Parameter { name: "name"; type: "string" }
+        }
+        Method {
+            name: "get"
+            type: "QObject*"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "setEnabled"
+            Parameter { name: "index"; type: "int" }
+            Parameter { name: "enabled"; type: "bool" }
+        }
+    }
+    Component {
+        name: "PaPlayer"
+        prototype: "QObject"
+        exports: ["com.jolla.keyboard/SampleCache 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "play"
+            type: "bool"
+            Parameter { name: "file"; type: "string" }
+        }
+    }
+    Component {
+        name: "QuickCloseGestureArea"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        exports: ["com.jolla.keyboard/CloseGestureArea 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "threshold"; type: "int" }
+        Signal { name: "triggered" }
+    }
+    Component {
+        name: "QuickHwrCanvas"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        exports: ["com.jolla.keyboard/HwrCanvas 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "threshold"; type: "float" }
+        Property { name: "curveDensity"; type: "float" }
+        Property { name: "lineWidth"; type: "float" }
+        Property { name: "color"; type: "QColor" }
+        Property { name: "blur"; type: "float" }
+        Property { name: "mask"; type: "QQuickItem"; isPointer: true }
+        Signal {
+            name: "arcStarted"
+            Parameter { name: "x"; type: "float" }
+            Parameter { name: "y"; type: "float" }
+        }
+        Signal {
+            name: "arcPointAdded"
+            Parameter { name: "x"; type: "float" }
+            Parameter { name: "y"; type: "float" }
+        }
+        Signal { name: "arcFinished" }
+        Signal { name: "arcCanceled" }
+        Method { name: "clear" }
+    }
+    Component {
+        name: "QuickKeyType"
+        prototype: "QObject"
+        exports: ["com.jolla.keyboard/KeyType 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "KeyType"
+            values: {
+                "UnknownKey": 0,
+                "CharacterKey": 1,
+                "FunctionKey": 2,
+                "PopupKey": 3,
+                "ShiftKey": 4,
+                "SymbolKey": 5,
+                "DeadKey": 6
+            }
+        }
+    }
+    Component {
+        name: "QuickShiftState"
+        prototype: "QObject"
+        exports: ["com.jolla.keyboard/ShiftState 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "ShiftState"
+            values: {
+                "AutoShift": 0,
+                "NoShift": 1,
+                "LatchedShift": 2,
+                "LockedShift": 3
+            }
+        }
+    }
+}

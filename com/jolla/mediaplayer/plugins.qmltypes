@@ -1,0 +1,310 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump com.jolla.mediaplayer 1.0'.
+
+Module {
+    Component {
+        name: "AggregateModel"
+        prototype: "QAbstractListModel"
+        exports: ["com.jolla.mediaplayer/AggregateModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "shuffled"; type: "bool" }
+        Property { name: "currentIndex"; type: "int" }
+        Signal { name: "updateCurrentItem" }
+        Method {
+            name: "setModel"
+            Parameter { name: "model"; type: "QAbstractItemModel"; isPointer: true }
+        }
+        Method {
+            name: "addModel"
+            Parameter { name: "model"; type: "QAbstractItemModel"; isPointer: true }
+        }
+        Method {
+            name: "addMedia"
+            Parameter { name: "media"; type: "QObject"; isPointer: true }
+        }
+        Method {
+            name: "removeIndex"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method { name: "clear" }
+        Method { name: "shuffle" }
+        Method {
+            name: "appendUrl"
+            Parameter { name: "url"; type: "QUrl" }
+        }
+        Method {
+            name: "shuffledIndex"
+            type: "int"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "indexOf"
+            type: "int"
+            Parameter { name: "media"; type: "QObject"; isPointer: true }
+            Parameter { name: "from"; type: "int" }
+        }
+        Method {
+            name: "indexOf"
+            type: "int"
+            Parameter { name: "media"; type: "QObject"; isPointer: true }
+        }
+    }
+    Component {
+        name: "BluetoothMediaPlayer"
+        prototype: "QObject"
+        exports: ["com.jolla.mediaplayer/BluetoothMediaPlayer 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Equalizer"
+            values: {
+                "EqualizerOff": 0,
+                "EqualizerOn": 1
+            }
+        }
+        Enum {
+            name: "Repeat"
+            values: {
+                "RepeatOff": 0,
+                "RepeatSingleTrack": 1,
+                "RepeatAllTracks": 2,
+                "RepeatGroup": 3
+            }
+        }
+        Enum {
+            name: "Shuffle"
+            values: {
+                "ShuffleOff": 0,
+                "ShuffleAllTracks": 1,
+                "ShuffleGroup": 2
+            }
+        }
+        Enum {
+            name: "Scan"
+            values: {
+                "ScanOff": 0,
+                "ScanAllTracks": 1,
+                "ScanGroup": 2
+            }
+        }
+        Enum {
+            name: "Status"
+            values: {
+                "Playing": 0,
+                "Stopped": 1,
+                "Paused": 2,
+                "ForwardSeek": 3,
+                "ReverseSeek": 4,
+                "Error": 5
+            }
+        }
+        Property { name: "equalizer"; type: "Equalizer" }
+        Property { name: "repeat"; type: "Repeat" }
+        Property { name: "shuffle"; type: "Shuffle" }
+        Property { name: "scan"; type: "Scan" }
+        Property { name: "status"; type: "Status" }
+        Property { name: "position"; type: "int" }
+        Property { name: "metadata"; type: "QVariantMap" }
+        Signal {
+            name: "changeEqualizer"
+            Parameter { name: "equalizer"; type: "Equalizer" }
+        }
+        Signal {
+            name: "changeRepeat"
+            Parameter { name: "repeat"; type: "Repeat" }
+        }
+        Signal {
+            name: "changeShuffle"
+            Parameter { name: "shuffle"; type: "Shuffle" }
+        }
+        Signal {
+            name: "changeScan"
+            Parameter { name: "scan"; type: "Scan" }
+        }
+        Signal { name: "release" }
+    }
+    Component {
+        name: "DeclarativeAlbumArtProvider"
+        prototype: "QObject"
+        exports: ["com.jolla.mediaplayer/AlbumArtProvider 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "albumArt"
+            type: "QUrl"
+            Parameter { name: "album"; type: "string" }
+            Parameter { name: "artist"; type: "string" }
+        }
+        Method {
+            name: "albumThumbnail"
+            type: "QUrl"
+            Parameter { name: "album"; type: "string" }
+            Parameter { name: "artist"; type: "string" }
+        }
+    }
+    Component {
+        name: "DeclarativeAudio"
+        prototype: "QObject"
+        exports: ["com.jolla.mediaplayer/Audio 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "State"
+            values: {
+                "Stopped": 0,
+                "Playing": 1,
+                "Paused": 2
+            }
+        }
+        Property { name: "duration"; type: "qlonglong"; isReadonly: true }
+        Property { name: "position"; type: "qlonglong" }
+        Property { name: "state"; type: "State"; isReadonly: true }
+        Property { name: "currentItem"; type: "QObject"; isReadonly: true; isPointer: true }
+        Property { name: "model"; type: "AggregateModel"; isReadonly: true; isPointer: true }
+        Signal { name: "endOfMedia" }
+        Method { name: "play" }
+        Method { name: "pause" }
+        Method { name: "stop" }
+        Method { name: "toggle" }
+        Method {
+            name: "setPlayModel"
+            Parameter { name: "model"; type: "QVariant" }
+        }
+        Method {
+            name: "addToQueue"
+            Parameter { name: "mediaOrModel"; type: "QVariant" }
+        }
+        Method {
+            name: "removeFromQueue"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "indexOf"
+            type: "int"
+            Parameter { name: "media"; type: "QVariant" }
+            Parameter { name: "from"; type: "int" }
+        }
+        Method {
+            name: "indexOf"
+            type: "int"
+            Parameter { name: "media"; type: "QVariant" }
+        }
+    }
+    Component {
+        name: "DeclarativeFile"
+        prototype: "QObject"
+        exports: ["com.jolla.mediaplayer/File 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "removeFile"
+            type: "bool"
+            Parameter { name: "path"; type: "QUrl" }
+        }
+    }
+    Component {
+        name: "DeclarativePlaylistModel"
+        prototype: "QAbstractListModel"
+        exports: ["com.jolla.mediaplayer/PlaylistModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "url"; type: "QUrl" }
+        Property { name: "store"; type: "DeclarativeTrackerStore"; isPointer: true }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Method { name: "populate" }
+        Method {
+            name: "append"
+            Parameter { name: "url"; type: "QUrl" }
+            Parameter { name: "title"; type: "string" }
+            Parameter { name: "author"; type: "string" }
+            Parameter { name: "duration"; type: "int" }
+        }
+        Method {
+            name: "remove"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "removeItemByUrl"
+            type: "int"
+            Parameter { name: "url"; type: "QUrl" }
+        }
+        Method {
+            name: "getUrl"
+            type: "QUrl"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method { name: "clear" }
+    }
+    Component {
+        name: "DeclarativePlaylistSaver"
+        prototype: "QObject"
+        exports: ["com.jolla.mediaplayer/PlaylistSaver 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "create"
+            type: "QUrl"
+            Parameter { name: "title"; type: "string" }
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "media"; type: "QObject"; isPointer: true }
+        }
+        Method {
+            name: "create"
+            type: "QUrl"
+            Parameter { name: "title"; type: "string" }
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "save"
+            type: "bool"
+            Parameter { name: "model"; type: "DeclarativePlaylistModel"; isPointer: true }
+            Parameter { name: "title"; type: "string" }
+            Parameter { name: "path"; type: "QUrl" }
+        }
+        Method {
+            name: "clear"
+            type: "bool"
+            Parameter { name: "url"; type: "QUrl" }
+            Parameter { name: "title"; type: "string" }
+        }
+        Method {
+            name: "isEditable"
+            type: "bool"
+            Parameter { name: "url"; type: "QUrl" }
+            Parameter { name: "parent"; type: "string" }
+        }
+        Method {
+            name: "removePlaylist"
+            type: "bool"
+            Parameter { name: "url"; type: "QUrl" }
+        }
+    }
+    Component {
+        name: "DeclarativeStringEscape"
+        prototype: "QObject"
+        exports: ["com.jolla.mediaplayer/StringEscape 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "escape"
+            type: "string"
+            Parameter { name: "str"; type: "string" }
+        }
+    }
+    Component {
+        name: "DeclarativeTrackerStore"
+        prototype: "QObject"
+        exports: ["com.jolla.mediaplayer/TrackerStore 1.0"]
+        exportMetaObjectRevisions: [0]
+        Signal { name: "error" }
+        Method {
+            name: "updateEntryCounter"
+            Parameter { name: "url"; type: "QUrl" }
+            Parameter { name: "counter"; type: "int" }
+        }
+        Method {
+            name: "addPlaylist"
+            Parameter { name: "url"; type: "QUrl" }
+            Parameter { name: "title"; type: "string" }
+            Parameter { name: "items"; type: "int" }
+        }
+    }
+}

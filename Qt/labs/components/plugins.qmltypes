@@ -1,0 +1,96 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump -nonrelocatable Qt.labs.components 2.0'.
+
+Module {
+    Component {
+        name: "QGlobals"
+        prototype: "QObject"
+        exports: ["Qt.labs.components/Globals 2.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Globals"
+            values: {
+                "Undefined": -1
+            }
+        }
+        Enum {
+            name: "Position"
+            values: {
+                "Left": 0,
+                "Top": 1,
+                "Right": 2,
+                "Bottom": 3
+            }
+        }
+    }
+    Component {
+        name: "QRangeModel"
+        prototype: "QObject"
+        exports: ["Qt.labs.components/RangeModel 2.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "value"; type: "float" }
+        Property { name: "minimumValue"; type: "float" }
+        Property { name: "maximumValue"; type: "float" }
+        Property { name: "stepSize"; type: "float" }
+        Property { name: "position"; type: "float" }
+        Property { name: "positionAtMinimum"; type: "float" }
+        Property { name: "positionAtMaximum"; type: "float" }
+        Property { name: "inverted"; type: "bool" }
+        Signal {
+            name: "valueChanged"
+            Parameter { name: "value"; type: "float" }
+        }
+        Signal {
+            name: "positionChanged"
+            Parameter { name: "position"; type: "float" }
+        }
+        Signal {
+            name: "stepSizeChanged"
+            Parameter { name: "stepSize"; type: "float" }
+        }
+        Signal {
+            name: "invertedChanged"
+            Parameter { name: "inverted"; type: "bool" }
+        }
+        Signal {
+            name: "minimumChanged"
+            Parameter { name: "min"; type: "float" }
+        }
+        Signal {
+            name: "maximumChanged"
+            Parameter { name: "max"; type: "float" }
+        }
+        Signal {
+            name: "positionAtMinimumChanged"
+            Parameter { name: "min"; type: "float" }
+        }
+        Signal {
+            name: "positionAtMaximumChanged"
+            Parameter { name: "max"; type: "float" }
+        }
+        Method { name: "toMinimum" }
+        Method { name: "toMaximum" }
+        Method {
+            name: "setValue"
+            Parameter { name: "value"; type: "float" }
+        }
+        Method {
+            name: "setPosition"
+            Parameter { name: "position"; type: "float" }
+        }
+        Method {
+            name: "valueForPosition"
+            type: "float"
+            Parameter { name: "position"; type: "float" }
+        }
+        Method {
+            name: "positionForValue"
+            type: "float"
+            Parameter { name: "value"; type: "float" }
+        }
+    }
+}

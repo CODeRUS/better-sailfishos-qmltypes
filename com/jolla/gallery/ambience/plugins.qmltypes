@@ -1,0 +1,28 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump com.jolla.gallery.ambience 1.0'.
+
+Module {
+    Component {
+        name: "DeclarativeProfileProvider"
+        prototype: "QObject"
+        exports: ["com.jolla.gallery.ambience/ProfileManager 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "profileNames"; type: "QStringList"; isReadonly: true }
+        Property { name: "profileCount"; type: "int"; isReadonly: true }
+        Property { name: "currentProfile"; type: "string" }
+        Method {
+            name: "profileName"
+            type: "string"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "indexOfProfile"
+            type: "int"
+            Parameter { name: "profileName"; type: "string" }
+        }
+    }
+}

@@ -1,0 +1,16 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/usr/lib/qt5/bin/qmlplugindump com.jolla.email.settings.translations 1.0'.
+
+Module {
+    Component {
+        name: "AppTranslator"
+        prototype: "QTranslator"
+        exports: ["com.lojja.email.settings.translations/EmailSettingsTranslations 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
+    Component { name: "QTranslator"; prototype: "QObject" }
+}
