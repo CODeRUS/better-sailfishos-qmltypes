@@ -1,0 +1,23 @@
+module com.jolla.startupwizard
+plugin jollastartupwizardplugin
+WizardCover 1.0 WizardCover.qml
+WelcomePage 1.0 WelcomePage.qml
+PleaseWaitPage 1.0 PleaseWaitPage.qml
+AmbienceDialog 1.0 AmbienceDialog.qml
+CancelPage 1.0 CancelPage.qml
+DateTimeDialog 1.0 DateTimeDialog.qml
+LanguageList 1.0 LanguageList.qml
+StandardWizardDialog 1.0 StandardWizardDialog.qml
+AcceptTutorialDialog 1.0 AcceptTutorialDialog.qml
+JollaAccountDialog 1.0 JollaAccountDialog.qml
+GenericAccountProviderPickerDialog 1.0 GenericAccountProviderPickerDialog.qml
+MyContactCardDialog 1.0 MyContactCardDialog.qml
+FlickHintAnimation 1.0 FlickHintAnimation.qml
+ApplicationInstallationDialog 1.0 ApplicationInstallationDialog.qml
+WizardDemoControl 1.0 WizardDemoControl.qml
+TermsOfUseDialog 1.0 TermsOfUseDialog.qml
+TermsOfUseHeading 1.0 TermsOfUseHeading.qml
+TermsOfUseOptions 1.0 TermsOfUseOptions.qml
+WizardSimPinQuery 1.0 WizardSimPinQuery.qml
+WizardClickableLabel 1.0 WizardClickableLabel.qml
+GenericAccountCreationPage 1.0 GenericAccountCreationPage.qml

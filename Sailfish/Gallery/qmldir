@@ -1,0 +1,12 @@
+plugin sailfishgalleryplugin
+DetailsPage 1.0 DetailsPage.qml
+HighlightItem 1.0 HighlightItem.qml
+ImageEditPage 1.0 ImageEditPage.qml
+ImageGridView 1.0 ImageGridView.qml
+ImageViewer 1.0 ImageViewer.qml
+SplitViewPage 1.0 SplitViewPage.qml
+SplitViewDialog 1.0 SplitViewDialog.qml
+ThumbnailImage 1.0 ThumbnailImage.qml
+ThumbnailVideo 1.0 ThumbnailVideo.qml
+ThumbnailCustom 1.0 ThumbnailCustom.qml
+VideoPoster 1.0 VideoPoster.qml

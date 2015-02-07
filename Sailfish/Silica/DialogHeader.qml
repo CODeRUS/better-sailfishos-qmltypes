@@ -1,0 +1,285 @@
+/****************************************************************************************
+**
+** Copyright (C) 2013 Jolla Ltd.
+** Contact: John Brooks <john.brooks@jollamobile.com>
+** All rights reserved.
+** 
+** This file is part of Sailfish Silica UI component package.
+**
+** You may use this file under the terms of BSD license as follows:
+**
+** Redistribution and use in source and binary forms, with or without
+** modification, are permitted provided that the following conditions are met:
+**     * Redistributions of source code must retain the above copyright
+**       notice, this list of conditions and the following disclaimer.
+**     * Redistributions in binary form must reproduce the above copyright
+**       notice, this list of conditions and the following disclaimer in the
+**       documentation and/or other materials provided with the distribution.
+**     * Neither the name of the Jolla Ltd nor the
+**       names of its contributors may be used to endorse or promote products
+**       derived from this software without specific prior written permission.
+** 
+** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR
+** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+** ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+**
+****************************************************************************************/
+
+import QtQuick 2.0
+import Sailfish.Silica 1.0
+import "private"
+import "private/Util.js" as Util
+
+BackgroundItem {
+    id: dialogHeader
+
+    property Item dialog
+    property Flickable flickable
+    property string acceptText: defaultAcceptText
+    property alias cancelText: cancelLabel.text
+    property alias title: titleText.text
+    property bool acceptTextVisible: acceptText.length > 0 && acceptLabel.visible
+    property alias extraContent: extraContentPlaceholder
+    property bool reserveExtraContent: extraContentPlaceholder.children.length > 0
+    property real spacing: Theme.paddingLarge
+
+    default property alias _children: acceptButton.data
+    property int _depth: dialog && dialog._depth ? dialog._depth+2 : 1
+
+    property bool _navigatingBack: dialog && dialog._navigationPending === PageNavigation.Back
+    property bool _navigatingForward: dialog && dialog._navigationPending === PageNavigation.Forward
+    property bool _canGoBack: dialog && dialog.backNavigation && dialog._depth !== 0
+    property bool _backgroundVisible: true
+    property real _maxButtonSize: dialog.width - Theme.itemSizeLarge
+    property real _overlayHeight: overlay.height
+
+    //% "Accept"
+    property string defaultAcceptText: qsTrId("components-he-dialog_accept")
+
+    // TODO: Remove top-level BackgroundItem, now here for API compatibility
+    down: false
+    highlighted: false
+    highlightedColor: "transparent"
+
+    height: overlay.height + (title.length > 0 ? titleText.height + Theme.paddingMedium : 0) + spacing
+    width: parent ? parent.width : Screen.width
+
+    onFlickableChanged: {
+        if (flickable) {
+            overlay.parent = flickable.contentItem
+        } else {
+            overlay.parent = dialogHeader
+        }
+    }
+
+    Component.onCompleted: {
+        if (!dialog)
+            dialog = _findDialog()
+        if (dialog) {
+            dialog._dialogHeader = dialogHeader
+        } else {
+            console.log("DialogHeader must have a parent Dialog instance")
+        }
+        if (!flickable)
+            flickable = Util.findFlickable(dialogHeader)
+    }
+
+    function _findDialog() {
+        var r = parent
+        while (r && !r.hasOwnProperty('__silica_dialog'))
+            r = r.parent
+        return r
+    }
+
+    Item {
+        id: overlay
+
+        z: 9999 // Just below pulley menu
+        height: dialog.isPortrait ? Theme.itemSizeLarge : Theme.itemSizeSmall
+        width: dialogHeader.width
+        y: flickable ? Math.max(flickable.contentY, flickable.originY) : 0
+
+        Wallpaper {
+            id: wallpaper
+            property real offset: flickable ? Math.min(flickable.contentY, flickable.originY) : 0
+            anchors.centerIn: parent
+            visible: __silica_applicationwindow_instance["_backgroundVisible"] == true && dialogHeader._backgroundVisible
+            rotation: (360 - dialog.rotation) % 360
+            state: rotation
+            states: [
+                State {
+                    name: "0"
+                    PropertyChanges {
+                        target: wallpaper
+                        verticalOffset: -Screen.height / 3 + wallpaper.offset
+                        horizontalOffset: -dialog.parent.x
+                        width: overlay.width
+                        height: overlay.height
+                    }
+                },
+                State {
+                    name: "180"
+                    PropertyChanges {
+                        target: wallpaper
+                        verticalOffset: -Screen.height / 3 + wallpaper.offset - (Screen.height-overlay.height)
+                        horizontalOffset: -dialog.parent.x
+                        width: overlay.width
+                        height: overlay.height
+                    }
+                },
+                State {
+                    name: "270"
+                    PropertyChanges {
+                        target: wallpaper
+                        verticalOffset: -Screen.height / 3 - dialog.parent.y
+                        horizontalOffset: -wallpaper.offset - (Screen.width-overlay.height)
+                        width: overlay.height
+                        height: overlay.width
+                    }
+                },
+                State {
+                    name: "90"
+                    PropertyChanges {
+                        target: wallpaper
+                        verticalOffset: -Screen.height / 3 - dialog.parent.y
+                        horizontalOffset: -wallpaper.offset
+                        width: overlay.height
+                        height: overlay.width
+                    }
+                }
+            ]
+        }
+
+        PanelBackground {
+            anchors.fill: parent
+            rotation: 180
+            visible: dialogHeader._backgroundVisible
+        }
+
+        BackgroundItem {
+            id: cancelButton
+            property real preferredWidth: Math.min(cancelLabel.implicitWidth*(reserveExtraContent?1.0:cancelLabel.opacity) + 2*Theme.paddingLarge,
+                                                   _maxButtonSize)
+            height: overlay.height
+            anchors {
+                left: parent.left
+                right: reserveExtraContent ? extraContentPlaceholder.left : acceptButton.left
+            }
+            onClicked: dialog.reject()
+
+            highlighted: pageStack._pageStackIndicator.backIndicatorDown || down
+            Binding {
+                when: dialog.status === PageStatus.Active
+                target: pageStack._pageStackIndicator
+                property: "backIndicatorHighlighted"
+                value: pageStack._pageStackIndicator.backIndicatorDown || cancelButton.down
+            }
+
+            Label {
+                id: cancelLabel
+
+                //% "Cancel"
+                text: qsTrId("components-he-dialog_cancel")
+                color: cancelButton.highlighted ? Theme.highlightColor : Theme.primaryColor
+                x: Theme.paddingLarge
+                width: Math.min(dialogHeader.width - acceptButton.width - x - Theme.paddingMedium, implicitWidth)
+                font {
+                    pixelSize: dialog.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
+                    family: Theme.fontFamilyHeading
+                }
+                anchors.verticalCenter: parent.verticalCenter
+                truncationMode: TruncationMode.Fade
+                opacity: _canGoBack && !dialogHeader._navigatingForward ? 1.0 : 0.0
+                Behavior on opacity { FadeAnimation { } }
+            }
+        }
+        Item {
+            id: extraContentPlaceholder
+            x: cancelButton.preferredWidth
+            width: dialogHeader.width - cancelButton.preferredWidth - acceptButton.width
+            anchors.verticalCenter: parent.verticalCenter
+            opacity: dialogHeader._navigatingBack || dialogHeader._navigatingForward ? 0.0 : 1.0
+            Behavior on opacity { FadeAnimation { } }
+            visible: opacity > 0
+        }
+        BackgroundItem {
+            id: acceptButton
+            onClicked: dialog.accept()
+
+            // This tries to fit in both labels, biased toward showing the acceptText if they would overlap.
+            // When moving back we reveal as much of the cancel text as we can.
+            // Neither button may be larger than _maxButtonSize.
+            // If the accept text is longer than dialog.width/2 then we bias toward the accept text.
+            // If the cancel text is longer than dialog.width/2 then we try to fit it in without clipping the acceptText
+            // If both are less than dialog.width/2 then they both get dialog.width/2
+            width: Math.min(_maxButtonSize,
+                       Math.max(acceptLabel.implicitWidth*(reserveExtraContent?1.0:acceptLabel.opacity) + 2*Theme.paddingLarge,
+                           Math.min(reserveExtraContent ? 0 : dialog.width/2, dialog.width - cancelButton.preferredWidth)))
+
+            height: overlay.height
+            anchors.right: parent.right
+            opacity: !dialogHeader.dialog || dialogHeader.dialog.canAccept ? 1.0 : 0.3
+            Behavior on opacity { FadeAnimation { } }
+
+            highlighted: pageStack._pageStackIndicator.forwardIndicatorDown || down
+            Binding {
+                when: dialog.status === PageStatus.Active
+                target: pageStack._pageStackIndicator
+                property: "forwardIndicatorHighlighted"
+                value: pageStack._pageStackIndicator.forwardIndicatorDown || acceptButton.down
+            }
+
+            Label {
+                id: acceptLabel
+                text: acceptText
+                color: acceptButton.highlighted ? Theme.highlightColor : Theme.primaryColor
+                // Don't allow the label to extend over the page stack indicator
+                width: acceptButton.width - 2*Theme.paddingLarge
+                truncationMode: TruncationMode.Fade
+                font {
+                    pixelSize: dialog.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
+                    family: Theme.fontFamilyHeading
+                }
+                anchors {
+                    right: parent.right
+                    // |text|pad-large|indicator
+                    rightMargin: Theme.paddingLarge
+                    verticalCenter: parent.verticalCenter
+                }
+
+                // TODO: remove rich text format once QTBUG-40161 has been solved
+                textFormat: Text.RichText
+                horizontalAlignment: Qt.AlignRight
+                opacity: dialogHeader._navigatingBack ? 0.0 : 1.0
+                Behavior on opacity { FadeAnimation { } }
+            }
+        }
+    }
+
+    Label {
+        id: titleText
+        y: overlay.height + Theme.paddingMedium
+        x: Theme.paddingLarge
+        width: parent.width - 2 * Theme.paddingLarge
+        font.pixelSize: Theme.fontSizeExtraLarge
+        wrapMode: Text.Wrap
+        color: Theme.highlightColor
+        opacity: text.length > 0 ? 1.0 : 0.0
+        Behavior on opacity { FadeAnimation { } }
+    }
+
+    // for testing
+    function _headerText() {
+        return acceptLabel.text
+    }
+    function _titleText() {
+        return titleText.text
+    }
+}

@@ -1,0 +1,23 @@
+module Sailfish.Pickers
+plugin sailfishcomponentspickersplugin
+AvatarPickerPage 1.0 AvatarPickerPage.qml
+ContentPickerPage 1.0 ContentPickerPage.qml
+DocumentItem 1.0 DocumentItem.qml
+DocumentPickerPage 1.0 DocumentPickerPage.qml
+DocumentModel 1.0 DocumentModel.qml
+ImageModel 1.0 ImageModel.qml
+ImagePickerPage 1.0 ImagePickerPage.qml
+MultiDocumentPickerDialog 1.0 MultiDocumentPickerDialog.qml
+MultiContentPickerDialog 1.0 MultiContentPickerDialog.qml
+MultiImagePickerDialog 1.0 MultiImagePickerDialog.qml
+MultiMusicPickerDialog 1.0 MultiMusicPickerDialog.qml
+MultiVideoPickerDialog 1.0 MultiVideoPickerDialog.qml
+MusicModel 1.0 MusicModel.qml
+MusicPickerPage 1.0 MusicPickerPage.qml
+PickerDialog 1.0 PickerDialog.qml
+PickerPage 1.0 PickerPage.qml
+SelectedContentModel 1.0 SelectedContentModel.qml
+VideoModel 1.0 VideoModel.qml
+ContentModel 1.0 ContentModel.qml
+SelectedContentModel 1.0 SelectedContentModel.qml
+VideoPickerPage 1.0 VideoPickerPage.qml

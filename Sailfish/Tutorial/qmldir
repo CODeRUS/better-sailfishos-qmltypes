@@ -1,0 +1,3 @@
+module Sailfish.Tutorial
+plugin sailfishtutorialplugin
+TutorialEntryPage 1.0 TutorialEntryPage.qml

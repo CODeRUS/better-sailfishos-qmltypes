@@ -1,0 +1,13 @@
+module com.jolla.settings
+plugin jollasettings
+SettingItem 1.0 SettingItem.qml
+SwitchSetting 1.0 SwitchSetting.qml
+SliderSetting 1.0 SliderSetting.qml
+SettingsSectionLink 1.0 SettingsSectionLink.qml
+SettingsPageLink 1.0 SettingsPageLink.qml
+SettingComponentLoader 1.0 SettingComponentLoader.qml
+SettingsPage 1.0 SettingsPage.qml
+FavoritesZone 1.0 FavoritesZone.qml
+FavoriteMenu 1.0 FavoriteMenu.qml
+CoverComponentLoader 1.0 CoverComponentLoader.qml
+CoverSwitchSetting 1.0 CoverSwitchSetting.qml
