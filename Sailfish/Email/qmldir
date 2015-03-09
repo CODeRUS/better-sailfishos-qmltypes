@@ -1,0 +1,4 @@
+module Sailfish.Email
+plugin sailfishemailplugin
+EmailComposerPage 1.1 EmailComposerPage.1.1.qml
+

@@ -1,0 +1,2 @@
+module MeeGo.QOfono
+plugin QOfonoQtDeclarative

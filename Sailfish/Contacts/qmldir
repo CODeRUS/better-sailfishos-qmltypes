@@ -1,0 +1,21 @@
+module Sailfish.Contacts
+plugin sailfishcontactsplugin
+ContactsUtil 1.0 common/common.js
+ContactCard 1.0 ContactCard.qml
+ContactCardPage 1.0 ContactCardPage.qml
+ContactItem 1.0 ContactItem.qml
+ContactBrowser 1.0 ContactBrowser.qml
+ContactBrowserItem 1.0 ContactBrowserItem.qml
+ContactSelectPage 1.0 ContactSelectPage.qml
+ContactSharePage 1.0 ContactSharePage.qml
+ContactsMultiSelectDialog 1.0 ContactsMultiSelectDialog.qml
+FavoriteContactItem 1.0 FavoriteContactItem.qml
+FavoritesBar 1.0 FavoritesBar.qml
+ContactsItemPoolItem 1.0 ContactsItemPoolItem.qml
+ContactPresenceIndicator 1.0 ContactPresenceIndicator.qml
+ContactPresenceUpdate 1.0 ContactPresenceUpdate.qml
+TemporaryContactCardPage 1.0 TemporaryContactCardPage.qml
+RecipientField 1.0 RecipientField.qml
+ContactImportPage 1.0 ContactImportPage.qml
+ContactBluetoothImport 1.0 ContactBluetoothImport.qml
+PresenceDetailsPage 1.0 PresenceDetailsPage.qml

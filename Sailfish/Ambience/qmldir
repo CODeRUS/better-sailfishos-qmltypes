@@ -1,0 +1,3 @@
+module Sailfish.Ambience
+plugin declarativeambience-qt5
+AmbienceColorPicker 1.0 AmbienceColorPicker.qml

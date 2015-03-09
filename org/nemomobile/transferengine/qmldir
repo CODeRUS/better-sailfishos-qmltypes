@@ -1,0 +1,3 @@
+module org.nemomobile.transferengine
+plugin declarativetransferengine
+

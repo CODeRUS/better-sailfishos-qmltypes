@@ -1,0 +1,19 @@
+module com.jolla.settings.system
+plugin systemsettingsplugin
+SoundDialog 1.0 SoundDialog.qml
+Tones 1.0 Tones.qml
+ToneItem 1.0 ToneItem.qml
+CurrentDateSettingDisplay 1.0 CurrentDateSettingDisplay.qml
+CurrentTimeSettingDisplay 1.0 CurrentTimeSettingDisplay.qml
+CurrentTimeZoneSettingDisplay 1.0 CurrentTimeZoneSettingDisplay.qml
+Use24HourClockSettingDisplay 1.0 Use24HourClockSettingDisplay.qml
+SettingDisplay 1.0 SettingDisplay.qml
+DeviceLockInput 1.0 DeviceLockInput.qml
+PinInput 1.0 PinInput.qml
+SimPinInput 1.0 SimPinInput.qml
+SimPinQuery 1.0 SimPinQuery.qml
+SimLockedNotice 1.0 SimLockedNotice.qml
+SimPinQuerySkippedNotice 1.0 SimPinQuerySkippedNotice.qml
+LanguagePickerPage 1.0 LanguagePickerPage.qml
+NetworkAddressField 1.0 NetworkAddressField.qml
+DeviceLockQuery 1.0 DeviceLockQuery.qml

@@ -1,0 +1,2 @@
+module com.jolla.connection
+plugin connectionagentplugin

@@ -1,0 +1,3 @@
+module Sailfish.Vault
+plugin sailfishvaultplugin
+BackupPage 1.0 BackupPage.qml

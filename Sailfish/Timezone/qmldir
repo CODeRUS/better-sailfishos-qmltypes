@@ -1,0 +1,4 @@
+module Sailfish.Timezone
+plugin sailfishtimezoneplugin
+TimezonePicker 1.0 TimezonePicker.qml
+CountryPicker 1.0 CountryPicker.qml
