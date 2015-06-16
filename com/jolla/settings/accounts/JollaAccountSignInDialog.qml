@@ -116,10 +116,10 @@ Dialog {
 
 
         Column {
-            width: parent.width - Theme.paddingLarge*2
+            width: parent.width - Theme.horizontalPageMargin*2
 
             Row {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 spacing: Theme.paddingLarge
                 height: accountIcon.height + spacing
 
@@ -139,7 +139,7 @@ Dialog {
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 height: implicitHeight + Theme.paddingLarge
                 wrapMode: Text.Wrap

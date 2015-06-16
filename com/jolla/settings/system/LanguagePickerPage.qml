@@ -26,7 +26,7 @@ Page {
             onClicked: root.languageClicked(model.name, model.locale)
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width - x*2
                 wrapMode: Text.Wrap

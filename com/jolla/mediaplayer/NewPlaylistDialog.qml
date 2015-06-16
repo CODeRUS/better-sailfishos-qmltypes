@@ -34,7 +34,7 @@ Dialog {
             spacing: Theme.paddingLarge
             DialogHeader {}
             AlbumArt {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 source: albumArtProvider.albumThumbnail(media.album, media.author)
             }
 

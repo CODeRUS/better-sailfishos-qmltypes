@@ -40,12 +40,12 @@ TextSwitch {
     id: root
 
     property alias icon: image
-    rightMargin: image.width + Theme.paddingLarge + Theme.paddingMedium
+    _rightPadding: image.width + Theme.paddingMedium
 
     HighlightImage {
         id: image
         anchors.right: parent.right
-        anchors.rightMargin: Theme.paddingLarge
+        anchors.rightMargin: root.rightMargin
         y: (Theme.itemSizeSmall - height)/2
         highlighted: root.highlighted
         opacity: parent.enabled ? 1.0 : 0.4

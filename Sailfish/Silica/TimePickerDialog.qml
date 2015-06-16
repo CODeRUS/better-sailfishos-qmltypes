@@ -51,6 +51,8 @@ Dialog {
     property date time: new Date(0,0,0, hour, minute)
     property string timeText: timePicker._formatTime()
 
+    allowedOrientations: Orientation.All
+
     Column {
         spacing: 10
         anchors.fill: parent

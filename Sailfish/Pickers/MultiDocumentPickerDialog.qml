@@ -30,6 +30,7 @@ PickerDialog {
             model: documentModel
             contentType: ContentType.Document
             visible: active || documentModel.count > 0
+            _glassOnly: documentPickerDialog._background
 
             onActiveFocusChanged: {
                 if (activeFocus) {
@@ -56,6 +57,7 @@ PickerDialog {
 
         delegate: DocumentItem {
             id: documentItem
+            leftMargin: listView.headerItem.searchFieldLeftMargin
             baseName: Theme.highlightText(documentModel.baseName(model.fileName), documentModel.filter, Theme.highlightColor)
             extension: Theme.highlightText(documentModel.extension(model.fileName), documentModel.filter, Theme.highlightColor)
             selected: model.selected

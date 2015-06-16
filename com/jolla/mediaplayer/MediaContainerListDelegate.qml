@@ -14,8 +14,9 @@ ListItem {
     property alias subtitle: subtitleLabel.text
     property alias subtitleFont: subtitleLabel.font
     property var formatFilter
+    property alias albumArtSize: albumArt.size
 
-    contentHeight: Theme.itemSizeExtraLarge
+    contentHeight: albumArt.size
 
     AlbumArt {
         id: albumArt
@@ -29,7 +30,7 @@ ListItem {
             left: albumArt.right
             leftMargin: Theme.paddingLarge
             right: parent.right
-            rightMargin: Theme.paddingMedium
+            rightMargin: Theme.horizontalPageMargin
             verticalCenter: albumArt.verticalCenter
         }
 
@@ -39,8 +40,10 @@ ListItem {
             font.family: Theme.fontFamilyHeading
             font.pixelSize: Theme.fontSizeMedium
             text: Theme.highlightText(item.title, RegExpHelpers.regExpFromSearchString(formatFilter, false), Theme.highlightColor)
+            textFormat: Text.StyledText
             color: highlighted ? Theme.highlightColor : Theme.primaryColor
             truncationMode: TruncationMode.Fade
+            maximumLineCount: 1
         }
 
         Label {
@@ -50,6 +53,7 @@ ListItem {
             font.pixelSize: Theme.fontSizeSmall
             color: highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
             truncationMode: TruncationMode.Fade
+            maximumLineCount: 1
         }
     }
 }

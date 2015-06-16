@@ -27,6 +27,7 @@ ValueButton {
 
     label: defaultText
     title: getTitle()
+    leftMargin: isPortrait ? Theme.horizontalPageMargin : Theme.paddingLarge
     toneEnabled: toneSettings[enabledProperty]
     value: (title != "" && toneEnabled)
            ? title

@@ -16,6 +16,7 @@ var iconMap = {
 
 var knownServiceUuids = {
     // Listed at https://www.bluetooth.org/Technical/AssignedNumbers/service_discovery.htm
+    "00001000-0000-1000-8000-00805F9B34FB": "SDP",	// Service Discovery
     "00001101-0000-1000-8000-00805F9B34FB": "SPP",	// Serial Port Profile
     "00001103-0000-1000-8000-00805F9B34FB": "DUN",	// Dial-up Networking Profile
     "00001104-0000-1000-8000-00805F9B34FB": "SYNC",	// Synchronization Profile
@@ -63,6 +64,14 @@ var knownServiceUuids = {
     "00001134-0000-1000-8000-00805F9B34FB": "MAP",	// Message Access Profile
     "00001135-0000-1000-8000-00805F9B34FB": "GNSS",	// Global Navigation Satellite System Profile
     "00001136-0000-1000-8000-00805F9B34FB": "GNSS",	// Global Navigation Satellite System Profile
+    "00001137-0000-1000-8000-00805F9B34FB": "3DSP",	// 3D Display
+    "00001138-0000-1000-8000-00805F9B34FB": "3DSP",	// 3D Glasses
+    "00001139-0000-1000-8000-00805F9B34FB": "3DSP",	// 3D Synchronization
+    "0000113A-0000-1000-8000-00805F9B34FB": "MPS",	// Multi-Profile Specification
+    "0000113B-0000-1000-8000-00805F9B34FB": "MPS",	// Multi-Profile Specification
+    "0000113C-0000-1000-8000-00805F9B34FB": "CTN",	// Calendar Tasks and Notes
+    "0000113D-0000-1000-8000-00805F9B34FB": "CTN",	// Calendar Tasks and Notes
+    "0000113E-0000-1000-8000-00805F9B34FB": "CTN",	// Calendar Tasks and Notes
     "00001200-0000-1000-8000-00805F9B34FB": "DID",	// Device Identification
     "00001205-0000-1000-8000-00805F9B34FB": "ESDP",	// Enhanced Service Discovery Profile
     "00001206-0000-1000-8000-00805F9B34FB": "ESDP",	// Enhanced Service Discovery Profile

@@ -543,3 +543,31 @@ function propertyAddressValue(propertyType, property)
 
     return ""
 }
+
+function presenceDescription(presenceState) {
+    switch (presenceState) {
+        //: Presence state: available
+        //% "Available"
+        case Contacts.Person.PresenceAvailable: return qsTrId("components_contacts-la-presence_available")
+        //: Presence state: away
+        //% "Away"
+        case Contacts.Person.PresenceAway: return qsTrId("components_contacts-la-presence_away")
+        //: Presence state: extended away
+        //% "Extended away"
+        case Contacts.Person.PresenceExtendedAway: return qsTrId("components_contacts-la-presence_extended_away")
+        //: Presence state: busy
+        //% "Busy"
+        case Contacts.Person.PresenceBusy: return qsTrId("components_contacts-la-presence_busy")
+        //: Presence state: hidden
+        //% "Hidden"
+        case Contacts.Person.PresenceHidden: return qsTrId("components_contacts-la-presence_hidden")
+        //: Presence state: offline
+        //% "Offline"
+        case Contacts.Person.PresenceOffline: return qsTrId("components_contacts-la-presence_offline")
+        //: Presence state: unknown
+        //% "Unknown"
+        case Contacts.Person.PresenceUnknown: return qsTrId("components_contacts-la-presence_unknown")
+    }
+    return '<Unknown:' + presenceState + '>'
+}
+

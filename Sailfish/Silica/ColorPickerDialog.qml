@@ -70,7 +70,7 @@ Dialog {
         ColorPicker {
             id: picker
             anchors.top: header.bottom
-
+            columns: Math.floor(width / Theme.itemSizeHuge)
             isPortrait: colorDialog.isPortrait
             onColorChanged: {
                 colorDialog._didSelectColor = true

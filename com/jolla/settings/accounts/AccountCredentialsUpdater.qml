@@ -268,13 +268,12 @@ Item {
             }
 
             Column {
-                x: Theme.paddingLarge
                 anchors {
                     top: header.bottom
                     left: parent.left
-                    leftMargin: Theme.paddingLarge
+                    leftMargin: Theme.horizontalPageMargin
                     right: parent.right
-                    rightMargin: Theme.paddingLarge
+                    rightMargin: Theme.horizontalPageMargin
                 }
                 spacing: Theme.paddingLarge
 
@@ -313,7 +312,7 @@ Item {
                             left: icon.right
                             leftMargin: Theme.paddingLarge
                             right: parent.right
-                            rightMargin: Theme.paddingLarge
+                            rightMargin: Theme.horizontalPageMargin
                             verticalCenter: parent.verticalCenter
                             verticalCenterOffset: -implicitHeight/2
                         }

@@ -30,9 +30,9 @@ SilicaListView {
             text: qsTrId(displayName)
             color: backgroundItem.highlighted ? Theme.highlightColor : Theme.primaryColor
             truncationMode: TruncationMode.Fade
-            x: Theme.paddingLarge
+            x: Theme.horizontalPageMargin
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.min(implicitWidth, parent.width - 2*Theme.paddingLarge)
+            width: Math.min(implicitWidth, parent.width - 2*Theme.horizontalPageMargin)
         }
         SecondaryLabel {
             text: userName
@@ -42,7 +42,7 @@ SilicaListView {
                 left: displayNameLabel.right
                 leftMargin: Theme.paddingSmall
                 right: parent.right
-                rightMargin: Theme.paddingLarge
+                rightMargin: Theme.horizontalPageMargin
                 verticalCenter: parent.verticalCenter
             }
             visible: text.length > 0

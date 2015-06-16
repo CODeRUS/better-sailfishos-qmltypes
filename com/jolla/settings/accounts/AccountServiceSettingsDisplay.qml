@@ -27,6 +27,9 @@ Column {
         model: serviceModel
 
         IconTextSwitch {
+            // this is a workaround for future-proofing, we want to keep facebook-im service
+            // around but make sure it is never enabled
+            visible: model.serviceName !== "facebook-im"
             icon.source: model.iconName
             text: model.displayName
             description: model.description

@@ -43,7 +43,7 @@ MouseArea {
         }
     }
 
-    height: valueText !== "" ? Theme.itemSizeExtraLarge : label !== "" ? Theme.itemSizeMedium : Theme.itemSizeSmall
+    height: (handleVisible || valueText !== "") ? Theme.itemSizeExtraLarge : label !== "" ? Theme.itemSizeMedium : Theme.itemSizeSmall
 
     onWidthChanged: updateWidth()
     onLeftMarginChanged: updateWidth()
@@ -148,10 +148,7 @@ MouseArea {
         width: slider._grooveWidth + 2*Theme.paddingMedium
         height: Theme.paddingMedium
         onWidthChanged: { _tracking = true; _updateHighlightToValue() }
-        anchors {
-            top: parent.verticalCenter
-            topMargin: Theme.paddingLarge
-        }
+        anchors.top: parent.verticalCenter
 
         ShaderEffect {
             property variant src: background
@@ -230,7 +227,10 @@ MouseArea {
         height: Theme.itemSizeMedium
         radius: 0.17
         falloffRadius: 0.17
-        anchors.verticalCenter: parent.verticalCenter
+        anchors {
+            verticalCenter: parent.verticalCenter
+            verticalCenterOffset: -parent.height / 4
+        }
         visible: handleVisible
         color: slider.highlighted ? Theme.highlightColor : Theme.primaryColor
         Behavior on x {
@@ -243,7 +243,7 @@ MouseArea {
         id: labelText
         visible: text.length
         font.pixelSize: Theme.fontSizeSmall
-        color: slider.highlighted ? Qt.hsla(slider.value, slider.saturation, slider.lightness, 1) : Theme.secondaryColor
+        color: slider.highlighted ? Theme.highlightColor : Theme.secondaryColor
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: background.verticalCenter
         anchors.topMargin: Theme.paddingMedium

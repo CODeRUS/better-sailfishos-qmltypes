@@ -26,14 +26,16 @@ PickerPage {
                 text: categoryList.model.category(index)
                 color: down ? Theme.highlightColor : Theme.primaryColor
                 anchors.verticalCenter: parent.verticalCenter
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
+                width: parent.width - x*2
             }
 
             onClicked: {
                 var subview = pageStack.push(Qt.resolvedUrl(model.subview), {
                     title: contentPicker.title,
                     _lastAppPage: pageStack.previousPage(contentPicker),
-                    _animationDuration: contentPicker._animationDuration
+                    _animationDuration: contentPicker._animationDuration,
+                    _background: contentPicker._background
                 }, pageStack._transitionDuration === 0 ? PageStackAction.Immediate : PageStackAction.Animated);
 
                 subview.selectedContentChanged.connect(function() {

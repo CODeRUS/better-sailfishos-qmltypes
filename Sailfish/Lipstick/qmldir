@@ -5,3 +5,4 @@ SystemDialogLayout 1.0 SystemDialogLayout.qml
 SystemDialogButton 1.0 SystemDialogButton.qml
 LauncherIcon 1.0 LauncherIcon.qml
 LauncherGridItem 1.0 LauncherGridItem.qml
+PressEffect 1.0 PressEffect.qml

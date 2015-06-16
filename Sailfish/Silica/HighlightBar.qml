@@ -91,6 +91,17 @@ Rectangle {
                            highlightItem, 'NonGraphicalFeedback');
     }
 
+    Connections {
+        target: highlightedItem
+        onWidthChanged: highlight(highlightedItem)
+        onHeightChanged: highlight(highlightedItem)
+    }
+
+    Connections {
+        target: parent
+        onHeightChanged: highlight(highlightedItem)
+    }
+
     Behavior on opacity { FadeAnimation { duration: highlightItem.opacityAnimationDuration } }
     Behavior on y {
         id: animateY

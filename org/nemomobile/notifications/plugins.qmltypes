@@ -12,10 +12,22 @@ Module {
         prototype: "QObject"
         exports: ["org.nemomobile.notifications/Notification 1.0"]
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Urgency"
+            values: {
+                "Low": 0,
+                "Normal": 1,
+                "Critical": 2
+            }
+        }
         Property { name: "category"; type: "string" }
+        Property { name: "appName"; type: "string" }
         Property { name: "replacesId"; type: "uint" }
+        Property { name: "appIcon"; type: "string" }
         Property { name: "summary"; type: "string" }
         Property { name: "body"; type: "string" }
+        Property { name: "urgency"; type: "Urgency" }
+        Property { name: "expireTimeout"; type: "int" }
         Property { name: "timestamp"; type: "QDateTime" }
         Property { name: "previewSummary"; type: "string" }
         Property { name: "previewBody"; type: "string" }
@@ -25,6 +37,8 @@ Module {
         Property { name: "remoteDBusCallInterface"; type: "string" }
         Property { name: "remoteDBusCallMethodName"; type: "string" }
         Property { name: "remoteDBusCallArguments"; type: "QVariantList" }
+        Property { name: "remoteActions"; type: "QVariantList" }
+        Property { name: "origin"; type: "string" }
         Signal { name: "clicked" }
         Signal {
             name: "closed"
@@ -34,5 +48,31 @@ Module {
         Method { name: "publish" }
         Method { name: "close" }
         Method { name: "notifications"; type: "QList<QObject*>" }
+        Method {
+            name: "notifications"
+            type: "QList<QObject*>"
+            Parameter { name: "owner"; type: "string" }
+        }
+        Method {
+            name: "remoteAction"
+            type: "QVariant"
+            Parameter { name: "name"; type: "string" }
+            Parameter { name: "displayName"; type: "string" }
+            Parameter { name: "service"; type: "string" }
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "iface"; type: "string" }
+            Parameter { name: "method"; type: "string" }
+            Parameter { name: "arguments"; type: "QVariantList" }
+        }
+        Method {
+            name: "remoteAction"
+            type: "QVariant"
+            Parameter { name: "name"; type: "string" }
+            Parameter { name: "displayName"; type: "string" }
+            Parameter { name: "service"; type: "string" }
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "iface"; type: "string" }
+            Parameter { name: "method"; type: "string" }
+        }
     }
 }

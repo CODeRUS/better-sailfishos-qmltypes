@@ -8,29 +8,6 @@ import QtQuick.tooling 1.1
 
 Module {
     Component {
-        name: "DeclarativeContentAction"
-        prototype: "QObject"
-        exports: ["Sailfish.TransferEngine/ContentAction 1.0"]
-        isCreatable: false
-        isSingleton: true
-        exportMetaObjectRevisions: [0]
-        Enum {
-            name: "Error"
-            values: {
-                "NoError": 0,
-                "FileTypeNotSupported": 1,
-                "FileDoesNotExist": 2,
-                "InvalidUrl": 3
-            }
-        }
-        Property { name: "error"; type: "Error"; isReadonly: true }
-        Method {
-            name: "trigger"
-            type: "bool"
-            Parameter { name: "url"; type: "QUrl" }
-        }
-    }
-    Component {
         name: "DeclarativeShare"
         defaultProperty: "data"
         prototype: "QQuickItem"

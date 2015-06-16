@@ -20,7 +20,7 @@ Module {
         }
         Signal {
             name: "process"
-            Parameter { name: "func"; type: "string" }
+            Parameter { name: "func"; type: "QVariant" }
             Parameter { name: "args"; type: "QVariant" }
             Parameter { name: "callback"; type: "QJSValue"; isPointer: true }
         }
@@ -55,29 +55,35 @@ Module {
         }
         Method {
             name: "call"
-            Parameter { name: "func"; type: "string" }
+            Parameter { name: "func"; type: "QVariant" }
             Parameter { name: "args"; type: "QVariant" }
             Parameter { name: "callback"; type: "QJSValue" }
         }
         Method {
             name: "call"
-            Parameter { name: "func"; type: "string" }
+            Parameter { name: "func"; type: "QVariant" }
             Parameter { name: "args"; type: "QVariant" }
         }
         Method {
             name: "call"
-            Parameter { name: "func"; type: "string" }
+            Parameter { name: "func"; type: "QVariant" }
         }
         Method {
             name: "call_sync"
             type: "QVariant"
-            Parameter { name: "func"; type: "string" }
+            Parameter { name: "func"; type: "QVariant" }
             Parameter { name: "args"; type: "QVariant" }
         }
         Method {
             name: "call_sync"
             type: "QVariant"
-            Parameter { name: "func"; type: "string" }
+            Parameter { name: "func"; type: "QVariant" }
+        }
+        Method {
+            name: "getattr"
+            type: "QVariant"
+            Parameter { name: "obj"; type: "QVariant" }
+            Parameter { name: "attr"; type: "string" }
         }
         Method { name: "pluginVersion"; type: "string" }
         Method { name: "pythonVersion"; type: "string" }
@@ -98,6 +104,12 @@ Module {
         name: "QPython13"
         prototype: "QPython"
         exports: ["io.thp.pyotherside/Python 1.3"]
+        exportMetaObjectRevisions: [0]
+    }
+    Component {
+        name: "QPython14"
+        prototype: "QPython"
+        exports: ["io.thp.pyotherside/Python 1.4"]
         exportMetaObjectRevisions: [0]
     }
 }

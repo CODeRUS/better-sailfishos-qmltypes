@@ -33,7 +33,6 @@
 ****************************************************************************************/
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Silica.theme 1.0
 
 BackgroundItem {
     id: root
@@ -45,7 +44,9 @@ BackgroundItem {
     property alias labelColor: titleText.color
     property alias valueColor: valueText.color
 
-    property real labelMargin: Theme.paddingLarge
+    property alias labelMargin: root.leftMargin
+    property real leftMargin: Theme.horizontalPageMargin
+    property real rightMargin: Theme.horizontalPageMargin
 
     property int _duration: 200
     property Item _descriptionLabel
@@ -63,7 +64,7 @@ BackgroundItem {
 
         anchors {
             left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter
-            leftMargin: root.labelMargin; rightMargin: Theme.paddingLarge
+            leftMargin: root.leftMargin; rightMargin: root.rightMargin
         }
         Flow {
             id: flow

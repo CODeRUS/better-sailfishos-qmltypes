@@ -89,7 +89,7 @@ Item {
         id: recipientsSummary
 
         width: parent.width
-        height: Theme.itemSizeMedium
+        height: Screen.sizeCategory >= Screen.Large ? Theme.itemSizeLarge : Theme.itemSizeMedium
         opacity: !_editing ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation {} }
         visible: opacity > 0.0
@@ -107,9 +107,9 @@ Item {
             id: summaryLabel
             anchors {
                 left: parent.left
-                leftMargin: Theme.paddingLarge
+                leftMargin: Theme.horizontalPageMargin
                 right: parent.right
-                rightMargin: Theme.paddingLarge
+                rightMargin: Theme.horizontalPageMargin
                 top: parent.top
                 topMargin: Theme.paddingSmall
             }

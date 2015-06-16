@@ -10,8 +10,8 @@ MouseArea {
     property bool highlighted: down
     property bool active
 
-    property real leftMargin: Theme.paddingLarge
-    property real rightMargin: Theme.paddingLarge
+    property real leftMargin: isPortrait ? Theme.horizontalPageMargin : Theme.paddingLarge
+    property real rightMargin: Theme.horizontalPageMargin
 
     height: text != "" ? Theme.itemSizeMedium : 0
     width: parent.width

@@ -30,6 +30,7 @@ PickerDialog {
             model: musicModel
             contentType: ContentType.Music
             visible: active || musicModel.count > 0
+            _glassOnly: musicPickerDialog._background
 
             onActiveFocusChanged: {
                 if (activeFocus) {

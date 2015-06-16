@@ -23,6 +23,7 @@ PickerDialog {
             model: imageModel
             contentType: ContentType.Image
             visible: active || imageModel.count > 0
+            _glassOnly: imagePickerDialog._background
 
             onActiveFocusChanged: {
                 if (activeFocus) {

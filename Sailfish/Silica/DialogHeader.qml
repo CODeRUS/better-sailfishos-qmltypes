@@ -49,6 +49,8 @@ BackgroundItem {
     property alias extraContent: extraContentPlaceholder
     property bool reserveExtraContent: extraContentPlaceholder.children.length > 0
     property real spacing: Theme.paddingLarge
+    property real leftMargin: Theme.horizontalPageMargin
+    property real rightMargin: Theme.horizontalPageMargin
 
     default property alias _children: acceptButton.data
     property int _depth: dialog && dialog._depth ? dialog._depth+2 : 1
@@ -266,8 +268,8 @@ BackgroundItem {
     Label {
         id: titleText
         y: overlay.height + Theme.paddingMedium
-        x: Theme.paddingLarge
-        width: parent.width - 2 * Theme.paddingLarge
+        x: leftMargin
+        width: parent.width - leftMargin - rightMargin
         font.pixelSize: Theme.fontSizeExtraLarge
         wrapMode: Text.Wrap
         color: Theme.highlightColor

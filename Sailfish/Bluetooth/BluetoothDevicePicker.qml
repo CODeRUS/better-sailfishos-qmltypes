@@ -17,6 +17,7 @@ Column {
 
     property bool _prevDiscoveryValue
     property bool _showDiscoveryProgress
+    property bool _showPairedDevicesHeader: showPairedDevicesHeader && !_showDiscoveryProgress && pairedDevices.visibleItemCount > 0
     property bool _showOtherDevicesHeader: nearbyDevices.visibleItemCount && pairedDevices.visibleItemCount
 
     signal deviceClicked(string address)
@@ -32,18 +33,20 @@ Column {
                 || BluetoothProfiles.profileMatchesDeviceProperties(preferredProfileHint, profiles, classOfDevice)
     }
 
+    width: parent.width
+
     Column {
         width: parent.width
         height: root._showDiscoveryProgress
                 ? discoveryProgressBar.height
-                : (pairedDevicesHeader.visible ? pairedDevicesHeader.height : 0)
+                : (root._showPairedDevicesHeader ? pairedDevicesHeader.height : 0)
         clip: true
 
         Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
 
         SectionHeader {
             id: pairedDevicesHeader
-            visible: root.showPairedDevicesHeader && !root._showDiscoveryProgress && pairedDevices.visibleItemCount > 0
+            visible: root._showPairedDevicesHeader
 
             //% "Paired devices"
             text: qsTrId("components_bluetooth-la-paired-devices")
@@ -105,13 +108,14 @@ Column {
                                                     || model.inputConnectionState === KnownDevicesModel.InputConnecting
 
                 property bool matchesProfileHint: root._matchesProfileHint(model.profiles, model.classOfDevice)
-                property bool useHighlight: highlightSelectedDevice && model.address === root.selectedDevice
-
-                visible: model.paired && root.excludedDevices.indexOf(model.address.toUpperCase()) < 0
+                property bool useHighlight: highlighted || (highlightSelectedDevice && model.address === root.selectedDevice)
+                property bool display: model.paired && root.excludedDevices.indexOf(model.address.toUpperCase()) < 0
 
                 function _removePairing() {
                     adapter.removePairing(model.address)
                 }
+
+                visible: display
 
                 menu: Component {
                     ContextMenu {
@@ -139,8 +143,8 @@ Column {
                     }
                 }
 
-                onVisibleChanged: {
-                    pairedDevices._hiddenItemsCount += (visible ? -1: 1)
+                onDisplayChanged: {
+                    pairedDevices._hiddenItemsCount += (display ? -1: 1)
                 }
 
                 onClicked: {
@@ -151,9 +155,9 @@ Column {
 
                 Image {
                     id: icon
-                    x: Theme.paddingLarge
+                    x: Theme.horizontalPageMargin
                     anchors.verticalCenter: parent.verticalCenter
-                    source: "image://theme/" + model.jollaIcon
+                    source: "image://theme/" + model.jollaIcon + (pairedDelegate.useHighlight ? "?" + Theme.highlightColor : "")
                     opacity: pairedDelegate.matchesProfileHint || pairedDelegate.useHighlight ? 1 : 0.5
                 }
 
@@ -169,7 +173,7 @@ Column {
                        - (showConnectionStatus ? connectedLabel.implicitHeight/2 : 0)
                     text: model.alias.length ? model.alias : model.address
                     truncationMode: TruncationMode.Fade
-                    color: (pairedDelegate.highlighted || pairedDelegate.useHighlight)
+                    color: pairedDelegate.useHighlight
                            ? Theme.highlightColor
                            : Theme.rgba(Theme.primaryColor, pairedDelegate.matchesProfileHint ? 1.0 : 0.5)
 
@@ -186,7 +190,7 @@ Column {
                     }
                     font.pixelSize: Theme.fontSizeExtraSmall
                     opacity: showConnectionStatus ? 1.0 : 0.0
-                    color: (pairedDelegate.highlighted || pairedDelegate.useHighlight)
+                    color: pairedDelegate.useHighlight
                            ? Theme.secondaryHighlightColor
                            : Theme.secondaryColor
 
@@ -221,11 +225,11 @@ Column {
                     id: trustedIcon
                     anchors {
                         right: parent.right
-                        rightMargin: Theme.paddingLarge
+                        rightMargin: Theme.horizontalPageMargin
                         verticalCenter: icon.verticalCenter
                     }
                     visible: model.trusted
-                    source: "image://theme/icon-s-certificates"
+                    source: "image://theme/icon-s-certificates" + (pairedDelegate.useHighlight ? "?" + Theme.highlightColor : "")
                     opacity: icon.opacity
                 }
             }
@@ -271,20 +275,21 @@ Column {
                 id: nearbyDeviceDelegate
 
                 property bool matchesProfileHint: root._matchesProfileHint(model.profiles, model.classOfDevice)
-                property bool useHighlight: highlightSelectedDevice && model.address === root.selectedDevice
+                property bool useHighlight: highlighted || (highlightSelectedDevice && model.address === root.selectedDevice)
+                property bool display: !model.paired && root.excludedDevices.indexOf(model.address.toUpperCase()) < 0
 
                 width: root.width
-                visible: !model.paired && root.excludedDevices.indexOf(model.address.toUpperCase()) < 0
+                visible: display
 
-                onVisibleChanged: {
-                    nearbyDevices._hiddenItemsCount += (visible ? -1: 1)
+                onDisplayChanged: {
+                    nearbyDevices._hiddenItemsCount += (display ? -1: 1)
                 }
 
                 Image {
                     id: nearbyDeviceIcon
-                    x: Theme.paddingLarge
+                    x: Theme.horizontalPageMargin
                     anchors.verticalCenter: parent.verticalCenter
-                    source: "image://theme/" + model.jollaIcon
+                    source: "image://theme/" + model.jollaIcon + (nearbyDeviceDelegate.useHighlight ? "?" + Theme.highlightColor : "")
                     opacity: nearbyDeviceDelegate.matchesProfileHint || nearbyDeviceDelegate.useHighlight ? 1 : 0.5
                 }
 
@@ -293,12 +298,12 @@ Column {
                         left: nearbyDeviceIcon.right
                         leftMargin: Theme.paddingMedium
                         right: parent.right
-                        rightMargin: Theme.paddingLarge
+                        rightMargin: Theme.horizontalPageMargin
                         verticalCenter: parent.verticalCenter
                     }
                     text: model.alias.length ? model.alias : model.address
                     truncationMode: TruncationMode.Fade
-                    color: (nearbyDeviceDelegate.highlighted || nearbyDeviceDelegate.useHighlight)
+                    color: nearbyDeviceDelegate.useHighlight
                            ? Theme.highlightColor
                            : Theme.rgba(Theme.primaryColor, nearbyDeviceDelegate.matchesProfileHint ? 1.0 : 0.5)
                 }

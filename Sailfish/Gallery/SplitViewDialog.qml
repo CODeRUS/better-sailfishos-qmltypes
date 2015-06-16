@@ -14,6 +14,8 @@ Dialog {
     property alias foregroundItem: drawer.foregroundItem
     property alias foreground: drawer.foreground
 
+    property alias _foreground: drawer.foreground
+
     default property alias data: drawer.data
 
     backNavigation: drawer.open
@@ -21,7 +23,7 @@ Dialog {
 
     Drawer {
         id: drawer
-        dock: dialog.orientation == Orientation.Portrait ? Dock.Top: Dock.Left
+        dock: dialog.orientation & Orientation.PortraitMask ? Dock.Top: Dock.Left
         hideOnMinimize: true
         anchors.fill: parent
     }

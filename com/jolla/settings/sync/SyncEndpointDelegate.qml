@@ -60,7 +60,7 @@ Item {
 
     Image {
         id: iconImage
-        x: Theme.paddingMedium
+        x: Theme.horizontalPageMargin
         y: parent.height/2 - height/2
         source: root.icon
     }
@@ -90,7 +90,7 @@ Item {
             top: deviceNameLabel.bottom
             left: deviceNameLabel.left
             right: busySpinner.running ? busySpinner.left : parent.right
-            rightMargin: Theme.paddingLarge
+            rightMargin: busySpinner.running ? Theme.paddingMedium : Theme.horizontalPageMargin
         }
         truncationMode: TruncationMode.Fade
         color: root.status == SyncEndpoint.Failed ? Theme.highlightColor : Theme.secondaryColor
@@ -104,7 +104,7 @@ Item {
         anchors {
             verticalCenter: iconImage.verticalCenter
             right: parent.right
-            rightMargin: Theme.paddingLarge
+            rightMargin: Theme.horizontalPageMargin
         }
     }
 }

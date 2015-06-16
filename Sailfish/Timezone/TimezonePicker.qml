@@ -19,13 +19,26 @@ Page {
             width: view.width
 
             PageHeader {
+                id: pageHeader
+
                 //% "Time zone"
                 title: qsTrId("components_timezone-he-time_zone")
             }
 
+            Item {
+                id: searchFieldPlaceholder
+                width: parent.width
+                height: page.isLandscape ? 0 : searchField.height
+            }
+
             SearchField {
                 id: searchField
-                width: view.width
+
+                parent: page.isLandscape ? pageHeader.extraContent : searchFieldPlaceholder
+
+                width: parent.width
+                anchors.verticalCenter: parent.verticalCenter
+
                 focus: true
                 Binding {
                     target: view.model
@@ -51,9 +64,8 @@ Page {
             onClicked: page.timezoneClicked(model.name)
             Label {
                 id: countryLabel
+                x: Theme.horizontalPageMargin
                 anchors {
-                    left: parent.left
-                    leftMargin: Theme.paddingLarge
                     verticalCenter: parent.verticalCenter
                     verticalCenterOffset: -subLabel.implicitHeight / 2
                 }
@@ -63,11 +75,9 @@ Page {
             }
             Label {
                 id: subLabel
-                anchors {
-                    left: parent.left
-                    leftMargin: Theme.paddingLarge
-                    top: countryLabel.bottom
-                }
+                x: Theme.horizontalPageMargin
+                anchors.top: countryLabel.bottom
+                textFormat: Text.StyledText
                 text: model.offsetWithDstOffset + " " + Theme.highlightText(model.city, view.model.filter, Theme.highlightColor)
                 font.pixelSize: Theme.fontSizeSmall
                 color: background.highlight ? Theme.highlightColor : Theme.secondaryColor

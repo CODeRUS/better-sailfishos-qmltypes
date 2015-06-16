@@ -50,7 +50,7 @@ Rectangle {
     anchors.bottom: parent ? parent.bottom : undefined
     color: Theme.primaryColor
     opacity: timer.moving || timer.running ? 1.0 : 0.0
-    visible: flickable.contentWidth >= flickable.width
+    visible: flickable.contentWidth > flickable.width
     Behavior on opacity { FadeAnimation { duration: 400 } }
     x: (flickable.contentX - flickable.originX) * _sizeRatio
 

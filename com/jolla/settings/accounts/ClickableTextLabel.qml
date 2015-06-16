@@ -9,6 +9,7 @@ Label {
     color: mouseArea.pressed && mouseArea.containsMouse ? Theme.highlightColor : Theme.primaryColor
     width: parent.width
     wrapMode: Text.Wrap
+    textFormat: Text.StyledText
     height: implicitHeight
 
     signal clicked

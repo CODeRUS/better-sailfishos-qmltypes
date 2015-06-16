@@ -5,7 +5,6 @@ import org.nemomobile.configuration 1.0
 
 Column {
     id: root
-    width: screen.width
     spacing: Theme.paddingLarge
 
     property Item _menu
@@ -29,8 +28,9 @@ Column {
 
     Grid {
         id: gridFavorites
-        columns: 4
-        width: root.width
+        columns: Math.floor(width / Theme.itemSizeExtraLarge)
+        x: Theme.horizontalPageMargin - Theme.paddingLarge
+        width: root.width - 2*x
 
         Repeater {
             model: FavoritesModel { filter: "grid_favorites" }
@@ -42,7 +42,7 @@ Column {
                 width: gridLoader.width
                 SettingComponentLoader {
                     id: gridLoader
-                    width: root.width / 4
+                    width: gridFavorites.width / gridFavorites.columns
                     height: width
                     settingsObject: model.object
                     gridMode: true

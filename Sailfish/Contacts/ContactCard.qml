@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.contacts 1.0
 import org.nemomobile.dbus 1.0
+import MeeGo.QOfono 0.2
 import "common/common.js" as CommonJs
 import "contactcard/contactcardmodelfactory.js" as ModelFactory
 import "contactcard"
@@ -12,6 +13,8 @@ SilicaFlickable {
     property Person contact
     property string activeDetail
     property bool readOnly
+    property bool hidePhoneActions: ofonoManager.modems.length < 1
+    property bool disablePhoneActions: !ofonoSimManager.present
 
     signal contactModified
 
@@ -122,6 +125,8 @@ SilicaFlickable {
             detailTypeValue: detailsLabel
             detailValue: detailsValue
             detailData: detailsData
+            hidePhoneActions: root.hidePhoneActions
+            disablePhoneActions: root.disablePhoneActions
 
             activationProgress: details._activationProgress
 
@@ -243,6 +248,15 @@ SilicaFlickable {
         function openAddress(street, city, region, zipcode, country) {
             call('openAddress', [street, city, region, zipcode, country])
         }
+    }
+
+    OfonoManager {
+        id: ofonoManager
+    }
+
+    OfonoSimManager {
+        id: ofonoSimManager
+        modemPath: ofonoManager.defaultModem
     }
 
     VerticalScrollDecorator {}

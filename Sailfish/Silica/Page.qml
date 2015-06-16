@@ -131,7 +131,8 @@ MouseArea {
     property int __silica_page
 
     visible: false
-    anchors.centerIn: parent
+    // This unusual binding avoids a warning when the page is destroyed.
+    anchors.centerIn: page ? parent : null
 
     width: isPortrait ? _horizontalDimension : _verticalDimension
     height: isPortrait ? _verticalDimension : _horizontalDimension

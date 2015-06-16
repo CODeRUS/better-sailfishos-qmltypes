@@ -9,6 +9,8 @@ BackgroundItem {
     property alias text: fieldValue.text
     property alias readOnly: fieldValue.readOnly
     property alias placeholderText: fieldValue.placeholderText
+    property alias acceptableInput: fieldValue.acceptableInput
+    property alias validator: fieldValue.validator
     property bool wantHighlight: readOnly && (pressed || fieldValue.focus)
     property bool submitOnDefocus: false
 
@@ -23,7 +25,7 @@ BackgroundItem {
         source: networkAddressField.icon + (networkAddressField.wantHighlight ? ("?" + Theme.highlightColor) : "")
         anchors {
             left: parent.left
-            leftMargin: Theme.paddingMedium
+            leftMargin: Theme.horizontalPageMargin - Theme.paddingMedium
             verticalCenter: parent.verticalCenter
         }
 
@@ -42,7 +44,19 @@ BackgroundItem {
         }
 
         enabled: !readOnly
-        color: networkAddressField.wantHighlight ? Theme.highlightColor : Theme.primaryColor
+        color: {
+            if (!focus && text != '' && !acceptableInput) {
+                // Only if the user has entered something, and the
+                // input is not valid, highlight with warning color
+                // (do not highlight when empty, to avoid a short
+                // flash of the warning color when the view loads)
+                return "#ff4d4d" // from components/private/TextBase.qml
+            } else if (focus || networkAddressField.wantHighlight) {
+                return Theme.highlightColor
+            } else {
+                return Theme.primaryColor
+            }
+        }
 
         EnterKey.onClicked: focus = false
 

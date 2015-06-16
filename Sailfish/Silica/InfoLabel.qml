@@ -42,7 +42,7 @@ Label {
         pixelSize: Theme.fontSizeExtraLarge
         family: Theme.fontFamilyHeading
     }
-    x: Theme.paddingLarge
-    width: parent.width - 2*Theme.paddingLarge
+    x: Theme.horizontalPageMargin
+    width: parent.width - 2*x
     color: Theme.rgba(Theme.highlightColor, 0.6)
 }

@@ -400,6 +400,7 @@ Module {
             }
         }
         Property { name: "automaticSyncEnabled"; type: "bool" }
+        Property { name: "syncExternallyEnabled"; type: "bool" }
         Property { name: "pastSyncPeriod"; type: "PastSyncPeriod" }
         Property { name: "direction"; type: "Direction" }
         Property { name: "schedule"; type: "AccountSyncSchedule"; isPointer: true }
@@ -438,6 +439,7 @@ Module {
         Property { name: "dailySyncTime"; type: "QTime"; isReadonly: true }
         Property { name: "interval"; type: "Interval"; isReadonly: true }
         Property { name: "peakScheduleEnabled"; type: "bool" }
+        Property { name: "syncExternallyDuringPeak"; type: "bool" }
         Property { name: "peakStartTime"; type: "QTime"; isReadonly: true }
         Property { name: "peakEndTime"; type: "QTime"; isReadonly: true }
         Property { name: "peakInterval"; type: "Interval"; isReadonly: true }

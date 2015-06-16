@@ -20,20 +20,9 @@ Page {
             topMargin: Theme.itemSizeLarge
             bottom: parent.bottom
         }
-        contentHeight: skipButton.y + skipButton.height + Theme.paddingLarge
 
-        // Anchor the buttons section at the bottom of the screen or below the image depending on
-        // the screen space available.
-        function _positionBottomSection() {
-            var fullContentHeight = view.y + view.height + addAccountItem.height + skipButton.height + Theme.paddingLarge*2
-            skipButton.anchors.topMargin = fullContentHeight < flickable.height
-                    ? (flickable.height - fullContentHeight + Theme.paddingLarge)
-                    : Theme.paddingLarge
-        }
-
-        Component.onCompleted: {
-            _positionBottomSection()
-        }
+        property int baseHeight: view.height + addAccountItem.height + image.height + skipButton.height + 2*Theme.paddingLarge
+        contentHeight: Math.max(baseHeight, height)
 
         AccountsListView {
             id: view
@@ -41,14 +30,11 @@ Page {
             height: ((count-1) * Theme.itemSizeMedium) + headerItem.height  // count-1 to omit jolla account (we know it has been created at this point)
             interactive: false
             _hideJollaAccount: true
-            onHeightChanged: {
-                flickable._positionBottomSection()
-            }
             header: Column {
                 width: root.width
 
                 Label {
-                    x: Theme.paddingLarge
+                    x: Theme.horizontalPageMargin
                     width: parent.width - x*2
                     height: implicitHeight + Theme.paddingLarge
                     wrapMode: Text.WordWrap
@@ -60,7 +46,7 @@ Page {
                     text: qsTrId("startupwizard-he-get_your_content")
                 }
                 Label {
-                    x: Theme.paddingLarge
+                    x: Theme.horizontalPageMargin
                     width: parent.width - x*2
                     height: implicitHeight + Theme.paddingLarge
                     wrapMode: Text.WordWrap
@@ -83,7 +69,7 @@ Page {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
-                    leftMargin: Theme.paddingLarge
+                    leftMargin: Theme.horizontalPageMargin
                 }
                 source: "image://theme/icon-m-add"
             }
@@ -104,19 +90,35 @@ Page {
         }
 
         Image {
+            id: image
+
             anchors {
                 top: addAccountItem.bottom
                 topMargin: Theme.paddingLarge
                 horizontalCenter: parent.horizontalCenter
             }
             visible: !root._hasCreatedAccount
+            height: !visible ? 0 : undefined
             source: "image://theme/graphic-startup-addyourcontent"
+        }
+
+        Item {
+            id: spacer
+
+            height: flickable.contentHeight - flickable.baseHeight
+
+            anchors {
+                top: image.bottom
+                topMargin: Theme.paddingLarge
+                left: parent.left
+                right: parent.right
+            }
         }
 
         Button {
             id: skipButton
             anchors {
-                top: addAccountItem.bottom
+                top: spacer.bottom
                 horizontalCenter: parent.horizontalCenter
             }
             text: root._hasCreatedAccount

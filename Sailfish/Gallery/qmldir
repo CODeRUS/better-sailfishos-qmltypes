@@ -1,3 +1,4 @@
+module Sailfish.Gallery
 plugin sailfishgalleryplugin
 DetailsPage 1.0 DetailsPage.qml
 HighlightItem 1.0 HighlightItem.qml

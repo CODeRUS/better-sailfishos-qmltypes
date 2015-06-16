@@ -7,7 +7,6 @@ import com.jolla.settings.accounts 1.0
 
 Dialog {
     id: root
-    allowedOrientations: Orientation.Portrait
 
     // If this dialog is a sub-dialog in the sequence of creation pages for a particular account,
     // set this property to the root creation page to automatically bind the appropriate account

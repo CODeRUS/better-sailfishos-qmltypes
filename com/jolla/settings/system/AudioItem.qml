@@ -24,8 +24,8 @@ MouseArea {
 
     Label {
         id: title
-        x: Theme.paddingLarge
-        width: parent.width - playIcon.width - Theme.paddingLarge - Theme.paddingMedium
+        x: Theme.horizontalPageMargin
+        width: parent.width - playIcon.width - 2*Theme.horizontalPageMargin
         anchors {
             verticalCenter: subtitle.height == 0 ? playIcon.verticalCenter : undefined
             top: subtitle.height > 0 ? parent.top : undefined
@@ -48,7 +48,7 @@ MouseArea {
         id: playIcon
 
         anchors.right: parent.right
-        anchors.rightMargin: Theme.paddingMedium
+        anchors.rightMargin: Theme.horizontalPageMargin
         anchors.verticalCenter: parent.verticalCenter
         width: Theme.itemSizeSmall; height: Theme.itemSizeSmall
 

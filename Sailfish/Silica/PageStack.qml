@@ -543,24 +543,27 @@ PageStackBase {
         }
     }
     onReleased: {
+        var pageChanged = dragBinding.targetItem !== _currentContainer
+
         dragBinding.clearTarget()
 
-        // activate navigation if the page has been dragged far enough
-        if (_forwardFlickDifference > _flickThreshold) {
-            navigateForward(PageStackAction.Animated)
-        } else if (_backFlickDifference > _flickThreshold) {
-            navigateBack(PageStackAction.Animated)
-        } else {
-            // otherwise slide the page back to normal position
-            if (_currentContainer == snapBackAnimation.target) {
-                snapBackAnimation.duration = _calculateDuration(0, _currentContainer.lateralOffset)
-                snapBackAnimation.restart()
+        if (!pageChanged) {
+            // activate navigation if the page has been dragged far enough
+            if (_forwardFlickDifference > _flickThreshold) {
+                navigateForward(PageStackAction.Animated)
+            } else if (_backFlickDifference > _flickThreshold) {
+                navigateBack(PageStackAction.Animated)
+            } else {
+                // otherwise slide the page back to normal position
+                if (_currentContainer == snapBackAnimation.target) {
+                    snapBackAnimation.duration = _calculateDuration(0, _currentContainer.lateralOffset)
+                    snapBackAnimation.restart()
+                }
             }
-
-            // Remove the flash if present
-            flash.opacity = 0.0
         }
 
+        // Remove the flash if present
+        flash.opacity = 0.0
         dragDirection = PageNavigation.None
     }
     onCanceled: {
@@ -981,10 +984,12 @@ PageStackBase {
                 // When the container is involved in a lateral transition with an animated container
                 target: container
                 property: "lateralOffset"
-                when: transitionPartner && transitionPartner.isPositioned() ? (transitionPartner.lateralOffset !== 0) : false
-                value: !transitionPartner || transitionPartner.lateralOffset == 0
+                when: transitionPartner && transitionPartner.isPositioned()
+                value: !transitionPartner
                        ? container.lateralOffset
-                       : (transitionPartner ? transitionPartner.lateralOffset + (transitionPartner.lateralOffset < 0 ? _currentWidth : -_currentWidth) : 0)
+                       : (transitionPartner.lateralOffset === 0
+                            ? (container.attached ? _currentWidth : -_currentWidth)
+                            : transitionPartner.lateralOffset + (transitionPartner.lateralOffset < 0 ? _currentWidth : -_currentWidth))
             }
             Binding {
                 // When the container is involved in a lateral transition

@@ -23,7 +23,7 @@ SilicaListView {
         }
 
         Label {
-            x: Theme.paddingLarge
+            x: Theme.horizontalPageMargin
             anchors.verticalCenter: parent.verticalCenter
             width: root.width - x*2
             text: model.name

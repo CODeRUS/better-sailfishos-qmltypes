@@ -23,7 +23,7 @@ Dialog {
 
         Column {
             id: contentColumn
-            x: Theme.paddingLarge
+            x: Theme.horizontalPageMargin
             y: Theme.paddingLarge
             width: root.width - x*2
 

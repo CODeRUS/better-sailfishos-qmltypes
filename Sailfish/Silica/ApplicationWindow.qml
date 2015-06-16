@@ -432,6 +432,7 @@ Window {
                 underDimmer.target = underItem
                 underDimmer.area = underRect === undefined ? Qt.rect(0, 0, underItem.width, underItem.height) : underRect
                 underDimmer.active = true
+                underDimmer.updateRegion() // force refresh
                 if (exclude === undefined) {
                     exclude = []
                 }

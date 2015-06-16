@@ -28,7 +28,7 @@ Dialog {
     }
 
     Column {
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         y: Theme.itemSizeLarge
         width: parent.width - x*2
         opacity: !root.canAccept ? 1 : 0
@@ -68,7 +68,7 @@ Dialog {
         }
 
         Label {
-            x: Theme.paddingLarge
+            x: Theme.horizontalPageMargin
             width: parent.width - 2*x
             height: implicitHeight + Theme.paddingLarge
             color: Theme.highlightColor

@@ -12,7 +12,7 @@ ListItem {
 
     property string searchString
 
-    property real leftMargin: Theme.paddingLarge
+    property real leftMargin: Theme.horizontalPageMargin
     property real leftMarginOffset
 
     // Same as: SearchField.textLeftMargin
@@ -43,6 +43,7 @@ ListItem {
             color: highlighted ? Theme.highlightColor: Theme.primaryColor
             width: Math.min(implicitWidth, row.width)
             truncationMode: width == row.width ? TruncationMode.Fade : TruncationMode.None
+            textFormat: Text.AutoText
         }
         Label {
             id: lastNameText
@@ -53,6 +54,7 @@ ListItem {
             color: highlighted ? Theme.secondaryHighlightColor: Theme.secondaryColor
             width: Math.min(implicitWidth, remainingWidth)
             truncationMode: width > 0 && width == remainingWidth ? TruncationMode.Fade : TruncationMode.None
+            textFormat: Text.AutoText
             visible: width > 0
         }
     }
@@ -61,7 +63,7 @@ ListItem {
 
         anchors {
             right: parent.right
-            rightMargin: Theme.paddingLarge
+            rightMargin: Theme.horizontalPageMargin
             verticalCenter: parent.verticalCenter
         }
 
@@ -93,10 +95,12 @@ ListItem {
         PropertyChanges {
             target: firstNameText
             text: Theme.highlightText(firstText, _regExpFor(searchString), Theme.highlightColor)
+            textFormat: Text.StyledText
         }
         PropertyChanges {
             target: lastNameText
             text: Theme.highlightText(secondText, _regExpFor(searchString), Theme.highlightColor)
+            textFormat: Text.StyledText
         }
     }
 }

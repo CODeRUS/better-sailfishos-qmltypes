@@ -15,7 +15,9 @@ Module {
         Property { name: "bluetoothAddress"; type: "string"; isReadonly: true }
         Property { name: "wlanMacAddress"; type: "string"; isReadonly: true }
         Property { name: "imei"; type: "string"; isReadonly: true }
+        Property { name: "serial"; type: "string"; isReadonly: true }
         Property { name: "softwareVersion"; type: "string"; isReadonly: true }
+        Property { name: "adaptationVersion"; type: "string"; isReadonly: true }
         Method { name: "totalDiskSpace"; type: "qlonglong" }
         Method { name: "availableDiskSpace"; type: "qlonglong" }
     }
@@ -134,6 +136,23 @@ Module {
         }
     }
     Component {
+        name: "DiskUsage"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/DiskUsage 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "working"; type: "bool"; isReadonly: true }
+        Signal {
+            name: "submit"
+            Parameter { name: "paths"; type: "QStringList" }
+            Parameter { name: "callback"; type: "QJSValue"; isPointer: true }
+        }
+        Method {
+            name: "calculate"
+            Parameter { name: "paths"; type: "QStringList" }
+            Parameter { name: "callback"; type: "QJSValue" }
+        }
+    }
+    Component {
         name: "DisplaySettings"
         prototype: "QObject"
         exports: ["org.nemomobile.systemsettings/DisplaySettings 1.0"]
@@ -248,26 +267,30 @@ Module {
                 "Connected": 0,
                 "DataInUse": 1,
                 "Disconnected": 2,
+                "ModeRequest": 6,
                 "MassStorage": 3,
                 "ChargingOnly": 4,
-                "OviSuite": 5,
-                "ModeRequest": 6,
+                "PCSuite": 5,
                 "Ask": 7,
                 "Undefined": 8,
-                "SDK": 9,
                 "Developer": 10,
                 "MTP": 11,
                 "Adb": 12,
                 "Diag": 13,
+                "ConnectionSharing": 14,
                 "Host": 15,
-                "ConnectionSharing": 14
+                "Charger": 16
             }
         }
-        Property { name: "currentMode"; type: "Mode"; isReadonly: true }
+        Property { name: "currentMode"; type: "Mode" }
         Property { name: "defaultMode"; type: "Mode" }
         Property { name: "supportedUSBModes"; type: "QList<int>"; isReadonly: true }
         Method {
             name: "setDefaultMode"
+            Parameter { name: "mode"; type: "Mode" }
+        }
+        Method {
+            name: "setCurrentMode"
             Parameter { name: "mode"; type: "Mode" }
         }
     }

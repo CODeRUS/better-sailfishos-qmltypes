@@ -15,6 +15,7 @@ ListItem {
     property alias baseName: baseName.text
     property alias extension: extension.text
     property bool selected
+    property real leftMargin: Theme.horizontalPageMargin
 
     contentHeight: Math.max(implicitHeight, baseName.height + 2 * Theme.paddingLarge)
     highlighted: down || menuOpen || selected
@@ -34,7 +35,8 @@ ListItem {
         wrapMode: Text.Wrap
         anchors {
             verticalCenter: parent.verticalCenter
-            left: parent.left; leftMargin: Theme.paddingMedium
+            left: parent.left
+            leftMargin: backgroundItem.leftMargin
             right: extension.left
         }
         maximumLineCount: 4
@@ -44,12 +46,12 @@ ListItem {
         id: extension
         textFormat: Text.StyledText
         truncationMode: TruncationMode.Fade
-        width: Theme.itemSizeSmall // Same width as SearchField's icon
         color: highlighted ? Theme.highlightColor : Theme.primaryColor
         opacity: 0.4
         anchors {
             bottom: baseName.bottom
             right: parent.right
+            rightMargin: (Theme.itemSizeExtraSmall - extension.implicitWidth) + Theme.horizontalPageMargin   // horizontally align document labels with different extensions
         }
     }
 }

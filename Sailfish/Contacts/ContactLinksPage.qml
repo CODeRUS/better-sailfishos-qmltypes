@@ -162,7 +162,7 @@ Page {
         spacing: Theme.paddingLarge
 
         Label {
-            width: root.width - Theme.paddingLarge*2
+            width: root.width - Theme.horizontalPageMargin*2
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
 

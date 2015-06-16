@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
+import com.jolla.settings.accounts 1.0
 
 /*
     This component is used to implement an account settings UI plugin.
@@ -103,4 +104,10 @@ Item {
             }
         }
     }
+
+    AccountFactory {
+        id: accountFactory
+    }
+
+    Component.onCompleted: accountFactory.ensureAccountSyncProfiles(accountId)
 }

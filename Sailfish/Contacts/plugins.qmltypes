@@ -66,6 +66,16 @@ Module {
         }
     }
     Component {
+        name: "PresenceListener"
+        prototype: "QObject"
+        exports: ["Sailfish.Contacts/PresenceListener 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Property { name: "globalPresenceState"; type: "int"; isReadonly: true }
+        Property { name: "accounts"; type: "QVariantList"; isReadonly: true }
+    }
+    Component {
         name: "SeasideFilteredModel"
         prototype: "QAbstractListModel"
         exports: ["org.nemomobile.contacts/PeopleModel 1.0"]

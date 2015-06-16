@@ -1,17 +1,17 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.contacts 1.0
+import "common/common.js" as CommonJs
 
 Page {
     id: presencePage
-    property Person self: Person.selfPerson
 
-    onSelfChanged: updatePresenceModel()
+    property var globalPresenceState
+    property ListModel presenceModel: ListModel {}
 
-    Connections {
-        target: self
-        onAccountDetailsChanged: scheduleUpdatePresenceModel()
-    }
+    property Component presenceSwitchBar: presenceSwitchBarComponent
+
+    property bool _presenceAvailable
 
     function scheduleUpdatePresenceModel() {
         // We usually get all change signals at once - only react to them once
@@ -25,85 +25,59 @@ Page {
     }
 
     function updatePresenceModel() {
-        if (self) {
-            var accounts = self.accountDetails
-            var i; var j; var account
+        var i; var j; var account; var available
 
-            // Remove any items no longer present
-            for (i = presenceModel.count; i > 0; --i) {
-                var path = presenceModel.get(i-1).path
-                for (j = 0; j < accounts.length; ++j) {
-                    if (accounts[j].accountPath == path) {
-                        break
-                    }
+        var accounts = getPresenceAccounts()
+
+        // Remove any items no longer present
+        for (i = presenceModel.count; i > 0; --i) {
+            var path = presenceModel.get(i-1).path
+            for (j = 0; j < accounts.length; ++j) {
+                if (accounts[j].accountPath == path) {
+                    break
                 }
-                if (j == accounts.length) {
-                    presenceModel.remove(i-1)
+            }
+            if (j == accounts.length) {
+                presenceModel.remove(i-1)
+            }
+        }
+
+        available = false
+        for (i = 0; i < accounts.length; ++i) {
+            account = accounts[i]
+            if (account.enabled) {
+                available = true
+            }
+
+            for (j = 0; j < presenceModel.count; ++j) {
+                if (presenceModel.get(j).path == account.accountPath) {
+                    break
                 }
             }
 
-            for (i = 0; i < accounts.length; ++i) {
-                account = accounts[i]
-
-                for (j = 0; j < presenceModel.count; ++j) {
-                    if (presenceModel.get(j).path == account.accountPath) {
-                        break
-                    }
-                }
-
-                if (j == presenceModel.count) {
-                    // Append this new account to the model
-                    presenceModel.append({
-                        'path': account.accountPath,
-                        'uri': account.accountUri,
-                        'provider': account.serviceProviderDisplayName != "" ? account.serviceProviderDisplayName : account.serviceProvider,
-                        'accountName': account.accountDisplayName,
-                        'iconPath': account.iconPath,
-                        'presenceState': account.presenceState,
-                        'message': account.presenceMessage,
-                        'enabled': account.enabled
-                    })
-                } else {
-                    // Update any properties that may have changed
-                    presenceModel.set(j, {
-                        'presenceState': account.presenceState,
-                        'message': account.presenceMessage
-                    })
-                }
+            if (j == presenceModel.count) {
+                // Append this new account to the model
+                presenceModel.append({
+                    'path': account.accountPath,
+                    'uri': account.accountUri,
+                    'provider': account.serviceProviderDisplayName != "" ? account.serviceProviderDisplayName : account.serviceProvider,
+                    'accountName': account.accountDisplayName,
+                    'iconPath': account.iconPath,
+                    'presenceState': account.presenceState,
+                    'message': account.presenceMessage,
+                    'enabled': account.enabled
+                })
+            } else {
+                // Update any properties that may have changed
+                presenceModel.set(j, {
+                    'presenceState': account.presenceState,
+                    'message': account.presenceMessage
+                })
             }
-        } else {
-            presenceModel.clear()
         }
-    }
 
-    function presenceDescription(presenceState) {
-        switch (presenceState) {
-            //: Presence state: available
-            //% "Available"
-            case Person.PresenceAvailable: return qsTrId("components_contacts-la-presence_available")
-            //: Presence state: away
-            //% "Away"
-            case Person.PresenceAway: return qsTrId("components_contacts-la-presence_away")
-            //: Presence state: extended away
-            //% "Extended away"
-            case Person.PresenceExtendedAway: return qsTrId("components_contacts-la-presence_extended_away")
-            //: Presence state: busy
-            //% "Busy"
-            case Person.PresenceBusy: return qsTrId("components_contacts-la-presence_busy")
-            //: Presence state: hidden
-            //% "Hidden"
-            case Person.PresenceHidden: return qsTrId("components_contacts-la-presence_hidden")
-            //: Presence state: offline
-            //% "Offline"
-            case Person.PresenceOffline: return qsTrId("components_contacts-la-presence_offline")
-            //: Presence state: unknown
-            //% "Unknown"
-            case Person.PresenceUnknown: return qsTrId("components_contacts-la-presence_unknown")
-        }
-        return '<Unknown:' + presenceState + '>'
+        _presenceAvailable = available
     }
-
-    ListModel { id: presenceModel }
 
     ContactPresenceUpdate {
         id: presenceUpdate
@@ -115,6 +89,18 @@ Page {
 
         VerticalScrollDecorator {}
 
+        ViewPlaceholder {
+            id: placeholder
+
+            enabled: !presencePage._presenceAvailable
+            //: Displayed when there are no presence accounts
+            //% "No accounts available with presence functionality"
+            text: qsTrId("components_contacts-la-no_presence")
+            //: Informs the user to configure an account in Settings | Accounts
+            //% "You can add or modify accounts in Settings | Accounts"
+            hintText: qsTrId("components_contacts-la-no_presence_hint")
+        }
+
         Column {
             id: content
             width: parent.width
@@ -125,41 +111,16 @@ Page {
                 title: qsTrId("components_contacts-he-presence_details")
             }
 
-            Row {
-                id: presenceSwitches
-                PresenceSwitch {
-                    id: offlineSwitch
-                    presenceState: Person.PresenceOffline
-                    width: presencePage.width / 3
-                    onClicked: {
-                        awaySwitch.cancelBusy()
-                        availableSwitch.cancelBusy()
-                    }
-                }
-                PresenceSwitch {
-                    id: awaySwitch
-                    presenceState: Person.PresenceAway
-                    width: presencePage.width / 3
-                    onClicked: {
-                        offlineSwitch.cancelBusy()
-                        availableSwitch.cancelBusy()
-                    }
-                }
-                PresenceSwitch {
-                    id: availableSwitch
-                    presenceState: Person.PresenceAvailable
-                    width: presencePage.width / 3
-                    onClicked: {
-                        offlineSwitch.cancelBusy()
-                        awaySwitch.cancelBusy()
-                    }
-                }
+            Loader {
+                sourceComponent: presencePage.presenceSwitchBar
+                visible: presencePage._presenceAvailable
             }
 
             SectionHeader {
                 //: List of services with presence that the global switches affect
                 //% "Controlled services"
                 text: qsTrId("components_contacts-la-controlled_services")
+                visible: presencePage._presenceAvailable
             }
 
             Repeater {
@@ -169,7 +130,7 @@ Page {
                     property var path: presenceModel.get(index).path
                     width: parent.width
                     contentHeight: icon.height
-                    enabled: model.enabled
+                    visible: model.enabled
                     menu: Component {
                         ContextMenu {
                             function presenceSelection(index) {
@@ -186,7 +147,7 @@ Page {
                                 model: 5
                                 MenuItem {
                                     property int presence: presenceSelection(index)
-                                    text: presenceDescription(presence)
+                                    text: CommonJs.presenceDescription(presence)
                                     onClicked: presenceUpdate.setAccountPresence(path, presence)
                                 }
                             }
@@ -198,7 +159,6 @@ Page {
                         width: Theme.iconSizeLarge
                         height: width
                         color: "#70777777"
-                        opacity: model.enabled ? 1 : 0.4
                         Image {
                             anchors.fill: parent
                             source: iconPath
@@ -215,7 +175,6 @@ Page {
                             verticalCenterOffset: implicitHeight / -2 - Theme.paddingSmall
                         }
                         color: highlighted ? Theme.highlightColor : Theme.primaryColor
-                        opacity: model.enabled ? 1 : 0.4
                         text: provider
                     }
 
@@ -241,13 +200,21 @@ Page {
                         }
                         color: highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
                         font.pixelSize: Theme.fontSizeSmall
-                        opacity: model.enabled ? 1 : 0.4
                         text: accountName
                     }
 
                     onClicked: showMenu()
                 }
             }
+        }
+    }
+
+    Component {
+        id: presenceSwitchBarComponent
+
+        GlobalPresenceSwitchBar {
+            width: presencePage.width
+            globalPresenceState: presencePage.globalPresenceState
         }
     }
 }

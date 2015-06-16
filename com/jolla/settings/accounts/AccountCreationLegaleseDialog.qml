@@ -10,8 +10,6 @@ Dialog {
     property string externalUrlLink
     property alias userAgent: termsView.userAgent
 
-    allowedOrientations: Orientation.Portrait
-
     DialogHeader {
         id: header
         //: The "accept terms / data usage" dialog header
@@ -35,10 +33,11 @@ Dialog {
         Label {
             id: consentLabel
             width: parent.width - x*2
-            x: Theme.paddingLarge
+            x: Theme.horizontalPageMargin
             color: Theme.highlightColor
             text: root.legaleseText
             wrapMode: Text.Wrap
+            textFormat: Text.AutoText
             font.pixelSize: Theme.fontSizeSmall
         }
 

@@ -10,6 +10,7 @@ Label {
     color: mouseArea.pressed ? wizardManager.defaultHighlightColor() : wizardManager.defaultPrimaryColor()
     width: parent.width
     wrapMode: Text.Wrap
+    textFormat: Text.StyledText
     height: implicitHeight
 
     signal clicked

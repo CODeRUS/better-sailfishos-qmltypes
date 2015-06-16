@@ -52,7 +52,8 @@ MouseArea {
     onCanceled: pressTimer.stop()
 
     height: Theme.itemSizeSmall
-    width: Math.max(buttonText.width, 214/480*Screen.width)
+    // Fit two buttons side by side, with paddingLarge spacing
+    width: Math.max(buttonText.width, Screen.width/2 - Theme.horizontalPageMargin - Theme.paddingMedium)
 
     Column {
         width: parent.width

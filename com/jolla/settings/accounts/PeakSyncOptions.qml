@@ -14,6 +14,12 @@ Column {
     property var peakStartTime: schedule ? schedule.peakStartTime : null
     property var peakEndTime: schedule ? schedule.peakEndTime : null
     property int peakDays: schedule ? schedule.peakDays : 0
+    property bool alwaysOnPeak: schedule ? schedule.syncExternallyDuringPeak : 0
+    property bool showAlwaysOn
+
+    //: Always up to date schedule
+    //% "Always up-to-date"
+    property string _textAlwaysOn: qsTrId("settings-accounts-la-sync_always_on")
 
     function _updateSchedule() {
         if (schedule) {
@@ -30,11 +36,16 @@ Column {
         //: Peak interval for data sync (e.g. user can click to choose to sync every 15 minutes, every hour, etc.) during designated peak period
         //% "Peak interval"
         label: qsTrId("settings-accounts-la-peak_interval")
-        value: root.intervalModel.intervalText(root.peakInterval)
+        value: root.alwaysOnPeak ? _textAlwaysOn : root.intervalModel.intervalText(root.peakInterval)
         onClicked: {
-            var obj = pageStack.push(intervalPickerDialog)
+            var obj = pageStack.push(intervalPickerDialog, {"showAlwaysOn" : showAlwaysOn})
             obj.intervalClicked.connect(function(interval, text) {
                 root.peakInterval = interval
+                if (text == _textAlwaysOn) {
+                    schedule.syncExternallyDuringPeak = true
+                } else {
+                    schedule.syncExternallyDuringPeak = false
+                }
                 root._updateSchedule()
             })
         }
@@ -88,7 +99,7 @@ Column {
         //: Label above section allowing selection of the days on which "peak" sync should be applicable
         //% "Peak days"
         text: qsTrId("settings-accounts-la-peak_days")
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         height: implicitHeight + Theme.paddingMedium    // extra space between the label and the combo above
         verticalAlignment: Text.AlignBottom
     }
@@ -113,20 +124,43 @@ Column {
         id: intervalPickerDialog
         Page {
             id: intervalPickerPage
+            property bool showAlwaysOn
             signal intervalClicked(int accountSyncInterval, string intervalText)
 
-            PageHeader {
-                id: pageHeader
-                //: Heading for page that allows the data sync schedule to be changed
-                //% "Schedule"
-                title: qsTrId("settings-accounts-he-schedule")
-            }
-            SyncIntervalOptions {
-                anchors.top: pageHeader.bottom
-                intervalModel: root.intervalModel
-                onIntervalClicked: {
-                    intervalPickerPage.intervalClicked(accountSyncInterval, intervalText)
-                    pageStack.pop()
+            Column {
+                width: parent.width
+
+                PageHeader {
+                    id: pageHeader
+                    //: Heading for page that allows the data sync schedule to be changed
+                    //% "Schedule"
+                    title: qsTrId("settings-accounts-he-schedule")
+                }
+
+                ListItem {
+                    width: parent.width
+                    visible: intervalPickerPage.showAlwaysOn
+                    onClicked: {
+                        intervalPickerPage.intervalClicked(0, _textAlwaysOn)
+                        pageStack.pop()
+                    }
+
+                    Label {
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: Theme.horizontalPageMargin
+                        }
+                        text: _textAlwaysOn
+                    }
+                }
+
+                SyncIntervalOptions {
+                    intervalModel: root.intervalModel
+                    onIntervalClicked: {
+                        intervalPickerPage.intervalClicked(accountSyncInterval, intervalText)
+                        pageStack.pop()
+                    }
                 }
             }
         }

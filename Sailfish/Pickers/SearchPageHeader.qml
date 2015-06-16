@@ -4,6 +4,7 @@ import Sailfish.Silica 1.0
 FocusScope {
     property alias title: header.title
     property alias placeholderText: searchField.placeholderText
+    property alias searchFieldLeftMargin: searchField.textLeftMargin
     property QtObject model
     readonly property bool active: searchField.text.length > 0
 

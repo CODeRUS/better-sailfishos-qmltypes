@@ -9,6 +9,8 @@ Grid {
     signal ready
     signal error(variant err)
 
+    columns: Math.floor(width / Theme.itemSizeExtraLarge)
+
     function done() {
         for (var i = 0; i < units.count; ++i)
             units.get(i).unitState = "";

@@ -1,17 +1,19 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.contacts 1.0
+import "common/common.js" as CommonJs
 
 BackgroundItem {
     id: root
-    property var presenceState
-    property Person self: Person.selfPerson
-    property bool _checked: self.globalPresenceState == presenceState
+
+    property var switchPresenceState
+    property var globalPresenceState
+
+    property bool _checked: globalPresenceState == switchPresenceState
     property bool _busy
     property int _busyCount
-    property var _globalPresenceState: self.globalPresenceState
-    on_GlobalPresenceStateChanged: cancelBusy()
 
+    onGlobalPresenceStateChanged: cancelBusy()
     function cancelBusy() {
         _busy = false
         _busyCount = 0
@@ -28,7 +30,7 @@ BackgroundItem {
 
         // Always try to set the global presence, in case it's out of sync with the
         // self contact presence.
-        presenceUpdate.setGlobalPresence(presenceState)
+        presenceUpdate.setGlobalPresence(switchPresenceState)
     }
 
     Rectangle {
@@ -41,7 +43,7 @@ BackgroundItem {
     Label {
         y: Theme.paddingMedium
         anchors.horizontalCenter: parent.horizontalCenter
-        text: presenceDescription(presenceState)
+        text: CommonJs.presenceDescription(switchPresenceState)
         color: _checked || highlighted ? Theme.highlightColor : Theme.primaryColor
         font.pixelSize: Theme.fontSizeExtraSmall
     }
@@ -51,10 +53,12 @@ BackgroundItem {
             bottom: parent.bottom
             left: parent.left
             right: parent.right
-            margins: Theme.paddingLarge
+            bottomMargin: Theme.paddingLarge
+            leftMargin: Theme.horizontalPageMargin
+            rightMargin: Theme.horizontalPageMargin
         }
         height: Theme.paddingMedium
-        presenceState: _checked || _busyCount%2 ? root.presenceState : Person.PresenceUnknown
+        presenceState: _checked || _busyCount%2 ? root.switchPresenceState : Person.PresenceUnknown
         opacity: _checked || _busyCount%2 ? 1.0 : 0.2
     }
 

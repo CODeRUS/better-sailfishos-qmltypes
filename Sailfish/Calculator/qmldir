@@ -1,1 +1,2 @@
+module Sailfish.Calculator
 plugin sailfishcalculatorplugin

@@ -92,10 +92,10 @@ PinInput {
                       //% "Only 1 attempt left. If this goes wrong, SIM card will be permanently locked."
                     ? qsTrId("settings_pin-la-last_puk_warning")         
                     : (pukRetries === undefined)
-                        //: Warns that the phone has been locked with a PUK code.
+                        //: Warns that the device has been locked with a PUK code.
                         //% "SIM locked with PUK code. Contact your network service provider for the PUK code."
                       ? qsTrId("settings_pin-la-puk_warning_attempts")
-                        //: Warns that the phone has been locked with a PUK code (%1 = number of attempts remaining before SIM is permanently locked)
+                        //: Warns that the device has been locked with a PUK code (%1 = number of attempts remaining before SIM is permanently locked)
                         //% "%n attempts left. Contact your network service provider for the PUK code."
                       : qsTrId("settings_pin-la-puk_warning_attempts_with_retries", pukRetries)
         default:

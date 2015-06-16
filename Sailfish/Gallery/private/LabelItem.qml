@@ -7,7 +7,6 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Silica.theme 1.0
 import Sailfish.Gallery 1.0
 
 BackgroundItem {
@@ -32,7 +31,7 @@ BackgroundItem {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: Theme.paddingLarge
+            leftMargin: Theme.horizontalPageMargin
             right: section.left
             rightMargin: Theme.paddingSmall
         }
@@ -46,7 +45,7 @@ BackgroundItem {
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
-            rightMargin: Theme.paddingLarge
+            rightMargin: Theme.horizontalPageMargin
         }
     }
 }

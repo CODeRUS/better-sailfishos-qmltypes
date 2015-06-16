@@ -204,20 +204,10 @@ SilicaFlickable {
 
         MouseArea {
             anchors.fill: parent
+            enabled: !flickable.scaled
 
             onClicked: {
-                if (!flickable.scaled) {
-                    flickable.clicked()
-                }
-            }
-
-            onDoubleClicked: {
-                if (flickable.scaled) {
-                    flickable._scale = flickable._fittedScale >= 1 ? 1.0 : flickable._fittedScale
-                    flickable.scaled = false
-                    flickable.contentX = 0
-                    flickable.contentY = 0
-                }
+                flickable.clicked()
             }
         }
     }

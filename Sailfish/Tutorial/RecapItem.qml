@@ -41,11 +41,11 @@ Item {
         case 0:
             if (androidLauncher) {
                 //: The secondary label shown when the tutorial is started on Android
-                //% "Simply hold the phone in one hand and follow the instructions on screen to learn how to navigate in Jolla Launcher"
+                //% "Simply hold the device in one hand and follow the instructions on screen to learn how to navigate in Jolla Launcher"
                 description.text = qsTrId("tutorial-la-follow_the_instructions_alternative")
             } else {
                 //: The secondary label shown when the tutorial is started
-                //% "Simply hold the phone in one hand and follow the instructions on screen to learn how to navigate in Sailfish OS"
+                //% "Simply hold the device in one hand and follow the instructions on screen to learn how to navigate in Sailfish OS"
                 description.text = qsTrId("tutorial-la-follow_the_instructions")
             }
             break
@@ -146,12 +146,12 @@ Item {
         id: description
         wrapMode: Text.Wrap
         horizontalAlignment: Text.AlignHCenter
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         anchors {
             top: label.bottom
             topMargin: Theme.paddingLarge
         }
-        width: parent.width - 2 * Theme.paddingLarge
+        width: parent.width - 2 * x
         color: tutorialTheme.highlightColor
     }
 

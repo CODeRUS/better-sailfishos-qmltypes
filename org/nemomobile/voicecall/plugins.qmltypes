@@ -38,6 +38,7 @@ Module {
         Property { name: "isMultiparty"; type: "bool"; isReadonly: true }
         Property { name: "isForwarded"; type: "bool"; isReadonly: true }
         Property { name: "isReady"; type: "bool"; isReadonly: true }
+        Property { name: "isRemoteHeld"; type: "bool"; isReadonly: true }
         Signal {
             name: "error"
             Parameter { name: "error"; type: "string" }
@@ -45,6 +46,7 @@ Module {
         Signal { name: "emergencyChanged" }
         Signal { name: "multipartyChanged" }
         Signal { name: "forwardedChanged" }
+        Signal { name: "remoteHeldChanged" }
         Method { name: "answer" }
         Method { name: "hangup" }
         Method {

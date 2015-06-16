@@ -15,6 +15,9 @@ SplitViewDialog
 
     property real rotationAngle
 
+    property alias foregroundItem: flickable
+    property alias foreground: flickable.children
+
     signal rotate(real angle)
     signal rotateRequested
     signal rotateCanceled
@@ -39,7 +42,7 @@ SplitViewDialog
 
             IconButton {
                 id: icon
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 icon.source: model.icon
                 icon.opacity: 1.0
                 down: operationDelegate.highlighted
@@ -53,7 +56,7 @@ SplitViewDialog
                 anchors {
                     left: icon.right
                     right: parent.right
-                    rightMargin: Theme.paddingLarge
+                    rightMargin: Theme.horizontalPageMargin
                     verticalCenter: parent.verticalCenter
                 }
             }
@@ -95,6 +98,13 @@ SplitViewDialog
             }
         }
     }
+
+    _foreground: Flickable {
+        id: flickable
+        anchors.fill: parent
+        flickableDirection: rotateDialog.splitOpen ? Flickable.AutoFlickDirection : Flickable.HorizontalAndVerticalFlick
+    }
+
     Binding {
         target: pageStack._pageStackIndicator
         property: "enabled"

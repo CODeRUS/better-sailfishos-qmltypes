@@ -9,6 +9,7 @@ BackgroundItem {
     property bool showWhiteBackgroundByDefault
 
     visible: text !== ""
+    contentItem.radius: 4
     highlighted: showWhiteBackgroundByDefault || down
 
     highlightedColor: {

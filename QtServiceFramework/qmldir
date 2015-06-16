@@ -1,3 +1,0 @@
-module QtServiceFramework
-plugin declarative_serviceframework
-typeinfo plugins.qmltypes

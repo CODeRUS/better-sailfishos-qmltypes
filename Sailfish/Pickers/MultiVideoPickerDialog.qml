@@ -18,7 +18,8 @@ PickerDialog {
 
         highlightEnabled: false
         anchors.fill: parent
-        columnCount: isLandscape ? 4 : 2
+        // reference column width: 960 / 4
+        columnCount: Math.floor(width / (Theme.pixelRatio * 240))
 
         header: SearchDialogHeader {
             width: gridView.width
@@ -29,6 +30,7 @@ PickerDialog {
             model: videoModel
             contentType: ContentType.Video
             visible: active || videoModel.count > 0
+            _glassOnly: videoPickerDialog._background
 
             onActiveFocusChanged: {
                 if (activeFocus) {

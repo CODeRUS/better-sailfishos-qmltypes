@@ -116,6 +116,7 @@ QtObject {
                     height: implicitHeight + Theme.paddingLarge
                     color: Theme.rgba(Theme.highlightColor, 0.6)
                     wrapMode: Text.Wrap
+                    textFormat: Text.AutoText
                     font.pixelSize: Theme.fontSizeSmall
                     text: {
                         switch (endpoint.status) {

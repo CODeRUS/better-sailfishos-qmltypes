@@ -81,5 +81,6 @@ BackgroundItem {
         wrapMode: Text.Wrap
         elide: Text.ElideRight
         color: _highlight ? Theme.highlightColor : Theme.primaryColor
+        maximumLineCount: 1
     }
 }

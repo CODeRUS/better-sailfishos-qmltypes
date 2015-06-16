@@ -82,7 +82,7 @@ Dialog {
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 height: implicitHeight + Theme.paddingLarge
                 wrapMode: Text.Wrap
@@ -96,7 +96,7 @@ Dialog {
 
             Label {
                 id: detailsPromptLabel
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeExtraSmall
@@ -108,7 +108,7 @@ Dialog {
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeExtraSmall
@@ -176,9 +176,9 @@ Dialog {
                     id: usernameCheckLabel
                     anchors {
                         left: parent.left
-                        leftMargin: Theme.paddingLarge
+                        leftMargin: Theme.horizontalPageMargin
                         right: usernameCheckSpinner.running ? usernameCheckSpinner.left : parent.right
-                        rightMargin: Theme.paddingLarge
+                        rightMargin: Theme.horizontalPageMargin
                         verticalCenter: parent.verticalCenter
                     }
                     wrapMode: Text.Wrap
@@ -220,9 +220,9 @@ Dialog {
                     anchors {
                         verticalCenter: parent.verticalCenter
                         right: parent.right
-                        rightMargin: Theme.paddingLarge
+                        rightMargin: Theme.horizontalPageMargin
                     }
-                    size: BusyIndicatorSize.Small
+                    size: BusyIndicatorSize.ExtraSmall
                     running: root._checkingUsername
                 }
             }
@@ -262,9 +262,9 @@ Dialog {
 
             anchors {
                 left: parent.left
-                leftMargin: Theme.paddingLarge
+                leftMargin: Theme.horizontalPageMargin
                 right: parent.right
-                rightMargin: Theme.paddingLarge
+                rightMargin: Theme.horizontalPageMargin
                 top: mainContentColumn.bottom
             }
 
@@ -411,7 +411,7 @@ Dialog {
                     spacing: Theme.paddingLarge
 
                     Label {
-                        x: Theme.paddingLarge
+                        x: Theme.horizontalPageMargin
                         width: parent.width - x*2
                         font.pixelSize: Theme.fontSizeExtraLarge
                         color: Theme.highlightColor
@@ -424,7 +424,7 @@ Dialog {
                     }
 
                     Label {
-                        x: Theme.paddingLarge
+                        x: Theme.horizontalPageMargin
                         width: parent.width - x*2
                         wrapMode: Text.Wrap
                         font.pixelSize: Theme.fontSizeExtraSmall

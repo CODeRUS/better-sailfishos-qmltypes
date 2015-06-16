@@ -15,7 +15,7 @@ SettingItem {
 
     Image {
         id: icon
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         anchors.verticalCenter: parent.verticalCenter
         source: (root.highlighted && root.iconSource != "" && root.useHighlightColor)
                 ? root.iconSource + "?" + Theme.highlightColor
@@ -30,7 +30,7 @@ SettingItem {
             leftMargin: icon.width > 0 ? Theme.paddingMedium : 0
             verticalCenter: parent.verticalCenter
             right: parent.right
-            rightMargin: Theme.paddingLarge
+            rightMargin: Theme.horizontalPageMargin
         }
     }
 }

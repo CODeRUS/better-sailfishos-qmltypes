@@ -68,7 +68,7 @@ Page {
                 height: Theme.itemSizeSmall
                 color: Theme.highlightColor
                 opacity: 0.5
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
             }
 
             Image {

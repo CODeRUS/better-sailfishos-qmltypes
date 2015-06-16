@@ -82,7 +82,15 @@ Item {
 
         property Item __silica_contextmenu_instance
         property real _menuHeight: __silica_contextmenu_instance ? __silica_contextmenu_instance.height : 0
-        property int minOffsetIndex: 0
+
+        // menuIndex is the index of the item displaying the context menu
+        property int menuIndex: 0
+        // minOffsetIndex is the first index which should have the _menuHeight offset applied
+        property int minOffsetIndex: {
+            var columns = Math.floor(width / cellWidth)
+            var row = Math.floor(menuIndex / columns)
+            return (row + 1) * columns
+        }
 
         // We have to calculate our own contentHeight, as changing contentY causes contentHeight
         // to change when the ListView is estimating contentHeight (which occurs when the context

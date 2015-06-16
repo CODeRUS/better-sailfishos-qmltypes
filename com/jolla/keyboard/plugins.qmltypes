@@ -116,6 +116,21 @@ Module {
         }
     }
     Component {
+        name: "QuickSeparatorState"
+        prototype: "QObject"
+        exports: ["com.jolla.keyboard/SeparatorState 1.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "State"
+            values: {
+                "AutomaticSeparator": 0,
+                "VisibleSeparator": 1,
+                "HiddenSeparator": 2
+            }
+        }
+    }
+    Component {
         name: "QuickShiftState"
         prototype: "QObject"
         exports: ["com.jolla.keyboard/ShiftState 1.0"]

@@ -10,7 +10,7 @@ ListItem {
 
     AccountIcon {
         id: icon
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         anchors.verticalCenter: parent.verticalCenter
         source: model.providerIcon
     }
@@ -19,6 +19,7 @@ ListItem {
             left: icon.right
             right: parent.right
             leftMargin: Theme.paddingLarge
+            rightMargin: Theme.horizontalPageMargin
             verticalCenter: parent.verticalCenter
         }
         truncationMode: TruncationMode.Fade

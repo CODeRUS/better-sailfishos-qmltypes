@@ -1,0 +1,2 @@
+module org.nemomobile.dbusnext
+plugin nemodbus

@@ -181,7 +181,9 @@ Module {
                 "Mouse": 10,
                 "Keyboard": 11,
                 "GameController": 12,
-                "Toy": 13
+                "Toy": 13,
+                "Watch": 14,
+                "Tablet": 15
             }
         }
         Property { name: "classFilter"; type: "uint" }

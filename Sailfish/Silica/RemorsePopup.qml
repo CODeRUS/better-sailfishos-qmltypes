@@ -40,6 +40,8 @@ import "private/Util.js" as Util
 BackgroundItem {
     id: remorsePopup
     property string text
+    property real leftMargin: Theme.horizontalPageMargin
+    property real rightMargin: Theme.horizontalPageMargin
 
     function execute(title, callback, timeout) {
         remorsePopup.text = title
@@ -148,11 +150,16 @@ BackgroundItem {
 
     Column {
         id: column
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.leftMargin: Theme.paddingLarge
-        anchors.verticalCenter: parent.verticalCenter
         opacity: 0.7
+        anchors {
+            left: parent.left
+            right: parent.right
+            topMargin: Theme.paddingLarge
+            bottomMargin: Theme.paddingLarge
+            leftMargin: remorsePopup.leftMargin
+            rightMargin: remorsePopup.rightMargin
+            verticalCenter: parent.verticalCenter
+        }
         Label {
             id: titleLabel
             //% "in %n seconds"

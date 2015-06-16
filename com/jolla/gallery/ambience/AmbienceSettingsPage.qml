@@ -28,7 +28,7 @@ Page {
 
     // Save only when user leaves the app or goes back to the previous page
     onStatusChanged: {
-        if (status === PageStatus.Deactivating) {
+        if (status === PageStatus.Deactivating && !removeRemorse.visible) {
             ambience.save()
         }
     }
@@ -62,6 +62,7 @@ Page {
         property url wallpaperUrl
         property bool readOnly
         property string mimeType
+        property string tohId
 
         // Read and write properties
         property bool favorite
@@ -69,6 +70,7 @@ Page {
 
         property bool _initDone
         property bool _modified
+        property bool _removed
 
         onFavoriteChanged: ambience.setModified()
         onDisplayNameChanged: ambience.setModified()
@@ -108,6 +110,7 @@ Page {
             source          = obj.url
             wallpaperUrl    = obj.wallpaperUrl
             mimeType        = obj.mimeType
+            tohId           = obj.tohId
             favorite        = obj.favorite
             displayName     = obj.displayName
             readOnly        = obj.readOnly
@@ -146,12 +149,13 @@ Page {
 
         function remove()
         {
+            _removed = true
             ambienceModel.remove(ambience.index())
         }
 
         function save()
         {
-            if (!ambience._initDone || !ambience._modified) {
+            if (!ambience._initDone || !ambience._modified || ambience._removed) {
                 return
             }
 
@@ -356,8 +360,8 @@ Page {
 
         anchors.fill: parent
         contentHeight: root.isPortrait
-                       ? ambience.favorite ? image.height + settingsList.implicitHeight : root.height
-                       : ambience.favorite ? settingsList.implicitHeight : root.height
+                       ? ambience.favorite ? image.height + settingsList.implicitHeight + Theme.paddingLarge : root.height
+                       : ambience.favorite ? settingsList.implicitHeight + Theme.paddingLarge : root.height
 
         PullDownMenu {
             highlightColor: ambienceColors.highlightColor
@@ -371,6 +375,7 @@ Page {
                 //: Remove ambience from the ambience list
                 //% "Remove ambience"
                 text: qsTrId("jolla-gallery-ambience-me-remove_ambience")
+                color: down || highlighted ? Theme.primaryColor : ambienceColors.highlightColor
                 onClicked: {
                     //: Remorse popup text for ambience deletion
                     //% "Deleting Ambience"
@@ -385,6 +390,7 @@ Page {
                 //: Active the ambience
                 //% "Set Ambience"
                 text: qsTrId("jolla-gallery-ambience-me-set_ambience")
+                color: down || highlighted ? Theme.primaryColor : ambienceColors.highlightColor
                 onClicked: ambience.makeCurrent()
             }
         }
@@ -416,7 +422,8 @@ Page {
             anchors {
                 right: image.right
                 bottom: image.bottom
-                margins: Theme.paddingMedium
+                bottomMargin: Theme.paddingMedium
+                rightMargin: (root.isPortrait ? Theme.horizontalPageMargin : Theme.paddingLarge) - Theme.paddingMedium
             }
 
             MouseArea {
@@ -471,6 +478,7 @@ Page {
 
                 width: root._listWidth
                 horizontalAlignment: TextInput.AlignLeft
+                textLeftMargin: root.isPortrait ? Theme.horizontalPageMargin : Theme.paddingLarge
 
                 //: Write a name label for ambience in read-only mode
                 //% "Ambience name"
@@ -536,6 +544,21 @@ Page {
                 Tones {
                     toneSettings: ambienceProfile
                 }
+            }
+
+            Label {
+                id: editHelpLabel
+                //: Help text to instruct how to reset back to original ambience setup
+                //% "You can reset back to the original settings by reinstalling the ambience."
+                text: qsTrId("jolla-gallery-ambience-la-edit-help-text")
+                width: root._listWidth - 2 * Theme.paddingLarge
+                opacity: (ambience.readOnly && ambience.tohId !== "") ? 1.0 : 0.0
+                Behavior on opacity { FadeAnimation {} }
+                wrapMode: Text.Wrap
+                x: Theme.paddingLarge
+                color: Theme.highlightColor
+                font.pixelSize: Theme.fontSizeSmall
+                visible: opacity == 1
             }
 
             // Spacer item at the bottom

@@ -54,6 +54,7 @@ ValueButton {
     property bool _currentIndexSet
     property bool _menuOpen: menu !== null && menu.parent === comboBox
     property Page _menuDialogItem
+    property Page _page
 
     height: _menuOpen ? menu.height + contentItem.height : contentItem.height
     value: (currentItem !== null && currentItem.text !== "") ? currentItem.text : ""
@@ -91,6 +92,9 @@ ValueButton {
             }
         }
         if (needSeparateDialog) {
+            if (!_page) {
+                _page = Util.findPage(comboBox)
+            }
             _menuDialogItem = pageStack.push(menuDialogComponent)
         } else {
             comboBox.menu.show(comboBox)
@@ -219,7 +223,7 @@ ValueButton {
         id: menuDialogComponent
 
         Page {
-            anchors.fill: parent
+            allowedOrientations: _page ? _page.allowedOrientations : Orientation.All
 
             Component.onCompleted: {
                 menu.height = 1 // XXX hack to allow us to check the MenuItems visibilities
@@ -257,7 +261,7 @@ ValueButton {
                     }
 
                     Label {
-                        x: Theme.paddingLarge
+                        x: Theme.horizontalPageMargin
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width - x*2
                         wrapMode: Text.Wrap

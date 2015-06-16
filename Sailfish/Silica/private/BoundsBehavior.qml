@@ -37,7 +37,9 @@ import Sailfish.Silica 1.0
 
 BounceEffect {
     id: bounceEffect
-    onActiveChanged: if (!active) fadeInAnimation.restart()
+    onActiveChanged: {
+        if (!active) fadeInAnimation.restart()
+    }
 
     Binding {
         when: bounceEffect.active && bounceEffect.flickable.interactive

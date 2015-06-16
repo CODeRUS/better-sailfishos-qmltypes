@@ -1,3 +1,4 @@
+module Sailfish.Silica
 plugin sailfishsilicaplugin
 AddAnimation 1.0 AddAnimation.qml
 RemoveAnimation 1.0 RemoveAnimation.qml
@@ -60,6 +61,7 @@ CoverPlaceholder 1.0 CoverPlaceholder.qml
 ProgressCircle 1.0 ProgressCircle.qml
 ProgressCircleBase 1.0 ProgressCircleBase.qml
 OpacityRampEffect 1.0 OpacityRampEffect.qml
+OpacityRampEffectBase 1.0 OpacityRampEffectBase.qml
 DockedPanel 1.0 DockedPanel.qml
 PanelBackground 1.0 PanelBackground.qml
 ListItem 1.0 ListItem.qml

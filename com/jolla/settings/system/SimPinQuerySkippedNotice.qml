@@ -7,9 +7,9 @@ Page {
     signal continueClicked()
 
     Column {
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         y: Theme.itemSizeLarge
-        width: parent.width - Theme.paddingLarge*2
+        width: parent.width - x*2
         spacing: Theme.paddingLarge
 
         Label {

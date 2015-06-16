@@ -16,6 +16,7 @@ SplitViewPage {
     property string _currentPhotoId
     property string _prevPhotoId
     property string _currentPhotoUserId
+    property real _rightMargin: pageStack.currentPage.isLandscape ? Theme.paddingLarge : Theme.horizontalPageMargin
 
     allowedOrientations: window.allowedOrientations
 
@@ -194,7 +195,7 @@ SplitViewPage {
         property string photoId
         interval: 2000
         onTriggered: {
-            if (photoId == _currentPhotoId && !fullscreenPage.splitActive) {
+            if (photoId == _currentPhotoId && !fullscreenPage.open) {
                 fetchData()
             }
         }
@@ -225,7 +226,7 @@ SplitViewPage {
             height: Theme.itemSizeLarge
             anchors {
                 right: parent.right
-                rightMargin: Theme.paddingLarge
+                rightMargin: _rightMargin
             }
 
             Image {
@@ -265,9 +266,9 @@ SplitViewPage {
                 text: photoAndLikesModel.likeInfo
                 wrapMode: width < paintedWidth ? Text.Wrap : Text.NoWrap
                 verticalAlignment: Text.AlignTop
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 height: text == "" ? 0 : maxHeight
-                width: listView.width - Theme.paddingLarge * 2
+                width: listView.width - x - _rightMargin
                 opacity: text == "" ? 0 : 1
                 font.pixelSize: Theme.fontSizeExtraSmall
                 Behavior on height { FadeAnimation { property: "height" } }
@@ -280,14 +281,14 @@ SplitViewPage {
                 property string photoNameStr: fullscreenPage.model.getField(fullscreenPage.currentIndex,
                                                                             FacebookImageCacheModel.Title)
                 text: photoNameStr == "" ? unknownNameStr : photoNameStr
-                width: listView.width - (2 * Theme.paddingLarge)
+                width: listView.width - x - _rightMargin
                 wrapMode: Text.Wrap
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 font.pixelSize: Theme.fontSizeExtraSmall
             }
 
             Row {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 y: Theme.paddingSmall
                 spacing: Theme.paddingSmall
 
@@ -321,7 +322,7 @@ SplitViewPage {
                     Behavior on opacity { FadeAnimation {} }
                     width: listView.width / 2
                     Row {
-                        x: Theme.paddingLarge
+                        x: Theme.horizontalPageMargin
                         height: parent.height
                         spacing: Theme.paddingLarge
 
@@ -412,7 +413,7 @@ SplitViewPage {
         delegate: MouseArea {
             id: delegate
             property bool isPagePortrait: fullscreenPage.isPortrait
-            property bool isSplitActive: fullscreenPage.opened
+            property bool isSplitActive: fullscreenPage.open
             width: slideshowView.width
             height: slideshowView.height
             opacity: Math.abs(x) <= slideshowView.width ? 1.0 - (Math.abs(x) / slideshowView.width) : 0
@@ -435,7 +436,6 @@ SplitViewPage {
 
             Image {
                 id: photo
-                property bool _isPortrait
                 property real scaleFactor
 
                 anchors.centerIn: parent
@@ -444,23 +444,23 @@ SplitViewPage {
                 asynchronous: true
                 width: implicitWidth * scaleFactor
                 height: implicitHeight * scaleFactor
-                Behavior on scaleFactor { NumberAnimation { duration: 300 }}
+                Behavior on scaleFactor { NumberAnimation { duration: 300; easing.type: Easing.InOutQuad }}
 
                 onStatusChanged: {
                     if (status == Image.Ready) {
-                        photo._isPortrait = implicitWidth < implicitHeight
                         updateScale()
                     }
                 }
 
                 function updateScale() {
-                    var minimumDimension = Math.min(fullscreenPage.width, fullscreenPage.height)
-                    if (fullscreenPage.splitActive) {
-                        scaleFactor = minimumDimension / (photo._isPortrait ? photo.implicitWidth : photo.implicitHeight)
+                    if (delegate.isSplitActive) {
+                        var visibleWidth = delegate.isPagePortrait ? fullscreenPage.width : fullscreenPage.width * .5
+                        var visibleHeight = delegate.isPagePortrait ? fullscreenPage.height * .5 : fullscreenPage.height
+                        scaleFactor = Math.max(visibleWidth / photo.implicitWidth,
+                                               visibleHeight / photo.implicitHeight)
                     } else {
-                        scaleFactor = delegate.isPagePortrait
-                                    ? minimumDimension / photo.implicitWidth
-                                    : minimumDimension / photo.implicitHeight
+                        scaleFactor = Math.min(fullscreenPage.width / photo.implicitWidth,
+                                               fullscreenPage.height / photo.implicitHeight)
                     }
                 }
             }

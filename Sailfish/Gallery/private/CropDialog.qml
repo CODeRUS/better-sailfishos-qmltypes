@@ -14,6 +14,9 @@ SplitViewDialog {
 
     property bool avatarCrop
 
+    property alias foregroundItem: flickable
+    property alias foreground: flickable.children
+
     signal edited
     signal cropRequested
     signal cropCanceled
@@ -48,6 +51,12 @@ SplitViewDialog {
         }
 
         model: AspectRatioModel {}
+    }
+
+    _foreground: Flickable {
+        id: flickable
+        anchors.fill: parent
+        flickableDirection: aspectRatioDialog.splitOpen ? Flickable.AutoFlickDirection : Flickable.HorizontalAndVerticalFlick
     }
 
     Binding {

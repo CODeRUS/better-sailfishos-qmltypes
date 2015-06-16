@@ -46,6 +46,19 @@ QtObject {
         return _cachedSyncOptions[serviceName]
     }
 
+    function anySyncOptionsModified() {
+        for (var serviceName in _cachedSyncOptions) {
+            var profiles = _cachedSyncOptions[serviceName]
+            for (var profileId in profiles) {
+                var syncOptions = profiles[profileId]
+                if (syncOptions.modified) {
+                    return true;
+                }
+            }
+        }
+        return false
+    }
+
     function updateProfilesForService(serviceName, extraProperties) {
         var optionsMap = allSyncOptionsForService(serviceName)
         for (var profileId in optionsMap) {

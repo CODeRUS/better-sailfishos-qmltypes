@@ -48,8 +48,8 @@ TextField {
         family: Theme.fontFamilyHeading
     }
 
-    textLeftMargin: Theme.itemSizeSmall + Theme.paddingMedium
-    textRightMargin: Theme.itemSizeSmall + Theme.paddingMedium
+    textLeftMargin: Theme.itemSizeSmall + Theme.paddingMedium + Theme.horizontalPageMargin - Theme.paddingLarge
+    textRightMargin: Theme.itemSizeSmall + Theme.paddingMedium + Theme.horizontalPageMargin - Theme.paddingLarge
     textTopMargin: height/2 - _editor.implicitHeight/2
     labelVisible: false
 
@@ -82,7 +82,7 @@ TextField {
                 id: clearButton
                 anchors {
                     right: parent.right
-                    rightMargin: Theme.paddingLarge
+                    rightMargin: Theme.horizontalPageMargin
                 }
                 width: icon.width
                 height: parent.height

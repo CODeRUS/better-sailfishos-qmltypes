@@ -9,6 +9,8 @@ ValueButton {
     property AccountSyncSchedule schedule
     property IntervalListModel intervalModel: IntervalListModel { }
     property bool isSync
+    property bool isAlwaysOn
+    property bool showAlwaysOn
 
     //: Only sync when user manually requests it; do not sync automatically
     //% "Manually"
@@ -17,6 +19,19 @@ ValueButton {
     //: Show custom options for data syncing
     //% "Custom"
     property string _textCustom: qsTrId("settings-accounts-la-sync_custom")
+
+    //: Always up to date schedule
+    //% "Always up-to-date"
+    property string _textAlwaysOn: qsTrId("settings-accounts-la-sync_always_on")
+
+    signal alwaysOnChanged(bool state)
+
+    // Property assignment can happen after Component.onCompleted
+    onIsAlwaysOnChanged: {
+        if (isAlwaysOn && value != _textAlwaysOn) {
+            value = _textAlwaysOn
+        }
+    }
 
     function _optionClicked() {
         _resetValueText()
@@ -27,7 +42,9 @@ ValueButton {
         if (!schedule) {
             return
         }
-        if (!schedule || !schedule.enabled) {
+        if (isAlwaysOn) {
+            value = _textAlwaysOn
+        } else if (!schedule.enabled) {
             value = _textManual
         } else if (schedule.peakScheduleEnabled) {
             value = _textCustom
@@ -88,6 +105,28 @@ ValueButton {
                     title: qsTrId("settings-accounts-he-schedule")
                 }
 
+                ListItem {
+                    width: parent.width
+                    visible: root.showAlwaysOn
+                    onClicked: {
+                        root.schedule.enabled = false
+                        root.schedule.peakScheduleEnabled = false
+                        if (!root.isAlwaysOn) {
+                            root.alwaysOnChanged(true);
+                        }
+                        root._optionClicked()
+                    }
+
+                    Label {
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: Theme.horizontalPageMargin
+                        }
+                        text: _textAlwaysOn
+                    }
+                }
+
                 SyncIntervalOptions {
                     width: parent.width
                     intervalModel: root.intervalModel
@@ -95,6 +134,9 @@ ValueButton {
                         root.schedule.enabled = true
                         root.schedule.setIntervalSyncMode(accountSyncInterval)
                         root.schedule.peakScheduleEnabled = false
+                        if (root.isAlwaysOn) {
+                            root.alwaysOnChanged(false);
+                        }
                         root._optionClicked()
                     }
                 }
@@ -104,6 +146,9 @@ ValueButton {
                     onClicked: {
                         root.schedule.enabled = false
                         root.schedule.peakScheduleEnabled = false
+                        if (root.isAlwaysOn) {
+                            root.alwaysOnChanged(false);
+                        }
                         root._optionClicked()
                     }
 
@@ -111,7 +156,7 @@ ValueButton {
                         anchors {
                             verticalCenter: parent.verticalCenter
                             left: parent.left
-                            leftMargin: Theme.paddingLarge
+                            leftMargin: Theme.horizontalPageMargin
                         }
                         text: root._textManual
                     }
@@ -124,6 +169,9 @@ ValueButton {
                         root.schedule.setIntervalSyncMode(AccountSyncSchedule.Every15Minutes)   // off-peak settings
                         root.schedule.setDefaultPeakSchedule()
                         root.schedule.peakScheduleEnabled = true
+                        if (root.isAlwaysOn) {
+                            root.alwaysOnChanged(false);
+                        }
                         root._optionClicked()
                     }
 
@@ -131,7 +179,7 @@ ValueButton {
                         anchors {
                             verticalCenter: parent.verticalCenter
                             left: parent.left
-                            leftMargin: Theme.paddingLarge
+                            leftMargin: Theme.horizontalPageMargin
                         }
                         text: root._textCustom
                     }

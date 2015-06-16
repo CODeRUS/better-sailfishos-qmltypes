@@ -108,18 +108,6 @@ Module {
         Method { name: "markAllRead"; type: "bool" }
     }
     Component {
-        name: "CommHistory::ClassZeroSMSModel"
-        prototype: "CommHistory::EventModel"
-        exports: ["org.nemomobile.commhistory/ClassZeroSMSModel 1.0"]
-        exportMetaObjectRevisions: [0]
-        Signal {
-            name: "newMessage"
-            Parameter { name: "messageToken"; type: "string" }
-            Parameter { name: "text"; type: "string" }
-        }
-        Method { name: "clear" }
-    }
-    Component {
         name: "CommHistory::ContactGroup"
         prototype: "QObject"
         Property { name: "contactIds"; type: "QList<int>"; isReadonly: true }
@@ -564,11 +552,6 @@ Module {
         }
         Method {
             name: "cancel"
-            type: "bool"
-            Parameter { name: "id"; type: "int" }
-        }
-        Method {
-            name: "sendReadReport"
             type: "bool"
             Parameter { name: "id"; type: "int" }
         }

@@ -21,7 +21,7 @@ BluetoothAgent {
     property bool _hasPrecedingDialog
 
     signal pairingSucceeded()
-    signal pairingFailed()
+    signal pairingFailed(int errorCode)
 
     function pairWithDevice(addr) {
         if (_pairingInProgress) {
@@ -169,7 +169,7 @@ BluetoothAgent {
         if (error == BluetoothAdapter.NoPairingError) {
             pairingSucceeded()
         } else {
-            pairingFailed()
+            pairingFailed(error)
         }
     }
 

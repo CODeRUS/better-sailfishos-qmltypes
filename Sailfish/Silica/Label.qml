@@ -39,12 +39,8 @@ Text {
     id: root
 
     property int truncationMode
-
-    // lineCount == 1 would cause the _fadeText binding to be unoptimized.
-    // Workaround with x >= 1 && x <= 1
-    property bool _fadeText: (width > 0) && (truncationMode == TruncationMode.Fade) && (lineCount >= 1) && (lineCount <= 1) && (contentWidth > Math.ceil(width))
+    property bool _fadeText: width > 0 && truncationMode == TruncationMode.Fade && lineCount == 1 && contentWidth > Math.ceil(width)
     property bool _elideText: (truncationMode == TruncationMode.Elide) || (truncationMode == TruncationMode.Fade && lineCount > 1)
-    property alias _rampEffect: rampEffect
 
     elide: _elideText ? (horizontalAlignment == Text.AlignLeft ? Text.ElideRight
                                                                : (horizontalAlignment == Text.AlignRight ? Text.ElideLeft
@@ -54,25 +50,27 @@ Text {
     color: Theme.primaryColor
     font.pixelSize: Theme.fontSizeMedium
 
-    Item {
-        parent: root.parent
-        x: root.x
-        y: root.y
-        OpacityRampEffect {
-            id: rampEffect
-
-            sourceItem: root
-            enabled: _fadeText
-            direction: horizontalAlignment == Text.AlignRight ? OpacityRamp.RightToLeft
-                                                              : OpacityRamp.LeftToRight
-
-            slope: 1 + 6 * root.width / Screen.width
-            offset: 1 - 1 / slope
-            width: root.width
-            height: root.height
-            anchors.fill: null
-            // Make sure we track the opacity of the Label
-            opacity: root.opacity
+    on_FadeTextChanged: {
+        if (_fadeText) {
+            layer.enabled = true
+            layer.smooth = true
+            layer.effect = rampComponent
+        } else {
+            layer.layer = false
+            layer.effect = null
         }
     }
+
+    Component {
+        id: rampComponent
+        OpacityRampEffectBase {
+            id: rampEffect
+            direction: horizontalAlignment == Text.AlignRight ? OpacityRamp.RightToLeft
+                                                              : OpacityRamp.LeftToRight
+            source: root;
+            slope: 1 + 6 * root.width / Screen.width
+            offset: 1 - 1 / slope
+        }
+    }
+
 }

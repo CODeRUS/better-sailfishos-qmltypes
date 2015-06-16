@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Lipstick 1.0
 
 Item {
     anchors.fill: parent
@@ -87,32 +88,40 @@ Item {
         Behavior on opacity { FadeAnimation { duration: 500 } }
     }
 
-    Image {
-        id: appMainPage
-        opacity: 0.0
-        source: Qt.resolvedUrl("/usr/share/sailfish-tutorial/graphics/tutorial-people-index.png")
-        sourceSize {
-            width: 540 * xScale
-            height: 960 * yScale
-        }
-        width: sourceSize.width
-        height: sourceSize.height
-
-        HintLabel {
-            id: hintLabel
-            atBottom: true
+    Item {
+        id: clipItem
+        anchors.fill: parent
+        clip: x > 0 || width < parent.width
+        Image {
+            id: appMainPage
             opacity: 0.0
-        }
 
-        TouchInteractionHint {
-            id: hint
-            direction: TouchInteraction.Left
-            loops: Animation.Infinite
-            anchors.verticalCenter: parent.verticalCenter
-            startX: hint.direction === TouchInteraction.Left
-                    ? parent.width
-                    : -width
+            Behavior on opacity { SmoothedAnimation { duration: 400; velocity: 1000 / duration } }
+            source: Qt.resolvedUrl("/usr/share/sailfish-tutorial/graphics/tutorial-people-index.png")
+            sourceSize {
+                width: 540 * xScale
+                height: 960 * yScale
+            }
+            width: sourceSize.width
+            height: sourceSize.height
+            x: -parent.x
+
         }
+    }
+    HintLabel {
+        id: hintLabel
+        atBottom: true
+        opacity: 0.0
+    }
+
+    TouchInteractionHint {
+        id: hint
+        direction: TouchInteraction.Left
+        loops: Animation.Infinite
+        anchors.verticalCenter: parent.verticalCenter
+        startX: hint.direction === TouchInteraction.Left
+                ? parent.width
+                : -width
     }
 
     SequentialAnimation {
@@ -134,15 +143,16 @@ Item {
             property: "opacity"
             to: 1.0
             duration: 500
-        }        
+        }
         PauseAnimation { duration: 1000 }
         ScriptAction  {
             script: {
                 //% "Swipe from the outside of the screen to go back to Home"
                 hintLabel.text = qsTrId("tutorial-la-swipe_to_home")
                 hintLabel.opacity = 1.0
+
                 hint.running = true
-                peekArea.peekEnabled = true
+                peekFilter.enabled = true
             }
         }
         PauseAnimation { duration: 3000 }
@@ -185,34 +195,59 @@ Item {
         }
         ScriptAction  {
             script: {
+                hint.running = false
+                hintLabel.opacity = 0.0
                 lessonCompleted(200)
             }
         }
     }
 
-    PeekArea {
-        id: peekArea
+    PeekFilter {
+        id: peekFilter
 
-        peekEnabled: false
+        property bool pressed: leftActive || rightActive
 
-        onOffsetChanged: {
-            if (peekEnabled) {
-                appMainPage.opacity = 1.0 - offset
-            }
-        }
-
+        enabled: false
+        onProgressChanged: if (enabled) appMainPage.opacity = 1.0 - Math.max(0.0, progress-0.3)/0.7
         onPressedChanged: {
-            if (peekEnabled) {
-                hintLabel.opacity = pressed ? 0.0 : 1.0
-                hint.running = pressed ? false : true
-            }
+            hintLabel.opacity = pressed ? 0.0 : 1.0
+            hint.running = pressed ? false : true
         }
-
-        onReleased: {
-            if (offset === 1.0) {
-                peekEnabled = false
-                closeAppAnimation.restart()
-            }
+        leftEnabled: true
+        rightEnabled: true
+        onGestureStarted: {
+            clipEndAnimation.complete()
+            var margin = leftActive ? "leftMargin" : "rightMargin"
+            dragEdgeBinding.property = margin
+            clipEndAnimation.property = margin
+            dragEdgeBinding.when = true
         }
+        onGestureCanceled: {
+            dragEdgeBinding.when = false
+            clipEndAnimation.to = 0
+            clipEndAnimation.duration = 200
+            clipEndAnimation.start()
+        }
+        onGestureTriggered: {
+            enabled = false
+            // make sure open animation has already finished
+            openAppAnimation.stop()
+            closeAppAnimation.restart()
+            dragEdgeBinding.when = false
+            clipEndAnimation.to = parent.width
+            clipEndAnimation.duration = 400*(clipEndAnimation.to - peekFilter.absoluteProgress)/Screen.width
+            clipEndAnimation.start()
+        }
+    }
+    Binding {
+        id: dragEdgeBinding
+        when: false
+        target: clipItem.anchors
+        value: peekFilter.absoluteProgress
+    }
+    NumberAnimation {
+        id: clipEndAnimation
+        easing.type: Easing.InOutQuad
+        target: clipItem.anchors
     }
 }

@@ -36,9 +36,9 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 Label {
-    x: Theme.paddingLarge
+    x: Theme.horizontalPageMargin
     height: Theme.itemSizeExtraSmall
-    width: (parent ? parent.width : Screen.width) - Theme.paddingLarge * 2
+    width: (parent ? parent.width : Screen.width) - x*2
     verticalAlignment: Text.AlignVCenter
     horizontalAlignment: Text.AlignRight
     font.pixelSize: Theme.fontSizeSmall

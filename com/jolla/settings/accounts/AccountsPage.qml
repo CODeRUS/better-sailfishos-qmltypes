@@ -5,8 +5,6 @@ import Sailfish.Accounts 1.0
 Page {
     id: root
 
-    allowedOrientations: Orientation.Portrait
-
     property QtObject _accountSyncAdapter
     property QtObject _settingsLoader
     property QtObject _settingsAgentRunner

@@ -19,7 +19,6 @@ Dialog {
         }
     }
 
-    allowedOrientations: Orientation.All
     canAccept: selectedDevice != ""
     forwardNavigation: canAccept
 

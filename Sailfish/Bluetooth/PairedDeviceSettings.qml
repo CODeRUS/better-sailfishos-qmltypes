@@ -34,67 +34,74 @@ Page {
         return ret.join(', ')
     }
 
-    Column {
-        width: root.width
+    SilicaFlickable {
+        anchors.fill: parent
+        contentHeight: content.height
 
-        PageHeader {
-            //% "Paired device"
-            title: qsTrId("components_bluetooth-he-paired_device")
-        }
+        Column {
+            id: content
 
-        TextField {
             width: root.width
 
-            //: Name or nickname of bluetooth device
-            //% "Device name"
-            label: qsTrId("components_bluetooth-la-device_name")
+            PageHeader {
+                //% "Paired device"
+                title: qsTrId("components_bluetooth-he-paired_device")
+            }
 
-            //: Placeholder test for bluetooth device nickname
-            //% "Nickname"
-            placeholderText: qsTrId("components_bluetooth-la-device_nickname")
+            TextField {
+                width: root.width
 
-            text: root.bluetoothDevice !== null ? root.bluetoothDevice.alias : ""
+                //: Name or nickname of bluetooth device
+                //% "Device name"
+                label: qsTrId("components_bluetooth-la-device_name")
 
-            onTextChanged: {
-                if (root.bluetoothDevice !== null) {
-                    root.bluetoothDevice.alias = text
+                //: Placeholder test for bluetooth device nickname
+                //% "Nickname"
+                placeholderText: qsTrId("components_bluetooth-la-device_nickname")
+
+                text: root.bluetoothDevice !== null ? root.bluetoothDevice.alias : ""
+
+                onTextChanged: {
+                    if (root.bluetoothDevice !== null) {
+                        root.bluetoothDevice.alias = text
+                    }
+                }
+
+                EnterKey.enabled: text || inputMethodComposing
+                EnterKey.iconSource: "image://theme/icon-m-enter-close"
+                EnterKey.onClicked: root.focus = true
+            }
+
+
+            BluetoothDeviceTypeComboBox {
+                width: root.width
+                deviceAddress: root.bluetoothDevice.address
+                deviceClass: root.bluetoothDevice.classOfDevice
+            }
+
+            TrustBluetoothDeviceSwitch {
+                checked: root.bluetoothDevice !== null && root.bluetoothDevice.trusted
+
+                onCheckedChanged: {
+                    if (root.bluetoothDevice !== null) {
+                        root.bluetoothDevice.trusted = checked
+                    }
                 }
             }
 
-            EnterKey.enabled: text || inputMethodComposing
-            EnterKey.iconSource: "image://theme/icon-m-enter-close"
-            EnterKey.onClicked: root.focus = true
-        }
+            Label {
+                x: Theme.horizontalPageMargin
+                width: root.width - x*2
+                height: implicitHeight + Theme.paddingMedium
+                verticalAlignment: Text.AlignBottom
+                font.pixelSize: Theme.fontSizeExtraSmall
+                wrapMode: Text.Wrap
+                color: Theme.rgba(Theme.highlightColor, 0.9)
 
-
-        BluetoothDeviceTypeComboBox {
-            width: root.width
-            deviceAddress: root.bluetoothDevice.address
-            deviceClass: root.bluetoothDevice.classOfDevice
-        }
-
-        TrustBluetoothDeviceSwitch {
-            checked: root.bluetoothDevice !== null && root.bluetoothDevice.trusted
-
-            onCheckedChanged: {
-                if (root.bluetoothDevice !== null) {
-                    root.bluetoothDevice.trusted = checked
-                }
+                //: List of bluetooth profiles that are supported by this bluetooth device
+                //% "Supported profiles: %1"
+                text: qsTrId("components_bluetooth-la-profiles").arg(profilesList())
             }
-        }
-
-        Label {
-            x: Theme.paddingLarge
-            width: root.width - x*2
-            height: implicitHeight + Theme.paddingMedium
-            verticalAlignment: Text.AlignBottom
-            font.pixelSize: Theme.fontSizeExtraSmall
-            wrapMode: Text.Wrap
-            color: Theme.rgba(Theme.highlightColor, 0.9)
-
-            //: List of bluetooth profiles that are supported by this bluetooth device
-            //% "Supported profiles: %1"
-            text: qsTrId("components_bluetooth-la-profiles").arg(profilesList())
         }
     }
 }

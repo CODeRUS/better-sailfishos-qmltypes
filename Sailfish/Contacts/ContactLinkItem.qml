@@ -12,7 +12,7 @@ ListItem {
 
     Image {
         id: icon
-        x: Theme.paddingMedium
+        x: Theme.horizontalPageMargin - Theme.paddingMedium
         anchors.verticalCenter: parent.verticalCenter
         source: person ? CommonJs.syncTargetIcon(person) + "?" + (highlighted ? Theme.highlightColor : Theme.primaryColor)
                        : ""

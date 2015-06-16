@@ -37,6 +37,7 @@ ValueButton {
 
     WallClock {
         id: wallClock
+        enabled: Qt.application.active
         updateFrequency: WallClock.Minute
     }
 }

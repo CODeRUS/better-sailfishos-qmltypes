@@ -45,6 +45,7 @@ Item {
            ? parent.height - height - 4 * Theme.paddingLarge
            : 4 * Theme.paddingLarge
         color: tutorialTheme.highlightColor
+        textFormat: Text.AutoText
     }
 
     Behavior on opacity {

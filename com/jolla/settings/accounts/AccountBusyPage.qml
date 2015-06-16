@@ -35,6 +35,9 @@ Page {
     //% "The account could not be created."
     property string accountCreationErrorText: qsTrId("components_accounts-he-cannot_create_account")
 
+    //% "The account could not be updated."
+    property string accountUpdateErrorText: qsTrId("components_accounts-he-cannot_update_account")
+
     //: Description displayed when an account cannot be created.
     //% "Go back to try again or skip now and add this account later."
     property string retryOrSkipOptionText: qsTrId("components_accounts-la-account_creation_error")
@@ -47,11 +50,14 @@ Page {
     //% "Creating account..."
     property string creatingAccountText: qsTrId("components_accounts-la-creating_account")
 
+    //: Notifies user that the updated account credentials are currently being saved
+    //% "Saving credentials..."
+    property string updatingAccountText: qsTrId("components_accounts-la-updating_account_credentials")
+
     //------ end informational text
 
 
     backNavigation: state == "info"
-    allowedOrientations: Orientation.Portrait
 
     states: [
         State {
@@ -74,7 +80,7 @@ Page {
         opacity: busyIndicator.opacity
 
         Label {
-            width: root.width - Theme.paddingLarge*2
+            width: root.width - Theme.horizontalPageMargin*2
             visible: text.length > 0
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
@@ -95,9 +101,9 @@ Page {
             top: parent.top
             topMargin: Theme.itemSizeLarge
             left: parent.left
-            leftMargin: Theme.paddingLarge
+            leftMargin: Theme.horizontalPageMargin
             right: parent.right
-            rightMargin: Theme.paddingLarge
+            rightMargin: Theme.horizontalPageMargin
         }
         spacing: Theme.paddingLarge
         opacity: 0

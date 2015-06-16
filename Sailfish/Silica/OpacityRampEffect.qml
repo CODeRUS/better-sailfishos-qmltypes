@@ -35,91 +35,17 @@
 import QtQuick 2.0
 import Sailfish.Silica.private 1.0
 
-// XXX This is sometimes showing random data and causing crashes on exit.
-// Disable for now...
-ShaderEffect {
+OpacityRampEffectBase {
     id: root
-
-    // API -----------------------
 
     // source item will be replaced by this effect item
     property Item sourceItem
 
-    // Opacity reduces linearly over the span of the item, affected by two
-    // tunable properties:
-    //  - the slope of the reduction (default 2.0, meaning 100% across half the width)
-    //  - the offset from which the reduction is applied (default 0.5, meaning half the width)
-    property real slope: 2.0
-    property real offset: 0.5
-
-    // clamp will be applied: clamp(factor + ramp value, min, max)
-    property real clampFactor: 0.0
-    property real clampMin: 0.0
-    property real clampMax: 1.0
-
-    // LtR = 0, RtL = 1, TtB = 2, BtT = 3
-    property int direction: 0 // default = LeftToRight-OpaqueToTranslucent
-
     property bool enabled: true
 
-    // impl. ---------------------
     anchors.fill: sourceItem
-    smooth: true
     visible: enabled && sourceItem && sourceItem.visible
-    property variant source: effectsource
-
-    property Item _nullItem: null
-
-    vertexShader: "
-        attribute highp vec4 qt_Vertex;
-        attribute highp vec2 qt_MultiTexCoord0;
-
-        uniform highp mat4 qt_Matrix;
-
-        uniform lowp float slope;
-        uniform lowp float offset;
-        uniform int direction;
-
-        varying highp vec2 vTC;
-        varying lowp float vLevel;
-
-        void main() {
-            gl_Position = qt_Matrix * qt_Vertex;
-            vTC = qt_MultiTexCoord0;
-
-            // Right-to-left
-            if (direction == 1)
-                vLevel = 1.0 + slope * (qt_MultiTexCoord0.x - 1.0 + offset);
-
-            // Top-to-bottom
-            else if (direction == 2)
-                vLevel = 1.0 - slope * (qt_MultiTexCoord0.y - offset);
-
-            // Bottom-to-top
-            else if (direction == 3)
-                vLevel = 1.0 + slope * (qt_MultiTexCoord0.y - 1.0 + offset);
-
-            // Left-to-right (and any bogus value)
-            else
-                vLevel = 1.0 - slope * (qt_MultiTexCoord0.x - offset);
-        }
-        "
-
-    fragmentShader: "
-        uniform sampler2D source;
-
-        uniform lowp float qt_Opacity;
-        uniform lowp float clampFactor;
-        uniform lowp float clampMin;
-        uniform lowp float clampMax;
-
-        varying highp vec2 vTC;
-        varying lowp float vLevel;
-
-        void main(void) {
-            gl_FragColor = qt_Opacity * texture2D(source, vTC) * (clamp(clampFactor + vLevel, clampMin, clampMax));
-        }
-        "
+    source: effectsource
 
     ShaderEffectSource {
         id: effectsource

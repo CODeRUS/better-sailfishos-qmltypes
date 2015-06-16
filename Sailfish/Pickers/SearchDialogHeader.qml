@@ -6,8 +6,11 @@ FocusScope {
     property alias placeholderText: searchField.placeholderText
     property alias dialog: header.dialog
     property int contentType: ContentType.InvalidType
+    property alias searchFieldLeftMargin: searchField.textLeftMargin
     property QtObject model
     readonly property bool active: searchField.text.length > 0
+
+    property alias _glassOnly: header._glassOnly
 
     implicitHeight: col.height
 

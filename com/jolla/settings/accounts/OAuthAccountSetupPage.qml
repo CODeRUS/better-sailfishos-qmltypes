@@ -73,6 +73,16 @@ AccountBusyPage {
         webViewLoadedTimer.start()
     }
 
+    function cancelSignIn() {
+        if (_busy) {
+            if (_accountToUpdate != null) {
+                _accountToUpdate.cancelSignInOperation()
+            } else {
+                accountFactory.cancel()
+            }
+        }
+    }
+
     function done(success, errorCode, errorMessage) {
         if (success) {
             backNavigation = false
@@ -119,22 +129,15 @@ AccountBusyPage {
         accountCredentialsUpdateError(message)
     }
 
-    allowedOrientations: Orientation.Portrait
     backNavigation: true
+
+    // Default to empty state to hide busy spinner. Without this, in landscape mode with the VKB
+    // shown the busy spinner becomes visible as it is no longer hidden by webViewContainer.
+    state: ""
 
     //: Message displayed while waiting for authentication process to load
     //% "Loading..."
     busyDescription: qsTrId("components_accounts-la-oauth_loading")
-
-    onStatusChanged: {
-        if (status == PageStatus.Deactivating && _busy) {
-            if (_accountToUpdate != null) {
-                _accountToUpdate.cancelSignInOperation()
-            } else {
-                accountFactory.cancel()
-            }
-        }
-    }
 
     Timer {
         id: webViewLoadedTimer
@@ -174,5 +177,9 @@ AccountBusyPage {
             left: parent.left
             right: parent.right
         }
+
+        // Ensure that the busy spinner is hidden when there are children of webViewContainer. This
+        // prevents it from becoming visible when the VKB is shown.
+        onChildrenChanged: root.state = (children.length === 0) ? "busy" : ""
     }
 }

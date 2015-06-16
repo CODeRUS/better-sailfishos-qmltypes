@@ -24,7 +24,7 @@ Column {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
-                    leftMargin: Theme.paddingLarge
+                    leftMargin: Theme.horizontalPageMargin
                 }
                 text: root.intervalModel.intervalText(model.interval)
             }

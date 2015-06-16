@@ -10,6 +10,8 @@ Dialog {
     property SelectedContentModel _selectedModel
     property int _animationDuration: 150
 
+    property Component _background
+
     function updateSelectedContent(model) {
         if (!_selectedModel) {
             _selectedModel = selectedModelComponent.createObject(pickerDialog)
@@ -28,6 +30,11 @@ Dialog {
         }
     }
 
+    Item {
+        id: background
+        anchors.fill: parent
+    }
+
     Component {
         id: selectedModelComponent
 
@@ -35,6 +42,10 @@ Dialog {
     }
 
     Component.onCompleted: {
+        if (_background) {
+            _background.createObject(background)
+        }
+
         if (!_selectedModel) {
             _selectedModel = selectedModelComponent.createObject(pickerDialog)
         }

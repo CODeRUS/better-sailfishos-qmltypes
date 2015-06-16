@@ -36,11 +36,14 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 Item {
+    id: detailItem
     width: parent.width
     height: Math.max(labelText.height, valueText.height) + 2*Theme.paddingSmall
 
     property alias label: labelText.text
     property alias value: valueText.text
+    property real leftMargin: Theme.horizontalPageMargin
+    property real rightMargin: Theme.horizontalPageMargin
 
     Text {
         id: labelText
@@ -50,7 +53,7 @@ Item {
             left: parent.left
             right: parent.horizontalCenter
             rightMargin: Theme.paddingSmall
-            leftMargin: Theme.paddingLarge
+            leftMargin: detailItem.leftMargin
         }
         horizontalAlignment: Text.AlignRight
         color: Theme.secondaryHighlightColor
@@ -66,7 +69,7 @@ Item {
             left: parent.horizontalCenter
             right: parent.right
             leftMargin: Theme.paddingSmall
-            rightMargin: Theme.paddingLarge
+            rightMargin: detailItem.rightMargin
         }
         horizontalAlignment: Text.AlignLeft
         color: Theme.highlightColor

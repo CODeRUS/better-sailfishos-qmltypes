@@ -72,6 +72,7 @@ Module {
         Property { name: "bus"; type: "DeclarativeDBus::BusType" }
         Property { name: "signalsEnabled"; type: "bool" }
         Signal { name: "interfaceChanged" }
+        Signal { name: "propertiesChanged" }
         Method {
             name: "call"
             Parameter { name: "method"; type: "string" }
@@ -79,12 +80,22 @@ Module {
         }
         Method {
             name: "typedCall"
+            type: "bool"
+            Parameter { name: "method"; type: "string" }
+            Parameter { name: "arguments"; type: "QJSValue" }
+            Parameter { name: "callback"; type: "QJSValue" }
+            Parameter { name: "errorCallback"; type: "QJSValue" }
+        }
+        Method {
+            name: "typedCall"
+            type: "bool"
             Parameter { name: "method"; type: "string" }
             Parameter { name: "arguments"; type: "QJSValue" }
             Parameter { name: "callback"; type: "QJSValue" }
         }
         Method {
             name: "typedCall"
+            type: "bool"
             Parameter { name: "method"; type: "string" }
             Parameter { name: "arguments"; type: "QJSValue" }
         }

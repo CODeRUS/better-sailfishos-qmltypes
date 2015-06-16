@@ -3,14 +3,16 @@ import Sailfish.Silica 1.0
 
 FocusScope {
     id: scope
-    property bool searchAsHeader: false
+    property bool searchAsHeader: isLandscape
     property alias title: pageHeader.title
     property alias placeholderText: searchField.placeholderText
     property alias searchText: searchField.text
-    property alias coverSource: cover.source
+    property Item coverArt
     default property alias _data: bottomCol.data
 
     implicitHeight: col.height + bottomCol.height
+
+    onCoverArtChanged: if (coverArt) coverArt.parent = coverHolder
 
     function enableSearch() {
         if (searchField.enabled) {
@@ -28,8 +30,8 @@ FocusScope {
         states: [
             State {
                 name: "HEADER"
-                when: !searchField.enabled && (cover.status !== Image.Ready)
-                PropertyChanges { target: effect; opacity: 0.0; }
+                when: !searchField.enabled && (!coverArt || coverArt.status !== Image.Ready)
+                PropertyChanges { target: coverHolder; opacity: 0.0; }
                 PropertyChanges { target: header; height: pageHeader.height; }
                 PropertyChanges { target: pageHeader; opacity: 1.0; }
                 PropertyChanges { target: col; height: pageHeader.height; }
@@ -38,8 +40,8 @@ FocusScope {
             State {
                 name: "SEARCH-HEADER"
                 when: searchField.enabled && searchAsHeader
-                PropertyChanges { target: effect; opacity: 0.0; }
-                PropertyChanges { target: header; height: Theme.paddingSmall; }
+                PropertyChanges { target: coverHolder; opacity: 0.0; }
+                PropertyChanges { target: header; height: 0; }
                 PropertyChanges { target: pageHeader; opacity: 0.0; }
                 PropertyChanges { target: col; height: pageHeader.height; }
                 PropertyChanges { target: searchField; opacity: 1.0; }
@@ -47,7 +49,7 @@ FocusScope {
             State {
                 name: "SEARCH"
                 when: searchField.enabled && !searchAsHeader
-                PropertyChanges { target: effect; opacity: 0.0; }
+                PropertyChanges { target: coverHolder; opacity: 0.0; }
                 PropertyChanges { target: header; height: pageHeader.height; }
                 PropertyChanges { target: pageHeader; opacity: 1.0; }
                 PropertyChanges { target: col; height: pageHeader.height + searchField.height; }
@@ -55,11 +57,11 @@ FocusScope {
             },
             State {
                 name: "IMAGE"
-                when: !searchField.enabled && (cover.status === Image.Ready)
+                when: !searchField.enabled && (coverArt && coverArt.status === Image.Ready)
                 PropertyChanges { target: pageHeader; opacity: 0.0; }
-                PropertyChanges { target: header; height: cover.height + Theme.paddingMedium; }
-                PropertyChanges { target: effect; opacity: 1.0; }
-                PropertyChanges { target: col; height: cover.height + Theme.paddingMedium; }
+                PropertyChanges { target: header; height: coverArt.height + Theme.paddingMedium; }
+                PropertyChanges { target: coverHolder; opacity: 1.0; }
+                PropertyChanges { target: col; height: coverArt.height + Theme.paddingMedium; }
                 PropertyChanges { target: searchField; opacity: 0.0; }
             }
         ]
@@ -93,7 +95,7 @@ FocusScope {
                     running: false
                     ParallelAnimation {
                         FadeAnimation { target: pageHeader; property: "opacity"; to: 0.0; }
-                        PropertyAnimation { target: header; property: "height"; to: Theme.paddingSmall; }
+                        PropertyAnimation { target: header; property: "height"; to: 0; }
                         PropertyAnimation { target: col; property: "height"; to: pageHeader.height; }
                     }
                     FadeAnimation { target: searchField; property: "opacity"; to: 1.0; }
@@ -119,8 +121,8 @@ FocusScope {
                         FadeAnimation { target: pageHeader; property: "opacity"; to: 0.0; }
                         FadeAnimation { target: searchField; property: "opacity"; to: 0.0; }
                     }
-                    PropertyAnimation { target: col; property: "height"; to: cover.height + Theme.paddingMedium; }
-                    FadeAnimation { target: effect; property: "opacity"; to: 1.0; }
+                    PropertyAnimation { target: col; property: "height"; to: coverHolder.coverArtSize + Theme.paddingMedium; }
+                    FadeAnimation { target: coverHolder; property: "opacity"; to: 1.0; }
                 }
             },
             Transition {
@@ -129,7 +131,7 @@ FocusScope {
                 SequentialAnimation {
                     id: toSearch
                     running: false
-                    FadeAnimation { target: effect; property: "opacity"; to: 0.0; }
+                    FadeAnimation { target: coverHolder; property: "opacity"; to: 0.0; }
                     PropertyAnimation { target: col; property: "height"; to: pageHeader.height + searchField.height; }
                     ParallelAnimation {
                         FadeAnimation { target: pageHeader; property: "opacity"; to: 1.0; }
@@ -141,32 +143,22 @@ FocusScope {
 
         Item {
             id: header
+
             width: parent.width
-            height: pageHeader.visible ? pageHeader.height : cover.height + Theme.paddingMedium
+            height: pageHeader.visible ? pageHeader.height : coverHolder.coverArtSize + Theme.paddingMedium
 
             PageHeader {
                 id: pageHeader
                 width: parent.width
             }
 
-            Image {
-                id: cover
-                asynchronous: true
-                property real size: parent.width
+            Item {
+                id: coverHolder
 
-                width: size
-                height: size
-                sourceSize.width: size
-                sourceSize.height: size
-                fillMode: Image.PreserveAspectFit
-            }
+                property real coverArtSize: parent.width
 
-            OpacityRampEffect {
-                id: effect
-                slope: 1.0
-                offset: 0.0
-                direction: OpacityRamp.BottomToTop
-                sourceItem: cover
+                width: coverArtSize
+                height: coverArtSize
             }
         }
 

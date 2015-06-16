@@ -19,7 +19,8 @@ Module {
                 "WaitingForConnection": 1,
                 "Checking": 2,
                 "UpToDate": 3,
-                "UpdateAvailable": 4
+                "UpdateAvailable": 4,
+                "PreparingForUpdate": 5
             }
         }
         Enum {
@@ -38,14 +39,16 @@ Module {
         Property { name: "osSummary"; type: "string"; isReadonly: true }
         Property { name: "osCover"; type: "string"; isReadonly: true }
         Property { name: "osWebsite"; type: "string"; isReadonly: true }
-        Property { name: "osSize"; type: "int"; isReadonly: true }
+        Property { name: "osDownloadSize"; type: "qlonglong"; isReadonly: true }
+        Property { name: "osInstallSize"; type: "qlonglong"; isReadonly: true }
         Property { name: "checked"; type: "bool"; isReadonly: true }
         Property { name: "lastChecked"; type: "QDateTime"; isReadonly: true }
         Property { name: "accountStatus"; type: "AccountStatus"; isReadonly: true }
         Signal { name: "updateInfoChanged" }
-        Signal { name: "upgradeCheckCacheCleared" }
+        Signal { name: "updateCheckCacheCleared" }
         Method { name: "checkForUpdate" }
+        Method { name: "getUpdateSize" }
         Method { name: "downloadUpdate" }
-        Method { name: "clearUpgradeCheckCache" }
+        Method { name: "clearOsUpdateCheckCache" }
     }
 }

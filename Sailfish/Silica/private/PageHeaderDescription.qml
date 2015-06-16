@@ -36,11 +36,11 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 Label {
-    width: parent.width - 2*Theme.paddingLarge
+    width: parent.width - parent.leftMargin - parent.rightMargin
     anchors {
         top: parent._titleItem.bottom
         right: parent.right
-        rightMargin: Theme.paddingLarge
+        rightMargin: parent.rightMargin
     }
     font.pixelSize: Theme.fontSizeSmall
     color: Theme.highlightColor

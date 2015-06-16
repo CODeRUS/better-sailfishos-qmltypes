@@ -82,7 +82,7 @@ Item {
             }
         }
 
-        text: headerText(imageEditPreview.editOperation)
+        text: headerText(preview.editOperation)
         height: Theme.itemSizeLarge
         color: Theme.highlightColor
         verticalAlignment: Text.AlignVCenter

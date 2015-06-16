@@ -95,7 +95,9 @@ Item {
     }
 
     width: parent.width
-    height: Math.max(entriesView.height, Theme.itemSizeMedium)
+    height: Math.max(
+                entriesView.height,
+                Screen.sizeCategory >= Screen.Large ? Theme.itemSizeLarge : Theme.itemSizeMedium)
 
     InverseMouseArea {
         anchors.fill: parent

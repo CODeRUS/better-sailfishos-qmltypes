@@ -40,8 +40,11 @@ Item {
     id: placeholder
     property Item flickable
     property alias text: mainLabel.text
+    property alias textFormat: mainLabel.textFormat
     property alias hintText: hintLabel.text
     property real verticalOffset
+    property real leftMargin: Theme.horizontalPageMargin
+    property real rightMargin: Theme.horizontalPageMargin
 
     // stay centered in screen
     x: (flickable ? flickable.originX : 0) + (__silica_applicationwindow_instance._rotatingItem.width - width) / 2
@@ -66,11 +69,12 @@ Item {
     InfoLabel { id: mainLabel }
     Text {
         id: hintLabel
-        x: Theme.paddingLarge
+        x: leftMargin
         anchors.top: mainLabel.bottom
-        width: parent.width - 2*Theme.paddingLarge
+        width: parent.width - parent.leftMargin - parent.rightMargin
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.Wrap
+        textFormat: mainLabel.textFormat
         font {
             pixelSize: Theme.fontSizeLarge
             family: Theme.fontFamilyHeading

@@ -104,7 +104,7 @@ TextBaseItem {
     property alias placeholderColor: placeholderTextLabel.color
     property bool softwareInputPanelEnabled: true
     property bool errorHighlight: false
-    property real textMargin: Theme.paddingLarge
+    property real textMargin: Theme.horizontalPageMargin
     property real textLeftMargin: textMargin
     property real textRightMargin: textMargin
     property real textTopMargin: Theme.paddingSmall

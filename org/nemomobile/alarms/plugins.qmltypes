@@ -57,6 +57,7 @@ Module {
         Property { name: "allDay"; type: "bool"; isReadonly: true }
         Property { name: "calendarUid"; type: "string"; isReadonly: true }
         Property { name: "calendarEventUid"; type: "string"; isReadonly: true }
+        Property { name: "notebookUid"; type: "string"; isReadonly: true }
         Property { name: "calendarEventRecurrenceId"; type: "string"; isReadonly: true }
         Property { name: "timeoutSnoozeCounter"; type: "int"; isReadonly: true }
         Property { name: "maximalTimeoutSnoozeCount"; type: "int" }

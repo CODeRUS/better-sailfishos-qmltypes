@@ -87,7 +87,7 @@ Dialog {
     }
 
     Column {
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         y: Theme.itemSizeLarge
         width: parent.width - x*2
         opacity: root.errorMessage != "" ? 1 : 0
@@ -122,7 +122,7 @@ Dialog {
         spacing: Theme.paddingLarge
 
         Label {
-            x: Theme.paddingLarge
+            x: Theme.horizontalPageMargin
             width: root.width - x*2
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
@@ -175,7 +175,7 @@ Dialog {
 
             Label {
                 id: title
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - 2*x
                 height: implicitHeight + Theme.paddingLarge
                 color: Theme.highlightColor
@@ -197,7 +197,7 @@ Dialog {
 
                 Label {
                     id: instructions
-                    x: Theme.paddingLarge
+                    x: Theme.horizontalPageMargin
                     width: parent.width - x*2
                     color: Theme.rgba(Theme.highlightColor, 0.6)
                     font.pixelSize: Theme.fontSizeSmall
@@ -208,7 +208,7 @@ Dialog {
                 Label {
                     id: readOnlyPasskey
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width - Theme.paddingLarge*2
+                    width: parent.width - Theme.horizontalPageMargin*2
                     height: implicitHeight + Theme.paddingLarge
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignBottom
@@ -268,7 +268,7 @@ Dialog {
                 Behavior on opacity { FadeAnimation {} }
 
                 Label {
-                    x: Theme.paddingLarge
+                    x: Theme.horizontalPageMargin
                     width: parent.width - x*2
                     color: Theme.rgba(Theme.highlightColor, 0.6)
                     wrapMode: Text.WordWrap
@@ -325,7 +325,7 @@ Dialog {
             spacing: Theme.paddingLarge
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeExtraLarge
@@ -337,7 +337,7 @@ Dialog {
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 wrapMode: Text.Wrap
                 color: Theme.rgba(Theme.highlightColor, 0.6)

@@ -43,8 +43,9 @@ MouseArea {
 
     property bool checked
     property bool automaticCheck: true
-    property real leftMargin
-    property real rightMargin: Theme.paddingLarge
+    property real leftMargin: Theme.horizontalPageMargin
+    property real rightMargin: Theme.horizontalPageMargin
+    property real _rightPadding
     property bool down: pressed && containsMouse
     property bool highlighted: down
     property bool busy
@@ -61,7 +62,7 @@ MouseArea {
         width: Theme.itemSizeExtraSmall
         height: Theme.itemSizeSmall
         anchors {
-            left: parent.left; leftMargin: root.leftMargin
+            left: parent.left; leftMargin: root.leftMargin - Theme.paddingLarge
         }
 
         GlassItem {
@@ -106,7 +107,7 @@ MouseArea {
     }
     Label {
         id: label
-        width: parent.width - toggle.width - root.leftMargin - root.rightMargin
+        width: parent.width - toggle.width - root.leftMargin - root.rightMargin - root._rightPadding
         opacity: root.enabled ? 1.0 : 0.4
         anchors {
             verticalCenter: toggle.verticalCenter
@@ -119,7 +120,7 @@ MouseArea {
     }
     Label {
         id: desc
-        width: parent.width - toggle.width - root.leftMargin - root.rightMargin
+        width: parent.width - toggle.width - root.leftMargin - root.rightMargin - root._rightPadding
         height: text.length ? (implicitHeight + Theme.paddingMedium) : 0
         opacity: root.enabled ? 1.0 : 0.4
         anchors.top: label.bottom

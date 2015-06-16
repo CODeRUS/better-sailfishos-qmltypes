@@ -18,6 +18,12 @@ Module {
         Property { name: "lightness"; type: "float" }
         Property { name: "alpha"; type: "float" }
         Method { name: "toHexString"; type: "string" }
+        Method { name: "remap" }
+        Method {
+            name: "equals"
+            type: "bool"
+            Parameter { name: "color"; type: "QColor" }
+        }
     }
     Component {
         name: "DeclarativeProfileProvider"

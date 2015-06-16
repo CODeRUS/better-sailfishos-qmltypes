@@ -202,6 +202,25 @@ Module {
         }
     }
     Component {
+        name: "NemoCalendarImportModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.calendar/ImportModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "fileName"; type: "string" }
+        Method {
+            name: "getEvent"
+            type: "QObject*"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "importToNotebook"
+            type: "bool"
+            Parameter { name: "notebookUid"; type: "string" }
+        }
+        Method { name: "importToNotebook"; type: "bool" }
+    }
+    Component {
         name: "NemoCalendarNotebookModel"
         prototype: "QAbstractListModel"
         exports: ["org.nemomobile.calendar/NotebookModel 1.0"]
@@ -219,6 +238,8 @@ Module {
         Property { name: "name"; type: "string"; isReadonly: true }
         Property { name: "description"; type: "string"; isReadonly: true }
         Property { name: "color"; type: "string"; isReadonly: true }
+        Property { name: "accountId"; type: "int"; isReadonly: true }
+        Property { name: "accountIcon"; type: "QUrl"; isReadonly: true }
         Property { name: "isDefault"; type: "bool"; isReadonly: true }
         Property { name: "localCalendar"; type: "bool"; isReadonly: true }
         Property { name: "isReadOnly"; type: "bool"; isReadonly: true }

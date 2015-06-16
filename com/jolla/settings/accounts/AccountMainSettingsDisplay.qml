@@ -38,7 +38,7 @@ Item {
 
     Image {
         id: accountIcon
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         width: Theme.iconSizeLarge
         height: width
         source: root.accountProvider.iconName
@@ -50,7 +50,7 @@ Item {
             left: accountIcon.right
             leftMargin: Theme.paddingLarge
             right: parent.right
-            rightMargin: Theme.paddingLarge
+            rightMargin: Theme.horizontalPageMargin
             verticalCenter: accountIcon.verticalCenter
             verticalCenterOffset: usernameLabel.text != ""
                                   ? (-usernameLabel.implicitHeight - Theme.paddingMedium)/2

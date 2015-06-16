@@ -19,6 +19,8 @@ Column {
     property alias account: accountObj
     property int accountId
 
+    default property alias _children: contentColumn.data
+
     signal aboutToSaveAccount()
     signal accountInitialized()
     signal accountSaveCompleted(var success)
@@ -133,5 +135,11 @@ Column {
         accountProvider: root.accountProvider
         accountUserName: account.defaultCredentialsUserName
         accountDisplayName: account.displayName
+    }
+
+    Column {
+        id: contentColumn
+        width: parent.width
+        visible: root.accountEnabled
     }
 }

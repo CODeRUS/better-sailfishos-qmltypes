@@ -18,6 +18,8 @@ Dialog {
     }
 
     SilicaFlickable {
+        id: flickable
+
         anchors.fill: parent
         contentHeight: contentColumn.height
 
@@ -34,10 +36,21 @@ Dialog {
                 //: Heading for page that allows the user to change the current ambience colors
                 //% "Ambience"
                 title: qsTrId("startupwizard-he-ambience")
+
+                Rectangle {
+                    parent: header
+                    z: 9998 // Just below DialogHeader overlay
+
+                    width: parent.width
+                    height: parent._overlayHeight
+                    y: Math.max(flickable.contentY, flickable.originY)
+
+                    color: "black"
+                }
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 height: implicitHeight + Theme.paddingLarge
                 wrapMode: Text.Wrap
@@ -49,6 +62,8 @@ Dialog {
 
             AmbienceColorPicker {
                 id: picker
+
+                columns: Math.floor(width / Theme.itemSizeHuge)
 
                 onColorChanged: {
                     root._colorSelected = true

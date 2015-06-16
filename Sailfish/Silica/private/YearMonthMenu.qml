@@ -98,7 +98,9 @@ ListView {
 
         ContextMenu {
             Grid {
-                columns: 3
+                id: monthGrid
+
+                columns: isPortrait ? 3 : 6
 
                 Repeater {
                     model: ListModel {
@@ -116,7 +118,7 @@ ListView {
 
                     BackgroundItem {
                         id: monthBox
-                        width: root.width / 3
+                        width: root.width / monthGrid.columns
                         height: width
 
                         onClicked: {

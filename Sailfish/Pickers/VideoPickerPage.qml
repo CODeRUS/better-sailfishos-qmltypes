@@ -17,7 +17,8 @@ PickerPage {
         property bool searchActive
 
         anchors.fill: parent
-        columnCount: isLandscape ? 4 : 2
+        // reference column width: 960 / 4
+        columnCount: Math.floor(width / (Theme.pixelRatio * 240))
 
         header: SearchPageHeader {
             id: searchHeader

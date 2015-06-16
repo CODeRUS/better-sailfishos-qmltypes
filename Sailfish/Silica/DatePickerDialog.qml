@@ -68,6 +68,7 @@ Dialog {
 
     canAccept: !isNaN(selectedDate.getTime())
     forwardNavigation: _showYearSelectionFirst ? false : !_belowTop
+    allowedOrientations: Orientation.All
 
     Loader {
         id: initialYearSelectionLoader
@@ -154,6 +155,8 @@ Dialog {
             property alias currentYear: menu.currentYear
             signal monthActivated(int month, int year)
 
+            allowedOrientations: datePickerDialog.allowedOrientations
+
             YearMonthMenu {
                 id: menu
                 onMonthActivated: parent.monthActivated(month, year)
@@ -189,12 +192,12 @@ Dialog {
                     top: header.bottom
                     horizontalCenter: parent.horizontalCenter
                 }
-                width: datePicker.width
+                width: datePicker.width - datePicker.leftMargin - datePicker.rightMargin
                 Repeater {
                     model: weekdayModel
                     MenuLabel {
                         text: model.name
-                        width: datePicker.width / 7
+                        width: weekDays.width / 7
                     }
                 }
             }

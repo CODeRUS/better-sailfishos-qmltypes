@@ -22,7 +22,6 @@ PickerPage {
         currentIndex: -1
         anchors.fill: parent
         header: SearchPageHeader {
-            id: searchField
             width: listView.width
             title: documentPicker.title
 
@@ -56,6 +55,7 @@ PickerPage {
 
         delegate: DocumentItem {
             id: documentItem
+            leftMargin: listView.headerItem.searchFieldLeftMargin
             baseName: Theme.highlightText(documentModel.baseName(model.fileName), documentModel.filter, Theme.highlightColor)
             extension: Theme.highlightText(documentModel.extension(model.fileName), documentModel.filter, Theme.highlightColor)
 

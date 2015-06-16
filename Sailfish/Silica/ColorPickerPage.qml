@@ -60,7 +60,7 @@ Page {
         ColorPicker {
             id: picker
             anchors.top: header.bottom
-
+            columns: Math.floor(width / Theme.itemSizeHuge)
             isPortrait: colorDialog.isPortrait
             onColorClicked: colorDialog.colorClicked(picker.color)
         }

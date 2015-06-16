@@ -18,6 +18,10 @@ Module {
         Property { name: "flickable"; type: "QQuickFlickable"; isPointer: true }
         Property { name: "data"; type: "QObject"; isList: true; isReadonly: true }
         Method {
+            name: "handlePress"
+            Parameter { name: "pos"; type: "QPointF" }
+        }
+        Method {
             name: "handleMove"
             Parameter { name: "pos"; type: "QPointF" }
         }
@@ -32,9 +36,10 @@ Module {
         Enum {
             name: "Size"
             values: {
-                "Small": 0,
-                "Medium": 1,
-                "Large": 2
+                "ExtraSmall": 0,
+                "Small": 1,
+                "Medium": 2,
+                "Large": 3
             }
         }
     }
@@ -47,20 +52,6 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "text"; type: "string" }
         Property { name: "hasText"; type: "bool"; isReadonly: true }
-    }
-    Component {
-        name: "DeclarativeConfigApi"
-        prototype: "QObject"
-        exports: ["Sailfish.Silica.private/Config 1.0"]
-        isCreatable: false
-        isSingleton: true
-        exportMetaObjectRevisions: [0]
-        Property { name: "wayland"; type: "bool"; isReadonly: true }
-        Property { name: "demoMode"; type: "bool"; isReadonly: true }
-        Method {
-            name: "setCompositorWindows"
-            Parameter { type: "QList<QObject*>" }
-        }
     }
     Component {
         name: "DeclarativeCover"
@@ -120,51 +111,6 @@ Module {
         Method {
             name: "trigger"
             Parameter { name: "id"; type: "int" }
-        }
-    }
-    Component {
-        name: "DeclarativeCoverWindow"
-        defaultProperty: "data"
-        prototype: "QQuickWindow"
-        exports: ["Sailfish.Silica.private/CoverWindow 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "cover"; type: "DeclarativeCover"; isPointer: true }
-        Property { name: "mainWindow"; type: "DeclarativeWindow"; isPointer: true }
-        Method {
-            name: "setContentSize"
-            Parameter { name: "w"; type: "float" }
-            Parameter { name: "h"; type: "float" }
-        }
-    }
-    Component {
-        name: "DeclarativeDBusAdaptor"
-        prototype: "QDBusVirtualObject"
-        exports: ["Sailfish.Silica.private/DBusAdaptor 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "service"; type: "string" }
-        Property { name: "path"; type: "string" }
-        Property { name: "iface"; type: "string" }
-        Property { name: "xml"; type: "string" }
-        Signal { name: "interfaceChanged" }
-    }
-    Component {
-        name: "DeclarativeDBusInterface"
-        prototype: "QObject"
-        exports: ["Sailfish.Silica.private/DBusInterface 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "destination"; type: "string" }
-        Property { name: "path"; type: "string" }
-        Property { name: "iface"; type: "string" }
-        Signal { name: "interfaceChanged" }
-        Method {
-            name: "call"
-            Parameter { name: "method"; type: "string" }
-            Parameter { name: "arguments"; type: "QJSValue" }
-        }
-        Method {
-            name: "typedCall"
-            Parameter { name: "method"; type: "string" }
-            Parameter { name: "arguments"; type: "QJSValue" }
         }
     }
     Component {
@@ -242,22 +188,6 @@ Module {
         }
     }
     Component {
-        name: "DeclarativeDragFilter"
-        prototype: "QObject"
-        exports: ["Sailfish.Silica.private/DragFilter 1.0"]
-        isCreatable: false
-        exportMetaObjectRevisions: [0]
-        Property { name: "canceled"; type: "bool"; isReadonly: true }
-        Property { name: "screenMargin"; type: "float" }
-        Method {
-            name: "begin"
-            Parameter { name: "x"; type: "float" }
-            Parameter { name: "y"; type: "float" }
-        }
-        Method { name: "end" }
-        Method { name: "cancelClick" }
-    }
-    Component {
         name: "DeclarativeEnterKey"
         prototype: "QObject"
         exports: ["Sailfish.Silica/EnterKey 1.0"]
@@ -312,7 +242,8 @@ Module {
                 "DateLong": 12,
                 "MonthNameStandalone": 13,
                 "MonthNameStandaloneShort": 14,
-                "DateMedium": 15
+                "DateMedium": 15,
+                "DateMediumWithoutYear": 16
             }
         }
         Enum {
@@ -449,6 +380,8 @@ Module {
                 "Landscape": 2,
                 "PortraitInverted": 4,
                 "LandscapeInverted": 8,
+                "PortraitMask": 5,
+                "LandscapeMask": 10,
                 "All": 15
             }
         }
@@ -460,6 +393,8 @@ Module {
                 "Landscape": 2,
                 "PortraitInverted": 4,
                 "LandscapeInverted": 8,
+                "PortraitMask": 5,
+                "LandscapeMask": 10,
                 "All": 15
             }
         }
@@ -556,55 +491,38 @@ Module {
         }
     }
     Component {
-        name: "DeclarativePreeditText"
-        prototype: "QObject"
-        exports: ["Sailfish.Silica.private/PreeditText 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "text"; type: "string" }
-    }
-    Component {
-        name: "DeclarativeQuickScrollButtonBase"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["Sailfish.Silica.private/QuickScrollButtonBase 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "pressed"; type: "bool"; isReadonly: true }
-        Property { name: "flickable"; type: "QQuickItem"; isPointer: true }
-        Signal { name: "clicked" }
-    }
-    Component {
         name: "DeclarativeScreen"
         prototype: "QObject"
-        exports: [
-            "Sailfish.Silica/Screen 1.0",
-            "Sailfish.Silica/StandardPaths 1.0"
-        ]
+        exports: ["Sailfish.Silica/Screen 1.0"]
         isCreatable: false
         isSingleton: true
-        exportMetaObjectRevisions: [0, 0]
-        Property { name: "width"; type: "int"; isReadonly: true }
-        Property { name: "height"; type: "int"; isReadonly: true }
-    }
-    Component {
-        name: "DeclarativeTextBaseItem"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["Sailfish.Silica.private/TextBaseItem 1.0"]
         exportMetaObjectRevisions: [0]
         Enum {
-            name: "HAlignment"
+            name: "SizeCategory"
             values: {
-                "AlignLeft": 1,
-                "AlignRight": 2,
-                "AlignHCenter": 4
+                "Small": 0,
+                "Medium": 1,
+                "Large": 2,
+                "ExtraLarge": 3
             }
         }
-        Property { name: "horizontalAlignment"; type: "HAlignment" }
-        Property { name: "explicitHorizontalAlignment"; type: "bool"; isReadonly: true }
-        Method {
-            name: "setImplicitHorizontalAlignment"
-            Parameter { name: "alignment"; type: "HAlignment" }
-        }
+        Property { name: "width"; type: "int"; isReadonly: true }
+        Property { name: "height"; type: "int"; isReadonly: true }
+        Property { name: "sizeCategory"; type: "SizeCategory"; isReadonly: true }
+    }
+    Component {
+        name: "DeclarativeStandardPaths"
+        prototype: "QObject"
+        exports: ["Sailfish.Silica/StandardPaths 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Property { name: "data"; type: "string"; isReadonly: true }
+        Property { name: "documents"; type: "string"; isReadonly: true }
+        Property { name: "genericData"; type: "string"; isReadonly: true }
+        Property { name: "music"; type: "string"; isReadonly: true }
+        Property { name: "pictures"; type: "string"; isReadonly: true }
+        Property { name: "videos"; type: "string"; isReadonly: true }
     }
     Component {
         name: "DeclarativeTouchBlocker"
@@ -646,57 +564,6 @@ Module {
         }
     }
     Component {
-        name: "DeclarativeUnderline"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["Sailfish.Silica.private/Underline 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "horizontalAlignment"; type: "int" }
-        Property { name: "primaryColor"; type: "QColor" }
-        Property { name: "secondaryColor"; type: "QColor" }
-    }
-    Component {
-        name: "DeclarativeVisibilityCull"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["Sailfish.Silica.private/VisibilityCull 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "target"; type: "QQuickItem"; isPointer: true }
-        Property { name: "enabled"; type: "bool" }
-    }
-    Component {
-        name: "DeclarativeWindow"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["Sailfish.Silica.private/Window 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "orientation"; type: "DeclarativeOrientation::Orientation"; isReadonly: true }
-        Property { name: "deviceOrientation"; type: "DeclarativeOrientation::Orientation" }
-        Property { name: "_allowedOrientations"; type: "DeclarativeOrientation::Orientations" }
-        Property { name: "screenRotation"; type: "int"; isReadonly: true }
-        Property { name: "_persistentOpenGLContext"; type: "bool" }
-        Property { name: "_persistentSceneGraph"; type: "bool" }
-        Signal { name: "_orientationLockedChanged" }
-        Method { name: "activate" }
-        Method { name: "deactivate" }
-        Method { name: "_processPendingDeletions" }
-        Method {
-            name: "_selectOrientation"
-            type: "int"
-            Parameter { type: "int" }
-            Parameter { type: "int" }
-        }
-        Method {
-            name: "_selectOrientation"
-            type: "int"
-            Parameter { type: "int" }
-        }
-        Method {
-            name: "_setCover"
-            Parameter { name: "window"; type: "QObject"; isPointer: true }
-        }
-    }
-    Component {
         name: "MInverseMouseArea"
         defaultProperty: "data"
         prototype: "QQuickItem"
@@ -717,230 +584,6 @@ Module {
         Method { name: "cancelTouch" }
     }
     Component {
-        name: "PulleyMenuLogic"
-        prototype: "QObject"
-        exports: ["Sailfish.Silica.private/PulleyMenuLogic 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "pullDownType"; type: "bool" }
-        Property { name: "flickable"; type: "QObject"; isPointer: true }
-        Signal { name: "finalPositionReached" }
-        Signal {
-            name: "flickableChanged"
-            Parameter { name: "arg"; type: "QObject"; isPointer: true }
-        }
-        Signal {
-            name: "pullDownTypeChanged"
-            Parameter { name: "arg"; type: "bool" }
-        }
-        Signal {
-            name: "animateFlick"
-            Parameter { name: "duration"; type: "float" }
-            Parameter { name: "position"; type: "float" }
-        }
-        Method { name: "outOfBounds"; type: "bool" }
-        Method { name: "monitorFlick" }
-    }
-    Component { name: "QDBusVirtualObject"; prototype: "QObject" }
-    Component {
-        name: "QQuickRootItem"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        Method {
-            name: "setWidth"
-            Parameter { name: "w"; type: "int" }
-        }
-        Method {
-            name: "setHeight"
-            Parameter { name: "h"; type: "int" }
-        }
-    }
-    Component {
-        name: "QQuickWindow"
-        defaultProperty: "data"
-        prototype: "QWindow"
-        Property { name: "data"; type: "QObject"; isList: true; isReadonly: true }
-        Property { name: "color"; type: "QColor" }
-        Property { name: "contentItem"; type: "QQuickItem"; isReadonly: true; isPointer: true }
-        Property {
-            name: "activeFocusItem"
-            revision: 1
-            type: "QQuickItem"
-            isReadonly: true
-            isPointer: true
-        }
-        Signal { name: "frameSwapped" }
-        Signal { name: "sceneGraphInitialized" }
-        Signal { name: "sceneGraphInvalidated" }
-        Signal { name: "beforeSynchronizing" }
-        Signal { name: "beforeRendering" }
-        Signal { name: "afterRendering" }
-        Signal {
-            name: "closing"
-            revision: 1
-            Parameter { name: "close"; type: "QQuickCloseEvent"; isPointer: true }
-        }
-        Signal {
-            name: "colorChanged"
-            Parameter { type: "QColor" }
-        }
-        Signal { name: "activeFocusItemChanged"; revision: 1 }
-        Method { name: "update" }
-        Method { name: "releaseResources" }
-    }
-    Component {
-        name: "QWindow"
-        prototype: "QObject"
-        Enum {
-            name: "Visibility"
-            values: {
-                "Hidden": 0,
-                "AutomaticVisibility": 1,
-                "Windowed": 2,
-                "Minimized": 3,
-                "Maximized": 4,
-                "FullScreen": 5
-            }
-        }
-        Property { name: "title"; type: "string" }
-        Property { name: "modality"; type: "Qt::WindowModality" }
-        Property { name: "flags"; type: "Qt::WindowFlags" }
-        Property { name: "x"; type: "int" }
-        Property { name: "y"; type: "int" }
-        Property { name: "width"; type: "int" }
-        Property { name: "height"; type: "int" }
-        Property { name: "minimumWidth"; type: "int" }
-        Property { name: "minimumHeight"; type: "int" }
-        Property { name: "maximumWidth"; type: "int" }
-        Property { name: "maximumHeight"; type: "int" }
-        Property { name: "visible"; type: "bool" }
-        Property { name: "active"; revision: 1; type: "bool"; isReadonly: true }
-        Property { name: "visibility"; revision: 1; type: "Visibility" }
-        Property { name: "contentOrientation"; type: "Qt::ScreenOrientation" }
-        Property { name: "opacity"; revision: 1; type: "float" }
-        Signal {
-            name: "screenChanged"
-            Parameter { name: "screen"; type: "QScreen"; isPointer: true }
-        }
-        Signal {
-            name: "modalityChanged"
-            Parameter { name: "modality"; type: "Qt::WindowModality" }
-        }
-        Signal {
-            name: "windowStateChanged"
-            Parameter { name: "windowState"; type: "Qt::WindowState" }
-        }
-        Signal {
-            name: "xChanged"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Signal {
-            name: "yChanged"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Signal {
-            name: "widthChanged"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Signal {
-            name: "heightChanged"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Signal {
-            name: "minimumWidthChanged"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Signal {
-            name: "minimumHeightChanged"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Signal {
-            name: "maximumWidthChanged"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Signal {
-            name: "maximumHeightChanged"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Signal {
-            name: "visibleChanged"
-            Parameter { name: "arg"; type: "bool" }
-        }
-        Signal {
-            name: "visibilityChanged"
-            revision: 1
-            Parameter { name: "visibility"; type: "QWindow::Visibility" }
-        }
-        Signal { name: "activeChanged"; revision: 1 }
-        Signal {
-            name: "contentOrientationChanged"
-            Parameter { name: "orientation"; type: "Qt::ScreenOrientation" }
-        }
-        Signal {
-            name: "focusObjectChanged"
-            Parameter { name: "object"; type: "QObject"; isPointer: true }
-        }
-        Signal {
-            name: "opacityChanged"
-            revision: 1
-            Parameter { name: "opacity"; type: "float" }
-        }
-        Method { name: "requestActivate"; revision: 1 }
-        Method {
-            name: "setVisible"
-            Parameter { name: "visible"; type: "bool" }
-        }
-        Method { name: "show" }
-        Method { name: "hide" }
-        Method { name: "showMinimized" }
-        Method { name: "showMaximized" }
-        Method { name: "showFullScreen" }
-        Method { name: "showNormal" }
-        Method { name: "close"; type: "bool" }
-        Method { name: "raise" }
-        Method { name: "lower" }
-        Method {
-            name: "setTitle"
-            Parameter { type: "string" }
-        }
-        Method {
-            name: "setX"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Method {
-            name: "setY"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Method {
-            name: "setWidth"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Method {
-            name: "setHeight"
-            Parameter { name: "arg"; type: "int" }
-        }
-        Method {
-            name: "setMinimumWidth"
-            Parameter { name: "w"; type: "int" }
-        }
-        Method {
-            name: "setMinimumHeight"
-            Parameter { name: "h"; type: "int" }
-        }
-        Method {
-            name: "setMaximumWidth"
-            Parameter { name: "w"; type: "int" }
-        }
-        Method {
-            name: "setMaximumHeight"
-            Parameter { name: "h"; type: "int" }
-        }
-        Method {
-            name: "alert"
-            revision: 1
-            Parameter { name: "msec"; type: "int" }
-        }
-    }
-    Component {
         name: "RecyclingDelegate"
         defaultProperty: "data"
         prototype: "QQuickItem"
@@ -952,13 +595,10 @@ Module {
     Component {
         name: "Silica::Theme"
         prototype: "QObject"
-        exports: [
-            "Sailfish.Silica.theme/Theme 1.0",
-            "Sailfish.Silica/Theme 1.0"
-        ]
+        exports: ["Sailfish.Silica/Theme 1.0"]
         isCreatable: false
         isSingleton: true
-        exportMetaObjectRevisions: [0, 0]
+        exportMetaObjectRevisions: [0]
         Property { name: "fontFamilyHeading"; type: "string"; isReadonly: true }
         Property { name: "fontFamily"; type: "string"; isReadonly: true }
         Property { name: "fontSizeTiny"; type: "int"; isReadonly: true }
@@ -974,15 +614,19 @@ Module {
         Property { name: "itemSizeLarge"; type: "float"; isReadonly: true }
         Property { name: "itemSizeExtraLarge"; type: "float"; isReadonly: true }
         Property { name: "itemSizeHuge"; type: "float"; isReadonly: true }
+        Property { name: "iconSizeExtraSmall"; type: "float"; isReadonly: true }
         Property { name: "iconSizeSmall"; type: "float"; isReadonly: true }
+        Property { name: "iconSizeSmallPlus"; type: "float"; isReadonly: true }
         Property { name: "iconSizeMedium"; type: "float"; isReadonly: true }
         Property { name: "iconSizeLarge"; type: "float"; isReadonly: true }
+        Property { name: "iconSizeExtraLarge"; type: "float"; isReadonly: true }
         Property { name: "iconSizeLauncher"; type: "float"; isReadonly: true }
         Property { name: "coverSizeSmall"; type: "QSize"; isReadonly: true }
         Property { name: "coverSizeLarge"; type: "QSize"; isReadonly: true }
         Property { name: "paddingSmall"; type: "float"; isReadonly: true }
         Property { name: "paddingMedium"; type: "float"; isReadonly: true }
         Property { name: "paddingLarge"; type: "float"; isReadonly: true }
+        Property { name: "horizontalPageMargin"; type: "float"; isReadonly: true }
         Property { name: "flickDeceleration"; type: "float"; isReadonly: true }
         Property { name: "maximumFlickVelocity"; type: "float"; isReadonly: true }
         Property { name: "pixelRatio"; type: "float"; isReadonly: true }
@@ -1008,20 +652,6 @@ Module {
             type: "QColor"
             Parameter { name: "color"; type: "QColor" }
             Parameter { name: "opacity"; type: "float" }
-        }
-    }
-    Component {
-        name: "TemporaryFileWriter"
-        prototype: "QObject"
-        exports: ["Sailfish.Silica.private/TemporaryFileWriter 1.0"]
-        isCreatable: false
-        isSingleton: true
-        exportMetaObjectRevisions: [0]
-        Method {
-            name: "writeToFile"
-            type: "string"
-            Parameter { name: "text"; type: "string" }
-            Parameter { name: "extension"; type: "string" }
         }
     }
 }

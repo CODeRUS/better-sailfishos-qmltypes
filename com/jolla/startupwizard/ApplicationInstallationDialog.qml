@@ -97,7 +97,7 @@ Dialog {
 
             Label {
                 id: pageHeading
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeExtraLarge
@@ -110,7 +110,7 @@ Dialog {
 
             Label {
                 id: pageDescription
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 wrapMode: Text.Wrap
                 color: Theme.highlightColor
@@ -127,7 +127,7 @@ Dialog {
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 wrapMode: Text.Wrap
                 color: Theme.highlightColor

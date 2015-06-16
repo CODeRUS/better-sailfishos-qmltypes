@@ -3,6 +3,7 @@ plugin mediaplayerplugin
 AddToPlaylistPage 1.0 AddToPlaylistPage.qml
 AlbumArt 1.0 AlbumArt.qml
 AudioPlayer 1.0 AudioPlayer.qml
+CoverArt 1.0 CoverArt.qml
 GriloListView 1.0 GriloListView.qml
 GriloQueryListModel 1.0 GriloQueryListModel.qml
 MediaContainerListDelegate 1.0 MediaContainerListDelegate.qml

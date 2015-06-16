@@ -235,7 +235,7 @@ Item {
                         top: parent.top
                         topMargin: Theme.paddingSmall // Just a visual tweak
                         left: imagePlaceholder.right
-                        leftMargin: -Theme.paddingLarge // Compensate internal margin
+                        leftMargin: -Theme.horizontalPageMargin // Compensate internal margin
                         right: parent.right
                     }
                     background: null
@@ -253,7 +253,7 @@ Item {
                     font.pixelSize: Theme.fontSizeExtraSmall
                     color: tutorialTheme.highlightColor
                     anchors {
-                        rightMargin: Theme.paddingLarge
+                        rightMargin: Theme.horizontalPageMargin
                         right: parent.right
                         top: textField.top
                         // Position center of the upper part of TextField
@@ -307,7 +307,7 @@ Item {
                         id: timeLabel
                         anchors {
                             right: parent.right
-                            rightMargin: Theme.paddingLarge
+                            rightMargin: Theme.horizontalPageMargin
                             baseline: firstNameLabel.baseline
                         }
                         font.pixelSize: Theme.fontSizeExtraSmall

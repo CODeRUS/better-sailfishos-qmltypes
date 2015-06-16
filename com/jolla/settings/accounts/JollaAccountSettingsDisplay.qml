@@ -17,7 +17,7 @@ StandardAccountSettingsDisplay {
     }
 
     Label {
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         width: parent.width - x*2
         height: implicitHeight + Theme.paddingLarge*2
         wrapMode: Text.Wrap

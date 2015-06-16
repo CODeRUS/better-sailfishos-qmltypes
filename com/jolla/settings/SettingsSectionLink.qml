@@ -21,7 +21,7 @@ SettingItem {
     Row {
         id: row
         height: Theme.itemSizeSmall
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
 
         Image {
             id: icon

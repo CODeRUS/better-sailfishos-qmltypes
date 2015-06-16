@@ -11,7 +11,10 @@ FocusScope {
     property alias count: listView.count
     property alias delegate: listView.delegate
     property alias header: headerContainer.children
+    property alias headerItem: listView.headerItem
     property alias footer: footerContainer.children
+    property alias contentItem: listView.contentItem
+    property alias contentWidth: listView.contentWidth
     default property alias _data: listView.flickableData
 
     anchors.fill: parent

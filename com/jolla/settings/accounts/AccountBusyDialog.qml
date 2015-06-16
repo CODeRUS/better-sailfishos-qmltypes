@@ -7,7 +7,6 @@ import com.jolla.settings.accounts 1.0
 
 Dialog {
     id: root
-    allowedOrientations: Orientation.Portrait
 
     property string successDialogHeader
 
@@ -125,7 +124,7 @@ Dialog {
 
         Label {
             id: statusLabel
-            width: root.width - Theme.paddingLarge*2
+            width: root.width - Theme.horizontalPageMargin*2
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
             color: Theme.highlightColor
@@ -148,8 +147,8 @@ Dialog {
         id: infoColumn
 
         anchors.top: header.bottom
-        x: Theme.paddingLarge
-        width: parent.width - Theme.paddingLarge*2
+        x: Theme.horizontalPageMargin
+        width: parent.width - x*2
         spacing: Theme.paddingLarge
         opacity: 0
 

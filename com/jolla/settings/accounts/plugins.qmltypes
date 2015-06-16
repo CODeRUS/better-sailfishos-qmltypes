@@ -137,6 +137,11 @@ Module {
             type: "int"
             Parameter { name: "providerName"; type: "string" }
         }
+        Method {
+            name: "ensureAccountSyncProfiles"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+        }
     }
     Component {
         name: "CaldavAccountCalendarUpdater"

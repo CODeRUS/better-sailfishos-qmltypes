@@ -34,9 +34,9 @@ Dialog {
         anchors {
             top: dialogHeader.bottom
             left: parent.left
-            leftMargin: Theme.paddingLarge
+            leftMargin: Theme.horizontalPageMargin
             right: parent.right
-            rightMargin: Theme.paddingLarge
+            rightMargin: Theme.horizontalPageMargin
         }
         spacing: Theme.paddingLarge
 
@@ -79,9 +79,9 @@ Dialog {
             bottom: parent.bottom
             bottomMargin: Theme.paddingLarge * 2
             left: parent.left
-            leftMargin: Theme.paddingLarge
+            leftMargin: Theme.horizontalPageMargin
             right: parent.right
-            rightMargin: Theme.paddingLarge
+            rightMargin: Theme.horizontalPageMargin
         }
 
         onAcceptClicked: root.accept()
@@ -113,9 +113,9 @@ Dialog {
                     anchors {
                         top: header.bottom
                         left: parent.left
-                        leftMargin: Theme.paddingLarge
+                        leftMargin: Theme.horizontalPageMargin
                         right: parent.right
-                        rightMargin: Theme.paddingLarge
+                        rightMargin: Theme.horizontalPageMargin
                     }
                     spacing: Theme.paddingLarge
 

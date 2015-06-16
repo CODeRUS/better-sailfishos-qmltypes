@@ -65,7 +65,7 @@ ComboBox {
         id: deviceTypeLabel
         anchors {
             left: parent.left
-            leftMargin: Theme.paddingLarge
+            leftMargin: Theme.horizontalPageMargin
             verticalCenter: parent.verticalCenter
         }
         color: root.highlighted ? Theme.highlightColor : Theme.primaryColor
@@ -115,7 +115,7 @@ ComboBox {
                        rightMargin: Theme.paddingMedium
                        verticalCenter: parent.verticalCenter
                     }
-                    source: "image://theme/" + model.icon
+                    source: "image://theme/" + model.icon + (root.highlighted ? "?" + Theme.highlightColor : "")
                 }
             }
         }

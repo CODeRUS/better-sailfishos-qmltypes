@@ -51,7 +51,7 @@ Item {
                 hintLabel.atBottom = true
                 hintLabel.text = timelineCounter === 0
                         ? androidLauncher
-                          //% "Flick up to unlock your phone"
+                          //% "Flick up to unlock your device"
                           ? qsTrId("tutorial-la-unlock_phone_alternative")
                           //% "Flick up to unlock your Jolla"
                           : qsTrId("tutorial-la-unlock_phone")

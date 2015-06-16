@@ -20,6 +20,7 @@ Grid {
     property bool containsAndroidSupport
 
     width: parent.width
+    columns: Math.floor(width / Theme.itemSizeExtraLarge)
 
     function updateApplicationSelection(packageName, selected) {
         var index = selectedApplications.indexOf(packageName);
@@ -45,7 +46,7 @@ Grid {
             property bool selected: model.preselected
             property string packageName: model.packageName
 
-            width: root.width / 4
+            width: root.width / root.columns
             height: icon.height + label.height + 2 * Theme.paddingMedium + Theme.paddingSmall
             highlighted: down || selected
             highlightedColor: Theme.rgba(Theme.highlightBackgroundColor, 0.5)

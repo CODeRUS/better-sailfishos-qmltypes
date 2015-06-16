@@ -2,6 +2,7 @@ module Sailfish.Media
 plugin sailfishmediaplugin
 MediaFormatter 1.0 MediaFormatter.qml
 MediaListItem 1.0 MediaListItem.qml
+MprisPlayerControls 1.0 MprisPlayerControls.qml
 PlayerControls 1.0 PlayerControls.qml
 ScreenBlank 1.0 ScreenBlank.qml
 VideoPlayer 1.0 VideoPlayer.qml

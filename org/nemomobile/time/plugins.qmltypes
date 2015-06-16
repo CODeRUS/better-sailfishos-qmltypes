@@ -20,10 +20,12 @@ Module {
                 "Second": 2
             }
         }
+        Property { name: "ready"; type: "bool"; isReadonly: true }
         Property { name: "enabled"; type: "bool" }
         Property { name: "time"; type: "QDateTime"; isReadonly: true }
         Property { name: "timezone"; type: "string"; isReadonly: true }
         Property { name: "timezoneAbbreviation"; type: "string"; isReadonly: true }
+        Property { name: "timezoneOffsetFromUtc"; type: "int"; isReadonly: true }
         Property { name: "updateFrequency"; type: "UpdateFrequency" }
         Signal { name: "systemTimeUpdated" }
     }

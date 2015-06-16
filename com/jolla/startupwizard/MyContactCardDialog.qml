@@ -102,7 +102,7 @@ Dialog {
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 height: implicitHeight + Theme.paddingLarge
                 wrapMode: Text.WordWrap
@@ -118,7 +118,7 @@ Dialog {
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 height: implicitHeight + Theme.paddingLarge
                 wrapMode: Text.WordWrap
@@ -131,7 +131,7 @@ Dialog {
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 height: implicitHeight + Theme.paddingLarge
                 wrapMode: Text.WordWrap

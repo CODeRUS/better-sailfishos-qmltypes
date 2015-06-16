@@ -13,7 +13,6 @@ Dialog {
     property string selectedFilename
     property QtObject alarmModel
 
-    allowedOrientations: Orientation.All
     onSelectedFilenameChanged: previewPlayer.source = selectedFilename
     onActiveFilenameChanged: previewPlayer.source = activeFilename
 
@@ -93,7 +92,7 @@ Dialog {
                     id: musicIcon
                     anchors {
                         left: parent.left
-                        leftMargin: Theme.paddingLarge
+                        leftMargin: Theme.horizontalPageMargin
                         verticalCenter: parent.verticalCenter
                     }
                     source: "image://theme/icon-m-sounds" + (selectFromMusic.down ? ("?" + Theme.highlightColor)
@@ -104,7 +103,7 @@ Dialog {
                     anchors.left: musicIcon.right
                     anchors.right: parent.right
                     anchors.leftMargin: Theme.paddingMedium
-                    anchors.rightMargin: Theme.paddingLarge
+                    anchors.rightMargin: Theme.horizontalPageMargin
                     anchors.verticalCenter: parent.verticalCenter
                     color: selectFromMusic.down ? Theme.highlightColor : Theme.primaryColor
                     //% "Select from music"
@@ -125,7 +124,7 @@ Dialog {
                         previewPlayer.stop()
                     }
                 }
-                leftMargin: Theme.paddingMedium
+                leftMargin: Theme.horizontalPageMargin - Theme.paddingMedium
             }
 
             Item {

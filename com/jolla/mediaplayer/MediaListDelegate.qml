@@ -13,6 +13,8 @@ MediaListItem {
     playing: audioPlayer.currentItem != null && media.url == audioPlayer.currentItem.url
     duration: media.duration
     title: Theme.highlightText(media.title, RegExpHelpers.regExpFromSearchString(formatFilter, false), Theme.highlightColor)
+    textFormat: Text.StyledText
+    subtitleTextFormat: Text.AutoText
     subtitle: media.author
     onPlayingChanged: if (playing) ListView.view.currentIndex = model.index
 }

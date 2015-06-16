@@ -45,6 +45,8 @@ BackgroundItem {
     property alias wrapMode: titleLabel.wrapMode
     property alias horizontalAlignment: titleLabel.horizontalAlignment
     property alias pending: countdown.running
+    property real leftMargin: Theme.horizontalPageMargin
+    property real rightMargin: Theme.horizontalPageMargin
 
     function execute(item, title, callback, timeout) {
         remorseItem.text = title
@@ -165,10 +167,15 @@ BackgroundItem {
 
     Column {
         id: column
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: Theme.paddingLarge
-        anchors.verticalCenter: parent.verticalCenter
+        anchors {
+            left: parent.left
+            right: parent.right
+            topMargin: Theme.paddingLarge
+            bottomMargin: Theme.paddingLarge
+            leftMargin: remorseItem.leftMargin
+            rightMargin: remorseItem.rightMargin
+            verticalCenter: parent.verticalCenter
+        }
         Label {
             id: titleLabel
             //% "in %n seconds"

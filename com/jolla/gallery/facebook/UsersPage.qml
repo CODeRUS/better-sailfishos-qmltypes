@@ -63,7 +63,7 @@ Page {
                 id: countLabel
                 anchors {
                     right: parent.right
-                    leftMargin: Theme.paddingLarge
+                    leftMargin: Theme.horizontalPageMargin
                     left: thumbnail.right
                     verticalCenter: parent.verticalCenter
                 }

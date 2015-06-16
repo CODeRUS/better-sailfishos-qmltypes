@@ -34,6 +34,7 @@ MouseArea {
         opacity: appItem.enabled ? 1 : 0.2
         font.pixelSize: Theme.fontSizeTiny
         elide: Text.ElideRight
+        textFormat: Text.PlainText
         color: highlighted ? Theme.highlightColor : Theme.primaryColor
         text: launcher ? launcher.title : ""
     }

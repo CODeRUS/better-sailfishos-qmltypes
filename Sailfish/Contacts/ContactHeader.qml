@@ -323,7 +323,7 @@ Item {
         // Anchor to the top, because the bottom moves when the context menu opens
         anchors {
             left: parent.left
-            leftMargin: Theme.paddingLarge
+            leftMargin: Theme.horizontalPageMargin
             top: parent.top
             topMargin: _headerHeight - height - Theme.paddingLarge
         }
@@ -449,6 +449,7 @@ Item {
         width: Theme.itemSizeSmall
         anchors {
             right: parent.right
+            rightMargin: Theme.horizontalPageMargin - Theme.paddingLarge
             top: parent.top
             topMargin: _headerHeight - height
         }
@@ -509,7 +510,7 @@ Item {
     Label {
         id: nameLabel
         y: Theme.paddingLarge
-        width: parent.width - Theme.paddingLarge
+        width: parent.width - Theme.horizontalPageMargin
         font {
             family: Theme.fontFamilyHeading
             pixelSize: Theme.fontSizeLarge

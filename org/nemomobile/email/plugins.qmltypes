@@ -75,7 +75,7 @@ Module {
         Property { name: "recvSecurity"; type: "string" }
         Property { name: "recvUsername"; type: "string" }
         Property { name: "recvPassword"; type: "string" }
-        Property { name: "pushCapable"; type: "string"; isReadonly: true }
+        Property { name: "pushCapable"; type: "bool"; isReadonly: true }
         Property { name: "sendServer"; type: "string" }
         Property { name: "sendPort"; type: "string" }
         Property { name: "sendAuth"; type: "string" }
@@ -277,6 +277,14 @@ Module {
                 "SendFailed": 6
             }
         }
+        Enum {
+            name: "SearchStatus"
+            values: {
+                "SearchDone": 0,
+                "SearchCanceled": 1,
+                "SearchFailed": 2
+            }
+        }
         Property { name: "synchronizing"; type: "bool"; isReadonly: true }
         Property { name: "currentSynchronizingAccountId"; type: "int"; isReadonly: true }
         Signal {
@@ -332,6 +340,18 @@ Module {
             Parameter { name: "status"; type: "EmailAgent::Status" }
         }
         Signal { name: "networkConnectionRequested" }
+        Signal {
+            name: "searchMessageIdsMatched"
+            Parameter { name: "ids"; type: "QMailMessageIdList" }
+        }
+        Signal {
+            name: "searchCompleted"
+            Parameter { name: "search"; type: "string" }
+            Parameter { name: "matchedIds"; type: "QMailMessageIdList" }
+            Parameter { name: "isRemote"; type: "bool" }
+            Parameter { name: "remainingMessagesOnRemote"; type: "int" }
+            Parameter { name: "status"; type: "EmailAgent::SearchStatus" }
+        }
         Method {
             name: "accountsSync"
             Parameter { name: "syncOnlyInbox"; type: "bool" }
@@ -368,7 +388,7 @@ Module {
         Method {
             name: "downloadAttachment"
             Parameter { name: "messageId"; type: "int" }
-            Parameter { name: "attachmentlocation"; type: "string" }
+            Parameter { name: "attachmentLocation"; type: "string" }
         }
         Method {
             name: "exportUpdates"
@@ -541,12 +561,26 @@ Module {
                 "UnspecifiedResponse": 6
             }
         }
+        Enum {
+            name: "AttachedDataStatus"
+            values: {
+                "Unknown": 0,
+                "Downloaded": 1,
+                "Downloading": 2,
+                "Failed": 3,
+                "FailedToSave": 4,
+                "Saved": 5
+            }
+        }
         Property { name: "accountId"; type: "int"; isReadonly: true }
         Property { name: "accountAddress"; type: "string"; isReadonly: true }
         Property { name: "folderId"; type: "int"; isReadonly: true }
         Property { name: "attachments"; type: "QStringList" }
         Property { name: "bcc"; type: "QStringList" }
         Property { name: "body"; type: "string" }
+        Property { name: "calendarInvitationUrl"; type: "string"; isReadonly: true }
+        Property { name: "hasCalendarInvitation"; type: "bool"; isReadonly: true }
+        Property { name: "calendarInvitationStatus"; type: "AttachedDataStatus"; isReadonly: true }
         Property { name: "cc"; type: "QStringList" }
         Property { name: "contentType"; type: "ContentType"; isReadonly: true }
         Property { name: "date"; type: "QDateTime"; isReadonly: true }
@@ -580,6 +614,7 @@ Module {
         Signal { name: "inlinePartsDownloaded" }
         Method { name: "cancelMessageDownload" }
         Method { name: "downloadMessage" }
+        Method { name: "getCalendarInvitation" }
         Method { name: "send" }
         Method { name: "saveDraft" }
     }
@@ -609,12 +644,28 @@ Module {
                 "Recipients": 7
             }
         }
+        Enum {
+            name: "SearchOn"
+            values: {
+                "LocalAndRemote": 0,
+                "Local": 1,
+                "Remote": 2
+            }
+        }
         Property { name: "canFetchMore"; type: "bool"; isReadonly: true }
         Property { name: "count"; type: "int"; isReadonly: true }
         Property { name: "combinedInbox"; type: "bool" }
         Property { name: "filterUnread"; type: "bool" }
         Property { name: "limit"; type: "uint" }
+        Property { name: "searchLimit"; type: "uint" }
+        Property { name: "searchOn"; type: "EmailMessageListModel::SearchOn" }
+        Property { name: "searchFrom"; type: "bool" }
+        Property { name: "searchRecipients"; type: "bool" }
+        Property { name: "searchSubject"; type: "bool" }
+        Property { name: "searchBody"; type: "bool" }
+        Property { name: "searchRemainingOnRemote"; type: "int"; isReadonly: true }
         Property { name: "sortBy"; type: "EmailMessageListModel::Sort"; isReadonly: true }
+        Property { name: "unreadMailsSelected"; type: "bool"; isReadonly: true }
         Signal { name: "messageDownloadCompleted" }
         Method {
             name: "setFolderKey"
@@ -624,6 +675,11 @@ Module {
         Method {
             name: "setFolderKey"
             Parameter { name: "id"; type: "int" }
+        }
+        Method {
+            name: "setAccountKey"
+            Parameter { name: "id"; type: "int" }
+            Parameter { name: "defaultInbox"; type: "bool" }
         }
         Method {
             name: "setAccountKey"
@@ -678,6 +734,7 @@ Module {
             name: "setSearch"
             Parameter { name: "search"; type: "string" }
         }
+        Method { name: "cancelSearch" }
         Method {
             name: "accountIdForMessage"
             type: "int"
@@ -803,6 +860,8 @@ Module {
             Parameter { name: "vFolderId"; type: "int" }
         }
         Method { name: "deleteSelectedMessageIds" }
+        Method { name: "markAsReadSelectedMessagesIds" }
+        Method { name: "markAsUnReadSelectedMessagesIds" }
         Method { name: "markAllMessagesAsRead" }
         Method {
             name: "foldersAdded"

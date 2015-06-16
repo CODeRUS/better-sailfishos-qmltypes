@@ -52,7 +52,7 @@ Item {
     property QtObject customModel
     property alias delegate: dateController.delegate
 
-    property int _dateBoxSize: gridWidth / 7
+    property int _dateBoxSize
     property int _displayedMonthStartIndex: -1
 
     signal updateModel(variant modelObject, variant fromDate, variant toDate, int primaryMonth)
@@ -222,7 +222,10 @@ Item {
     }
 
     Grid {
-        anchors.left: weekColumn.right
+        anchors {
+            left: weekColumn.right
+            leftMargin: leftMargin
+        }
         columns: 7
 
         Repeater {

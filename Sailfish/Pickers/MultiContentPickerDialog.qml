@@ -25,7 +25,8 @@ PickerDialog {
                 text: categoryList.model.category(index)
                 color: down ? Theme.highlightColor : Theme.primaryColor
                 anchors.verticalCenter: parent.verticalCenter
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
+                width: parent.width - x*2
             }
 
             onClicked: {
@@ -34,7 +35,8 @@ PickerDialog {
                     acceptDestination: pageStack.previousPage(contentPickerDialog),
                     acceptDestinationAction: PageStackAction.Pop,
                     _selectedModel: contentPickerDialog._selectedModel,
-                    _animationDuration: contentPickerDialog._animationDuration
+                    _animationDuration: contentPickerDialog._animationDuration,
+                    _background: contentPickerDialog._background
                 }, pageStack._transitionDuration === 0 ? PageStackAction.Immediate : PageStackAction.Animated);
 
                 subview.accepted.connect(function() {

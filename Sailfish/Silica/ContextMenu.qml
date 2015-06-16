@@ -62,7 +62,19 @@ MouseArea {
     default property alias children: contentColumn.data
     property alias _contentColumn: contentColumn
 
-    x: _page !== null ? mapFromItem(_page, 0, 0).x : 0
+    x: {
+        if (!parent || !_page)
+            return 0
+
+        var offset = 0
+        var p = parent
+        do {
+            offset += p.x
+            p = p.parent
+        } while (p !== _page)
+
+        return -offset
+    }
     height: _displayHeight
     width: _flickable !== null ? _flickable.width : (parent ? parent.width : 0)
     parent: null
@@ -104,9 +116,7 @@ MouseArea {
         if (_parentMouseArea) {
             _parentMouseArea.preventStealing = active
         }
-        if (!active) {
-            __silica_applicationwindow_instance._undimScreen()
-        }
+        _updateDim()
 
         RemorseItem.activeChanged(contextMenu, active)
     }
@@ -115,6 +125,35 @@ MouseArea {
         if (!_activeAllowed && active) {
             hide()
         }
+    }
+
+    Item {
+        id: underRegion
+
+        parent: contextMenu.parent
+        anchors {
+            top: parent ? parent.top : undefined
+            left: parent ? parent.left : undefined
+            right: parent ? parent.right : undefined
+        }
+        height: (parent && contextMenu._open) ? (parent.height - contextMenu.height) : 0
+
+        onHeightChanged: if (active) _updateDim()
+        onWidthChanged: if (active) _updateDim()
+        onXChanged: if (active) _updateDim()
+        onYChanged: if (active) _updateDim()
+    }
+
+    Connections {
+        target: contextMenu.parent
+        onHeightChanged: if (active) _updateDim()
+    }
+
+    function _updateDim() {
+        if (active)
+            __silica_applicationwindow_instance._dimScreen([ contextMenu ], underRegion)
+        else
+            __silica_applicationwindow_instance._undimScreen()
     }
 
     function show(item) {
@@ -127,7 +166,6 @@ MouseArea {
                 _expandedPosition = -1
                 active = true
                 _page = Util.findPage(contextMenu)
-                __silica_applicationwindow_instance._dimScreen([ contextMenu ], parent)
             } else {
                 parent = null
                 _page = null

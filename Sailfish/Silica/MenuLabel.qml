@@ -47,7 +47,7 @@ Item {
         opacity: 0.6
         color: Theme.highlightColor
         font.pixelSize: Theme.fontSizeSmall
-        width: parent.width - Theme.paddingLarge*2
+        width: parent.width - Theme.horizontalPageMargin*2
         anchors {
             verticalCenterOffset: verticalOffset
             centerIn: parent

@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import org.nemomobile.configuration 1.0
 import org.nemomobile.contacts 1.0
 import "contactcard/ContactsDBusService.js" as ContactsService
 import "common/common.js" as ContactsUtils
@@ -158,8 +159,10 @@ SilicaFlickable {
     property real _searchListSpace: Screen.height - topContentArea.height
 
     onSearchEnabledChanged: {
-        // Activate/deactivate the VKB by changing focus target
-        (searchEnabled ? contactSearchField : root).focus = true
+        // Activate/deactivate the VKB by changing focus target, if the page is already active
+        if (pageStack.currentPage.status == PageStatus.Active) {
+            (searchEnabled ? contactSearchField : root).focus = true
+        }
     }
     onAtYBeginningChanged: {
         if ((atYBeginning && _searchFiltered && (searchView.height > _searchListSpace)) ||
@@ -304,6 +307,7 @@ SilicaFlickable {
                     if (!enabled) {
                         text = ''
                     }
+                    searchConfig.value = enabled ? 1 : 0
                 }
 
                 visible: opacity > 0
@@ -312,6 +316,11 @@ SilicaFlickable {
                     FadeAnimation {
                         duration: 150
                     }
+                }
+
+                ConfigurationValue {
+                    id: searchConfig
+                    key: "/desktop/sailfish/contacts/search_enabled"
                 }
             }
         }
@@ -417,7 +426,7 @@ SilicaFlickable {
                         requiredProperty: root._filterProperty
                         contextMenuComponent: contactContextMenuComponent
 
-                        enabled: !_searchFiltered && favoritesModel.populated
+                        enabled: !_searchFiltered && root.favoriteContactsModel.populated
                         opacity: enabled ? 1 : 0
                         Behavior on opacity { FadeAnimation {} }
 

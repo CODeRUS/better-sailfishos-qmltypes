@@ -7,7 +7,7 @@ Label {
 
     anchors.centerIn: parent
     visible: enabled
-    width: parent.width - Theme.paddingLarge*2
+    width: parent.width - Theme.horizontalPageMargin*2
     horizontalAlignment: Text.AlignHCenter
     wrapMode: Text.Wrap
     font {

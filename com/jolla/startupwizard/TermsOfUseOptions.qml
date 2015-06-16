@@ -20,7 +20,7 @@ Column {
 
     WizardClickableLabel {
         width: parent.width
-        //% "<u>Reject and turn the phone off</u>"
+        //% "<u>Reject and turn the device off</u>"
         text: qsTrId("startupwizard-la-sailfish_terms_reject")
 
         onClicked: root.rejectClicked()

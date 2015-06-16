@@ -1,3 +1,0 @@
-module QtPublishSubscribe
-plugin declarative_publishsubscribe
-typeinfo plugins.qmltypes

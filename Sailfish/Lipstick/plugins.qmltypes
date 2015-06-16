@@ -8,6 +8,80 @@ import QtQuick.tooling 1.1
 
 Module {
     Component {
+        name: "PeekFilter"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        exports: ["Sailfish.Lipstick/PeekFilter 1.0"]
+        exportMetaObjectRevisions: [0]
+        attachedType: "PeekFilterAttached"
+        Enum {
+            name: "Area"
+            values: {
+                "NoArea": 0,
+                "Left": 1,
+                "Top": 2,
+                "Right": 4,
+                "Bottom": 8,
+                "Edges": 15,
+                "Horizontal": 16,
+                "Vertical": 32
+            }
+        }
+        Enum {
+            name: "Areas"
+            values: {
+                "NoArea": 0,
+                "Left": 1,
+                "Top": 2,
+                "Right": 4,
+                "Bottom": 8,
+                "Edges": 15,
+                "Horizontal": 16,
+                "Vertical": 32
+            }
+        }
+        Property { name: "progress"; type: "float"; isReadonly: true }
+        Property { name: "absoluteProgress"; type: "float"; isReadonly: true }
+        Property { name: "threshold"; type: "float" }
+        Property { name: "boundaryWidth"; type: "float" }
+        Property { name: "boundaryHeight"; type: "float" }
+        Property { name: "leftEnabled"; type: "bool" }
+        Property { name: "rightEnabled"; type: "bool" }
+        Property { name: "topEnabled"; type: "bool" }
+        Property { name: "bottomEnabled"; type: "bool" }
+        Property { name: "horizontalEnabled"; type: "bool" }
+        Property { name: "verticalEnabled"; type: "bool" }
+        Property { name: "leftActive"; type: "bool"; isReadonly: true }
+        Property { name: "rightActive"; type: "bool"; isReadonly: true }
+        Property { name: "topActive"; type: "bool"; isReadonly: true }
+        Property { name: "bottomActive"; type: "bool"; isReadonly: true }
+        Property { name: "horizontalActive"; type: "bool"; isReadonly: true }
+        Property { name: "verticalActive"; type: "bool"; isReadonly: true }
+        Property { name: "windowLeftActive"; type: "bool"; isReadonly: true }
+        Property { name: "windowRightActive"; type: "bool"; isReadonly: true }
+        Property { name: "windowTopActive"; type: "bool"; isReadonly: true }
+        Property { name: "windowBottomActive"; type: "bool"; isReadonly: true }
+        Signal { name: "gestureStarted" }
+        Signal { name: "gestureTriggered" }
+        Signal { name: "gestureCanceled" }
+        Signal { name: "activeChanged" }
+        Signal { name: "activeAreaChanged" }
+    }
+    Component {
+        name: "PeekFilterAttached"
+        prototype: "QObject"
+        Property { name: "active"; type: "bool"; isReadonly: true }
+        Property { name: "threshold"; type: "float" }
+        Property { name: "boundaryWidth"; type: "float" }
+        Property { name: "boundaryHeight"; type: "float" }
+        Property { name: "enabled"; type: "bool" }
+        Property { name: "orientation"; type: "Qt::ScreenOrientation" }
+        Property { name: "pressDelay"; type: "int" }
+        Property { name: "activeTouches"; type: "int"; isReadonly: true }
+        Method { name: "invalidate" }
+        Method { name: "cancelGesture" }
+    }
+    Component {
         name: "QQuickRootItem"
         defaultProperty: "data"
         prototype: "QQuickItem"

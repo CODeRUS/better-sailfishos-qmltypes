@@ -1,0 +1,2 @@
+module Mer.State
+plugin statefs-declarative

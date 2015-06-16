@@ -4,11 +4,11 @@ import Sailfish.TransferEngine 1.0
 import org.nemomobile.thumbnailer 1.0
 import org.nemomobile.notifications 1.0
 import org.nemomobile.transferengine 1.0
+import org.nemomobile.contentaction 1.0
 
 Page {
     id: transfersPage
 
-    property Item _remorsePopup
     property date _today: new Date()
 
     function statusText(transferType, status, fileSize, transferDate) {
@@ -62,47 +62,58 @@ Page {
         return new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5]);
     }
 
-    function transferIcon(transferType) {
+    function transferIcon(transferType, highlight) {
         // TODO: How we figure out if upload/download is from device2device e.g. BT.
+        var imgSource = ""
         switch (transferType) {
         case TransferModel.Upload:
-            return "image://theme/icon-s-cloud-upload"
+            imgSource = "image://theme/icon-s-cloud-upload"
+            break;
         case TransferModel.Download:
-            return "image://theme/icon-s-cloud-download"
+            imgSource = "image://theme/icon-s-cloud-download"
+            break;
         case TransferModel.Sync:
-            return "image://theme/icon-s-sync"
+            imgSource = "image://theme/icon-s-sync"
+            break;
         default:
             console.log("TransfersPage::transferIcon: failed to get transfer type")
             return ""
         }
+        if (highlight) {
+            imgSource += "?" + Theme.highlightColor
+        }
+        return imgSource
     }
 
-    function mimeTypeIcon(mimeType) {
+    function mimeTypeIcon(mimeType, highlight) {
         if (mimeType.length === 0)
             return ""
         var type = mimeType.split("/");
+        var imgSource = ""
 
         // Handle basic media types
         if (type[0] === "image") {
             return ""   // no mime type icon for images
         } else if (type[0] === "video") {
-            return "image://theme/icon-m-video"
+            imgSource = "image://theme/icon-m-video"
         } else if (type[0] === "audio") {
-            return "image://theme/icon-m-sound"
+            imgSource = "image://theme/icon-m-sound"
+        } else if (type[1].indexOf("excel")
+                   || type[1].indexOf("pdf")
+                   || type[1].indexOf("word")
+                   || type[1].indexOf("powerpoint")) {
+            // TODO: CHECK the rest of document types
+            imgSource = "image://theme/icon-m-document"
+        } else if (type[1].indexOf("vcard")) {
+            // handle contacts
+            imgSource = "image://theme/icon-m-people"
+        } else {
+            imgSource = "image://theme/icon-m-other"
         }
-        // Next doc types
-        // TODO: CHECK the rest of document types
-        if (type[1].indexOf("excel")   ||
-            type[1].indexOf("pdf")     ||
-            type[1].indexOf("word")    ||
-            type[1].indexOf("powerpoint")) {
-            return "image://theme/icon-m-document"
+        if (highlight) {
+            imgSource += "?" + Theme.highlightColor
         }
-        // Handle contacts
-        if (type[1].indexOf("vcard")) {
-            return "image://theme/icon-m-people"
-        }
-        return "image://theme/icon-m-other"
+        return imgSource
     }
 
     // Delegate for a transfer entry in a list
@@ -185,7 +196,7 @@ Page {
                 Image {
                     id: mimeTypeImage
                     anchors.centerIn: parent
-                    source: mimeTypeIcon(mimeType)
+                    source: mimeTypeIcon(mimeType, transferEntry.highlighted)
                     asynchronous: true
                     z: 1    // place above the image thumbnail
                 }
@@ -193,7 +204,7 @@ Page {
 
             Image {
                 id: transferTypeIcon
-                source: transferIcon(transferType)
+                source: transferIcon(transferType, transferEntry.highlighted)
                 asynchronous: true
                 anchors {
                     top: thumbnail.top
@@ -208,7 +219,7 @@ Page {
                 font.pixelSize: Theme.fontSizeSmall
                 color: status == TransferModel.TransferInterrupted
                        ? Theme.highlightColor
-                       : (transferEntry.highlighted || menuOpen ? Theme.highlightColor : Theme.primaryColor)
+                       : (transferEntry.highlighted ? Theme.highlightColor : Theme.primaryColor)
                 anchors {
                     verticalCenter: transferTypeIcon.verticalCenter
                     left: transferTypeIcon.right
@@ -226,7 +237,7 @@ Page {
                     top: transferTypeIcon.bottom
                 }
                 leftMargin: 0
-                rightMargin: Theme.paddingLarge
+                rightMargin: Theme.horizontalPageMargin
                 height: visible ? Theme.itemSizeSmall : Theme.paddingMedium
                 value: visible ? progress : 0
                 visible: status === TransferModel.TransferStarted
@@ -247,19 +258,19 @@ Page {
                     left: thumbnail.right
                     leftMargin: Theme.paddingLarge
                     right: parent.right
-                    rightMargin: Theme.paddingLarge
+                    rightMargin: Theme.horizontalPageMargin
                     top: transferProgressBar.bottom
                 }
             }
 
             Image {
                 id: serviceTypeImage
-                source: serviceIcon
+                source: serviceIcon + (transferEntry.highlighted ? "?" + Theme.highlightColor : "")
                 width: Theme.itemSizeSmall / 2
                 height: width
                 anchors {
                     right: parent.right
-                    rightMargin: Theme.paddingLarge
+                    rightMargin: Theme.horizontalPageMargin
                     verticalCenter: transferTypeIcon.verticalCenter
                 }
             }
@@ -287,6 +298,11 @@ Page {
                                 //: Notification text shown when file doesn't exist error occured.
                                 //% "Oops, file doesn't exist"
                                 errorNotification.show(path,  qsTrId("jolla-transferui-no-error-file-does-not-exist"))
+                                break
+                            case ContentAction.UrlSchemeNotSupported:
+                                //: Notification text shown when an unsupported url scheme error occured.
+                                //% "Oops, url scheme not supported"
+                                errorNotification.show(path, qsTrId("jolla-transferui-no-error-url-scheme-not-supported"))
                                 break
                             case ContentAction.InvalidUrl:
                                 //: Notification text shown when file invalid url error occured.
@@ -336,22 +352,7 @@ Page {
                 //% "Clear all"
                 text: qsTrId("transferui-me_clear-all")
                 onClicked: {
-                    if (_remorsePopup === null) {
-                        _remorsePopup = remorsePopupComponent.createObject(transfersPage)
-                    }
-
-                    //: Clearing transfers in 5 seconds
-                    //% "Clearing transfers"
-                    _remorsePopup.execute(qsTrId("transferui-me-clear-transfers"),
-                                              function() {
-                                                  transferModel.clearTransfers()
-                                              }
-                                          )
-                }
-
-                Component {
-                    id: remorsePopupComponent
-                    RemorsePopup {}
+                    transferModel.clearTransfers()
                 }
             }
         }
@@ -371,6 +372,8 @@ Page {
     Notification {
         id: errorNotification
 
+        //% "Transfers"
+        appName: qsTrId("transferui-ap-name")
         category: "x-jolla.transferui.error"
 
         function show(path, summary)

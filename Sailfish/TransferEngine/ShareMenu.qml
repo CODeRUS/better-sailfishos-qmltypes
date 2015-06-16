@@ -65,8 +65,10 @@ Item {
 
         Label {
             id: shareLabel
-            anchors.margins: Theme.paddingLarge
-            anchors.right: parent.right
+            anchors {
+                rightMargin: Theme.horizontalPageMargin
+                right: parent.right
+            }
             //: Share menu label
             //% "Share"
             text: qsTrId("transferui-la_sharemenu_share")

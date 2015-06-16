@@ -9,12 +9,13 @@ ListItem {
     property variant duration
     property string title
     property string subtitle
-    property int textFormat: Text.AutoText
+    property alias textFormat: titleLabel.textFormat
+    property alias subtitleTextFormat: subtitleLabel.textFormat
     property bool playing
 
     Label {
         id: durationLabel
-        x: Theme.paddingMedium
+        x: Theme.horizontalPageMargin
         text: {
             if (mediaListItem.duration === undefined) {
                 return ""
@@ -42,7 +43,7 @@ ListItem {
         anchors {
             left: durationLabel.right; leftMargin: Theme.paddingMedium
             top: parent.top; topMargin: Theme.paddingSmall
-            right: parent.right; rightMargin: Theme.paddingLarge
+            right: parent.right; rightMargin: Theme.horizontalPageMargin
         }
         Label {
             id: titleLabel
@@ -53,8 +54,9 @@ ListItem {
                 pixelSize: Theme.fontSizeMedium
             }
             horizontalAlignment: Text.AlignLeft
-            textFormat: mediaListItem.textFormat
+            textFormat: Text.AutoText
             color: highlighted || playing ? Theme.highlightColor : Theme.primaryColor
+            maximumLineCount: 1
         }
 
         Label {
@@ -66,9 +68,10 @@ ListItem {
                 pixelSize: Theme.fontSizeExtraSmall
             }
             horizontalAlignment: Text.AlignLeft
-            textFormat: mediaListItem.textFormat
+            textFormat: titleLabel.textFormat
             opacity: 0.6
             color: highlighted || playing ? Theme.highlightColor : Theme.primaryColor
+            maximumLineCount: 1
         }
     }
 

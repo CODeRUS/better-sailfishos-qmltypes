@@ -20,7 +20,7 @@ Page {
 
     Drawer {
         id: drawer
-        dock: page.orientation == Orientation.Portrait ? Dock.Top: Dock.Left
+        dock: page.orientation & Orientation.PortraitMask ? Dock.Top: Dock.Left
         hideOnMinimize: true
         anchors.fill: parent
     }

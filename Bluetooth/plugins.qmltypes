@@ -46,6 +46,16 @@ Module {
             name: "audioPlayingStateChanged"
             Parameter { name: "playing"; type: "bool" }
         }
+        Signal {
+            name: "connectInputError"
+            Parameter { name: "error"; type: "string" }
+            Parameter { name: "errorMessage"; type: "string" }
+        }
+        Signal {
+            name: "disconnectInputError"
+            Parameter { name: "error"; type: "string" }
+            Parameter { name: "errorMessage"; type: "string" }
+        }
         Method { name: "connectAudio" }
         Method { name: "disconnectAudio" }
         Method { name: "connectInput" }

@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Contacts 1.0
+import org.nemomobile.configuration 1.0
 import org.nemomobile.contacts 1.0
 
 Page {
@@ -29,11 +30,24 @@ Page {
 
     signal contactClicked(variant contact, variant clickedItemY, variant property, string propertyType)
 
+    onStatusChanged: {
+        if (status == PageStatus.Activating) {
+            // Apply the current value of searchConfig
+            contactBrowser.searchEnabled = (searchConfig.value == 1)
+        }
+    }
+
+    ConfigurationValue {
+        id: searchConfig
+        key: "/desktop/sailfish/contacts/search_enabled"
+        defaultValue: 0
+    }
+
     ContactBrowser {
         id: contactBrowser
 
         contactsSelectable: false
-        searchEnabled: true
+        searchEnabled: false
         focus: false
         showSearchPatternAsNewContact: root.showSearchPatternAsNewContact
 
@@ -46,15 +60,26 @@ Page {
         ]
 
         PullDownMenu {
+            id: menu
+
             visible: searchMenuEnabled
             enabled: contactBrowser.allContactsModel.count > 0
+
+            // Don't change the menu text while the menu is open
+            property bool _searchEnabled
+            onActiveChanged: {
+                if (active) {
+                    _searchEnabled = contactBrowser.searchEnabled
+                }
+            }
+
             MenuItem {
-                                                   //: Hide contact search view
-                                                   //% "Hide search"
-                text: contactBrowser.searchEnabled ? qsTrId("components_pickers-me-hide_search")
-                                                   //: Show contact search view
-                                                   //% "Show search"
-                                                   : qsTrId("components_pickers-me-show_search")
+                                          //: Hide contact search view
+                                          //% "Hide search"
+                text: menu._searchEnabled ? qsTrId("components_pickers-me-hide_search")
+                                          //: Show contact search view
+                                          //% "Show search"
+                                          : qsTrId("components_pickers-me-show_search")
 
                 onClicked: contactBrowser.searchEnabled = !contactBrowser.searchEnabled
             }

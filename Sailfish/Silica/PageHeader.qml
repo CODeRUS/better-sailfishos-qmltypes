@@ -45,6 +45,8 @@ Item {
     property alias extraContent: extraContentPlaceholder
     property string description
     property Item page
+    property real leftMargin: Theme.horizontalPageMargin
+    property real rightMargin: Theme.horizontalPageMargin
     property Item _descriptionLabel
     property real _preferredHeight: page && page.isLandscape ? Theme.itemSizeSmall : Theme.itemSizeLarge
 
@@ -72,13 +74,13 @@ Item {
     Label {
         id: headerText
         // Don't allow the label to extend over the page stack indicator
-        width: Math.min(implicitWidth, parent.width - 2*Theme.paddingLarge)
+        width: Math.min(implicitWidth, parent.width - leftMargin - rightMargin)
         truncationMode: TruncationMode.Fade
         color: Theme.highlightColor
         y: _preferredHeight/2 - height/2
         anchors {
             right: parent.right
-            rightMargin: Theme.paddingLarge
+            rightMargin: pageHeader.rightMargin
         }
         font {
             pixelSize: Theme.fontSizeLarge
@@ -89,7 +91,7 @@ Item {
         id: extraContentPlaceholder
         anchors {
             left: parent.left
-            leftMargin: Theme.paddingLarge
+            leftMargin: pageHeader.leftMargin
             right: headerText.left
             verticalCenter: parent.verticalCenter
         }

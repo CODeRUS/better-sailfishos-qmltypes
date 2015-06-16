@@ -5,8 +5,6 @@ import Sailfish.Accounts 1.0
 // xxxxxx for legacy versions of email and active sync plugins xxxxx
 
 Dialog {
-    allowedOrientations: Orientation.Portrait
-
     property Provider accountProvider
     property AccountManager accountManager
     property int accountId

@@ -47,6 +47,8 @@ Item {
     readonly property int year: date.getFullYear()
     readonly property int month: date.getMonth()+1
     readonly property int day: date.getDate()
+    property real leftMargin: Theme.horizontalPageMargin - Theme.paddingLarge
+    property real rightMargin: Theme.horizontalPageMargin - Theme.paddingLarge
 
     property date date: new Date()
     property string dateText: Qt.formatDate(date)
@@ -95,7 +97,7 @@ Item {
     property bool _changingDate
     property bool _changeWithoutAnimation
     property bool _loadNonVisibleGridsImmediately: true
-    property int _dateBoxSize: width / 7
+    property int _dateBoxSize: (width - leftMargin - rightMargin) / 7
     property alias _gridView: view  // for testing
 
     signal updateModel(variant modelObject, variant fromDate, variant toDate, int primaryMonth)
@@ -310,6 +312,7 @@ Item {
             displayedYear: model.year
             displayedMonth: model.month
             selectedDate: datePicker.date
+            _dateBoxSize: datePicker._dateBoxSize
             highlightedDate: datePicker._highlightedDate
             modelComponent: datePicker.modelComponent
             delegate: datePicker.delegate

@@ -8,25 +8,6 @@ import QtQuick.tooling 1.1
 
 Module {
     Component {
-        name: "DeclarativeAvatarFileHandler"
-        prototype: "QObject"
-        exports: ["Sailfish.Gallery.private/AvatarFileHandler 1.0"]
-        isCreatable: false
-        isSingleton: true
-        exportMetaObjectRevisions: [0]
-        Method {
-            name: "createNewAvatarFileName"
-            type: "QUrl"
-            Parameter { name: "id"; type: "string" }
-        }
-        Method {
-            name: "removeOldAvatars"
-            type: "bool"
-            Parameter { name: "id"; type: "string" }
-            Parameter { name: "excludedFile"; type: "QUrl" }
-        }
-    }
-    Component {
         name: "DeclarativeFileInfo"
         prototype: "QObject"
         exports: ["Sailfish.Gallery/FileInfo 1.0"]
@@ -37,55 +18,6 @@ Module {
         Property { name: "mimeType"; type: "string"; isReadonly: true }
         Property { name: "fileName"; type: "string"; isReadonly: true }
         Property { name: "size"; type: "qlonglong"; isReadonly: true }
-    }
-    Component {
-        name: "DeclarativeImageEditor"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["Sailfish.Gallery.private/ImageEditor 1.0"]
-        exportMetaObjectRevisions: [0]
-        Enum {
-            name: "EditOperationType"
-            values: {
-                "None": 0,
-                "Crop": 1,
-                "Rotate": 2
-            }
-        }
-        Property { name: "source"; type: "QUrl" }
-        Property { name: "target"; type: "QUrl" }
-        Signal {
-            name: "cropped"
-            Parameter { name: "success"; type: "bool" }
-        }
-        Signal {
-            name: "rotated"
-            Parameter { name: "success"; type: "bool" }
-        }
-        Method {
-            name: "crop"
-            Parameter { name: "cropSize"; type: "QSizeF" }
-            Parameter { name: "imageSize"; type: "QSizeF" }
-            Parameter { name: "position"; type: "QPointF" }
-        }
-        Method {
-            name: "rotate"
-            Parameter { name: "rotation"; type: "int" }
-        }
-    }
-    Component {
-        name: "DeclarativeImageMetadata"
-        prototype: "QObject"
-        exports: ["Sailfish.Gallery.private/ImageMetadata 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "source"; type: "QUrl" }
-        Property { name: "autoUpdate"; type: "bool" }
-        Property { name: "orientation"; type: "int"; isReadonly: true }
-        Property { name: "width"; type: "int"; isReadonly: true }
-        Property { name: "height"; type: "int"; isReadonly: true }
-        Property { name: "valid"; type: "bool"; isReadonly: true }
-        Property { name: "hasExif"; type: "bool"; isReadonly: true }
-        Property { name: "hasXmp"; type: "bool"; isReadonly: true }
     }
     Component {
         name: "FitNamespace"

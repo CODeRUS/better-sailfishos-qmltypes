@@ -6,7 +6,6 @@ import org.nemomobile.dbus 1.0
 
 Dialog {
     id: root
-    allowedOrientations: Orientation.Portrait
 
     property bool _connectionSelected
     property bool _connectionSelectorClosed
@@ -90,7 +89,7 @@ Dialog {
 
     Column {
         id: retryText
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         y: Theme.itemSizeLarge
         width: parent.width - x*2
         spacing: Theme.paddingLarge

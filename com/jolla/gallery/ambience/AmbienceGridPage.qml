@@ -47,8 +47,8 @@ MediaSourcePage {
                 id: favoriteGrid
 
                 width: grid.width
-                height: Math.ceil(ambienceModelFaves.count / (gridPage.isPortrait ? 2.0 : 3.0)) * (grid.width / (gridPage.isPortrait ? 2 : 3))
-                columnCount: gridPage.isPortrait ? 2 : 3
+                height: Math.ceil(ambienceModelFaves.count / columnCount) * cellSize
+                columnCount: Math.floor(width / (2 * Theme.itemSizeExtraLarge))
                 interactive: false
                 model: ambienceModelFaves
                 add: Transition { NumberAnimation { properties: "opacity"; from: 0; to: 1; easing.type: Easing.InOutQuad; duration: 400 } }
@@ -93,7 +93,7 @@ MediaSourcePage {
             ImageGridView {
                 id: nonFaveGrid
                 width: grid.width
-                height: Math.ceil(ambienceModelNoFaves.count / (gridPage.isPortrait ? 3.0 : 5.0)) * (grid.width / (gridPage.isPortrait ? 3 : 5))
+                height: Math.ceil(ambienceModelNoFaves.count / columnCount) * cellSize
                 model: ambienceModelNoFaves
                 interactive: false
                 add: Transition { NumberAnimation { properties: "opacity"; from: 0; to: 1; easing.type: Easing.InOutQuad; duration: 400 } }

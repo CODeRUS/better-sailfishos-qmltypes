@@ -15,7 +15,7 @@ Item {
 
     Label {
         id: headingLabel
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         width: parent.width - x*2
         height: implicitHeight + Theme.paddingLarge
         wrapMode: Text.Wrap
@@ -32,7 +32,7 @@ Item {
     Label {
         id: descriptionLabel
         anchors.top: headingLabel.bottom
-        x: Theme.paddingLarge
+        x: Theme.horizontalPageMargin
         width: parent.width - x*2
         wrapMode: Text.Wrap
         font.pixelSize: Theme.fontSizeExtraSmall

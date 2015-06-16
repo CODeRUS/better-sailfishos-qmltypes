@@ -13,7 +13,7 @@ Item {
 
     width: parent.width
     height: active ? label.height + container.height + Theme.paddingMedium : label.height
-    clip: !active
+    clip: true
 
     Behavior on height { NumberAnimation {
             target: root

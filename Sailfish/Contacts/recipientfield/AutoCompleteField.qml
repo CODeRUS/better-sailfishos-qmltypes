@@ -44,7 +44,7 @@ Item {
         property string trimmedText: text.trim()
 
         width: parent.width - actionButton.width
-        textRightMargin: Theme.paddingSmall
+        textRightMargin: Theme.horizontalPageMargin - Theme.paddingLarge + Theme.paddingSmall
         label: placeholderText
         readOnly: model.formattedNameText != ""
         onReadOnlyChanged: {
@@ -138,7 +138,7 @@ Item {
         opacity: 0.6
         anchors {
             right: parent.right
-            rightMargin: Theme.paddingSmall
+            rightMargin: Theme.horizontalPageMargin - Theme.paddingLarge + Theme.paddingSmall
             verticalCenter: inputField.top
             verticalCenterOffset: inputField.textVerticalCenterOffset
         }
@@ -180,8 +180,8 @@ Item {
                         left: parent.left
                         right: parent.right
                         verticalCenter: parent.verticalCenter
-                        leftMargin: Theme.paddingLarge
-                        rightMargin: Theme.paddingLarge
+                        leftMargin: Theme.horizontalPageMargin
+                        rightMargin: Theme.horizontalPageMargin
                     }
                     truncationMode: TruncationMode.Fade
                     textFormat: Text.StyledText

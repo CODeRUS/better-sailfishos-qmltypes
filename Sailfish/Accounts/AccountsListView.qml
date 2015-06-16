@@ -87,7 +87,7 @@ SilicaListView {
 
         AccountIcon {
             id: icon
-            x: Theme.paddingLarge
+            x: Theme.horizontalPageMargin
             anchors.verticalCenter: parent.verticalCenter
             source: model.accountIcon
         }
@@ -105,7 +105,7 @@ SilicaListView {
                 left: icon.right
                 leftMargin: Theme.paddingLarge
                 right: parent.right
-                rightMargin: Theme.paddingLarge
+                rightMargin: Theme.horizontalPageMargin
                 verticalCenter: parent.verticalCenter
                 verticalCenterOffset: accountUserName.text === "" ? 0 : -implicitHeight/2
             }
@@ -127,7 +127,7 @@ SilicaListView {
                 leftMargin: Theme.paddingLarge
                 top: accountName.bottom
                 right: parent.right
-                rightMargin: Theme.paddingLarge
+                rightMargin: Theme.horizontalPageMargin
             }
             truncationMode: TruncationMode.Fade
             text: {

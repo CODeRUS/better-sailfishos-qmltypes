@@ -297,6 +297,9 @@ Page {
         if (!src.onlyPreview) {
             notification.body = src.activity;
             notification.summary = src.message;
+            notification.category = "x-jolla.vault.error"
+        } else {
+            notification.category = "x-jolla.vault.transient-error"
         }
         notification.previewBody = src.activity;
         notification.previewSummary = src.message;
@@ -307,7 +310,6 @@ Page {
 
     Notification {
         id: notification
-        category: "x-jolla.vault.error"
     }
 
     BusyIndicator {

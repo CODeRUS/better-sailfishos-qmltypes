@@ -57,7 +57,7 @@ Rectangle {
     anchors.right: parent ? parent.right : undefined
     color: Theme.primaryColor
     opacity: (timer.moving && _inBounds) || timer.running ? 1.0 : 0.0
-    visible: flickable.contentHeight >= flickable.height
+    visible: flickable.contentHeight > flickable.height
     Behavior on opacity { FadeAnimation { duration: 400 } }
     y: _headerSpacing + (flickable.contentY - flickable.originY + _topMenuSpacing) * _sizeRatio
 

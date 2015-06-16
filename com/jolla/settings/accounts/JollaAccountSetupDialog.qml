@@ -51,7 +51,7 @@ Dialog {
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 wrapMode: Text.WordWrap
                 font {
@@ -66,7 +66,7 @@ Dialog {
             }
 
             Label {
-                x: Theme.paddingLarge
+                x: Theme.horizontalPageMargin
                 width: parent.width - x*2
                 wrapMode: Text.WordWrap
                 font.pixelSize: Theme.fontSizeSmall
@@ -85,7 +85,7 @@ Dialog {
                     id: createAccountButton
                     anchors {
                         left: parent.left
-                        leftMargin: Theme.paddingLarge
+                        leftMargin: Theme.horizontalPageMargin
                     }
                     //: Button label for creating a Jolla account
                     //% "Create account"
@@ -97,7 +97,7 @@ Dialog {
                 Button {
                     anchors {
                         right: parent.right
-                        rightMargin: Theme.paddingLarge
+                        rightMargin: Theme.horizontalPageMargin
                     }
                     //: Button label for creating a Jolla account
                     //% "Sign in"
@@ -170,7 +170,7 @@ Dialog {
                     }
 
                     Label {
-                        x: Theme.paddingLarge
+                        x: Theme.horizontalPageMargin
                         width: parent.width - x*2
                         wrapMode: Text.WordWrap
                         font {
@@ -184,16 +184,17 @@ Dialog {
                     }
 
                     Label {
-                        x: Theme.paddingLarge
+                        x: Theme.horizontalPageMargin
                         width: parent.width - x*2
                         wrapMode: Text.WordWrap
                         color: Theme.highlightColor
                         //: Description of what user will miss if the option to set up a Jolla account is missed
-                        //% "Without a Jolla account, you'll only get basic phone functionality. You'll also miss out on OS updates and you won't be able to access the Jolla store."
+                        //% "Without a Jolla account, you'll only get basic device functionality. You'll also miss out on OS updates and you won't be able to access the Jolla store."
                         text: qsTrId("settings_accounts-la-without_jolla_account")
                     }
 
                     Image {
+                        anchors.horizontalCenter: parent.horizontalCenter
                         source: "image://theme/graphic-startup-skipping"
                     }
                 }
@@ -208,7 +209,7 @@ Dialog {
                         id: noButton
                         anchors {
                             left: parent.left
-                            leftMargin: Theme.paddingLarge
+                            leftMargin: Theme.horizontalPageMargin
                         }
                         //: Button label to go back to previous page
                         //% "Go back"
@@ -220,7 +221,7 @@ Dialog {
                     Button {
                         anchors {
                             right: parent.right
-                            rightMargin: Theme.paddingLarge
+                            rightMargin: Theme.horizontalPageMargin
                         }
                         //: Button label to go back to skip setting up a Jolla account, and do it later instead
                         //% "Skip"

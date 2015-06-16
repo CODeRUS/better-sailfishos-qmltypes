@@ -10,6 +10,8 @@ Page {
     property Item _lastAppPage
     property int _animationDuration: 150
 
+    property Component _background
+
     function _customSelectionHandler(model, index, selected) {
         _handleSelection(model, index, selected)
     }
@@ -23,6 +25,17 @@ Page {
             pageStack.pop(_lastAppPage)
         } else {
             pageStack.pop()
+        }
+    }
+
+    Item {
+        id: background
+        anchors.fill: parent
+    }
+
+    Component.onCompleted: {
+        if (_background) {
+            _background.createObject(background)
         }
     }
 }

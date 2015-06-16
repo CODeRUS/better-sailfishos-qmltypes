@@ -12,9 +12,12 @@ Column {
     property alias detailTypeValue: contactDetailType.text
     property variant detailData
     property real activationProgress
+    property bool hidePhoneActions
+    property bool disablePhoneActions
 
     property alias active: contactDetailActions.active
     property bool _wasActive
+    property bool _disableActionButtons
     onActivationProgressChanged: {
         if (activationProgress == 1) {
             _wasActive = false
@@ -74,7 +77,23 @@ Column {
     onActiveChanged: {
         _wasActive = !active
         if (actionDetailsModel.count == 0) {
+            if (hidePhoneActions && detailType === "phone") {
+                return
+            } else {
+                ModelFactory.getDetailsActionItemsModel(actionDetailsModel, detailType)
+            }
+        }
+    }
+
+    // In case modem/SIM is ready later
+    onHidePhoneActionsChanged: {
+        if (!hidePhoneActions && detailType === "phone" && actionDetailsModel.count == 0) {
             ModelFactory.getDetailsActionItemsModel(actionDetailsModel, detailType)
+        }
+    }
+    onDisablePhoneActionsChanged: {
+        if (detailType === "phone") {
+            _disableActionButtons = disablePhoneActions
         }
     }
 
@@ -99,7 +118,7 @@ Column {
                 id: contactDetailType
                 color: parent.active ? Theme.highlightColor : Theme.primaryColor
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width - 2*Theme.paddingLarge
+                width: parent.width - 2*Theme.horizontalPageMargin
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
                 font {
@@ -126,6 +145,7 @@ Column {
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: labelWrapper.bottom
+                topMargin: Theme.paddingMedium
             }
 
             property real animationProgress: active ? activationProgress : (_wasActive ? (1 - activationProgress) : 0)
@@ -140,7 +160,7 @@ Column {
 
                 Repeater {
                     model: actionDetailsModel
-                    Button { text: actionLabel; onClicked: handleActionClicked(actionType) }
+                    Button { text: actionLabel; enabled: !_disableActionButtons; onClicked: handleActionClicked(actionType) }
                 }
             }
         }

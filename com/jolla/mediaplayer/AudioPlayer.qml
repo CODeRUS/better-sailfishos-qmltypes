@@ -6,6 +6,7 @@ import Sailfish.Silica.theme 1.0
 import Sailfish.Media 1.0
 import com.jolla.mediaplayer 1.0
 import org.nemomobile.policy 1.0
+import org.nemomobile.mpris 1.0
 
 DockedPanel {
     id: player
@@ -18,12 +19,13 @@ DockedPanel {
     property alias currentItem: audio.currentItem
     property alias duration: audio.duration
     property int position: audio.position + _seekOffset
-    property alias state: audio.state
+    property alias state: audio.playbackState
     property alias playModel: audio.model
-    readonly property bool playing: audio.state == Audio.Playing || _resume
+    readonly property bool playing: audio.playbackState == Audio.Playing || _resume
     readonly property bool seeking: forwardKey.pressed || rewindKey.pressed
     property bool _resume
     property int _seekOffset
+    property bool _isLandscape: pageStack && pageStack.currentPage && pageStack.currentPage.isLandscape
 
     function seekForward(time) {
         player._seekOffset += time
@@ -49,7 +51,7 @@ DockedPanel {
 
     width: parent.width
 
-    height: column.height + 2*Theme.paddingLarge
+    height: column.height + (_isLandscape ? Theme.paddingLarge : Theme.paddingLarge * 2)
     contentHeight: height
     flickableDirection: Flickable.VerticalFlick
 
@@ -88,7 +90,7 @@ DockedPanel {
     }
 
     function removeFromQueue(index) {
-        var isPlaying = audio.state == Audio.Playing
+        var isPlaying = audio.playbackState == Audio.Playing
         var isVisible = player.visible
 
         if (index >= audio.model.count || index < 0) {
@@ -171,7 +173,7 @@ DockedPanel {
 
     onSeekingChanged: {
         if (seeking) {
-            _resume = audio.state == Audio.Playing
+            _resume = audio.playbackState == Audio.Playing
             audio.pause()
         } else {
             audio.position += _seekOffset
@@ -186,13 +188,13 @@ DockedPanel {
 
     onPositionChanged: if (!slider.pressed) slider.value = position / 1000
 
-    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaTogglePlayPause; onPressed: player.toggle() }
-    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaPlay; onPressed: player._play() }
-    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaPause; onPressed: player.pause() }
-    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaStop; onPressed: audio.stop() }
-    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaNext; onPressed: audio.playNext() }
-    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaPrevious; onPressed: audio.playPrevious() }
-    MediaKey { enabled: player._grabKeys; key: Qt.Key_ToggleCallHangup; onPressed: player.toggle() }
+    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaTogglePlayPause; onReleased: player.toggle() }
+    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaPlay; onReleased: player._play() }
+    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaPause; onReleased: player.pause() }
+    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaStop; onReleased: audio.stop() }
+    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaNext; onReleased: audio.playNext() }
+    MediaKey { enabled: player._grabKeys; key: Qt.Key_MediaPrevious; onReleased: audio.playPrevious() }
+    MediaKey { enabled: player._grabKeys; key: Qt.Key_ToggleCallHangup; onReleased: player.toggle() }
 
     MediaKey {
         id: forwardKey
@@ -229,6 +231,10 @@ DockedPanel {
 
     Audio {
         id: audio
+
+        property int playbackState
+        property bool changingItem
+
         onEndOfMedia: audio.playNext()
         model.currentIndex: audio.model.currentIndex
         model.onShuffledChanged: shuffleSwitch.checked = model.shuffled
@@ -260,23 +266,40 @@ DockedPanel {
         }
 
         onStateChanged: {
-            if (state == Audio.Playing && !player._resume) {
+            if (playbackState == state) return
+
+            // We don't want the transition to stop state when
+            // choosing to play the next or previous song, or when the
+            // current song has finished and it will transit
+            // automatically to the next one.
+            if (Audio.Stopped == state && (changingItem || isEndOfMedia())) return
+
+            playbackState = state
+        }
+
+        onPlaybackStateChanged: {
+            if (playbackState == Audio.Playing && !player._resume) {
                 player.open = true
-            } else if (state == Audio.Stopped) {
+            } else if (playbackState == Audio.Stopped) {
                 player._resume = false
             }
         }
+
         function playNext() {
             var index = model.currentIndex + 1
             if (index >= model.count) {
                 if (!repeatSwitch.checked) {
+                    playbackState = state
                     return
                 }
                 index = 0
             }
 
+            changingItem = true
             model.currentIndex = index
             play()
+            changingItem = false
+            playbackState = state
         }
 
         function playPrevious() {
@@ -295,8 +318,11 @@ DockedPanel {
                 return
             }
 
+            changingItem = true
             model.currentIndex = index
             play()
+            changingItem = false
+            playbackState = state
         }
 
         function setShuffle(shuffle) {
@@ -308,9 +334,9 @@ DockedPanel {
         id: bluetoothMediaPlayer
 
         status: {
-            if (audio.state == Audio.Playing) {
+            if (audio.playbackState == Audio.Playing) {
                 return BluetoothMediaPlayer.Playing
-            } else if (audio.state == Audio.Stopped) {
+            } else if (audio.playbackState == Audio.Stopped) {
                 return BluetoothMediaPlayer.Stopped
             } else if (rewindKey.pressed) {
                 return BluetoothMediaPlayer.ReverseSeek
@@ -371,7 +397,7 @@ DockedPanel {
 
         canGoNext: {
             if (!active) return false
-            if ((audio.model.currentIndex + 1 >= audio.model.count) && (loopStatus != MprisPlayer.Playlist)) return false
+            if ((audio.model.currentIndex + 1 >= audio.model.count) && (loopStatus != Mpris.Playlist)) return false
             return true
         }
         canGoPrevious: {
@@ -388,14 +414,14 @@ DockedPanel {
         canPlay: currentItem
         canSeek: currentItem
 
-        loopStatus: repeatSwitch.checked ? MprisPlayer.Playlist : MprisPlayer.None
+        loopStatus: repeatSwitch.checked ? Mpris.Playlist : Mpris.None
         playbackStatus: {
-            if (audio.state == Audio.Playing) {
-                return MprisPlayer.Playing
-            } else if (audio.state == Audio.Stopped) {
-                return MprisPlayer.Stopped
+            if (audio.playbackState == Audio.Playing) {
+                return Mpris.Playing
+            } else if (audio.playbackState == Audio.Stopped) {
+                return Mpris.Stopped
             } else {
-                return MprisPlayer.Paused
+                return Mpris.Paused
             }
         }
         position: audio.position * 1000
@@ -425,9 +451,9 @@ DockedPanel {
         onOpenUriRequested: playUrl(url)
 
         onLoopStatusRequested: {
-            if (loopStatus == MprisPlayer.None) {
+            if (loopStatus == Mpris.None) {
                 repeatSwitch.checked = false
-            } else if (loopStatus == MprisPlayer.Playlist) {
+            } else if (loopStatus == Mpris.Playlist) {
                 repeatSwitch.checked = true
             }
         }
@@ -437,29 +463,33 @@ DockedPanel {
             var metadata = {}
 
             if ('url' in localMetadata) {
-                metadata[metadataToString(MprisPlayer.Url)] = localMetadata['url'] // Url
+                metadata[mpris.metadataToString(Mpris.Url)] = localMetadata['url'] // Url
 
                 // FIXME: Related to JB#13207. The "id" has to be an
                 // unique identifier and it is not.
-                metadata[metadataToString(MprisPlayer.TrackId)] = "/com/jolla/mediaplayer/" + Qt.md5(localMetadata['url'].toString()) // DBus object path
+                metadata[mpris.metadataToString(Mpris.TrackId)] = "/com/jolla/mediaplayer/" + Qt.md5(localMetadata['url'].toString()) // DBus object path
             }
-            if ('duration' in localMetadata) metadata[metadataToString(MprisPlayer.Length)] = localMetadata['duration'] * 1000 // Microseconds
-            if ('album' in localMetadata) metadata[metadataToString(MprisPlayer.Album)] = localMetadata['album'] // String
-            if ('artist' in localMetadata) metadata[metadataToString(MprisPlayer.Artist)] = [localMetadata['artist']] // List of strings
-            if ('genre' in localMetadata) metadata[metadataToString(MprisPlayer.Genre)] = [localMetadata['genre']] // List of strings
-            if ('title' in localMetadata) metadata[metadataToString(MprisPlayer.Title)] = localMetadata['title'] // String
-            if ('track' in localMetadata) metadata[metadataToString(MprisPlayer.TrackNumber)] = localMetadata['track'] // Int
+            if ('duration' in localMetadata) metadata[mpris.metadataToString(Mpris.Length)] = localMetadata['duration'] * 1000 // Microseconds
+            if ('album' in localMetadata) metadata[mpris.metadataToString(Mpris.Album)] = localMetadata['album'] // String
+            if ('artist' in localMetadata) metadata[mpris.metadataToString(Mpris.Artist)] = [localMetadata['artist']] // List of strings
+            if ('genre' in localMetadata) metadata[mpris.metadataToString(Mpris.Genre)] = [localMetadata['genre']] // List of strings
+            if ('title' in localMetadata) metadata[mpris.metadataToString(Mpris.Title)] = localMetadata['title'] // String
+            if ('track' in localMetadata) metadata[mpris.metadataToString(Mpris.TrackNumber)] = localMetadata['track'] // Int
 
             mprisPlayer.metadata = metadata
         }
+    }
+
+    Mpris {
+        id: mpris
     }
 
     Column {
         id: column
 
         width: parent.width
-        y: Theme.paddingMedium
-        spacing: Theme.paddingLarge
+        y: player._isLandscape ? Theme.paddingSmall : Theme.paddingMedium
+        spacing: player._isLandscape ? Theme.paddingSmall : Theme.paddingLarge
 
         Slider {
             id: slider
@@ -508,7 +538,7 @@ DockedPanel {
             IconButton {
                 id: playPause
                 width: parent.width / 3
-                icon.source: audio.state == Audio.Playing ? "image://theme/icon-m-pause?" + Theme.highlightColor : "image://theme/icon-m-play"
+                icon.source: audio.playbackState == Audio.Playing ? "image://theme/icon-m-pause?" + Theme.highlightColor : "image://theme/icon-m-play"
                 onClicked: audio.toggle()
             }
 
@@ -524,6 +554,8 @@ DockedPanel {
 
     PushUpMenu {
         id: bottomMenu
+
+        bottomMargin: player._isLandscape ? Theme.itemSizeExtraSmall : Theme.itemSizeSmall
 
         Row {
             id: row
