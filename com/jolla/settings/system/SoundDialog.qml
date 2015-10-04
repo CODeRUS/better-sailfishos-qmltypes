@@ -10,11 +10,14 @@ Dialog {
     property string activeSoundTitle
     property string activeSoundSubtitle
     property bool noSound
-    property string selectedFilename
+    property string selectedFilename: activeFilename
+    property string selectedSoundTitle: activeSoundTitle
     property QtObject alarmModel
 
     onSelectedFilenameChanged: previewPlayer.source = selectedFilename
     onActiveFilenameChanged: previewPlayer.source = activeFilename
+
+    canAccept: selectedFilename != "" || noSound
 
     PreviewPlayer {
         id: previewPlayer
@@ -29,10 +32,13 @@ Dialog {
             onSelectedContentChanged: {
                 // Only preview here
                 if (selectedContent.count == 1) {
-                    soundDialog.selectedFilename = selectedContent.get(0).filePath
+                    var content = selectedContent.get(0)
+                    soundDialog.selectedFilename = content.filePath
+                    soundDialog.selectedSoundTitle = content.title
                     alarmToneList.currentIndex = -1
                 } else {
                     soundDialog.selectedFilename = ""
+                    soundDialog.selectedSoundTitle = ""
                 }
                 previewPlayer.toggle(soundDialog.selectedFilename)
             }
@@ -65,10 +71,12 @@ Dialog {
                 iconOpacity: alarmToneList.currentIndex == -1 && previewPlayer.playbackState === Audio.PlayingState
                              ? 1.0 : 0.0
                 enabled: !noSound
+                visible: soundDialog.activeFilename != ""
 
                 onClicked: {
                     alarmToneList.currentIndex = -1
                     soundDialog.selectedFilename = soundDialog.activeFilename
+                    soundDialog.selectedSoundTitle = soundDialog.activeSoundTitle
                     previewPlayer.toggle(soundDialog.selectedFilename)
                 }
             }
@@ -121,6 +129,7 @@ Dialog {
                     if (noSound) {
                         alarmToneList.currentIndex = -1
                         soundDialog.selectedFilename = ""
+                        soundDialog.selectedSoundTitle = ""
                         previewPlayer.stop()
                     }
                 }
@@ -145,6 +154,7 @@ Dialog {
             onClicked: {
                 alarmToneList.currentIndex = index
                 soundDialog.selectedFilename = filename
+                soundDialog.selectedSoundTitle = model.title
                 previewPlayer.toggle(soundDialog.selectedFilename)
             }
         }

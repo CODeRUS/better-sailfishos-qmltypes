@@ -36,7 +36,7 @@ Grid {
             id: coloredSquare
             height: width
             width: root.width/root.columns
-            color: model.highlightBackgroundColor
+            color: Ambience.highlightBackgroundColor(model.highlightColor)
 
             MouseArea {
                 id: mouseArea
@@ -46,8 +46,8 @@ Grid {
                         _tickIcon = tickIconComponent.createObject(root)
                     }
                     _tickIcon.parent = coloredSquare
-                    _tickIcon.modifierColor = model.highlightBackgroundColor
-                    root.color = model.highlightBackgroundColor
+                    _tickIcon.modifierColor = coloredSquare.color
+                    root.color = coloredSquare.color
                     ambienceModel.makeCurrent(model.index)
                 }
 

@@ -108,6 +108,11 @@ Module {
         Property { name: "actions"; type: "DeclarativeCoverAction"; isList: true; isReadonly: true }
         Property { name: "enabled"; type: "bool" }
         Property { name: "iconBackground"; type: "bool" }
+        Property { name: "window"; type: "QWindow"; isPointer: true }
+        Signal {
+            name: "windowChanged"
+            Parameter { name: "window"; type: "QWindow"; isPointer: true }
+        }
         Method {
             name: "trigger"
             Parameter { name: "id"; type: "int" }
@@ -233,17 +238,18 @@ Module {
                 "TimepointSectionRelative": 3,
                 "WeekdayNameStandalone": 4,
                 "DurationElapsed": 5,
-                "TimeValueTwelveHours": 6,
-                "TimeValueTwentyFourHours": 7,
-                "TimeValue": 8,
-                "DurationShort": 9,
-                "DurationLong": 10,
-                "DateFull": 11,
-                "DateLong": 12,
-                "MonthNameStandalone": 13,
-                "MonthNameStandaloneShort": 14,
-                "DateMedium": 15,
-                "DateMediumWithoutYear": 16
+                "DurationElapsedShort": 6,
+                "TimeValueTwelveHours": 7,
+                "TimeValueTwentyFourHours": 8,
+                "TimeValue": 9,
+                "DurationShort": 10,
+                "DurationLong": 11,
+                "DateFull": 12,
+                "DateLong": 13,
+                "MonthNameStandalone": 14,
+                "MonthNameStandaloneShort": 15,
+                "DateMedium": 16,
+                "DateMediumWithoutYear": 17
             }
         }
         Enum {
@@ -491,26 +497,6 @@ Module {
         }
     }
     Component {
-        name: "DeclarativeScreen"
-        prototype: "QObject"
-        exports: ["Sailfish.Silica/Screen 1.0"]
-        isCreatable: false
-        isSingleton: true
-        exportMetaObjectRevisions: [0]
-        Enum {
-            name: "SizeCategory"
-            values: {
-                "Small": 0,
-                "Medium": 1,
-                "Large": 2,
-                "ExtraLarge": 3
-            }
-        }
-        Property { name: "width"; type: "int"; isReadonly: true }
-        Property { name: "height"; type: "int"; isReadonly: true }
-        Property { name: "sizeCategory"; type: "SizeCategory"; isReadonly: true }
-    }
-    Component {
         name: "DeclarativeStandardPaths"
         prototype: "QObject"
         exports: ["Sailfish.Silica/StandardPaths 1.0"]
@@ -545,6 +531,14 @@ Module {
                 "Up": 1,
                 "Right": 2,
                 "Down": 3
+            }
+        }
+        Enum {
+            name: "Mode"
+            values: {
+                "Swipe": 0,
+                "EdgeSwipe": 1,
+                "Pull": 2
             }
         }
     }
@@ -593,6 +587,26 @@ Module {
         Property { name: "item"; type: "QQuickItem"; isReadonly: true; isPointer: true }
     }
     Component {
+        name: "Silica::Screen"
+        prototype: "QObject"
+        exports: ["Sailfish.Silica/Screen 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "SizeCategory"
+            values: {
+                "Small": 0,
+                "Medium": 1,
+                "Large": 2,
+                "ExtraLarge": 3
+            }
+        }
+        Property { name: "width"; type: "int"; isReadonly: true }
+        Property { name: "height"; type: "int"; isReadonly: true }
+        Property { name: "sizeCategory"; type: "SizeCategory"; isReadonly: true }
+    }
+    Component {
         name: "Silica::Theme"
         prototype: "QObject"
         exports: ["Sailfish.Silica/Theme 1.0"]
@@ -621,6 +635,9 @@ Module {
         Property { name: "iconSizeLarge"; type: "float"; isReadonly: true }
         Property { name: "iconSizeExtraLarge"; type: "float"; isReadonly: true }
         Property { name: "iconSizeLauncher"; type: "float"; isReadonly: true }
+        Property { name: "buttonWidthSmall"; type: "float"; isReadonly: true }
+        Property { name: "buttonWidthMedium"; type: "float"; isReadonly: true }
+        Property { name: "buttonWidthLarge"; type: "float"; isReadonly: true }
         Property { name: "coverSizeSmall"; type: "QSize"; isReadonly: true }
         Property { name: "coverSizeLarge"; type: "QSize"; isReadonly: true }
         Property { name: "paddingSmall"; type: "float"; isReadonly: true }

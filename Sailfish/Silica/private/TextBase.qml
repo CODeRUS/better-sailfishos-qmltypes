@@ -252,7 +252,9 @@ TextBaseItem {
     Label {
         id: placeholderTextLabel
 
-        color: _editor.activeFocus ? Theme.secondaryHighlightColor : Theme.secondaryColor
+        color: textBase.errorHighlight
+               ? "#ff4d4d"
+               : (_editor.activeFocus ? Theme.secondaryHighlightColor : Theme.secondaryColor)
 
         opacity: (textBase.text.length === 0 && !_editor.inputMethodComposing) ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation {} }

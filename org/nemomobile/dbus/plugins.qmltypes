@@ -107,7 +107,7 @@ Module {
         Method {
             name: "setProperty"
             Parameter { name: "name"; type: "string" }
-            Parameter { name: "value"; type: "QVariant" }
+            Parameter { name: "newValue"; type: "QVariant" }
         }
     }
     Component {

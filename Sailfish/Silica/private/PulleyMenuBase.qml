@@ -109,11 +109,12 @@ MouseArea {
     property bool _atInitialPosition: Math.abs(flickable.contentY - _inactivePosition) < 1.0 && !active
     property bool _atFinalPosition: Math.abs(flickable.contentY - _finalPosition) < 1.0 && active
     property bool _pullDown: _inactivePosition > _finalPosition
+    property real _menuIndicatorPosition // The position of the highlight when the menu is closed
 
     property bool _activationInhibited
     property bool _activationPermitted: visible && enabled && _atInitialPosition && !_activationInhibited
 
-    property color highlightColor: Theme.highlightColor
+    property color highlightColor: Theme.highlightBackgroundColor
     property color backgroundColor: Theme.highlightBackgroundColor
 
     property bool _bounceBackEnabled: false
@@ -125,11 +126,15 @@ MouseArea {
 
     property bool _inListView: flickable !== null && flickable.hasOwnProperty('highlightRangeMode')
     property bool _changingListView: false
-    property Item _menuIndicatorItem
+    property real _shadowHeight: Theme.itemSizeExtraLarge
     property Item _page
     property bool _activeAllowed: (!_page || _page.status != PageStatus.Inactive) && Qt.application.active
     property bool _activeDimmer
     property bool _hinting
+    property real _highlightIndicatorPosition
+    property bool _doClick
+    property bool _quickSelected
+    property bool _pageActive: _page && _page.status === PageStatus.Active
 
     property QtObject _ngfEffect
 
@@ -137,16 +142,37 @@ MouseArea {
     property Item _contentColumn
     // "Type" of PulleyMenu, for PulleyMenuLogic
     property alias _isPullDownMenu: logic.pullDownType
+    property alias _dragDistance: logic.dragDistance
 
     z: 10000 // we want the menu indicator and its dimmer to appear above content
-    x: flickable.contentX
-    width: flickable.width ? flickable.width : Screen.width
-    height: (active ? _activeHeight : _inactiveHeight) + spacing
+    x: flickable.contentX + (flickable.width - width)/2
+    width: flickable.width ? Math.min(flickable.width, screen.sizeCategory > Screen.Medium ? Screen.width*0.7 : Screen.width) : Screen.width
+    height: _activeHeight + spacing
 
-    // When the height changes the dimmable rectangle changes
-    onHeightChanged: if (active || _activeDimmer || dimmer.opacity > 0) _updateDim()
-    onWidthChanged: if (active || _activeDimmer || dimmer.opacity > 0) _updateDim()
-    onYChanged: if (active || _activeDimmer || dimmer.opacity > 0) _updateDim()
+    layer.enabled: active || (flickable.dragging && __silica_applicationwindow_instance._dimmingActive)
+    layer.smooth: true
+    layer.sourceRect: Qt.rect(0, _isPullDownMenu ? 0 : -_shadowHeight,
+                              pulleyBase.width, pulleyBase.height + _shadowHeight)
+    layer.effect: Item {
+        property variant source
+        ShaderEffect {
+            property variant source: parent.source
+            property real flickOpacity: flickable ? flickable.contentItem.opacity : 1.0
+            y: _isPullDownMenu ? 0 : -_shadowHeight
+            width: pulleyBase.width
+            height: pulleyBase.height + _shadowHeight
+            fragmentShader: "
+                uniform sampler2D source;
+                uniform lowp float flickOpacity;
+                varying highp vec2 qt_TexCoord0;
+                void main(void)
+                {
+                    highp vec4 pixelColor = texture2D(source, qt_TexCoord0);
+                    gl_FragColor = pixelColor * flickOpacity;
+                }
+                "
+        }
+    }
 
     states: [
         State {
@@ -215,10 +241,14 @@ MouseArea {
     }
     onActiveChanged: {
         _bounceBackEnabled = active
-        _updateDim()
         if (_inListView) {
             expandedStateTimer.restart()
         }
+        highlightItem._highlightedItemPosition = _isPullDownMenu ? -Screen.height : Screen.height
+        if (!active) {
+            highlightItem.clearHighlight()
+        }
+        _setMenuItemsInverted(active)
     }
 
     on_ActiveAllowedChanged: {
@@ -227,8 +257,19 @@ MouseArea {
         }
     }
 
-    function _findMenuItem(item) {
-        if (!item.visible || !item.enabled) {
+    on_AtFinalPositionChanged: _setMenuItemsInverted(!_atFinalPosition)
+
+    on_PageActiveChanged: if (_pageActive) highlightItem.state = "enterView"
+
+    Binding {
+        when: active && _atFinalPosition && !flickable.dragging && !_quickSelected
+        target: __silica_applicationwindow_instance
+        property: "_dimScreen"
+        value: active && !_bounceBackRunning
+    }
+
+    function _findMenuItem(item, allItems) {
+        if (!allItems && (!item.visible || !item.enabled)) {
             return null
         }
         if (item.hasOwnProperty("__silica_menuitem")) {
@@ -255,14 +296,19 @@ MouseArea {
                 }
             }
             if (count == 1) {
+                _quickSelected = true
                 var xPos = width/2
-                if ((_pullDown && parentItem.mapToItem(child, xPos, yPos-topMargin).y < 0)
+                if ((_pullDown && parentItem.mapToItem(child, xPos, yPos).y < 0)
                         || (!_pullDown && parentItem.mapToItem(child, xPos, yPos).y > 0)) {
                     menuItem = child
                     highlightItem.highlight(menuItem, pulleyBase)
                     return menuItem
                 }
+            } else {
+                _quickSelected = false
             }
+        } else {
+            _quickSelected = false
         }
 
         return null
@@ -277,9 +323,10 @@ MouseArea {
         var xPos = width/2
         child = parentItem.childAt(xPos, yPos)
         while (child) {
-            if (child && child.hasOwnProperty("__silica_menuitem") && child.enabled) {
+            if (child && child.hasOwnProperty("__silica_menuitem") && child.enabled && child.visible) {
                 menuItem = child
-                highlightItem.highlight(menuItem, pulleyBase)
+                yPos = parentItem.mapToItem(child, xPos, yPos).y
+                highlightItem.highlight(menuItem, pulleyBase, logic.dragDistance <= _contentEnd && !_atFinalPosition)
                 break
             }
             parentItem = child
@@ -288,8 +335,35 @@ MouseArea {
         }
         if (!child) {
             menuItem = null
+            var wasHighlighted = !!highlightItem.highlightedItem
             highlightItem.clearHighlight()
+            if (logic.dragDistance <= _contentEnd && wasHighlighted) {
+                highlightItem.moveTo(_highlightIndicatorPosition)
+            }
         }
+    }
+
+    function _hasMenuItems() {
+        for (var i = 0; i < _contentColumn.children.length; ++i) {
+            if (_findMenuItem(_contentColumn.children[i])) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    function _forEachItem(func) {
+        for (var i = 0; i < _contentColumn.children.length; ++i) {
+            var item = _findMenuItem(_contentColumn.children[i], true)
+            if (item) {
+                func(item)
+            }
+        }
+    }
+
+    function _setMenuItemsInverted(inverted) {
+        _forEachItem(function (item) { item._invertColors = inverted })
     }
 
     function hide() {
@@ -297,7 +371,6 @@ MouseArea {
             delayedBounceTimer.restart()
         }
         menuItem = null
-        highlightItem.clearHighlight()
     }
 
     function cancelBounceBack() {
@@ -323,23 +396,161 @@ MouseArea {
         }
     }
 
-    Rectangle {
-        id: dimmer
-        anchors.fill: parent
-        anchors.bottomMargin: -_menuIndicatorItem.height/2 + (_isPullDownMenu ? spacing : 0)
-        anchors.topMargin: -_menuIndicatorItem.height/2 + (!_isPullDownMenu ? spacing : 0)
-        color: __silica_applicationwindow_instance.dimmedRegionColor
-        opacity: flickable && flickable._pulleyDimmerActive ? 0.5 : 0.0
-        Behavior on opacity { FadeAnimation {} }
-        z: -1
-    }
-
     HighlightBar {
         id: highlightItem
+        y: {
+            if (!active) return _menuIndicatorPosition
+            if (highlightedItem || (!flickable.dragging && _atFinalPosition)
+                    || logic.dragDistance > _contentEnd) return _highlightedItemPosition
+            return _highlightIndicatorPosition
+        }
+
+        yAnimationDuration: 120
         color: pulleyBase.highlightColor
-        audioEnabled: flickable.dragging
-        opacityAnimationDuration: 75
-        visible: active
+        audioEnabled: flickable.dragging || quickSelect
+        opacityAnimationDuration: _atInitialPosition || _bounceBackRunning ? 400 : 120
+        opacity: Theme.highlightBackgroundOpacity * _opacity
+
+        property real _opacity: {
+            if (highlightedItem) return 1.0
+            if ((!active && !_hinting) || _bounceBackRunning) return busyOpacity
+            if (!_hasMenuItems(_contentColumn)) return 1.0 - logic.dragDistance/Theme.paddingMedium
+            return Math.max(1.5 - logic.dragDistance/Theme.itemSizeExtraSmall,
+                            logic.dragDistance <= _contentEnd && !flickAnimation.running ? 0.5 : 0.0)
+        }
+
+        property real busyOpacity: 1.0
+        Timer {
+            id: busyTimer
+            running: busy && !active && Qt.application.active
+            interval: 500
+            repeat: true
+            onRunningChanged: highlightItem.busyOpacity = 1.0
+            onTriggered: highlightItem.busyOpacity = highlightItem.busyOpacity >= 0.99 ? 0.2 : 1.2
+        }
+
+        states: [
+            State {
+                name: "click"
+                when: _doClick && !_quickSelected
+            },
+            State {
+                name: "quickselectclick"
+                when: _doClick && _quickSelected
+            },
+            State {
+                name: "enterView"
+                PropertyChanges {
+                    target: highlightItem
+                    opacity: Theme.highlightBackgroundOpacity
+                }
+            },
+            State {
+                name: "bounceBack"
+                when: _bounceBackRunning && active
+                PropertyChanges {
+                    target: highlightItem
+                    y: _menuIndicatorPosition
+                }
+            }
+        ]
+        transitions: [
+            Transition {
+                to: "click"
+                SequentialAnimation {
+                    FadeAnimation {
+                        target: highlightItem
+                        duration: 200
+                        to: 0.1
+                    }
+                    FadeAnimation {
+                        target: highlightItem
+                        duration: 100
+                        to: Theme.highlightBackgroundOpacity
+                    }
+                    FadeAnimation {
+                        target: highlightItem
+                        duration: 200
+                        to: 0.1
+                    }
+                    FadeAnimation {
+                        target: highlightItem
+                        duration: 100
+                        to: Theme.highlightBackgroundOpacity
+                    }
+                    PauseAnimation {
+                        duration: 50
+                    }
+                    ScriptAction {
+                        script: {
+                            if (active && menuItem) {
+                                menuItem.clicked()
+                            }
+                            hide()
+                            _doClick = false
+                        }
+                    }
+                }
+            },
+            Transition {
+                to: "quickselectclick"
+                SequentialAnimation {
+                    FadeAnimation {
+                        target: highlightItem
+                        duration: 135
+                        to: 0.15
+                    }
+                    FadeAnimation {
+                        target: highlightItem
+                        duration: 65
+                        to: Theme.highlightBackgroundOpacity
+                    }
+                    PauseAnimation {
+                        duration: 50
+                    }
+                    ScriptAction {
+                        script: {
+                            if (active && menuItem) {
+                                menuItem.clicked()
+                            }
+                            hide()
+                            _doClick = false
+                        }
+                    }
+                }
+            },
+            Transition {
+                to: "enterView"
+                SequentialAnimation {
+                    FadeAnimation {
+                        target: highlightItem
+                        duration: 600
+                        to: 0.7
+                    }
+                    FadeAnimation {
+                        target: highlightItem
+                        duration: 2500
+                        to: Theme.highlightBackgroundOpacity
+                    }
+                    ScriptAction {
+                        script: highlightItem.state = ""
+                    }
+                }
+            },
+            Transition {
+                to: "bounceBack"
+                ScriptAction {
+                    script: highlightItem._transientAnimateY = false
+                }
+                SmoothedAnimation {
+                    target: highlightItem
+                    property: "y"
+                    to: _menuIndicatorPosition
+                    duration: 400
+                    velocity: -1
+                }
+            }
+        ]
     }
 
     function _interceptFlick() {
@@ -359,8 +570,7 @@ MouseArea {
     function _bounceBack() {
         if (!flickAnimation.running) {
             if (menuItem) {
-                menuItem.clicked()
-                hide()
+                _doClick = true
             } else if (!_atFinalPosition) {
                 hide()
             }
@@ -382,40 +592,8 @@ MouseArea {
             flickAnimation.stop()
             bounceBackAnimation.stop()
         } else {
+            highlightItem.state = ""
             snapAnimation.stop()
-        }
-    }
-    function _updateDim() {
-        if (flickable === null) {
-            return
-        }
-        var enable = active && !bounceBackAnimation.running
-        var window = __silica_applicationwindow_instance
-        var dimRect
-        // 2 * screen height to ensure the whole view is covered even when quickly flicked closed
-        var dimHeight = window._screenHeight * 2
-        // still update dimmer geometry when deactivating
-        if (_pullDown) {
-            if (flickable.pushUpMenu && flickable.pushUpMenu.visible) {
-                var pum = flickable.pushUpMenu
-                dimHeight = pum.y - pum._menuIndicatorItem.height/2 + pum.spacing - y - height - _menuIndicatorItem.height/2 + spacing
-            }
-            dimHeight = Math.min(dimHeight, window._screenHeight * 2)
-            dimRect = Qt.rect(0, height + _menuIndicatorItem.height/2 - spacing, width, dimHeight)
-        } else {
-            var menuIndicatorHalf = _menuIndicatorItem ? _menuIndicatorItem.height/2 : Theme.paddingLarge
-            if (flickable.pullDownMenu && flickable.pullDownMenu.visible) {
-                var pdm = flickable.pullDownMenu
-                var pdmMenuIndicatorHalf = pdm._menuIndicatorItem ? pdm._menuIndicatorItem.height/2 : Theme.paddingLarge
-                dimHeight = y - menuIndicatorHalf + spacing - pdm.y - pdm.height - pdmMenuIndicatorHalf + pdm.spacing
-            }
-            dimHeight = Math.min(dimHeight, window._screenHeight * 2)
-            dimRect = Qt.rect(0, -dimHeight-menuIndicatorHalf + spacing, width, dimHeight)
-        }
-        _activeDimmer = enable
-        window._dimItem(enable, pulleyBase, dimRect, [])
-        if (!flickable._pulleyDimmerActive && !enable) {
-            window._undimItem(pulleyBase)
         }
     }
 
@@ -484,11 +662,6 @@ MouseArea {
             }
         }
     }
-    Connections {
-        target: (active || _activeDimmer || dimmer.opacity > 0) ? _page : null
-        ignoreUnknownSignals: true
-        onOrientationChanged: pulleyBase._updateDim()
-    }
     Timer {
         id: delayedBounceTimer
         interval: 10
@@ -507,11 +680,11 @@ MouseArea {
     }
     SmoothedAnimation {
         id: bounceBackAnimation
-        duration: 350
+        duration: 400
+        velocity: -1
         target: flickable
         property: "contentY"
         to: _inactivePosition
-        onRunningChanged: _updateDim()
     }
     SmoothedAnimation {
         id: snapAnimation
@@ -524,7 +697,15 @@ MouseArea {
         anchors.fill: parent
         enabled: active && !_hinting
         stealPress: !flickable.dragging
-        onPressedOutside: { if (!flickAnimation.running && !flickable.moving) { menuItem = null; cancelTouch(); hide() } }
+        onPressedOutside: {
+            if (!flickAnimation.running && !flickable.moving) {
+                if (highlightItem.state !== "click") {
+                    menuItem = null
+                    hide()
+                }
+                cancelTouch()
+            }
+        }
     }
 
     Component.onCompleted: {

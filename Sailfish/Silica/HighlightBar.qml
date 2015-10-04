@@ -42,9 +42,16 @@ Rectangle {
     property bool audioEnabled
     property Item highlightedItem
     property int opacityAnimationDuration: 200
-    property color color: Theme.highlightColor
+    property alias yAnimationDuration: yAnimation.duration
+    property alias animateY: yBehavior.enabled
+    property alias animateOpacity: opacityBehavior.enabled
+    property real _highlightedItemPosition
+    property bool _transientAnimateY
 
     property QtObject _ngfEffect
+
+    y: _highlightedItemPosition
+    color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
 
     function clearHighlight() {
         if (highlightedItem) {
@@ -54,19 +61,21 @@ Rectangle {
         highlightedItem = null
     }
 
-    function highlight(item, container) {
+    function highlight(item, container, forceAnimate) {
         // This is a change of item so we deactivate the old item (to stop non-visual feedback)
         if (!item) {
             clearHighlight()
             return
         }
-        var newY = parent.mapFromItem(item, 0, item.height/2).y - highlightItem.height/2
-        width = item.width
 
-        if (y !== newY && highlightedItem !== null && highlightedItem !== item) {
-            animateY.enabled = true
+        var newY = parent.mapFromItem(item, 0, item.height/2).y - highlightItem.height/2
+        if (_highlightedItemPosition !== newY && highlightedItem !== null && highlightedItem !== item) {
+            _transientAnimateY = true
         }
-        y = newY
+
+        _transientAnimateY = _transientAnimateY || !!forceAnimate
+
+        _highlightedItemPosition = newY
 
         if (highlightedItem !== item) {
             if (highlightedItem) {
@@ -82,8 +91,14 @@ Rectangle {
         }
     }
 
-    height: Math.round(Theme.itemSizeExtraSmall/2)
-    opacity: highlightedItem ? 0.3 : 0.0
+    function moveTo(yPos) {
+        _transientAnimateY = true
+        _highlightedItemPosition = yPos
+    }
+
+    height: Theme.itemSizeExtraSmall
+    width: parent.width
+    opacity: highlightedItem ? 1.0 : 0.0
 
     Component.onCompleted: {
         // avoid hard dependency to ngf module
@@ -102,23 +117,28 @@ Rectangle {
         onHeightChanged: highlight(highlightedItem)
     }
 
-    Behavior on opacity { FadeAnimation { duration: highlightItem.opacityAnimationDuration } }
+    Behavior on opacity {
+        id: opacityBehavior
+        SmoothedAnimation { duration: highlightItem.opacityAnimationDuration; velocity: -1 }
+    }
     Behavior on y {
-        id: animateY
-        enabled: false
+        id: yBehavior
+        enabled: _transientAnimateY
         SequentialAnimation {
-            SmoothedAnimation { easing.type: Easing.InOutQuad; duration: 50 }
+            SmoothedAnimation {
+                id: yAnimation
+                duration: 100
+                velocity: -1
+                reversingMode: SmoothedAnimation.Immediate
+            }
+            PauseAnimation {
+                duration: 20
+            }
             PropertyAction {
-                target: animateY
-                property: "enabled"
+                target: highlightItem
+                property: "_transientAnimateY"
                 value: false
             }
         }
-    }
-
-    gradient: Gradient {
-        GradientStop { position: 0.0; color: "transparent" }
-        GradientStop { position: 0.5; color: highlightItem.color }
-        GradientStop { position: 1.0; color: "transparent" }
     }
 }

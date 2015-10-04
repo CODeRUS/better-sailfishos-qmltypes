@@ -43,11 +43,21 @@ Label {
     signal clicked
 
     property int __silica_menuitem
+    property int _duration: 50
+    property bool _invertColors
+    on_InvertColorsChanged: _duration = 200
 
     width: parent ? parent.width : Screen.width
     // Reduce height if inside pulley menu content item
     height: parent && parent.hasOwnProperty('__silica_pulleymenu_content') ? Theme.itemSizeExtraSmall : Theme.itemSizeSmall
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter
-    color: enabled ? (down || highlighted ? Theme.primaryColor : Theme.highlightColor) : Theme.secondaryHighlightColor
+    color: enabled ? ((down || highlighted) ^ _invertColors ? Theme.highlightColor : Theme.primaryColor)
+                   : Theme.rgba(Theme.secondaryColor, 0.4)
+    Behavior on color {
+        SequentialAnimation {
+            ColorAnimation { duration: _duration }
+            ScriptAction { script: _duration = 50 }
+        }
+    }
 }

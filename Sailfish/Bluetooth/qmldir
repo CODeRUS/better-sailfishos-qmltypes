@@ -9,3 +9,4 @@ TrustBluetoothDeviceSwitch 1.0 TrustBluetoothDeviceSwitch.qml
 AuthorizeBluetoothConnectionDialog 1.0 AuthorizeBluetoothConnectionDialog.qml
 BluetoothViewPlaceholder 1.0 BluetoothViewPlaceholder.qml
 BluetoothPairingManager 1.0 BluetoothPairingManager.qml
+BluetoothPairingNotification 1.0 BluetoothPairingNotification.qml

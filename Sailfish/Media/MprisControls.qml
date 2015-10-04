@@ -10,16 +10,16 @@ MouseArea {
     property bool previousEnabled
     property bool playEnabled
     property bool pauseEnabled
+    property color textColor: Theme.primaryColor
+    property real buttonSize: Theme.iconSizeLarge
 
-    readonly property real _squareSize: parent ? 0.25 * parent.width : 0
+    readonly property real _squareSize: width > 3 * buttonSize ? buttonSize : width / 3
 
     signal playPauseRequested ()
     signal nextRequested ()
     signal previousRequested ()
 
-    width: playerButtons.width
-    height: playerButtons.height + (2 * Theme.itemSizeLarge) - Theme.itemSizeExtraSmall
-    anchors.centerIn: parent
+    height: mainColumn.height
 
     drag.target: dummyDragItem
     drag.axis: Drag.XAxis
@@ -44,133 +44,154 @@ MouseArea {
         visible: false
     }
 
-    Column {
-        id: artistAndSong
+    MouseArea {
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: mainColumn.top
+            bottom: mainColumn.bottom
+        }
+    }
 
-        property var artistAndSongText: { "artist": "", "song": "" }
+    Column {
+        id: mainColumn
 
         anchors {
             left: parent.left
             right: parent.right
         }
 
-        onArtistAndSongTextChanged: {
-            if (artistAndSongFadeAnimation.running) {
-                artistAndSongFadeAnimation.complete()
+        MouseArea {
+            anchors {
+                left: parent.left
+                right: parent.right
             }
-            artistAndSongFadeAnimation.artist = artistAndSongText.artist
-            artistAndSongFadeAnimation.song = artistAndSongText.song
-            artistAndSongFadeAnimation.running = true
-        }
-
-        SequentialAnimation {
-            id: artistAndSongFadeAnimation
-
-            property string artist
-            property string song
-
-            FadeAnimation { target: artistAndSong; properties: "opacity"; to: 0.0 }
-            ScriptAction { script: { artistLabel.text = artistAndSongFadeAnimation.artist; songLabel.text = artistAndSongFadeAnimation.song } }
-            FadeAnimation { target: artistAndSong; properties: "opacity"; to: 1.0 }
-        }
-
-        Text {
-            id: artistLabel
-
-            width: parent.width
-            font.pixelSize: Theme.fontSizeHuge
-            elide: Text.ElideRight
-            horizontalAlignment: Text.AlignHCenter
-            color: Theme.highlightColor
-            maximumLineCount: 1
-        }
-
-        Text {
-            id: songLabel
-
-            width: parent.width
-            font.pixelSize: Theme.fontSizeMedium
-            elide: Text.ElideRight
-            horizontalAlignment: Text.AlignHCenter
-            color: Theme.highlightColor
-            maximumLineCount: 1
-        }
-    }
-
-    MouseArea {
-        anchors.fill: parent
-
-        enabled: mprisPlayerControls.isPlaying ? mprisPlayerControls.pauseEnabled : mprisPlayerControls.playEnabled
-
-        onClicked: mprisPlayerControls.playPauseRequested()
-    }
-
-    Row {
-        id: playerButtons
-
-        anchors.bottom: parent.bottom
-
-        IconButton {
-            enabled: mprisPlayerControls.previousEnabled
-            opacity: enabled ? 1.0 : 0.0
-            Behavior on opacity { FadeAnimation {} }
-            width: mprisPlayerControls._squareSize
-            height: width
-            icon.source: "image://theme/icon-cover-next-song"
-            icon.mirror: true
-            icon.width: Theme.iconSizeSmall
-            icon.height: icon.width
-
-            onClicked: mprisPlayerControls.previousRequested()
-        }
-        IconButton {
-            id: playPauseButton
-
-            property string iconSource: {
-                if (!enabled) return ""
-                return mprisPlayerControls.isPlaying ? "image://theme/icon-cover-pause" : "image://theme/icon-cover-play"
-            }
-
+            height: artistAndSong.height
             enabled: mprisPlayerControls.isPlaying ? mprisPlayerControls.pauseEnabled : mprisPlayerControls.playEnabled
-            width: mprisPlayerControls._squareSize
-            height: width
-            icon.width: Theme.iconSizeSmall
-            icon.height: icon.width
 
+            onPressed: songLabel.color = Theme.highlightColor
+            onReleased: songLabel.color = mprisPlayerControls.textColor
+            onCanceled: songLabel.color = mprisPlayerControls.textColor
             onClicked: mprisPlayerControls.playPauseRequested()
-            onIconSourceChanged: {
-                if (playPauseButtonFadeAnimation.running) {
-                    playPauseButtonFadeAnimation.complete()
+
+            Column {
+                id: artistAndSong
+
+                property var artistAndSongText: { "artist": "", "song": "" }
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
                 }
-                playPauseButtonFadeAnimation.animationIcon = iconSource
-                playPauseButtonFadeAnimation.running = true
-            }
 
-            function _setIcon (source) {
-                icon.source = source
-            }
+                onArtistAndSongTextChanged: {
+                    if (artistAndSongFadeAnimation.running) {
+                        artistAndSongFadeAnimation.complete()
+                    }
+                    artistAndSongFadeAnimation.artist = artistAndSongText.artist
+                    artistAndSongFadeAnimation.song = artistAndSongText.song
+                    artistAndSongFadeAnimation.running = true
+                }
 
-            SequentialAnimation {
-                id: playPauseButtonFadeAnimation
+                SequentialAnimation {
+                    id: artistAndSongFadeAnimation
 
-                property string animationIcon
+                    property string artist
+                    property string song
 
-                FadeAnimation { target: playPauseButton; properties: "opacity"; to: 0.0; }
-                ScriptAction { script: playPauseButton._setIcon(playPauseButtonFadeAnimation.animationIcon) }
-                FadeAnimation { target: playPauseButton; properties: "opacity"; to: 1.0; }
+                    FadeAnimation { target: artistAndSong; properties: "opacity"; to: 0.0 }
+                    ScriptAction { script: { artistLabel.text = artistAndSongFadeAnimation.artist; songLabel.text = artistAndSongFadeAnimation.song } }
+                    FadeAnimation { target: artistAndSong; properties: "opacity"; to: 1.0 }
+                }
+
+                Label {
+                    id: songLabel
+
+                    width: parent.width
+                    font.pixelSize: Theme.fontSizeMedium
+                    truncationMode: TruncationMode.Fade
+                    horizontalAlignment: contentWidth > Math.ceil(width) ? Text.AlignHLeft : Text.AlignHCenter
+                    color: mprisPlayerControls.textColor
+                    maximumLineCount: 1
+                }
+
+                Label {
+                    id: artistLabel
+
+                    width: parent.width
+                    font.pixelSize: Theme.fontSizeMedium
+                    truncationMode: TruncationMode.Fade
+                    horizontalAlignment: contentWidth > Math.ceil(width) ? Text.AlignHLeft : Text.AlignHCenter
+                    color: songLabel.color
+                    maximumLineCount: 1
+                }
             }
         }
-        IconButton {
-            enabled: mprisPlayerControls.nextEnabled
-            opacity: enabled ? 1.0 : 0.0
-            Behavior on opacity { FadeAnimation {} }
-            width: mprisPlayerControls._squareSize
-            height: width
-            icon.source: "image://theme/icon-cover-next-song"
-            icon.width: Theme.iconSizeSmall
-            icon.height: icon.width
 
-            onClicked: mprisPlayerControls.nextRequested()
+        Row {
+            id: playerButtons
+
+            spacing: mprisPlayerControls.width / 3 - mprisPlayerControls._squareSize
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            IconButton {
+                anchors.leftMargin: 0.5 * playerButtons.spacing
+                enabled: mprisPlayerControls.previousEnabled
+                opacity: enabled ? 1.0 : 0.0
+                Behavior on opacity { FadeAnimation {} }
+                width: mprisPlayerControls._squareSize
+                height: width
+                icon.source: "image://theme/icon-m-previous"
+
+                onClicked: mprisPlayerControls.previousRequested()
+            }
+
+            IconButton {
+                id: playPauseButton
+
+                property string iconSource: {
+                    if (!enabled) return ""
+                    return mprisPlayerControls.isPlaying ? "image://theme/icon-m-pause" : "image://theme/icon-m-play"
+                }
+
+                enabled: mprisPlayerControls.isPlaying ? mprisPlayerControls.pauseEnabled : mprisPlayerControls.playEnabled
+                width: mprisPlayerControls._squareSize
+                height: width
+
+                onClicked: mprisPlayerControls.playPauseRequested()
+                onIconSourceChanged: {
+                    if (playPauseButtonFadeAnimation.running) {
+                        playPauseButtonFadeAnimation.complete()
+                    }
+                    playPauseButtonFadeAnimation.animationIcon = iconSource
+                    playPauseButtonFadeAnimation.running = true
+                }
+
+                function _setIcon (source) {
+                    icon.source = source
+                }
+
+                SequentialAnimation {
+                    id: playPauseButtonFadeAnimation
+
+                    property string animationIcon
+
+                    FadeAnimation { target: playPauseButton; properties: "opacity"; to: 0.0; }
+                    ScriptAction { script: playPauseButton._setIcon(playPauseButtonFadeAnimation.animationIcon) }
+                    FadeAnimation { target: playPauseButton; properties: "opacity"; to: 1.0; }
+                }
+            }
+
+            IconButton {
+                enabled: mprisPlayerControls.nextEnabled
+                opacity: enabled ? 1.0 : 0.0
+                Behavior on opacity { FadeAnimation {} }
+                width: mprisPlayerControls._squareSize
+                height: width
+                icon.source: "image://theme/icon-m-next"
+
+                onClicked: mprisPlayerControls.nextRequested()
+            }
         }
     }
 }

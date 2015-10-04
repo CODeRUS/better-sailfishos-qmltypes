@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Tutorial 1.0
 
 Item {
     id: root
@@ -8,6 +9,7 @@ Item {
 
     property int completedLessons
     property bool buttonsEnabled: showAnimation.running || root.opacity === 1.0
+    property bool upgradeMode
 
     function show(pauseDuration) {
         showPause.duration = pauseDuration !== undefined ? pauseDuration : 500
@@ -17,9 +19,15 @@ Item {
                 //% "Learn basics of Jolla Launcher"
                 label.text = qsTrId("tutorial-la-learn_basics_alternative")
             } else {
-                //: The primary label shown when the tutorial is started
-                //% "Learn basics of your Jolla"
-                label.text = qsTrId("tutorial-la-learn_basics")
+                if (upgradeMode) {
+                    //: The primary label shown when the tutorial is show after an upgrade
+                    //% "Congratulations on upgrading to Sailfish OS 2.0!"
+                    label.text = qsTrId("tutorial-la-thanks_for_updating")
+                } else {
+                    //: The primary label shown when the tutorial is started
+                    //% "Learn basics of your Jolla"
+                    label.text = qsTrId("tutorial-la-learn_basics")
+                }
             }
             againButton.visible = false
             //% "Start"
@@ -44,47 +52,72 @@ Item {
                 //% "Simply hold the device in one hand and follow the instructions on screen to learn how to navigate in Jolla Launcher"
                 description.text = qsTrId("tutorial-la-follow_the_instructions_alternative")
             } else {
-                //: The secondary label shown when the tutorial is started
-                //% "Simply hold the device in one hand and follow the instructions on screen to learn how to navigate in Sailfish OS"
-                description.text = qsTrId("tutorial-la-follow_the_instructions")
+                if (upgradeMode) {
+                    //: The secondary label shown when the tutorial is started after an upgrade
+                    //% "We've made some exciting changes. Start the Tutorial to learn about them!"
+                    description.text = qsTrId("tutorial-la-exciting_changes")
+                } else {
+                    if (Screen.sizeCategory >= Screen.Large) {
+                        //: The secondary label shown when the tutorial is started (for large screen devices)
+                        //% "Simply hold the device comfortably and follow the instructions on screen to learn how to navigate in Sailfish OS"
+                        description.text = qsTrId("tutorial-la-follow_the_instructions_tablet")
+                    } else {
+                        //: The secondary label shown when the tutorial is started (for small screen devices)
+                        //% "Simply hold the device in one hand and follow the instructions on screen to learn how to navigate in Sailfish OS"
+                        description.text = qsTrId("tutorial-la-follow_the_instructions")
+                    }
+                }
             }
             break
         case 1:
-            //% "Now you know how to navigate between Lock screen, Home and Launcher"
-            description.text = qsTrId("tutorial-la-recap_launcher")
+            //% "Now you know how to navigate between Lock screen, Home and Events"
+            description.text = qsTrId("tutorial-la-recap_home")
             break
         case 2:
-            //% "Now you know that swiping from the left or right side brings you back to Home"
+            //% "Now you know that swiping from the left or right edge brings you back to Home"
             description.text = qsTrId("tutorial-la-recap_swipe_to_close")
             break
         case 3:
             if (androidLauncher) {
                 //: This text has a full stop at the end unlike the other "recap labels" because
                 //: it's shown together with tutorial-la-recap_tutorial_completed
-                //% "Now you know that the glow on top of the view is the pulley menu and learned how to find more information about Jolla Launcher."
+                //% "Now you know that the line at the top of the view is the pulley menu and learned how to find more information about Jolla Launcher."
                 description.text = qsTrId("tutorial-la-recap_pulley_menu_alternative")
                 description.text += "\n\n"
                 //: Text shown at the end of the tutorial below tutorial-la-recap_pulley_menu_alternative
                 //% "This was the last part of the Tutorial. Now jump into the Sailfish experience!"
                 description.text += qsTrId("tutorial-la-recap_tutorial_completed_alternative")
             } else {
-                //% "Now you know that swiping up always opens Events view"
-                description.text = qsTrId("tutorial-la-recap_events_view")
+                //% "Now you know that the dot on the top left indicates that you are in a subpage and swipe to right moves you to previous page"
+                description.text = qsTrId("tutorial-la-recap_page_navigation")
             }
             break
         case 4:
-            //% "Now you know that the dot at the top left indicates that you are in a subpage and flick to right moves you to previous view"
-            description.text = qsTrId("tutorial-la-recap_page_navigation")
+            if (Tutorial.deviceType === Tutorial.PhoneDevice) {
+                //% "Now you know that the line at the top of the view is the pulley menu and you learned how to call a phone number"
+                description.text = qsTrId("tutorial-la-recap_phone_pulley_menu")
+            } else if (Tutorial.deviceType === Tutorial.TabletDevice) {
+                //% "Now you know that the line at the top of the view is the pulley menu"
+                description.text = qsTrId("tutorial-la-recap_tablet_pulley_menu")
+            } else {
+                description.text = ""
+            }
             break
         case 5:
-            //% "Now you know that the glow on top of the view is the pulley menu and you learned how to call a phone number"
-            description.text = qsTrId("tutorial-la-recap_pulley_menu")
-            break
-        case 6:
-            //: This text has a full stop at the end unlike the other "recap labels" because
-            //: it's shown together with tutorial-la-recap_tutorial_completed
-            //% "Now you know what to do when you get a call."
-            description.text = qsTrId("tutorial-la-recap_incoming_call")
+            if (Tutorial.deviceType === Tutorial.PhoneDevice) {
+                //: This text has a full stop at the end unlike the other "recap labels" because
+                //: it's shown together with tutorial-la-recap_tutorial_completed
+                //% "Now you know what to do when you get a call."
+                description.text = qsTrId("tutorial-la-recap_incoming_call")
+            } else if (Tutorial.deviceType === Tutorial.TabletDevice) {
+                //: This text has a full stop at the end unlike the other "recap labels" because
+                //: it's shown together with tutorial-la-recap_tutorial_completed
+                //% "Now you know what to do when an alarm rings."
+                description.text = qsTrId("tutorial-la-recap_alarm")
+            } else {
+                description.text = ""
+            }
+
             description.text += "\n\n"
             //: Text shown at the end of the tutorial below tutorial-la-recap_incoming_call
             //% "This was the last part of the Tutorial. Now jump into the Jolla experience!"
@@ -133,7 +166,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: tutorialTheme.highlightDimmerColor
-        opacity: 0.8
+        opacity: 0.9
     }
 
     InfoLabel {
@@ -213,6 +246,7 @@ Item {
         }
         color: tutorialTheme.primaryColor
         highlightColor: tutorialTheme.highlightColor
+        highlightBackgroundColor: tutorialTheme.highlightBackgroundColor
         enabled: buttonsEnabled
         //% "Try again"
         text: qsTrId("tutorial-bt-try_again")
@@ -224,11 +258,12 @@ Item {
         id: continueButton
         anchors {
             bottom: progress.top
-            bottomMargin: 2 * Theme.paddingLarge
+            bottomMargin: 4*Theme.paddingLarge
             horizontalCenter: parent.horizontalCenter
         }
         color: tutorialTheme.primaryColor
         highlightColor: tutorialTheme.highlightColor
+        highlightBackgroundColor: tutorialTheme.highlightBackgroundColor
         enabled: buttonsEnabled
 
         onClicked: {

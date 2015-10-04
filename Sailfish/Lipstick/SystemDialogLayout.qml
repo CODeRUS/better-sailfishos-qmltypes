@@ -14,106 +14,108 @@ Item {
 
     property alias title: label.text
     property alias buttons: buttonsContainer.children
-    property alias selectedButton: buttonsContainer.selectedItem
+    property alias selectedButton: buttonsContainer.selectedButton
 
     default property alias _data: content.data
-
-    property int _screenRotation: screenConfig.value != undefined ? screenConfig.value : 0
-    property bool _transpose: (_screenRotation % 180) != 0
-    property real _imMargin: _transpose
-                ? Qt.inputMethod.keyboardRectangle.width
-                : Qt.inputMethod.keyboardRectangle.height
-    property real _contentHeight: content.y + content.height
-    property real _maximumHeight: Math.min(
-                layout._contentHeight,
-                Math.min(Screen.height * 2.0 / 3.0, Screen.height - layout._imMargin))
 
     property alias contentWidth: content.width
     property alias contentHeight: content.height
 
-    implicitWidth: _transpose ? _maximumHeight : Screen.width
-    implicitHeight: _transpose ? Screen.width : _maximumHeight
+    property real maximumHeight: layout.height * 2 / 3
+    property int headerLayout: Qt.Vertical
+    property int buttonCount: buttonsContainer.children.length
 
-    Behavior on _imMargin {
-        NumberAnimation {
-            duration: 200
-            easing.type: Easing.InOutQuad
-        }
-    }
-
-    ConfigurationValue {
-        id: screenConfig
-        key: "/desktop/jolla/components/screen_rotation_angle"
-    }
+    signal dismiss
 
     SilicaFlickable {
         id: flickable
 
         clip: contentHeight > height
 
-        width: layout._transpose ? layout.height : layout.width
-        height: layout._transpose ? layout.width : layout.height
+        width: parent.width
+        height: Math.min(layout.maximumHeight, content.y + content.height)
 
-        rotation: 0 - layout._screenRotation
+        contentWidth: layout.width
+        contentHeight: content.y + content.height
 
-        anchors.centerIn: layout
-
-        contentWidth: flickable.width
-        contentHeight: layout._contentHeight
-
-        Label {
-            id: label
-
-            y: Theme.paddingLarge
-            width: flickable.width
-
-            font {
-                family: Theme.fontFamilyHeading
-                pixelSize: Theme.fontSizeMedium
-            }
-
-            horizontalAlignment: Text.AlignHCenter
-            color: "black"
-            opacity: 0.6
-            wrapMode: Text.Wrap
-        }
-
-
-        Image {
-            id: highlightBackground
-            visible: buttonsContainer.visible
-            anchors { fill: buttonsContainer }
-            rotation: 180
-
-            source: "image://theme/graphic-system-gradient?" + Theme.highlightColor
-        }
-
-        Row {
-            id: buttonsContainer
-
-            property Item selectedItem
-            property real itemWidth: children.length > 0 ? width / children.length : 0
-
-            anchors.top: label.bottom
-
-            width: flickable.width
-            height: visible ? Math.floor(Screen.height / 3) - y : 0
-
-            visible: children.length > 0
+        Rectangle {
+            anchors.fill: parent
+            color: Theme.highlightBackgroundColor
         }
 
         Rectangle {
             anchors.fill: content
+            color: Theme.rgba(Theme.highlightDimmerColor, 0.2)
+        }
 
-            color: Theme.highlightBackgroundColor
+        Flow {
+            id: header
+            x: -flickable.contentX
+            width: layout.width
+
+            Item {
+                id: labelContainer
+
+                width: buttonsContainer.width
+                height: label.y + label.height
+                Label {
+                    id: label
+
+                    y: Theme.paddingLarge
+
+                    anchors {
+                        left: labelContainer.left
+                        right: labelContainer.right
+                        margins: Theme.horizontalPageMargin
+                    }
+
+                    font {
+                        family: Theme.fontFamilyHeading
+                        pixelSize: Theme.fontSizeMedium
+                    }
+
+                    horizontalAlignment: layout.headerLayout == Qt.Vertical
+                            ? Text.AlignHCenter
+                            : Text.AlignLeft
+                    color: Theme.rgba("black", 0.4)
+                    wrapMode: Text.Wrap
+                }
+            }
+
+            Row {
+                id: buttonsContainer
+
+                property Item selectedButton
+                property real buttonWidth: layout.buttonCount > 0 ? width / layout.buttonCount : 0
+
+                width: layout.headerLayout == Qt.Vertical ? header.width : header.width / 2
+                visible: children.length > 0
+            }
         }
 
         Item {
             id: content
 
-            anchors.top: buttonsContainer.bottom
+            anchors.top: header.bottom
 
             implicitWidth: flickable.width
         }
     }
+
+    Image {
+        id: dimmer
+        anchors {
+            top: flickable.bottom
+            bottom: parent.bottom
+        }
+        width: parent.width
+
+        source: "image://theme/graphic-system-gradient?" + Theme.highlightBackgroundColor
+
+        MouseArea {
+            anchors.fill: dimmer
+            onClicked: layout.dismiss()
+        }
+    }
+
 }

@@ -1,2 +1,5 @@
 module Sailfish.Silica.private
 plugin sailfishsilicaplugin
+PageOrientationTransition 1.0 PageOrientationTransition.qml
+VirtualKeyboardObserver 1.0 VirtualKeyboardObserver.qml
+Wallpaper 1.0 Wallpaper.qml

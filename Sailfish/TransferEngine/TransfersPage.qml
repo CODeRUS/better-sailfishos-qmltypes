@@ -97,7 +97,7 @@ Page {
         } else if (type[0] === "video") {
             imgSource = "image://theme/icon-m-video"
         } else if (type[0] === "audio") {
-            imgSource = "image://theme/icon-m-sound"
+            imgSource = "image://theme/icon-m-music"
         } else if (type[1].indexOf("excel")
                    || type[1].indexOf("pdf")
                    || type[1].indexOf("word")
@@ -290,24 +290,30 @@ Page {
                         if (!ok) {
                             switch (ContentAction.error) {
                             case ContentAction.FileTypeNotSupported:
-                                //: Notification text shown when file not supported error occured.
-                                //% "Oops, file type not supported"
-                                errorNotification.show(path,  qsTrId("jolla-transferui-no-error-file-not-supported"))
+                                if (mimeType != "") {
+                                    //: Notification text shown when user tries to open a file of a particular type that is not supported. %1 = the file type
+                                    //% "Cannot open file, '%1' file type not supported"
+                                    errorNotification.show(qsTrId("transferui-la-file_type_specific_not_supported").arg(mimeType))
+                                } else {
+                                    //: Notification text shown when user tries to open a file of a type that is not supported
+                                    //% "Cannot open file, file type not supported"
+                                    errorNotification.show(qsTrId("transferui-la-file_type_not_supported"))
+                                }
                                 break
                             case ContentAction.FileDoesNotExist:
-                                //: Notification text shown when file doesn't exist error occured.
-                                //% "Oops, file doesn't exist"
-                                errorNotification.show(path,  qsTrId("jolla-transferui-no-error-file-does-not-exist"))
+                                //: Notification text shown when user tries to open a file but the file is not found locally.
+                                //% "Cannot open file, file was not found"
+                                errorNotification.show(qsTrId("transferui-la-file_not_found"))
                                 break
                             case ContentAction.UrlSchemeNotSupported:
-                                //: Notification text shown when an unsupported url scheme error occured.
-                                //% "Oops, url scheme not supported"
-                                errorNotification.show(path, qsTrId("jolla-transferui-no-error-url-scheme-not-supported"))
+                                //: Notification text shown when user tries to open a URL but the URL type is not supported. %1 = the URL
+                                //% "Cannot open URL, unsupported URL scheme for %1"
+                                errorNotification.show(qsTrId("transferui-la-url_scheme_not_supported").arg(url))
                                 break
                             case ContentAction.InvalidUrl:
-                                //: Notification text shown when file invalid url error occured.
-                                //% "Oops, invalid file url"
-                                errorNotification.show(path,  qsTrId("jolla-transferui-no-error-invalid-url"))
+                                //: Notification text shown when user tries to open a URL but the URL is invalid
+                                //% "Cannot open URL, URL is invalid"
+                                errorNotification.show(qsTrId("transferui-la-url_invalid"))
                                 break
                             default:
                                 console.log("Unknown content action error!")
@@ -376,15 +382,9 @@ Page {
         appName: qsTrId("transferui-ap-name")
         category: "x-jolla.transferui.error"
 
-        function show(path, summary)
+        function show(summary)
         {
-            var startIndex = path.lastIndexOf("/")
-            var fileName = path
-            if (startIndex >= 0 &&  startIndex + 1 < path.length - 1 )
-                fileName = path.substr(startIndex + 1, path.length - 1)
-
             previewSummary = summary
-            previewBody = fileName
             publish()
         }
     }

@@ -39,6 +39,7 @@ Item {
     property alias text: text.text
     property alias color: text.color
     property real verticalOffset
+    property int __silica_menulabel
 
     height: Theme.itemSizeExtraSmall - Theme.paddingLarge
     width: parent ? parent.width : Screen.width

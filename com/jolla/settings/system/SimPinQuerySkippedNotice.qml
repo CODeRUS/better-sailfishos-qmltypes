@@ -4,6 +4,9 @@ import Sailfish.Silica 1.0
 Page {
     id: root
 
+    property alias titleColor: titleLabel.color
+    property color textColor: Theme.highlightColor
+
     signal continueClicked()
 
     Column {
@@ -13,6 +16,7 @@ Page {
         spacing: Theme.paddingLarge
 
         Label {
+            id: titleLabel
             width: parent.width
             wrapMode: Text.Wrap
             color: Theme.highlightColor
@@ -30,7 +34,7 @@ Page {
         Label {
             width: parent.width
             wrapMode: Text.Wrap
-            color: Theme.highlightColor
+            color: root.textColor
             font.pixelSize: Theme.fontSizeExtraSmall
             //: Network restriction information, displayed when user has chosen to bypass SIM PIN entry.
             //% "You won't be able to connect to the network. Only emergency calls are possible."
@@ -40,7 +44,7 @@ Page {
         Label {
             width: parent.width
             wrapMode: Text.Wrap
-            color: Theme.highlightColor
+            color: root.textColor
             font.pixelSize: Theme.fontSizeExtraSmall
             //: SIM activation instructions, displayed when user has chosen to bypass SIM PIN entry.
             //% "Your SIM card can still be activated later in Settings > System settings > PIN code."
@@ -48,17 +52,21 @@ Page {
         }
     }
 
-    Button {
+    BackgroundItem {
+        id: continueButton
         anchors {
             horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
             bottomMargin: Theme.paddingLarge
         }
-        //% "Continue"
-        text: qsTrId("settings_system-la-continue")
 
-        onClicked: {
-            root.continueClicked()
+        onClicked: root.continueClicked()
+
+        Label {
+            anchors.centerIn: parent
+            //% "Continue"
+            text: qsTrId("settings_system-la-continue")
+            color: continueButton.highlighted ? Theme.highlightColor : Theme.primaryColor
         }
     }
 }

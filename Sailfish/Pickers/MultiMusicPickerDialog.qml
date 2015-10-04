@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtDocGallery 5.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Pickers 1.0
 import Sailfish.Gallery 1.0
 import Sailfish.Media 1.0
@@ -9,6 +10,11 @@ PickerDialog {
     id: musicPickerDialog
 
     property bool preview
+
+    orientationTransitions: Private.PageOrientationTransition {
+        fadeTarget: _background ? listView : __silica_applicationwindow_instance.contentItem
+        targetPage: musicPickerDialog
+    }
 
     MediaFormatter {
         id: formatter

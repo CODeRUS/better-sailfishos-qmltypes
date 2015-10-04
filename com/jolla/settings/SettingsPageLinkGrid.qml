@@ -18,6 +18,9 @@ SettingItem {
         source: (root.highlighted && root.iconSource != "" && root.useHighlightColor)
                 ? root.iconSource + "?" + Theme.highlightColor
                 : root.iconSource
+        // assuming no items larger than ones in launcher
+        height: Math.min(Theme.iconSizeLauncher, implicitHeight)
+        width: Math.min(Theme.iconSizeLauncher, implicitWidth)
     }
 
     Label {

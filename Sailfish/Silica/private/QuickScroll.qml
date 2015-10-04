@@ -36,9 +36,12 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 Item {
+    id: root
+
     property Flickable flickable
     property bool quickScroll: flickable && (flickable.flickableDirection === Flickable.VerticalFlick || flickable.flickableDirection === Flickable.AutoFlickDirection)
     property bool quickScrollAnimating
+    property real rightMargin
     property bool _quickScrollAllowed: _initialised && quickScroll && flickable.height >= Screen.width && flickable.contentHeight > 3.5*flickable.height
     property Item _quickScrollArea
     property bool _incubating
@@ -93,6 +96,8 @@ Item {
     }
     Component {
         id: quickScrollAreaComponent
-        QuickScrollArea {}
+        QuickScrollArea {
+            anchors.rightMargin: root.rightMargin
+        }
     }
 }

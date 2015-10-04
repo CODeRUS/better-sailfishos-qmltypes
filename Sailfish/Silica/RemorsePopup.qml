@@ -52,7 +52,6 @@ BackgroundItem {
         if (_page) {
             parent = _page
         }
-        countdown.restart()
         state = "active"
     }
     function cancel() {
@@ -62,7 +61,7 @@ BackgroundItem {
 
     function _close() {
         countdown.stop()
-        state = ""
+        state = "inactive"
     }
     function _execute() {
         if (!_triggered) {
@@ -75,41 +74,90 @@ BackgroundItem {
     }
 
     property int _timeout: 5000
-    property int _secsRemaining: Math.ceil(_msRemaining/1000).toFixed(0)
+    property int _seconds: (_timeout + 999) / 1000
+    property int _secsRemaining: (_msRemaining + 999) / 1000
     property real _msRemaining: _timeout
     property Item _page
     property bool _triggered
+    property real _contentOpacity
 
     signal canceled
     signal triggered
 
-    opacity: 0.0
     visible: false
     width: parent ? parent.width : Screen.width
-    height: Theme.itemSizeSmall
+    height: Theme.itemSizeSmall + Theme.paddingSmall
+    y: -height
     z: 1
+    _screenMargin: 0
 
     onClicked: cancel()
 
-    states: State {
-        name: "active"
-        PropertyChanges { target: _page; showNavigationIndicator: false }
-        PropertyChanges { target: remorsePopup; opacity: 1.0; visible: true }
-    }
+    states: [
+        State {
+            name: "active"
+            PropertyChanges {
+                target: _page
+                showNavigationIndicator: false
+            }
+            PropertyChanges {
+                target: remorsePopup
+                visible: true
+                y: 0
+                _contentOpacity: 1
+            }
+        }, State {
+            name: "inactive"
+            PropertyChanges {
+                target: _page
+                showNavigationIndicator: false
+            }
+            PropertyChanges {
+                target: remorsePopup
+                visible: true
+                _contentOpacity: 1
+            }
+        }
+    ]
     transitions: [
         Transition {
             to: "active"
             SequentialAnimation {
                 PropertyAction { properties: "showNavigationIndicator" }
                 PropertyAction { properties: "visible" }
-                FadeAnimation {}
+                ParallelAnimation {
+                    PropertyAnimation {
+                        target: remorsePopup
+                        property: "y"
+                        duration: 200
+                        easing.type: Easing.OutQuad
+                    }
+                    SequentialAnimation {
+                        PauseAnimation { duration: 150 }
+                        PropertyAnimation {
+                            target: remorsePopup
+                            property: "_contentOpacity"
+                            duration: 150
+                        }
+                    }
+                    ScriptAction {
+                        script: countdown.restart()
+                    }
+                }
             }
         },
         Transition {
+            to: "inactive"
             SequentialAnimation {
-                FadeAnimation {}
-                PropertyAction { properties: "visible" }
-                PropertyAction { properties: "showNavigationIndicator" }
+                PropertyAnimation {
+                    target: remorsePopup
+                    property: "y"
+                    duration: 200
+                    easing.type: Easing.OutQuad
+                }
+                ScriptAction {
+                    script: remorsePopup.state = ""
+                }
             }
         }
     ]
@@ -127,54 +175,79 @@ BackgroundItem {
 
     Rectangle {
         anchors.fill: parent
-        color: Theme.highlightBackgroundColor
-    }
-    Rectangle {
-        anchors.right: parent.right
-        height: parent.height
-        width: parent.width - (parent.width * _msRemaining / _timeout)
-        color: "black"
-        opacity: 0.2
-    }
-    Rectangle {
-        anchors.fill: parent
-        color: Theme.highlightDimmerColor
-        opacity: highlighted ? 0.2 : 0.0
+        color: Qt.rgba(0, 0, 0, 0.6)
     }
 
+    Row {
+        id: row
+
+        property real cellWidth: (parent.width - ((repeater.count - 1) * spacing)) / repeater.count
+
+        height: Theme.paddingSmall
+        spacing: 1
+
+        Repeater {
+            id: repeater
+
+            model: _seconds
+
+            Rectangle {
+                width: row.cellWidth
+                height: parent ? parent.height : 0
+                color: Theme.highlightBackgroundColor
+                opacity: remorsePopup._secsRemaining > Positioner.index ? 0.6 : 0
+                Behavior on opacity {
+                    FadeAnimation { duration: 200 }
+                }
+            }
+        }
+    }
     Image {
-        anchors.top: parent.bottom
-        width: parent.width
-        source: "image://theme/graphic-system-gradient?" + Theme.highlightBackgroundColor
-    }
+        id: promptIcon
 
-    Column {
-        id: column
-        opacity: 0.7
         anchors {
-            left: parent.left
-            right: parent.right
-            topMargin: Theme.paddingLarge
-            bottomMargin: Theme.paddingLarge
-            leftMargin: remorsePopup.leftMargin
-            rightMargin: remorsePopup.rightMargin
             verticalCenter: parent.verticalCenter
+            verticalCenterOffset: row.height/2
+            left: row.left
+            leftMargin: Theme.paddingMedium
+        }
+        source: "image://theme/icon-m-clear" + (remorsePopup.highlighted ? "?" + Theme.highlightColor : "")
+        smooth: true
+        fillMode: Image.PreserveAspectFit
+        opacity: remorsePopup._contentOpacity
+    }
+    Column {
+        anchors {
+            verticalCenter: promptIcon.verticalCenter
+            left: promptIcon.right
+            leftMargin: Theme.paddingMedium
+            right: parent.right
         }
         Label {
-            id: titleLabel
-            //% "in %n seconds"
-            text: remorsePopup.text + " " + qsTrId("components-la-in-n-seconds", remorsePopup._secsRemaining)
-            width: parent.width
-            font.family: Theme.fontFamilyHeading
-            font.pixelSize: Theme.fontSizeMedium
-            color: "black"
             truncationMode: TruncationMode.Fade
+            font.pixelSize: Theme.fontSizeExtraSmall
+            color: remorsePopup.highlighted ? Theme.highlightColor : Theme.primaryColor
+            textFormat: Text.PlainText
+            maximumLineCount: 1
+            opacity: remorsePopup._contentOpacity
+            //: Describes the remaining time to prevent action trigger
+            //% "in %n seconds"
+            text: remorsePopup.text + " " + qsTrId("components-la-in-n-seconds", remorsePopup._secsRemaining) +
+                  //: Prompts the user to cancel the pending action, appended to the description
+                  //% ", Tap to cancel"
+                  (screen.sizeCategory > Screen.Medium ? qsTrId("components-la-tap-to-cancel-appended") : "")
         }
         Label {
+            truncationMode: TruncationMode.Fade
+            font.pixelSize: Theme.fontSizeExtraSmall
+            color: remorsePopup.highlighted ? Theme.highlightColor : Theme.primaryColor
+            textFormat: Text.PlainText
+            maximumLineCount: 1
+            opacity: remorsePopup._contentOpacity
+            //: Prompts the user to cancel the pending action
             //% "Tap to cancel"
             text: qsTrId("components-la-tap-to-cancel")
-            color: "black"
-            font.pixelSize: Theme.fontSizeSmall
+            visible: screen.sizeCategory <= Screen.Medium
         }
     }
 

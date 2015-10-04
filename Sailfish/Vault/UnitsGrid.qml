@@ -9,12 +9,18 @@ Grid {
     signal ready
     signal error(variant err)
 
-    columns: Math.floor(width / Theme.itemSizeExtraLarge)
+    columns: 4
+    rowSpacing: Screen.sizeCategory > Screen.Medium ? 2 * Theme.paddingLarge : 0
+    columnSpacing: Screen.sizeCategory > Screen.Medium ? 4 * Theme.paddingLarge : 0
+    property bool busy: false
 
     function done() {
+        ready();
+    }
+
+    function clearStatus() {
         for (var i = 0; i < units.count; ++i)
             units.get(i).unitState = "";
-        ready();
     }
 
     function addUnit(name, info) {
@@ -76,7 +82,10 @@ Grid {
             label: translation
             checked: selected
             onClicked: {
-                state === "" && units.setProperty(index, "selected", !selected)
+                if (!self.busy) {
+                    units.setProperty(index, "unitState", "")
+                    units.setProperty(index, "selected", !selected)
+                }
             }
             state: unitState
         }

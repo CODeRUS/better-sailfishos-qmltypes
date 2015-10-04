@@ -37,10 +37,6 @@ QtObject {
         if (account.providerName === "activesync") {
             asdaemon.typedCall("sync", [{"type":"t", "value": account.identifier}])
             _finishedWithAccount(account)
-        } else if (account.providerName === "sailfisheas") {
-            // Temporary solution, this syncs should happen via buteo as well. See JB#28770
-            sailfisheas.typedCall("sync", [{"type":"t", "value": account.identifier}])
-            _finishedWithAccount(account)
         } else {
             var waitForProfileCreation = createMissingProfiles(account)
             if (!waitForProfileCreation) {
@@ -137,13 +133,6 @@ QtObject {
         destination: "com.nokia.asdbus"
         path:        "/com/nokia/asdbus"
         iface:       "com.nokia.asdbus"
-        busType:     DBusInterface.SessionBus
-    }
-
-    property DBusInterface sailfisheas: DBusInterface {
-        destination: "com.sailfish.easdaemon"
-        path:        "/"
-        iface:       "com.sailfish.easdaemon"
         busType:     DBusInterface.SessionBus
     }
 }

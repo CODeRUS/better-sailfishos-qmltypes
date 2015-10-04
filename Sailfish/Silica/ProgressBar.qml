@@ -119,6 +119,7 @@ Item {
         font.pixelSize: Theme.fontSizeSmall
         font.family: Theme.fontFamily
         color: Theme.secondaryColor
+        textFormat: Text.PlainText
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: background.verticalCenter
         anchors.topMargin: Theme.paddingSmall + 2
@@ -133,6 +134,7 @@ Item {
             anchors.bottomMargin: Theme.paddingMedium
             font.pixelSize: Theme.fontSizeLarge
             font.family: Theme.fontFamily
+            textFormat: Text.PlainText
             text: progressBar.valueText
             visible: text !== ""
         }

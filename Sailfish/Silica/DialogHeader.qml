@@ -43,7 +43,7 @@ BackgroundItem {
     property Item dialog
     property Flickable flickable
     property string acceptText: defaultAcceptText
-    property alias cancelText: cancelLabel.text
+    property string cancelText: defaultCancelText
     property alias title: titleText.text
     property bool acceptTextVisible: acceptText.length > 0 && acceptLabel.visible
     property alias extraContent: extraContentPlaceholder
@@ -54,16 +54,20 @@ BackgroundItem {
 
     default property alias _children: acceptButton.data
     property int _depth: dialog && dialog._depth ? dialog._depth+2 : 1
+    property alias _glassOnly: wallpaper.glassOnly
 
     property bool _navigatingBack: dialog && dialog._navigationPending === PageNavigation.Back
     property bool _navigatingForward: dialog && dialog._navigationPending === PageNavigation.Forward
     property bool _canGoBack: dialog && dialog.backNavigation && dialog._depth !== 0
-    property bool _backgroundVisible: true
+    property bool _backgroundVisible: !__silica_applicationwindow_instance._rotating
     property real _maxButtonSize: dialog.width - Theme.itemSizeLarge
     property real _overlayHeight: overlay.height
 
     //% "Accept"
     property string defaultAcceptText: qsTrId("components-he-dialog_accept")
+
+    //% "Cancel"
+    property string defaultCancelText: qsTrId("components-he-dialog_cancel")
 
     // TODO: Remove top-level BackgroundItem, now here for API compatibility
     down: false
@@ -110,17 +114,18 @@ BackgroundItem {
 
         Wallpaper {
             id: wallpaper
-            property real offset: flickable ? Math.min(flickable.contentY, flickable.originY) : 0
             anchors.centerIn: parent
-            visible: __silica_applicationwindow_instance["_backgroundVisible"] == true && dialogHeader._backgroundVisible
-            rotation: (360 - dialog.rotation) % 360
+            visible: dialogHeader._backgroundVisible
+            rotation: dialog.rotation
+            source: glassOnly ? "" : Theme.backgroundImage
             state: rotation
             states: [
                 State {
                     name: "0"
                     PropertyChanges {
                         target: wallpaper
-                        verticalOffset: -Screen.height / 3 + wallpaper.offset
+                        windowRotation: 0
+                        verticalOffset: 0
                         horizontalOffset: -dialog.parent.x
                         width: overlay.width
                         height: overlay.height
@@ -130,7 +135,8 @@ BackgroundItem {
                     name: "180"
                     PropertyChanges {
                         target: wallpaper
-                        verticalOffset: -Screen.height / 3 + wallpaper.offset - (Screen.height-overlay.height)
+                        windowRotation: 180
+                        verticalOffset: 0
                         horizontalOffset: -dialog.parent.x
                         width: overlay.width
                         height: overlay.height
@@ -140,8 +146,9 @@ BackgroundItem {
                     name: "270"
                     PropertyChanges {
                         target: wallpaper
-                        verticalOffset: -Screen.height / 3 - dialog.parent.y
-                        horizontalOffset: -wallpaper.offset - (Screen.width-overlay.height)
+                        windowRotation: 270
+                        verticalOffset: -dialog.parent.y
+                        horizontalOffset: -(Screen.width-overlay.height)
                         width: overlay.height
                         height: overlay.width
                     }
@@ -150,8 +157,9 @@ BackgroundItem {
                     name: "90"
                     PropertyChanges {
                         target: wallpaper
-                        verticalOffset: -Screen.height / 3 - dialog.parent.y
-                        horizontalOffset: -wallpaper.offset
+                        windowRotation: 90
+                        verticalOffset: -dialog.parent.y
+                        horizontalOffset: 0
                         width: overlay.height
                         height: overlay.width
                     }
@@ -167,13 +175,15 @@ BackgroundItem {
 
         BackgroundItem {
             id: cancelButton
-            property real preferredWidth: Math.min(cancelLabel.implicitWidth*(reserveExtraContent?1.0:cancelLabel.opacity) + 2*Theme.paddingLarge,
+            property real preferredWidth: Math.min(cancelLabel.implicitWidth*(reserveExtraContent?1.0:cancelLabel.opacity)
+                                                        + Theme.paddingLarge + Theme.horizontalPageMargin,
                                                    _maxButtonSize)
             height: overlay.height
             anchors {
                 left: parent.left
                 right: reserveExtraContent ? extraContentPlaceholder.left : acceptButton.left
             }
+            enabled: cancelText !== ""
             onClicked: dialog.reject()
 
             highlighted: pageStack._pageStackIndicator.backIndicatorDown || down
@@ -186,11 +196,9 @@ BackgroundItem {
 
             Label {
                 id: cancelLabel
-
-                //% "Cancel"
-                text: qsTrId("components-he-dialog_cancel")
+                text: cancelText
                 color: cancelButton.highlighted ? Theme.highlightColor : Theme.primaryColor
-                x: Theme.paddingLarge
+                x: dialogHeader.leftMargin
                 width: Math.min(dialogHeader.width - acceptButton.width - x - Theme.paddingMedium, implicitWidth)
                 font {
                     pixelSize: dialog.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
@@ -222,11 +230,12 @@ BackgroundItem {
             // If the cancel text is longer than dialog.width/2 then we try to fit it in without clipping the acceptText
             // If both are less than dialog.width/2 then they both get dialog.width/2
             width: Math.min(_maxButtonSize,
-                       Math.max(acceptLabel.implicitWidth*(reserveExtraContent?1.0:acceptLabel.opacity) + 2*Theme.paddingLarge,
+                       Math.max(acceptLabel.implicitWidth*(reserveExtraContent?1.0:acceptLabel.opacity) + Theme.paddingLarge + Theme.horizontalPageMargin,
                            Math.min(reserveExtraContent ? 0 : dialog.width/2, dialog.width - cancelButton.preferredWidth)))
 
             height: overlay.height
             anchors.right: parent.right
+            enabled: acceptText !== ""
             opacity: !dialogHeader.dialog || dialogHeader.dialog.canAccept ? 1.0 : 0.3
             Behavior on opacity { FadeAnimation { } }
 
@@ -243,7 +252,7 @@ BackgroundItem {
                 text: acceptText
                 color: acceptButton.highlighted ? Theme.highlightColor : Theme.primaryColor
                 // Don't allow the label to extend over the page stack indicator
-                width: acceptButton.width - 2*Theme.paddingLarge
+                width: acceptButton.width - Theme.paddingLarge - Theme.horizontalPageMargin
                 truncationMode: TruncationMode.Fade
                 font {
                     pixelSize: dialog.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
@@ -252,7 +261,7 @@ BackgroundItem {
                 anchors {
                     right: parent.right
                     // |text|pad-large|indicator
-                    rightMargin: Theme.paddingLarge
+                    rightMargin: dialogHeader.rightMargin
                     verticalCenter: parent.verticalCenter
                 }
 

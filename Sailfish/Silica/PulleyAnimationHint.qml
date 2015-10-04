@@ -39,16 +39,18 @@ import "private/Util.js" as Util
 MouseArea {
     id: root
     property Flickable flickable
-    property real pullDownDistance: Theme.itemSizeLarge
+    property real pullDownDistance: Theme.itemSizeExtraSmall + (menu && menu._bottomDragMargin || 0)
     property Item menu: flickable && (pushUpHint ? flickable.pushUpMenu : flickable.pullDownMenu)
     property real _menuInactivePos: menu !== null ? menu._inactivePosition : 0
     property bool pushUpHint
     property bool flickableDragged: flickable && flickable.dragging
+    property bool _bounceBack
 
     enabled: menu && menu.enabled && menu.visible
 
     onClicked: {
         if (menu._atInitialPosition) {
+            _bounceBack = false
             menuPeek.start()
         }
     }
@@ -93,12 +95,22 @@ MouseArea {
             duration: 400*Math.max(1.0, pullDownDistance/Theme.itemSizeLarge)
             easing.type: Easing.OutCubic
         }
+        PropertyAction {
+            target: root
+            property: "_bounceBack"
+            value: true
+        }
         NumberAnimation {
             target: flickable
             property: "contentY"
             to: _menuInactivePos
-            duration: 300*Math.max(1.0, pullDownDistance/Theme.itemSizeLarge)
+            duration: 400 // Matches bounceback animation duration
             easing.type: Easing.InOutCubic
+        }
+        PropertyAction {
+            target: root
+            property: "_bounceBack"
+            value: false
         }
         PropertyAction {
             target: menu
@@ -110,6 +122,14 @@ MouseArea {
             property: "_hinting"
             value: false
         }
+    }
+
+    Binding {
+        id: bounceBackOverride
+        when: _bounceBack
+        target: menu
+        property: "_bounceBackRunning"
+        value: menuPeek.running
     }
 
     Component.onCompleted: {

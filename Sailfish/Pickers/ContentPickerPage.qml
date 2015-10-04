@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 
 PickerPage {
     id: contentPicker
@@ -7,6 +8,11 @@ PickerPage {
     // ContentType.Image, ContentType.Video, ContentType.Music
     // ContentType.Document, ContentType.Person
     property int selectedContentType
+
+    orientationTransitions: Private.PageOrientationTransition {
+        fadeTarget: _background ? categoryList : __silica_applicationwindow_instance.contentItem
+        targetPage: contentPicker
+    }
 
     SilicaListView {
         id: categoryList

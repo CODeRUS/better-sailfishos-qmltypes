@@ -9,6 +9,4 @@ SettingComponentLoader 1.0 SettingComponentLoader.qml
 SettingsPage 1.0 SettingsPage.qml
 FavoritesZone 1.0 FavoritesZone.qml
 FavoriteMenu 1.0 FavoriteMenu.qml
-CoverComponentLoader 1.0 CoverComponentLoader.qml
-CoverSwitchSetting 1.0 CoverSwitchSetting.qml
 ApplicationsGridView 1.0 ApplicationsGridView.qml

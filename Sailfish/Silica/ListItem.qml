@@ -38,9 +38,11 @@ import Sailfish.Silica 1.0
 BackgroundItem {
     id: listItem
     property variant menu
-    property Item _menuItem
     property bool menuOpen: _menuItem != null && _menuItem._open
     property bool showMenuOnPressAndHold: true
+
+    property Item _menuItem
+    property bool _menuItemCreated
 
     // If this item is removed by a RemorseItem, do not restore visibility
     // This binding should be removed when JB#8682 is addressed
@@ -76,24 +78,39 @@ BackgroundItem {
             return null
         }
         if (_menuItem == null) {
-            if (menu.createObject !== undefined) {
-                _menuItem = menu.createObject(listItem, properties || {})
-                _menuItem.closed.connect(function() { _menuItem.destroy() })
-            } else {
-                _menuItem = menu
+            _initMenuItem(properties)
+        } else {
+            for (var prop in properties) {
+                if (prop in _menuItem) {
+                    _menuItem[prop] = properties[prop];
+                }
             }
         }
         if (_menuItem) {
-            if (menu.createObject === undefined) {
-                for (var prop in properties) {
-                    if (prop in _menuItem) {
-                        _menuItem[prop] = properties[prop];
-                    }
-                }
-            }
             _menuItem.show(listItem)
         }
         return _menuItem
+    }
+
+    function _initMenuItem(properties) {
+        if (_menuItem || (menu == null)) {
+            return
+        }
+        var result
+        if (menu.createObject !== undefined) {
+            result = menu.createObject(listItem, properties || {})
+            _menuItemCreated = true
+            result.closed.connect(function() { _menuItem.destroy() })
+        } else {
+            result = menu
+            _menuItemCreated = false
+            for (var prop in properties) {
+                if (prop in result) {
+                    result[prop] = properties[prop];
+                }
+            }
+        }
+        _menuItem = result
     }
 
     function hideMenu() {
@@ -110,6 +127,13 @@ BackgroundItem {
     onPressAndHold: {
         if (down && showMenuOnPressAndHold) {
             showMenu()
+        }
+    }
+
+    onMenuChanged: {
+        if (menu != null && _menuItem != null && _menuItemCreated) {
+            // delete the previously created context menu instance
+            _menuItem.destroy()
         }
     }
 

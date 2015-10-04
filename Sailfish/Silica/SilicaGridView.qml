@@ -49,6 +49,7 @@ GridView {
     property Item pushUpMenu
     property QtObject _scrollAnimation
     property bool _pulleyDimmerActive: pullDownMenu && pullDownMenu._activeDimmer || pushUpMenu && pushUpMenu._activeDimmer
+    property alias _quickScrollRightMargin: quickScrollItem.rightMargin
 
     function scrollToTop() {
         FastScroll.scrollToTop(gridView, quickScrollItem)

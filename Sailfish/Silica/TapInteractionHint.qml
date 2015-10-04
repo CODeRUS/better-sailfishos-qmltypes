@@ -32,7 +32,7 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.2
 import Sailfish.Silica 1.0
 
 Image {
@@ -63,18 +63,18 @@ Image {
         loops: Animation.Infinite
         SequentialAnimation {
             id: blinkAnimation
-            NumberAnimation {
+            OpacityAnimator {
                 target: root
-                property: "opacity"
+                from: 0.0
                 to: 1.0
                 duration: blinkAnimation.loops > 1 ? 100 : 300
             }
             PauseAnimation {
                 duration: blinkAnimation.loops > 1 ? 100 : 400
             }
-            NumberAnimation {
+            OpacityAnimator {
                 target: root
-                property: "opacity"
+                from: 1.0
                 to: 0.0
                 duration: blinkAnimation.loops > 1 ? 300 : 700
             }

@@ -74,6 +74,11 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "globalPresenceState"; type: "int"; isReadonly: true }
         Property { name: "accounts"; type: "QVariantList"; isReadonly: true }
+        Method {
+            name: "presenceStateText"
+            type: "string"
+            Parameter { name: "presenceState"; type: "int" }
+        }
     }
     Component {
         name: "SeasideFilteredModel"

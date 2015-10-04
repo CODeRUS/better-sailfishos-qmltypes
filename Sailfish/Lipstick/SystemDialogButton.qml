@@ -11,21 +11,26 @@ import Sailfish.Silica 1.0
 MouseArea {
     id: button
 
-    property alias text: label.text
+    property string text
+    property alias textFormat: label.textFormat
     property url iconSource
+    property alias icon: icon
+    property bool selected: parent && parent.selectedButton == button
 
-    width: parent.itemWidth
-    height: parent.height
+    width: parent ? parent.buttonWidth : label.implicitWidth + Theme.paddingMedium
+    implicitHeight: label.y + label.height + Theme.paddingMedium
 
-    onClicked: parent.selectedItem = button
+    onClicked: parent.selectedButton = button
 
     Rectangle {
         id: highlightBackground
-        visible: parent.pressed && parent.containsMouse || button.parent.selectedItem == button
+        visible: (button.pressed && button.containsMouse) || button.selected
 
         anchors.fill: parent
-
-        color: Theme.highlightBackgroundColor
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightDimmerColor, 0) }
+            GradientStop { position: 1.0; color: Theme.rgba(Theme.highlightDimmerColor, 0.2) }
+        }
     }
 
     Image {
@@ -35,21 +40,22 @@ MouseArea {
         width: Theme.iconSizeLarge
         height: Theme.iconSizeLarge
         anchors.horizontalCenter: parent.horizontalCenter
-        opacity: 0.5
         source: button.iconSource != "" ? button.iconSource + "?" + Theme.highlightDimmerColor : ""
     }
     Label {
         id: label
         anchors {
-            left: parent.left
+            left: button.left
             top: icon.bottom
-            right: parent.right
+            right: button.right
             margins: Theme.paddingMedium
         }
+        text: button.text + "\n"
         horizontalAlignment: Text.AlignHCenter
         font.pixelSize: Theme.fontSizeExtraSmall
-        wrapMode: Text.WordWrap
-        color: "black"
-        opacity: 0.5
+        wrapMode: Text.Wrap
+        maximumLineCount: 2
+        elide: Text.ElideRight
+        color: Theme.rgba("black", 0.4)
     }
 }

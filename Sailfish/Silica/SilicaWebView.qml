@@ -62,8 +62,30 @@ WebView {
     property Page _page
     property bool _cookiesEnabled: true
 
+    // Some components (currently libjollasignonui) may want to turn off
+    // focus animation completely
+    property bool _allowFocusAnimation: true
+
     // Part of experimental API
     property Item _webPage: webView.experimental.page
+
+    // For performance reasons we turn off WebView's automatic input field
+    // repositioning & scaling feature by setting experimental.enableInputFieldAnimation
+    // to false and manually trigger repositioning after the virtual keyboard
+    // animation is over.
+    VirtualKeyboardObserver {
+        id: vkbObserver
+        active: webView.visible
+        orientation: pageStack.currentPage.orientation
+
+        onOpenedChanged: {
+            if (opened) {
+                if (webView.focus && webView._allowFocusAnimation) {
+                    experimental.animateInputFieldVisible()
+                }
+            }
+        }
+    }
 
     function scrollToTop() {
         FastScroll.scrollToTop(webView, quickScrollItem)
@@ -98,6 +120,8 @@ WebView {
     experimental.deviceWidth: Screen.width
     experimental.deviceHeight: Screen.height
     experimental.preferences.cookiesEnabled: _cookiesEnabled
+    experimental.enableInputFieldAnimation: false
+    experimental.enableResizeContent: !vkbObserver.animating
 
     TouchBlocker {
         target: pageStack._backFlickDifference != 0 || pageStack._forwardFlickDifference != 0 ? webView : null

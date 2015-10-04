@@ -12,7 +12,7 @@ function serviceDisplayName(serviceName, serviceDisplayName) {
     case "facebook-images":
         return qsTrId("components_accounts-la-sync_service_name_images")
     case "facebook-microblog":
-        return qsTrId("components_accounts-la-sync_service_name_feeds_and_notifications")
+        return qsTrId("components_accounts-la-sync_service_name_notifications")
     case "twitter-microblog":
         return qsTrId("components_accounts-la-sync_service_name_tweets_and_notifications")
     case "google-gmail":

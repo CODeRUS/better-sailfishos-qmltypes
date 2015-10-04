@@ -34,6 +34,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import "private"
 
 Dialog {
     id: timePickerDialog
@@ -54,15 +55,19 @@ Dialog {
     allowedOrientations: Orientation.All
 
     Column {
-        spacing: 10
-        anchors.fill: parent
+        spacing: Theme.paddingLarge
+        width: parent.width
 
         DialogHeader {
-            acceptText: timePicker.timeText
         }
         TimePicker {
             id: timePicker
             anchors.horizontalCenter: parent.horizontalCenter
+
+            ClockItem {
+                anchors.centerIn: parent
+                time: timePicker.time
+            }
         }
     }
 

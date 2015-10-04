@@ -7,6 +7,8 @@ Column {
 
     property bool populated: false
     property bool busy: false
+    // This is the internal "icon margin" of an UnitSwitch item.
+    property real contentMargin: (Theme.itemSizeExtraLarge - Theme.iconSizeLauncher) / 2
 
     // emited when component information loading is completed
     signal ready
@@ -20,16 +22,19 @@ Column {
 
     signal error(variant err)
 
-    anchors { left: parent.left; right: parent.right}
+    anchors.horizontalCenter: parent.horizontalCenter
+    width: unitsGrid.width
     spacing: Theme.paddingSmall
 
     UnitsGrid {
-        anchors { left: parent.left; right: parent.right}
         id: unitsGrid
+        anchors.horizontalCenter: parent.horizontalCenter
+        busy: backupItem.busy
+
         onReady: {
             console.log("Units grid is ready");
-            populated = true;
-            busy = false;
+            backupItem.populated = true;
+            backupItem.busy = false;
             backupItem.ready();
         }
         onError: backupItem.error(err)
@@ -86,6 +91,15 @@ Column {
                 unitProgress(data);
             }
         }
+        onError: {
+            if (operation == Vault.Backup || operation == Vault.Restore) {
+                backupItem.error(error)
+                taskDone();
+            } else if (operation == Vault.RemoveSnapshot) {
+                backupItem.error(error)
+                backupItem.ready();
+            }
+        }
     }
 
     function startBackup() {
@@ -94,7 +108,8 @@ Column {
             console.log("Nothing to backup");
             return;
         }
-        busy = true;
+        unitsGrid.clearStatus()
+        backupItem.busy = true;
         vault.startBackup(startBackupItem.text, units);
         startBackupItem.text = ""
     }
@@ -110,6 +125,7 @@ Column {
             console.log("Nothing to restore");
             return;
         }
+        unitsGrid.clearStatus()
         busy = true;
         vault.startRestore(tag, units);
     }
@@ -130,7 +146,7 @@ Column {
 
     Item {
         width: parent.width
-        height: Theme.paddingLarge
+        height: 2 * Theme.paddingLarge
     }
 
     Item {
@@ -140,6 +156,7 @@ Column {
         StartBackup {
             id: startBackupItem
             enabled: !backupItem.busy && backupItem.populated
+            contentMargin: backupItem.contentMargin
             onClicked: startBackup()
         }
         ProgressBar {

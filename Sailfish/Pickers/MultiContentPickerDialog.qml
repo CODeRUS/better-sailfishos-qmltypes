@@ -1,11 +1,17 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 
 PickerDialog {
     id: contentPickerDialog
 
     // We are single selection, so don't show the forward navigation indicator
     forwardNavigation: false
+
+    orientationTransitions: Private.PageOrientationTransition {
+        fadeTarget: _background ? categoryList : __silica_applicationwindow_instance.contentItem
+        targetPage: contentPickerDialog
+    }
 
     SilicaListView {
         id: categoryList

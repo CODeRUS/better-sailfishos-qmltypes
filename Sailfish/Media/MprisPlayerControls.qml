@@ -6,7 +6,7 @@ Loader {
 
     active: mprisManager.availableServices.length > 0
 
-    Component.onCompleted: setSource("MprisManagerControls.qml", { "mprisManager": mprisManager, "parent": controlsLoader.parent })
+    Component.onCompleted: setSource("MprisManagerControls.qml", { "mprisManager": mprisManager, "parent": Qt.binding(function() { return controlsLoader.parent }) })
 
     MprisManager {
         id: mprisManager

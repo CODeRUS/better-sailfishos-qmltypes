@@ -8,6 +8,7 @@ PinInput {
     property OfonoSimManager simManager
     property int requestedPinType
     property bool retrying
+    property bool showBackgroundGradient: true
 
     property string _currentPinType: enteringNewPin && simManager.isPukType(requestedPinType)
                                      ? simManager.pukToPin(requestedPinType)
@@ -27,7 +28,8 @@ PinInput {
         z: -1
         anchors.fill: parent
         color: Theme.highlightDimmerColor
-        opacity: root.emergency ? 0.0 : 1.0
+        visible: root.showBackgroundGradient
+        opacity: root.emergency || !root.showBackgroundGradient ? 0.0 : 1.0
 
         Behavior on opacity { FadeAnimation {} }
 

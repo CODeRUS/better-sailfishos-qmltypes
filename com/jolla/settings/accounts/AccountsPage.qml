@@ -149,10 +149,7 @@ Page {
         }
 
         PullDownMenu {
-            MenuItem {
-                //: Initiates adding a new account
-                //% "Add account"
-                text: qsTrId("components_accounts-me-add_account")
+            AddAccountMenuItem {
                 onClicked: accountCreationManager.startAccountCreation()
             }
         }

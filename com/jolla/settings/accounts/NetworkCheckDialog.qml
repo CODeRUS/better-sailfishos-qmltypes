@@ -7,6 +7,13 @@ import org.nemomobile.dbus 1.0
 Dialog {
     id: root
 
+    property alias headingText: headingLabel.text
+    property alias bodyText: bodyLabel.text
+    property alias skipText: skipLabel.text
+    property alias skipPressed: skipLabel.pressed
+
+    signal skipClicked()
+
     property bool _connectionSelected
     property bool _connectionSelectorClosed
     property bool _shouldAccept
@@ -15,7 +22,7 @@ Dialog {
     function _showConnSelector() {
         _connectionSelectorClosed = false
         _connectionSelected = false
-        connectionSelector.call('openConnection', ["wlan"])
+        connectionSelector.call('openConnectionNow', ["wlan"])
     }
 
     function _checkStatus() {
@@ -23,6 +30,7 @@ Dialog {
             if (_shouldReject) {
                 pageStack.pop()
             } else if (_shouldAccept) {
+                forwardNavigation = true
                 canAccept = true
                 accept()
             }
@@ -42,10 +50,12 @@ Dialog {
     }
 
     acceptDestinationAction: PageStackAction.Replace
-    canAccept: false
 
     onStatusChanged: {
         if (status == PageStatus.Active) {
+            forwardNavigation = false
+            canAccept = false
+
             if (accountFactory.haveNetworkConnectivity()) {
                 _tryAccept()
             } else if (_shouldAccept || _shouldReject) {
@@ -89,14 +99,21 @@ Dialog {
 
     Column {
         id: retryText
-        x: Theme.horizontalPageMargin
-        y: Theme.itemSizeLarge
-        width: parent.width - x*2
-        spacing: Theme.paddingLarge
-        visible: root._connectionSelectorClosed && !root._connectionSelected
+        width: parent.width
+        visible: !root._connectionSelected
+
+        // show a header to be consistent with other dialogs, but do not show
+        // the accept/cancel navigation
+        DialogHeader {
+            cancelText: ""
+            acceptText: ""
+        }
 
         Label {
-            width: parent.width
+            id: headingLabel
+            x: Theme.horizontalPageMargin
+            width: parent.width - x*2
+            height: implicitHeight + Theme.paddingLarge
             font.pixelSize: Theme.fontSizeExtraLarge
             color: Theme.highlightColor
             wrapMode: Text.Wrap
@@ -106,28 +123,49 @@ Dialog {
         }
 
         Label {
-            width: parent.width
-            font.pixelSize: Theme.fontSizeSmall
+            id: bodyLabel
+            x: Theme.horizontalPageMargin
+            width: parent.width - x*2
+            height: implicitHeight + Theme.paddingLarge*2
+            font.pixelSize: Theme.fontSizeExtraSmall
             color: Theme.highlightColor
             wrapMode: Text.Wrap
             //: The user did not select a network connection
             //% "You must select an internet connection to continue."
             text: qsTrId("settings_accounts-la-must_select_conn")
         }
+
+        Button {
+            id: retryButton
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: retryText.visible
+            //: Display the dialog to set up the internet connection
+            //% "Connect"
+            text: qsTrId("settings_accounts-bt-connect")
+
+            onClicked: {
+                root._showConnSelector()
+            }
+        }
     }
 
-    Button {
+    ClickableTextLabel {
+        id: skipLabel
         anchors {
-            horizontalCenter: parent.horizontalCenter
+            left: parent.left
+            leftMargin: Theme.horizontalPageMargin
             bottom: parent.bottom
             bottomMargin: Theme.paddingLarge
+            right: parent.right
+            rightMargin: Theme.horizontalPageMargin
         }
-        visible: retryText.visible
-        //% "Retry"
-        text: qsTrId("settings_accounts-bt-retry")
+        verticalAlignment: Text.AlignBottom
+        font.pixelSize: Theme.fontSizeSmall
+        visible: text != "" && retryText.visible
 
         onClicked: {
-            root._showConnSelector()
+            root.forwardNavigation = true
+            root.skipClicked()
         }
     }
 

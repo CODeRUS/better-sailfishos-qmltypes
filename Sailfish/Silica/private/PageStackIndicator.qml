@@ -123,7 +123,7 @@ Item {
             id: backMouseArea
             height: parent.height
             width: Theme.itemSizeSmall
-            enabled: indicators.clickablePageIndicators
+            enabled: indicators.clickablePageIndicators && indicators.maxOpacity > 0.0
             x: parent.width/2
             onClicked: root.navigateBack()
         }
@@ -167,7 +167,7 @@ Item {
 
         MouseArea {
             id: forwardMouseArea
-            enabled: forwardPageIndicator.canNavigateForward && indicators.clickablePageIndicators
+            enabled: forwardPageIndicator.canNavigateForward && indicators.clickablePageIndicators && indicators.maxOpacity > 0.0
             height: parent.height
             width: Theme.itemSizeSmall
             anchors.right: parent.horizontalCenter

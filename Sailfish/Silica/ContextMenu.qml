@@ -43,6 +43,7 @@ MouseArea {
 
     property bool active
     property bool closeOnActivation: true
+    property bool hasContent: contentColumn.children.length > 0
 
     property int _openAnimationDuration: 200
     property Item _highlightedItem
@@ -53,6 +54,7 @@ MouseArea {
     property bool _open
     property bool _expanded: height == contentColumn.height && height > 0
     property real _expandedPosition
+    property real _targetHeight
     property Item _page
     property bool _activeAllowed: (!_page || _page.status != PageStatus.Inactive) && Qt.application.active
 
@@ -99,6 +101,28 @@ MouseArea {
     }
     drag.target: Item {}
 
+    Component {
+        id: removeOpacityEffect
+        Item {
+            property variant source
+            ShaderEffect {
+                x: Math.min(0, contextMenu.x)
+                width: Math.max(parent.width, contextMenu.width)
+                // Try to avoid resizing the layer due to expansion animation
+                height: Math.max(parent.height, _targetHeight)
+                property variant source: parent.source
+                fragmentShader: "
+                    uniform sampler2D source;
+                    varying highp vec2 qt_TexCoord0;
+                    void main(void)
+                    {
+                        gl_FragColor = texture2D(source, qt_TexCoord0);
+                    }
+                    "
+            }
+        }
+    }
+
     onHeightChanged: {
         if (_highlightedItem) {
             // reposition the highlightBar
@@ -116,7 +140,6 @@ MouseArea {
         if (_parentMouseArea) {
             _parentMouseArea.preventStealing = active
         }
-        _updateDim()
 
         RemorseItem.activeChanged(contextMenu, active)
     }
@@ -127,43 +150,15 @@ MouseArea {
         }
     }
 
-    Item {
-        id: underRegion
-
-        parent: contextMenu.parent
-        anchors {
-            top: parent ? parent.top : undefined
-            left: parent ? parent.left : undefined
-            right: parent ? parent.right : undefined
-        }
-        height: (parent && contextMenu._open) ? (parent.height - contextMenu.height) : 0
-
-        onHeightChanged: if (active) _updateDim()
-        onWidthChanged: if (active) _updateDim()
-        onXChanged: if (active) _updateDim()
-        onYChanged: if (active) _updateDim()
-    }
-
-    Connections {
-        target: contextMenu.parent
-        onHeightChanged: if (active) _updateDim()
-    }
-
-    function _updateDim() {
-        if (active)
-            __silica_applicationwindow_instance._dimScreen([ contextMenu ], underRegion)
-        else
-            __silica_applicationwindow_instance._undimScreen()
-    }
-
     function show(item) {
         if (item) {
             parent = item
-            if (contentColumn.children.length) {
+            if (hasContent) {
                 _parentMouseArea = _findBackgroundItem(item)
                 _flickable = Util.findFlickable(item)
                 _flickableMoved = false
                 _expandedPosition = -1
+                _targetHeight = parent.height + _getDisplayHeight()
                 active = true
                 _page = Util.findPage(contextMenu)
             } else {
@@ -305,6 +300,29 @@ MouseArea {
         }
     }
 
+
+    Binding {
+        when: active && (!_parentMouseArea || !_parentMouseArea.pressed)
+        target: __silica_applicationwindow_instance
+        property: "_dimScreen"
+        value: true
+    }
+
+    states: [
+        State {
+            when: contextMenu.parent && (active || displayHeightAnimation.running)
+            PropertyChanges {
+                target: contextMenu.parent
+                layer.effect: removeOpacityEffect
+                layer.enabled: true
+                layer.smooth: true
+                layer.sourceRect: Qt.rect(Math.min(0, contextMenu.x), 0
+                                          , Math.max(parent.width, contextMenu.width)
+                                          , Math.max(contextMenu.parent.height, _targetHeight))
+            }
+        }
+    ]
+
     Connections {
         target: _flickable
         onContentYChanged: _flickableMoved = true
@@ -358,6 +376,7 @@ MouseArea {
     property real _displayHeight: active && contentColumn.height > 0 ? _getDisplayHeight() : 0
     Behavior on _displayHeight {
         NumberAnimation {
+            id: displayHeightAnimation
             duration: contextMenu._openAnimationDuration
             easing.type: Easing.InOutQuad
 

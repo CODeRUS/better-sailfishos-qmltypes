@@ -41,9 +41,18 @@ Item {
     id: wallpaper
 
     property alias source: wallpaperTextureImage.source
+    property real windowRotation
+    property int verticalOffset
+    property int horizontalOffset
+    property alias ratio: wallpaperEffect.ratio
+    property alias effect: wallpaperEffect
 
-    property real horizontalOffset: 0
-    property real verticalOffset: -Screen.height / 3
+    property bool glassOnly
+    property bool dimmed
+    property color dimmedRegionColor: Theme.highlightDimmerColor
+
+    property real _dimOpacity: dimmed ? 0.5 : 0.0
+    Behavior on _dimOpacity { FadeAnimation { id: dimAnim; property: "_dimOpacity" } }
 
     Item {
         id: glassTextureItem
@@ -53,7 +62,6 @@ Item {
         Image {
             id: glassTextureImage
             opacity: 0.1
-            scale: Theme.pixelRatio
             source: "image://theme/graphic-shader-texture"
             Behavior on opacity { FadeAnimation { duration: 200 } }
         }
@@ -74,17 +82,29 @@ Item {
         id: wallpaperEffect
         anchors.fill: parent
 
-        visible: wallpaperTextureImage.source != ""
+        visible: wallpaperTextureImage.source != "" || glassOnly
 
-        // offset normalized to effect size
-        property size offset: Qt.size(wallpaper.horizontalOffset / width, wallpaper.verticalOffset / height)
+        // wallpaper orientation
+        property real wpRotation: Math.floor(wallpaper.windowRotation / 90) * 90
 
-        // ratio of effect size vs home wallpaper size
-        property real ratio: (Screen.height/Screen.width)/(wallpaperTextureImage.implicitHeight/wallpaperTextureImage.implicitWidth)
-        property size sizeRatio: Qt.size(width/Screen.width, ratio * height/Screen.height)
+        // wallpaper angle in radians
+        property real angle: (360 - wpRotation) * (Math.PI/180)
+
+        // ratio between wallpaper width and visible area width
+        property size screenSizeInv: Qt.size(wallpaper.width/Screen.height, wallpaper.height/Screen.height)
+
+        property real horizontalOffset: wallpaper.horizontalOffset / Screen.height
+        property real verticalOffset: wallpaper.verticalOffset / Screen.height
+
+        // ratio between visible area width and screen height
+        property real ratio: Screen.width/Screen.height
+
+        // visible area origo in texture space
+        property size offset: Qt.size((1.0-ratio) * .5 - horizontalOffset - 0.5, verticalOffset - 0.5)
 
         // glass texture size
-        property size glassTextureSizeInv: Qt.size(1.0/glassTextureImage.sourceSize.width, -1.0/glassTextureImage.sourceSize.height)
+        property size glassTextureSizeInv: Qt.size(1.0/(glassTextureImage.sourceSize.width),
+                                                   -1.0/(glassTextureImage.sourceSize.height))
 
         property Image wallpaperTexture: wallpaperTextureImage
         property variant glassTexture: ShaderEffectSource {
@@ -93,18 +113,25 @@ Item {
             wrapMode: ShaderEffectSource.Repeat
         }
 
+        property color dimmedColor: Theme.rgba(dimmedRegionColor, _dimOpacity)
+
         // Enable blending in compositor (for events view etc..)
         blending: !Config.wayland
 
         vertexShader: "
-           uniform highp mat4 qt_Matrix;
+           uniform highp float angle;
+           uniform highp vec2 screenSizeInv;
            uniform highp vec2 offset;
-           uniform highp vec2 sizeRatio;
+           uniform highp mat4 qt_Matrix;
            attribute highp vec4 qt_Vertex;
            attribute highp vec2 qt_MultiTexCoord0;
            varying highp vec2 qt_TexCoord0;
+
            void main() {
-              qt_TexCoord0 = (qt_MultiTexCoord0 - offset) * sizeRatio;
+              lowp float s = sin(angle);
+              lowp float c = cos(angle);
+              lowp mat2 rotation = mat2(c, -s, s, c);
+              qt_TexCoord0 = rotation * (qt_MultiTexCoord0 * screenSizeInv + offset) + vec2(0.5, 0.5);
               gl_Position = qt_Matrix * qt_Vertex;
            }
         "
@@ -114,11 +141,16 @@ Item {
            uniform sampler2D glassTexture;
            uniform highp vec2 glassTextureSizeInv;
            uniform lowp float qt_Opacity;
+           uniform lowp vec4 dimmedColor;
            varying highp vec2 qt_TexCoord0;
+
            void main() {
               lowp vec4 wp = texture2D(wallpaperTexture, qt_TexCoord0);
               lowp vec4 tx = texture2D(glassTexture, gl_FragCoord.xy * glassTextureSizeInv);
-              gl_FragColor = vec4(0.4*wp.rgb + tx.rgb, 1.0)" + (blending ? "*qt_Opacity" : "") + ";
+              gl_FragColor = gl_FragColor = "
+                + (dimmed || dimAnim.running ? "vec4(mix(0.4*wp.rgb + tx.rgb, dimmedColor.rgb, dimmedColor.a), 1.0)"
+                                             : "vec4(0.4*wp.rgb + tx.rgb, 1.0)") + (blending ? "*qt_Opacity" : "")
+                + ";
            }
         "
     }

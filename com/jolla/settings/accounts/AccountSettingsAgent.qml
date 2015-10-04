@@ -43,7 +43,7 @@ Item {
         //% "Images"
         QT_TRID_NOOP("components_accounts-la-sync_service_name_images")
 
-        //: Content feeds and notifications (e.g. for Facebook)
+        //: Content feeds and notifications
         //% "Feeds and notifications"
         QT_TRID_NOOP("components_accounts-la-sync_service_name_feeds_and_notifications")
 
@@ -82,6 +82,10 @@ Item {
         //: Describes the effect of enabling the "Sharing" service for a particular user account.
         //% "Allow apps to show and update your %1 photos, videos and other content."
         QT_TRID_NOOP("components_accounts-la-service_description_sharing")
+
+        //: Notifications
+        //% "Notifications"
+        QT_TRID_NOOP("components_accounts-la-sync_service_name_notifications")
     }
 
     FirstTimeUseCounter {

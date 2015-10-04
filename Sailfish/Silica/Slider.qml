@@ -34,6 +34,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0
 
 MouseArea {
     id: slider
@@ -46,14 +47,13 @@ MouseArea {
     property bool handleVisible: true
     property string valueText
     property alias label: labelText.text
-    property bool down: pressed
+    property bool down: pressed && !DragFilter.canceled && !_cancel
     property bool highlighted: down
     property real leftMargin: Math.round(Screen.width/8)
     property real rightMargin: Math.round(Screen.width/8)
 
     property bool _hasValueLabel: false
     property real _oldValue
-    property bool _tracking: true
     property real _precFactor: 1.0
 
     property real _grooveWidth: Math.max(0, width - leftMargin - rightMargin)
@@ -61,6 +61,9 @@ MouseArea {
     property bool _cancel
 
     property bool _componentComplete
+
+    DragFilter.orientations: Qt.Vertical
+    onPreventStealingChanged: if (preventStealing) slider.DragFilter.end()
 
     onStepSizeChanged: {
         // Avoid rounding errors.  We assume that the range will
@@ -75,7 +78,7 @@ MouseArea {
         }
     }
 
-    height: valueText !== "" ? Theme.itemSizeExtraLarge : label !== "" ? Theme.itemSizeMedium : Theme.itemSizeSmall
+    implicitHeight: valueText !== "" ? Theme.itemSizeExtraLarge : label !== "" ? Theme.itemSizeMedium : Theme.itemSizeSmall
 
     onWidthChanged: updateWidth()
     onLeftMarginChanged: updateWidth()
@@ -91,7 +94,6 @@ MouseArea {
     function cancel() {
         _cancel = true
         value = _oldValue
-        _updateHighlightToValue()
     }
 
     drag {
@@ -99,19 +101,11 @@ MouseArea {
         minimumX: leftMargin - highlight.width/2
         maximumX: slider.width - leftMargin - highlight.width/2
         axis: Drag.XAxis
-    }
-
-    function _updateHighlightToValue() {
-        if (maximumValue > minimumValue) {
-            highlight.x = (sliderValue - minimumValue) / (maximumValue - minimumValue) * _grooveWidth - highlight.width/2 + leftMargin
-        } else {
-            highlight.x = leftMargin - highlight.width/2
-        }
+        onActiveChanged: if (drag.active && !slider.DragFilter.canceled) slider.DragFilter.end()
     }
 
     function _updateValueToDraggable() {
         if (width > (leftMargin + rightMargin)) {
-            highlight.x = draggable.x
             var pos = draggable.x + highlight.width/2 - leftMargin
             value = _calcValue((pos / _grooveWidth) * (maximumValue - minimumValue) + minimumValue)
         }
@@ -136,6 +130,7 @@ MouseArea {
     }
 
     onPressed: {
+        slider.DragFilter.begin(mouse.x, mouse.y)
         _cancel = false
         _oldValue = value
         draggable.x = Math.min(Math.max(drag.minimumX, mouseX - highlight.width/2), drag.maximumX)
@@ -143,17 +138,15 @@ MouseArea {
 
     onReleased: {
         if (!_cancel) {
-            _tracking = false
             _updateValueToDraggable()
-            if (stepSize != 0.0) {
-                // on release make sure that we settle on a step boundary
-                _updateHighlightToValue()
-            }
             _oldValue = value
         }
     }
 
-    onCanceled: value = _oldValue
+    onCanceled: {
+        slider.DragFilter.end()
+        value = _oldValue
+    }
 
     onValueTextChanged: {
         if (valueText && !_hasValueLabel) {
@@ -164,13 +157,6 @@ MouseArea {
             } else {
                 console.log(valueIndicatorComponent.errorString())
             }
-        }
-    }
-
-    onSliderValueChanged: {
-        if (!slider.drag.active) {
-            _tracking = false
-            _updateHighlightToValue()
         }
     }
 
@@ -187,7 +173,6 @@ MouseArea {
         radius: 0.06
         falloffRadius: 0.09
         ratio: 0.0
-        onWidthChanged: { _tracking = true; _updateHighlightToValue() }
         color: slider.highlighted ? Theme.highlightColor : Theme.secondaryColor
         states: State {
             name: "hasText"; when: slider.valueText !== "" || text !== ""
@@ -211,7 +196,10 @@ MouseArea {
         color: slider.highlighted ? Theme.highlightColor : Theme.primaryColor
         Behavior on width {
             enabled: !_widthChanged
-            SmoothedAnimation { velocity: 1500 }
+            SmoothedAnimation {
+                duration: 300
+                velocity: 1500*Theme.pixelRatio
+            }
         }
     }
 
@@ -220,19 +208,19 @@ MouseArea {
         width: highlight.width
         height: highlight.height
         onXChanged: {
-            if (_cancel) {
+            if (_cancel || slider.DragFilter.canceled) {
                 return
             }
             if (slider.drag.active) {
                 _updateValueToDraggable()
             }
-            if (!_tracking && Math.abs(highlight.x - draggable.x) < 5) {
-                _tracking = true
-            }
         }
     }
     GlassItem {
         id: highlight
+        x: (maximumValue > minimumValue)
+                ? (sliderValue - minimumValue) / (maximumValue - minimumValue) * _grooveWidth - highlight.width/2 + leftMargin
+                : leftMargin - highlight.width/2
         width: Theme.itemSizeMedium
         height: Theme.itemSizeMedium
         radius: 0.17
@@ -242,7 +230,10 @@ MouseArea {
         color: slider.highlighted ? Theme.highlightColor : Theme.primaryColor
         Behavior on x {
             enabled: !_widthChanged
-            SmoothedAnimation { velocity: 1500 }
+            SmoothedAnimation {
+                duration: 300
+                velocity: 1500*Theme.pixelRatio
+            }
         }
     }
 
@@ -276,6 +267,5 @@ MouseArea {
 
     Component.onCompleted: {
         _componentComplete = true
-        _updateHighlightToValue()
     }
 }

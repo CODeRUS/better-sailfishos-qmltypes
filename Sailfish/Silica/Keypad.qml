@@ -49,6 +49,10 @@ Column {
 
     property string _numbers: "0123456789"
     property QtObject _feedbackEffect
+    property int _buttonWidth: (3*Theme.itemSizeHuge - 4*Theme.paddingLarge) / 3
+    property int _buttonHeight: screen.sizeCategory > Screen.Medium ? Theme.itemSizeExtraLarge : Theme.itemSizeLarge
+    property int _horizontalSpacing: screen.sizeCategory > Screen.Medium ? Theme.paddingLarge : 0
+    property int _horizontalPadding: Math.max((width - 3*_buttonWidth - 2*_horizontalSpacing) / 2, 0)
 
     signal pressed(string number)
     signal released(string number)
@@ -97,12 +101,7 @@ Column {
         pressedButtonBackground.y = itemCenter.y - pressedButtonBackground.height/2
     }
 
-    anchors {
-        left: parent.left
-        leftMargin: Theme.paddingLarge * 2
-        right: parent.right
-        rightMargin: Theme.paddingLarge * 2
-    }
+    width: parent.width
 
     Component.onCompleted: {
         // Avoid hard dependency to feedback
@@ -114,8 +113,8 @@ Column {
         // Place button background here and not in the root Column so it can be repositioned.
         Rectangle {
             id: pressedButtonBackground
-            width: (dialer.width / 3) - (2 * Theme.paddingSmall)
-            height: width - Theme.paddingSmall  // avoid touching vanity characters
+            width: dialer._buttonWidth
+            height: dialer._buttonHeight + 2*Theme.paddingSmall // make highlight more square
             visible: false
             radius: 4
 
@@ -125,6 +124,9 @@ Column {
     }
 
     Row {
+        x: dialer._horizontalPadding
+        spacing: dialer._horizontalSpacing
+
         KeypadButton {
             key: Qt.Key_1
             text: _numbers.charAt(1)
@@ -150,6 +152,9 @@ Column {
         }
     }
     Row {
+        x: dialer._horizontalPadding
+        spacing: dialer._horizontalSpacing
+
         Repeater {
             model: 3
             KeypadButton {
@@ -160,6 +165,9 @@ Column {
         }
     }
     Row {
+        x: dialer._horizontalPadding
+        spacing: dialer._horizontalSpacing
+
         Repeater {
             model: 3
             KeypadButton {
@@ -170,6 +178,9 @@ Column {
         }
     }
     Row {
+        x: dialer._horizontalPadding
+        spacing: dialer._horizontalSpacing
+
         Item {
             width: asteriskButton.width
             height: asteriskButton.height
@@ -186,7 +197,7 @@ Column {
             key: Qt.Key_0
             text: "0"
             secondaryText: vanityDialNumbers[10]
-        }        
+        }
         Item {
             width: hashButton.width
             height: hashButton.height

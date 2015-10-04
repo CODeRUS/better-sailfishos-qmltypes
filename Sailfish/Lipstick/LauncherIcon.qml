@@ -19,8 +19,10 @@ Image {
             return icon
         } else if (icon.indexOf('/') === 0) {
             return 'file://' + icon
-        } else {
+        } else if (icon.length) {
             return 'image://theme/' + icon
+        } else {
+            return ""
         }
     }
 }

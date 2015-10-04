@@ -1,8 +1,12 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Lipstick 1.0
+import Sailfish.Tutorial 1.0
+import "private"
 
 Item {
+    id: lesson
+
     anchors.fill: parent
 
     Component.onCompleted: {
@@ -21,9 +25,10 @@ Item {
                 appInfo.text = androidLauncher
                         //% "Here is a running app"
                         ? qsTrId("tutorial-la-running_app")
-                        //% "Here is running People app"
+                        //% "Here is the minimized People app"
                         : qsTrId("tutorial-la-people_app")
                 appInfo.opacity = 1.0
+                peopleApp.enabled = true
             }
         }
         PauseAnimation { duration: 3000 }
@@ -38,7 +43,6 @@ Item {
                 //% "Tap to open"
                 appInfo.text = qsTrId("tutorial-la-tap_to_open")
                 appInfo.opacity = 1.0
-                peopleApp.enabled = true
             }
         }
     }
@@ -55,17 +59,14 @@ Item {
         Behavior on opacity { FadeAnimation { duration: 500 } }
     }
 
-
-    BackgroundItem {
+    CoverItem {
         id: peopleApp
-        x: 24 * xScale
-        y: 24 * yScale
-        width: 148 * xScale
-        height: 235 * yScale
-        highlightedColor: Theme.rgba(tutorialTheme.highlightColor, 0.3)
-        enabled: false
+
+        row: 0
+        column: 0
 
         onClicked: {
+            timeline.complete()
             enabled = false
             appInfo.opacity = 0.0
             openAppAnimation.start()
@@ -92,20 +93,43 @@ Item {
         id: clipItem
         anchors.fill: parent
         clip: x > 0 || width < parent.width
+
         Image {
             id: appMainPage
             opacity: 0.0
 
             Behavior on opacity { SmoothedAnimation { duration: 400; velocity: 1000 / duration } }
-            source: Qt.resolvedUrl("/usr/share/sailfish-tutorial/graphics/tutorial-people-index.png")
-            sourceSize {
-                width: 540 * xScale
-                height: 960 * yScale
-            }
-            width: sourceSize.width
-            height: sourceSize.height
+            source: Screen.sizeCategory >= Screen.Large
+                    ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-app-background.png")
+                    : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-app-background.png")
+            width: lesson.width
+            height: lesson.height
             x: -parent.x
 
+            Image {
+                anchors.fill: parent
+                source: Screen.sizeCategory >= Screen.Large
+                        ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-people-app.png")
+                        : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-people-app.png")
+            }
+
+            SilicaFlickable {
+                anchors.fill: parent
+
+                interactive: false
+
+                PullDownMenu {
+                    highlightColor: tutorialTheme.highlightColor
+                    backgroundColor: tutorialTheme.highlightBackgroundColor
+                }
+            }
+
+            PageHeader {
+                //: Title of people application, should match contacts-ap-name
+                //% "People"
+                title: qsTrId("tutorial-la-people")
+                _titleItem.color: tutorialTheme.highlightColor
+            }
         }
     }
     HintLabel {
@@ -116,12 +140,16 @@ Item {
 
     TouchInteractionHint {
         id: hint
-        direction: TouchInteraction.Left
+
+        interactionMode: TouchInteraction.EdgeSwipe
+        direction: TouchInteraction.Right
         loops: Animation.Infinite
-        anchors.verticalCenter: parent.verticalCenter
-        startX: hint.direction === TouchInteraction.Left
-                ? parent.width
-                : -width
+
+        on_LoopsRunChanged: {
+            // alternate direction of hint every 2 times
+            if (_loopsRun % 2 === 0)
+                direction = direction === TouchInteraction.Right ? TouchInteraction.Left : TouchInteraction.Right
+        }
     }
 
     SequentialAnimation {
@@ -133,12 +161,6 @@ Item {
             duration: 100
         }
         NumberAnimation {
-            target: background
-            property: "contentY"
-            to: 780 * yScale
-            duration: 200
-        }
-        NumberAnimation {
             target: appMainPage
             property: "opacity"
             to: 1.0
@@ -147,55 +169,24 @@ Item {
         PauseAnimation { duration: 1000 }
         ScriptAction  {
             script: {
-                //% "Swipe from the outside of the screen to go back to Home"
-                hintLabel.text = qsTrId("tutorial-la-swipe_to_home")
+                //% "Swipe from the left or right edge to go Home"
+                hintLabel.text = qsTrId("tutorial-la-swipe_left_right_to_home")
                 hintLabel.opacity = 1.0
 
-                hint.running = true
+                hint.start()
                 peekFilter.enabled = true
             }
         }
-        PauseAnimation { duration: 3000 }
-        ScriptAction  {
-            script: {
-                hintLabel.opacity = 0.0
-            }
-        }
-        PauseAnimation { duration: 1000 }
-        ScriptAction  {
-            script: {
-                directionSwitcher.start()
-                //% "You can swipe either from left or right side"
-                hintLabel.text = qsTrId("tutorial-la-swipe_from_left_or_right")
-                hintLabel.opacity = 1.0
-            }
-        }
-    }
-
-    Timer {
-        id: directionSwitcher
-        repeat: true
-        interval: 4800
-        triggeredOnStart: true
-        onTriggered: {
-            hint.direction = hint.direction === TouchInteraction.Left
-                ? TouchInteraction.Right
-                : TouchInteraction.Left
-        }
-
     }
 
     SequentialAnimation {
         id: closeAppAnimation
-        NumberAnimation {
-            target: background
-            property: "contentY"
-            to: 1020 * yScale
+        PauseAnimation {
             duration: 200
         }
         ScriptAction  {
             script: {
-                hint.running = false
+                hint.stop()
                 hintLabel.opacity = 0.0
                 lessonCompleted(200)
             }
@@ -208,10 +199,14 @@ Item {
         property bool pressed: leftActive || rightActive
 
         enabled: false
+
         onProgressChanged: if (enabled) appMainPage.opacity = 1.0 - Math.max(0.0, progress-0.3)/0.7
         onPressedChanged: {
             hintLabel.opacity = pressed ? 0.0 : 1.0
-            hint.running = pressed ? false : true
+            if (pressed)
+                hint.stop()
+            else
+                hint.start()
         }
         leftEnabled: true
         rightEnabled: true

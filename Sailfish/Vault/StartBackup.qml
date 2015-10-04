@@ -6,6 +6,7 @@ Column {
 
     property bool enabled
     property alias text: messageField.text
+    property alias contentMargin: messageField.textMargin
 
     signal clicked
 
@@ -32,6 +33,8 @@ Column {
         }
     }
 
+    Item { width: 1; height: Theme.paddingLarge }
+
     Button {
         //% "Create"
         text: qsTrId("vault-bt-create")
@@ -39,4 +42,6 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
         onClicked: self.clicked()
     }
+
+    Item { width: 1; height: Theme.paddingLarge }
 }

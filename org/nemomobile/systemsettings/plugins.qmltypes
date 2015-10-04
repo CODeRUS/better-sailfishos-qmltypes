@@ -20,6 +20,7 @@ Module {
         Property { name: "adaptationVersion"; type: "string"; isReadonly: true }
         Method { name: "totalDiskSpace"; type: "qlonglong" }
         Method { name: "availableDiskSpace"; type: "qlonglong" }
+        Method { name: "diskUsageModel"; type: "QVariant" }
     }
     Component {
         name: "AlarmToneModel"
@@ -257,41 +258,37 @@ Module {
         Signal { name: "messageToneVolumeChanged" }
     }
     Component {
-        name: "USBSettings"
+        name: "QUsbMode"
         prototype: "QObject"
+        Property { name: "USB_CONNECTED"; type: "string"; isReadonly: true }
+        Property { name: "DATA_IN_USE"; type: "string"; isReadonly: true }
+        Property { name: "USB_DISCONNECTED"; type: "string"; isReadonly: true }
+        Property { name: "USB_CONNECTED_DIALOG_SHOW"; type: "string"; isReadonly: true }
+        Property { name: "MODE_UNDEFINED"; type: "string"; isReadonly: true }
+        Property { name: "MODE_ASK"; type: "string"; isReadonly: true }
+        Property { name: "MODE_MASS_STORAGE"; type: "string"; isReadonly: true }
+        Property { name: "MODE_DEVELOPER"; type: "string"; isReadonly: true }
+        Property { name: "MODE_MTP"; type: "string"; isReadonly: true }
+        Property { name: "MODE_HOST"; type: "string"; isReadonly: true }
+        Property { name: "MODE_CONNECTION_SHARING"; type: "string"; isReadonly: true }
+        Property { name: "MODE_DIAG"; type: "string"; isReadonly: true }
+        Property { name: "MODE_ADB"; type: "string"; isReadonly: true }
+        Property { name: "MODE_PC_SUITE"; type: "string"; isReadonly: true }
+        Property { name: "MODE_CHARGING"; type: "string"; isReadonly: true }
+        Property { name: "MODE_CHARGER"; type: "string"; isReadonly: true }
+    }
+    Component {
+        name: "QUsbModed"
+        prototype: "QUsbMode"
         exports: ["org.nemomobile.systemsettings/USBSettings 1.0"]
         exportMetaObjectRevisions: [0]
-        Enum {
-            name: "Mode"
-            values: {
-                "Connected": 0,
-                "DataInUse": 1,
-                "Disconnected": 2,
-                "ModeRequest": 6,
-                "MassStorage": 3,
-                "ChargingOnly": 4,
-                "PCSuite": 5,
-                "Ask": 7,
-                "Undefined": 8,
-                "Developer": 10,
-                "MTP": 11,
-                "Adb": 12,
-                "Diag": 13,
-                "ConnectionSharing": 14,
-                "Host": 15,
-                "Charger": 16
-            }
-        }
-        Property { name: "currentMode"; type: "Mode" }
-        Property { name: "defaultMode"; type: "Mode" }
-        Property { name: "supportedUSBModes"; type: "QList<int>"; isReadonly: true }
-        Method {
-            name: "setDefaultMode"
-            Parameter { name: "mode"; type: "Mode" }
-        }
-        Method {
-            name: "setCurrentMode"
-            Parameter { name: "mode"; type: "Mode" }
+        Property { name: "available"; type: "bool"; isReadonly: true }
+        Property { name: "supportedModes"; type: "QStringList"; isReadonly: true }
+        Property { name: "currentMode"; type: "string" }
+        Property { name: "configMode"; type: "string" }
+        Signal {
+            name: "usbStateError"
+            Parameter { name: "error"; type: "string" }
         }
     }
 }

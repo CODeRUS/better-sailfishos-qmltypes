@@ -1,8 +1,0 @@
-module org.SfietKonstantin.patchmanager
-plugin patchmanager
-PatchManagerPage 1.0 PatchManagerPage.qml
-AboutPage 1.0 AboutPage.qml
-DevelopersPage 1.0 DevelopersPage.qml
-LipstickWarningDialog 1.0 LipstickWarningDialog.qml
-PatchPage 1.0 PatchPage.qml
-RestartServicesDialog 1.0 RestartServicesDialog.qml

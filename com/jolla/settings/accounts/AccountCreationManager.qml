@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
 import com.jolla.settings.accounts 1.0
+import org.nemomobile.configuration 1.0
 import "accountcreationmanager.js" as ManagerScript
 
 /*
@@ -90,16 +91,19 @@ Item {
         pageStack.push(accountProviderPickerComponent)
     }
 
-    function startAccountCreationForProvider(providerName, properties) {
+    function startAccountCreationForProvider(providerName, properties, pageStackOperation) {
+        if (pageStackOperation === undefined) {
+            pageStackOperation = PageStackAction.Animated
+        }
         var agent = _accountCreationAgent(providerName, properties)
         if (accountFactory.haveNetworkConnectivity()) {
-            pageStack.push(agent.initialPage)
+            pageStack.push(agent.initialPage, {}, pageStackOperation)
         } else {
             var props = {
                 "acceptDestination": agent.initialPage,
                 "acceptDestinationAction": PageStackAction.Replace
             }
-            pageStack.push(networkCheckComponent, props)
+            pageStack.push(networkCheckComponent, props, {}, pageStackOperation)
         }
     }
 
@@ -125,6 +129,11 @@ Item {
         account.statusChanged.connect(function() {
             if (account.status === Account.Initialized) {
                 var providerName = account.providerName
+                if (providerName == "jolla") {
+                    hasCreatedJollaAccountBefore.key = "/apps/jolla-settings/jolla_account_creation_achieved"
+                    hasCreatedJollaAccountBefore.value = true
+                    hasCreatedJollaAccountBefore.sync()
+                }
                 var accountIdentifier = account.identifier
                 account.remove()
                 syncAdapter.triggerSync(providerName, accountIdentifier)
@@ -166,6 +175,10 @@ Item {
     }
 
     AccountFactory { id: accountFactory }
+
+    ConfigurationValue {
+        id: hasCreatedJollaAccountBefore
+    }
 
     AccountSyncAdapter { id: syncAdapter }
 

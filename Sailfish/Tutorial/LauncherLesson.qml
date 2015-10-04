@@ -1,98 +1,150 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Lipstick 1.0
+import Sailfish.Tutorial 1.0
 
 Item {
+    id: lesson
+
     anchors.fill: parent
 
-    property int originalIndex
-    property int targetIndex: -1
     property int timelineCounter
 
     Component.onCompleted: {
         // Make sure the background is at correct position
-        background.currentIndex = 0
-        timeline.restart()
+        background.currentIndex = 1
+        applicationGridIndicator.visible = false
+        timeline2.restart()
     }
 
     onTimelineCounterChanged: {
-        if (timelineCounter === 3) {
-            lessonCompleted()
+        if (timelineCounter === 2) {
+            if (!applicationGridEndAnimation.running)
+                jumpToLesson("SwipeLesson.qml")
         } else {
-            timeline.restart()
+            timeline1.restart()
         }
     }
 
     SequentialAnimation {
-        id: timeline
+        id: timeline1
         PauseAnimation { duration: 1000 }
-        ScriptAction  {
+        ScriptAction {
             script: {
                 hintLabel.atBottom = false
-                hintLabel.text = timelineCounter === 0
-                        //% "Here is Lock screen"
-                        ? qsTrId("tutorial-la-lock_screen")
-                        : timelineCounter === 1
-                          //% "Here is Home, showing all running apps"
-                          ? qsTrId("tutorial-la-home")
-                          //% "Here is Launcher, showing all installed apps"
-                          : qsTrId("tutorial-la-launcher")
+                //% "These are your installed apps"
+                hintLabel.text = qsTrId("tutorial-la-installed_apps")
                 hintLabel.opacity = 1.0
             }
         }
         PauseAnimation { duration: 3000 }
-        ScriptAction  {
+        ScriptAction {
             script: {
                 hintLabel.opacity = 0.0
+                timeline2.restart()
             }
         }
+    }
+
+    SequentialAnimation {
+        id: timeline2
         PauseAnimation { duration: 1000 }
         ScriptAction  {
             script: {
                 hintLabel.atBottom = true
                 hintLabel.text = timelineCounter === 0
-                        ? androidLauncher
-                          //% "Flick up to unlock your device"
-                          ? qsTrId("tutorial-la-unlock_phone_alternative")
-                          //% "Flick up to unlock your Jolla"
-                          : qsTrId("tutorial-la-unlock_phone")
-                        : timelineCounter === 1
-                          //% "Flick up to access all installed apps"
-                          ? qsTrId("tutorial-la-flick_to_launcher")
-                          //% "Flick down to go back Home"
-                          : qsTrId("tutorial-la-flick_to_home")
+                        //% "Swipe from the bottom edge to open the app grid"
+                        ? qsTrId("tutorial-la-swipe_to_launcher")
+                        //% "Swipe from the top edge to close it"
+                        : qsTrId("tutorial-la-swipe_to_close_grid")
                 hintLabel.opacity = 1.0
-                hint.direction = timelineCounter === 2
-                        ? TouchInteraction.Down
-                        : TouchInteraction.Up
-                hint.running = true
-                background.interactive = true
-                originalIndex = background.currentIndex
-                targetIndex = timelineCounter === 0
-                        ? 1
-                        : timelineCounter === 1
-                          ? 2
-                          : 1
+                hint.direction = timelineCounter === 0
+                        ? TouchInteraction.Up
+                        : TouchInteraction.Down
+                hint.start()
+                appGridPeek.bottomEnabled = timelineCounter === 0
+                appGridPeek.topEnabled = timelineCounter === 1
+                appGridPeek.enabled = appGridPeek.bottomEnabled || appGridPeek.topEnabled
             }
         }
     }
 
-    Connections {
-        target: background
+    PeekFilter {
+        id: appGridPeek
 
-        onMovingChanged: {
-            if (targetIndex !== -1) {
-                if (background.currentIndex === targetIndex) {
-                    background.interactive = false
-                    targetIndex = -1
-                    timelineCounter++
-                } else {
-                    hintLabel.opacity = background.moving ? 0.0 : 1.0
-                    hint.running = background.moving ? false : true
-                    if (!background.moving) {
-                        background.currentIndex = originalIndex
-                    }
-                }
+        enabled: false
+        boundaryHeight: parent.height
+
+        onBottomActiveChanged: {
+            if (enabled) {
+                hintLabel.opacity = active ? 0.0 : 1.0
+                if (active)
+                    hint.stop()
+                else
+                    hint.start()
             }
+        }
+
+        onTopActiveChanged: {
+            if (enabled) {
+                hintLabel.opacity = active ? 0.0 : 1.0
+                if (active)
+                    hint.stop()
+                else
+                    hint.start()
+            }
+        }
+
+        onGestureStarted: {
+            if (timelineCounter === 0 || timelineCounter === 1) {
+                applicationGridEndAnimation.complete()
+                dragEdgeBinding.when = true
+            }
+        }
+        onGestureTriggered: {
+            enabled = false
+            if (timelineCounter === 0 || timelineCounter === 1) {
+                applicationGridEndAnimation.from = applicationGrid.y
+                applicationGridEndAnimation.to = timelineCounter === 0 ? 0 : parent.height
+                applicationGridEndAnimation.duration = 400*(parent.height - absoluteProgress)/Screen.height
+                dragEdgeBinding.when = false
+                applicationGridEndAnimation.start()
+            }
+            timelineCounter++
+        }
+        onGestureCanceled: {
+            if (timelineCounter === 0 || timelineCounter === 1) {
+                applicationGridEndAnimation.from = applicationGrid.y
+                applicationGridEndAnimation.to = timelineCounter === 0 ? parent.height : 0
+                applicationGridEndAnimation.duration = 200
+                dragEdgeBinding.when = false
+                applicationGridEndAnimation.start()
+            }
+        }
+    }
+
+    Image {
+        source: "image://theme/graphics-edge-swipe-handle"
+
+        anchors {
+            bottom: applicationGrid.top
+            horizontalCenter: applicationGrid.horizontalCenter
+        }
+    }
+
+    Rectangle {
+        id: applicationGrid
+
+        color: "black"
+        width: parent.width
+        height: parent.height
+        y: parent.height
+
+        Image {
+            anchors.fill: parent
+            source: Screen.sizeCategory >= Screen.Large
+                    ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-launcher.png")
+                    : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-launcher.png")
         }
     }
 
@@ -103,11 +155,8 @@ Item {
 
     TouchInteractionHint {
         id: hint
-        direction: timelineCounter === 2
-                   ? TouchInteraction.Down
-                   : TouchInteraction.Up
         loops: Animation.Infinite
-        anchors.horizontalCenter: parent.horizontalCenter
+        interactionMode: TouchInteraction.EdgeSwipe
     }
 
     EdgeBlocker { edge: Qt.TopEdge }
@@ -117,4 +166,31 @@ Item {
     EdgeBlocker { edge: Qt.LeftEdge }
 
     EdgeBlocker { edge: Qt.RightEdge }
+
+    Binding {
+        id: dragEdgeBinding
+        when: false
+        target: applicationGrid
+        property: "y"
+        value: appGridPeek.topActive ? appGridPeek.absoluteProgress : lesson.height - appGridPeek.absoluteProgress
+    }
+
+    NumberAnimation {
+        id: applicationGridEndAnimation
+        target: applicationGrid
+        property: "y"
+        easing.type: Easing.OutQuad
+
+        onRunningChanged: {
+            if (timelineCounter === 2 && !running)
+                timer.start()
+        }
+    }
+
+    Timer {
+        id: timer
+
+        interval: 800
+        onTriggered: jumpToLesson("SwipeLesson.qml")
+    }
 }

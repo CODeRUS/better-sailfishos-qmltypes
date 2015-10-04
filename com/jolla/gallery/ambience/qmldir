@@ -1,7 +1,4 @@
 module com.jolla.gallery.ambience
 plugin jollagalleryambienceplugin
-AmbienceGalleryIcon 1.0 AmbienceGalleryIcon.qml
-AmbienceGridPage 1.0 AmbienceGridPage.qml
+AmbienceList 1.0 AmbienceList.qml
 AmbienceSettingsPage 1.0 AmbienceSettingsPage.qml
-Tones 1.0 Tones.qml
-AmbienceToneItem 1.0 AmbienceToneItem.qml

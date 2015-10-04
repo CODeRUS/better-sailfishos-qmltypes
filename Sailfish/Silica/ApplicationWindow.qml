@@ -3,7 +3,7 @@
 ** Copyright (C) 2013 Jolla Ltd.
 ** Contact: Matt Vogt <matthew.vogt@jollamobile.com>
 ** All rights reserved.
-** 
+**
 ** This file is part of Sailfish Silica UI component package.
 **
 ** You may use this file under the terms of BSD license as follows:
@@ -18,7 +18,7 @@
 **     * Neither the name of the Jolla Ltd nor the
 **       names of its contributors may be used to endorse or promote products
 **       derived from this software without specific prior written permission.
-** 
+**
 ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,6 +33,7 @@
 ****************************************************************************************/
 
 import QtQuick 2.1
+import QtQuick.Window 2.1 as QtQuick
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 import "CoverLoader.js" as CoverLoader
@@ -70,18 +71,20 @@ Window {
     readonly property real _screenHeight: stack.verticalOrientation ? Screen.height : Screen.width
     property alias _rotatingItem: rotatingItem
     property alias _touchBlockerItem: touchBlocker
+    property alias _rotating: wallpaperRotationAnim.running
 
-    // used by homescreen e.g. to not render the bg image
-    property bool _backgroundVisible: true
-    property alias _wallpaperVerticalOffset: wallpaper.verticalOffset
-    property alias _wallpaperHorizontalOffset: wallpaper.horizontalOffset
-    property alias dimmedRegionColor: dimmer.color
+    property color dimmedRegionColor: Theme.highlightDimmerColor
+
+    property bool _dimScreen: { return false }
+    readonly property bool _dimmingActive: _dimScreen || dimAnimation.running
 
     property bool _autoGcWhenInactive: Config.wayland
     property int allowedOrientations: Orientation.All
     property int _defaultPageOrientations: Orientation.Portrait
+    property int _defaultLabelFormat: Text.AutoText
 
     property bool _roundedCorners: true
+    property bool _resizeContent: true
 
     // TODO minimization gc is temporary disabled while v4 gc does not
     // release memory allocated for js heap. See JB#22508 and JB#22814
@@ -138,16 +141,16 @@ Window {
             })
     }
 
-    // Account for native screen rotation - we use portrait aspect
-    // If the native screen orientation is landscape, screenRotation will transpose to portrait
-    width: _transpose ? Screen.height : Screen.width
-    height: _transpose ? Screen.width : Screen.height
-
     // For page stack applications, bind orientation to the Page at the top of the stack
     _allowedOrientations: stack.currentPage ? stack.currentPage._allowedOrientations : allowedOrientations
+    _pageOrientation: stack.currentPage ? stack.currentPage._windowOrientation : undefined
 
     focus: true
     objectName: "rootWindow"
+
+    // If we have anything assigned to cover, then we let lipstick know that a cover window may be coming.
+    _haveCoverHint: !!cover
+
     onCoverChanged: {
         _coverObject = null
         // If cover is set to null/undefined/"" and callback given to CoverLoader.load
@@ -176,11 +179,13 @@ Window {
     }
 
     // background image
-    Wallpaper {
+    Item {
         id: wallpaper
-        anchors.fill: parent
-        source: _backgroundVisible ? Theme.backgroundImage : ""
-        rotation: 0 - window.screenRotation
+        width: Screen.width
+        height: Screen.height
+        anchors.centerIn: parent
+
+        rotation: window.QtQuick.Screen.angleBetween(Qt.PortraitOrientation, window.QtQuick.Screen.primaryOrientation)
 
         Item {
             id: rotatingItem
@@ -196,6 +201,15 @@ Window {
                         : stack.currentOrientation === Orientation.LandscapeInverted
                           ? 270
                           : 0
+            opacity: clippingItem.opacity
+
+            Behavior on rotation {
+                SequentialAnimation {
+                    id: wallpaperRotationAnim
+                    PropertyAction {}
+                    PauseAnimation { duration: 200 }
+                }
+            }
         }
 
         Item {
@@ -206,21 +220,15 @@ Window {
             height: parent.height - (stack.verticalOrientation ? Math.max(window.bottomMargin, stack.panelSize) : 0)
             clip: stack.panelSize > 0
 
+            opacity: _dimScreen ? 0.4 : 1.0
+            Behavior on opacity { FadeAnimation { id: dimAnimation } }
+
             Item {
                 id: content
 
                 // Content is now being resized. We need to add a property to skip resizing if there
                 // is such requirement in an app.
                 anchors.fill: parent
-
-                DimmedRegion {
-                    id: underDimmer
-                    property bool active
-                    anchors.fill: parent
-                    color: dimmer.color
-                    opacity: active ? dimmer.opacity : 0
-                    enabled: false
-                }
 
                 transform: Scale {
                     id: contentScale
@@ -232,60 +240,22 @@ Window {
                 PageStack {
                     id: stack
 
-                    property bool _testMode
+                    property alias _testMode: virtualKeyboardObserver.testMode
+                    property alias currentOrientation: virtualKeyboardObserver.orientation
+                    property alias verticalOrientation: virtualKeyboardObserver.verticalOrientation
+                    property alias horizontalOrientation: virtualKeyboardObserver.horizontalOrientation
 
-                    property int currentOrientation: currentPage ? currentPage.orientation : window.orientation
-                    property bool verticalOrientation: currentOrientation === Orientation.Portrait ||
-                                                       currentOrientation === Orientation.PortraitInverted ||
-                                                       currentOrientation === Orientation.None
-                    property bool horizontalOrientation: currentOrientation === Orientation.Landscape ||
-                                                         currentOrientation === Orientation.LandscapeInverted
-
-                    // panelSize is the sometimes animated imSize
-                    property real panelSize: 0
-                    property real previousImSize: 0
-                    property real imSize: !window.activeFocus ? 0 : (verticalOrientation ? (window._transpose ? Qt.inputMethod.keyboardRectangle.width
-                                                                                                             : Qt.inputMethod.keyboardRectangle.height)
-                                                                                        : (window._transpose ? Qt.inputMethod.keyboardRectangle.height
-                                                                                                             : Qt.inputMethod.keyboardRectangle.width))
-                    onImSizeChanged: {
-                        if (imSize <= 0 && previousImSize > 0) {
-                            imShowAnimation.stop()
-                            imHideAnimation.start()
-                        } else if (imSize > 0 && previousImSize <= 0) {
-                            imHideAnimation.stop()
-                            imShowAnimation.to = imSize
-                            imShowAnimation.start()
-                        } else {
-                            panelSize = imSize
-                        }
-
-                        previousImSize = imSize
-                    }
+                    property alias panelSize: virtualKeyboardObserver.panelSize
+                    property alias imSize: virtualKeyboardObserver.imSize
 
                     clip: bottomMargin > 0
                     anchors.fill: parent
 
-                    SequentialAnimation {
-                        id: imHideAnimation
-                        PauseAnimation {
-                            duration: stack._testMode ? 5 : 200
-                        }
-                        NumberAnimation {
-                            target: stack
-                            property: 'panelSize'
-                            to: 0
-                            duration: stack._testMode ? 5 : 200
-                            easing.type: Easing.InOutQuad
-                        }
-                    }
-
-                    NumberAnimation {
-                        id: imShowAnimation
-                        target: stack
-                        property: 'panelSize'
-                        duration: stack._testMode ? 5 : 200
-                        easing.type: Easing.InOutQuad
+                    VirtualKeyboardObserver {
+                        id: virtualKeyboardObserver
+                        transpose: window._transpose
+                        active: window.activeFocus && window._resizeContent
+                        orientation: stack.currentPage ? stack.currentPage.orientation : window.orientation
                     }
                 }
 
@@ -303,17 +273,6 @@ Window {
                     anchors.fill: parent
                     enabled: _defaultEnabled
                 }
-            }
-
-            DimmedRegion {
-                id: dimmer
-                property bool active
-                property real dimOpacity: active ? 0.5 : 0.0
-                anchors.fill: parent
-                color: Theme.highlightDimmerColor
-                Behavior on dimOpacity { FadeAnimation { property: "dimOpacity" } }
-                opacity: dimOpacity * (target && target.hasOwnProperty("flickable") ? target.flickable.contentItem.opacity : 1.0)
-                enabled: false
             }
 
             states: [
@@ -367,107 +326,6 @@ Window {
                 }
             ]
         }
-
-        // rounded corners
-        Image {
-            z: 1
-            visible: window._roundedCorners
-            // top left
-            source: "image://theme/graphic-interface-rounded-corner"
-        }
-
-        Image {
-            id: topRight
-
-            z: 1
-            visible: window._roundedCorners
-            anchors.right: parent.right
-            source: "image://theme/graphic-interface-rounded-corner"
-            transform: Rotation {
-                angle: 90
-                origin.x: topRight.height / 2
-                origin.y: topRight.height / 2
-            }
-        }
-
-        Image {
-            id: bottomRight
-
-            z: 1
-            visible: window._roundedCorners
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            source: "image://theme/graphic-interface-rounded-corner"
-            transform: Rotation {
-                angle: 180
-                origin.x: bottomRight.height / 2
-                origin.y: bottomRight.height / 2
-            }
-        }
-
-        Image {
-            id: bottomLeft
-
-            z: 1
-            visible: window._roundedCorners
-            anchors.bottom: parent.bottom
-            source: "image://theme/graphic-interface-rounded-corner"
-            transform: Rotation {
-                angle: 270
-                origin.x: bottomLeft.height / 2
-                origin.y: bottomLeft.height / 2
-            }
-        }
-    }
-
-    // Dims an area relative to the specified item, excluding
-    // the area used by the items in the exclude list
-    function _dimItem(activate, item, dimRect, exclude, underItem, underRect) {
-        if (activate) {
-            dimmer.target = item
-            dimmer.active = true
-        }
-        if (item == dimmer.target) {
-            if (underItem !== undefined && underItem !== null) {
-                underDimmer.target = underItem
-                underDimmer.area = underRect === undefined ? Qt.rect(0, 0, underItem.width, underItem.height) : underRect
-                underDimmer.active = true
-                underDimmer.updateRegion() // force refresh
-                if (exclude === undefined) {
-                    exclude = []
-                }
-                exclude.push(underItem)
-            } else {
-                underDimmer.active = false
-            }
-            if (exclude !== undefined) {
-                dimmer.exclude = exclude
-            } else {
-                dimmer.exclude = []
-            }
-            dimmer.area = dimRect
-        }
-    }
-
-    // Dims the whole screen, excluding
-    // the area used by the items in the exclude list
-    function _dimScreen(exclude, underItem) {
-        _dimItem(true, window, Qt.rect(0, 0, window.width, window.height), exclude, underItem)
-    }
-
-    function _undimItem(item) {
-        if (dimmer.target == item) {
-            dimmer.active = false
-        }
-    }
-
-    function _undimScreen() {
-        _undimItem(window)
-    }
-
-    // for testing
-    function _underDimmer() {
-        return underDimmer
     }
 
     Component.onCompleted: {
@@ -489,6 +347,14 @@ Window {
                 component.createObject(contentItem)
             } else {
                 console.warn("ReturnToHomeHintCounter.qml instantiation failed " + component.errorString())
+            }
+        }
+        if (Config.layoutGrid) {
+            component = Qt.createComponent(Qt.resolvedUrl("private/LayoutGrid.qml"))
+            if (component.status == Component.Ready) {
+                component.createObject(window)
+            } else {
+                console.warn("LayoutGrid.qml instantiation failed " + component.errorString())
             }
         }
     }

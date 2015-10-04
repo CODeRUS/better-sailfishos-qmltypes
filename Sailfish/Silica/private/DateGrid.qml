@@ -43,16 +43,19 @@ Item {
     property int displayedMonth
     property date selectedDate
     property var highlightedDate
+    property int weekStart: Qt.locale().firstDayOfWeek
 
-    property real gridWidth
     property real weekColumnWidth
     property bool needsUpdate
+    property alias daysVisible: weekDays.visible
+    property bool monthYearVisible
 
     property Component modelComponent
     property QtObject customModel
     property alias delegate: dateController.delegate
 
-    property int _dateBoxSize
+    property int cellWidth
+    property int cellHeight
     property int _displayedMonthStartIndex: -1
 
     signal updateModel(variant modelObject, variant fromDate, variant toDate, int primaryMonth)
@@ -69,14 +72,14 @@ Item {
         if (highlightDate !== undefined && highlightDate.getFullYear() == displayedYear && highlightDate.getMonth()+1 == displayedMonth) {
             var index = _displayedMonthStartIndex + (highlightDate.getDate() - 1)
             var itemToHighlight = dateController.itemAt(index)
-            if (itemToHighlight != null) {
-                _highlightDayItem(itemToHighlight, highlightItem)
+            if (itemToHighlight !== null) {
+                highlightItem.target = itemToHighlight
             } else {
                 // grid has not yet loaded
                 highlightWait.start()
             }
         } else {
-            highlightItem.visible = false
+            highlightItem.target = null
         }
     }
 
@@ -91,7 +94,7 @@ Item {
 
     function loadMonth(month, year) {
         // set the dates in the calendar grid; display 6 weeks
-        var fromDate = DatePickerScript._getStartDateForMonthView(year, month)
+        var fromDate = DatePickerScript._getStartDateForMonthView(year, month, root.weekStart)
         _loadDateGrid(fromDate, 7 * 6)       // we display 6 weeks
 
         _displayedMonthStartIndex = 0
@@ -103,18 +106,9 @@ Item {
         // set the week numbers
         var theMonth = new Date(Date.UTC(year, month-1, 1))
         DatePickerScript._loadWeekNumbers(weekNumberModel, year, month, 6)
+
         monthName.text = Format.formatDate(theMonth, Format.MonthNameStandaloneShort)
         monthYear.text = theMonth.getFullYear()
-    }
-
-    function _highlightDayItem(item, highlightItem) {
-        if (!item) {
-            return
-        }
-        var pos = root.mapFromItem(item, 0, 0)
-        highlightItem.x = pos.x + (_dateBoxSize/2 - highlightItem.width/2)
-        highlightItem.y = pos.y + (_dateBoxSize/2 - highlightItem.height/2)
-        highlightItem.visible = true
     }
 
     function _loadDateGrid(fromDate, totalDays) {
@@ -148,16 +142,14 @@ Item {
         _resetSelectedDateBox(selectedDate, selectedDateBox)
     }
 
-    width: gridWidth + weekColumn.width
-    height: height
-
     Label {
         id: monthName
         anchors {
             right: weekColumn.right
-            top: parent.top
-            topMargin: root._dateBoxSize - font.pixelSize/2
+            top: weekColumn.top
+            topMargin: root.cellHeight - font.pixelSize/2
         }
+        visible: monthYearVisible
         color: Theme.secondaryHighlightColor
     }
 
@@ -165,16 +157,19 @@ Item {
         id: monthYear
         anchors {
             right: weekColumn.right
-            top: parent.top
-            topMargin: root._dateBoxSize*2 - font.pixelSize/2
+            top: weekColumn.top
+            topMargin: root.cellHeight*2 - font.pixelSize/2
         }
+        visible: monthYearVisible
         color: Theme.secondaryHighlightColor
     }
 
     Column {
         id: weekColumn
 
-        width: root.weekColumnWidth
+        anchors.top: grid.top
+        x: weeksVisible ? leftMargin : 0
+        width: root.weekColumnWidth - Theme.paddingMedium
 
         Repeater {
             model: ListModel {
@@ -184,8 +179,8 @@ Item {
             onCountChanged: _resetSelectedDateBox(selectedDate, selectedDateBox)
 
             Item {
-                width: root.weekColumnWidth
-                height: root._dateBoxSize
+                width: weekColumn.width
+                height: root.cellHeight
 
                 Label {
                     id: weekLabel
@@ -196,6 +191,7 @@ Item {
                     color: Theme.highlightColor
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
+                    opacity: DatePickerScript._weekNumberForDate(selectedDate) == model.weekNumber ? 1.0 : 0.5
                 }
             }
         }
@@ -207,24 +203,53 @@ Item {
 
     Rectangle {
         id: selectedDateBox
-        width: _dateBoxSize
-        height: width
+        property Item target
+        x: target ? grid.x + target.x + (cellWidth - target.width)/2 : 0
+        y: target ? grid.y + target.y + (cellHeight - target.height)/2 : 0
+        width: cellWidth
+        height: cellHeight
+        visible: !!target
         color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
         radius: 4
     }
 
     Rectangle {
         id: highlightedDateBox
-        width: _dateBoxSize
-        height: width
+        property Item target
+        x: target ? grid.x + target.x + (cellWidth - target.width)/2 : 0
+        y: target ? grid.y + target.y + (cellHeight - target.height)/2 : 0
+        width: cellWidth
+        height: cellHeight
+        visible: !!target
         color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
         radius: 4
     }
 
+    Row {
+        id: weekDays
+        anchors.left: grid.left
+        Repeater {
+            model: 7
+            delegate: Label {
+                // 2 Jan 2000 was a Sunday
+                text: Qt.formatDateTime(new Date(2000, 0, 2 + root.weekStart + index, 12), "ddd")
+                width: cellWidth
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Theme.highlightColor
+                opacity: (new Date(2000, 0, 2 + root.weekStart + index, 12)).getDay() === selectedDate.getDay()
+                         && selectedDate.getMonth()+1 == displayedMonth ? 1.0 : 0.5
+                horizontalAlignment: Text.AlignHCenter
+            }
+        }
+    }
+
     Grid {
+        id: grid
         anchors {
+            top: daysVisible ? weekDays.bottom : parent.top
+            topMargin: daysVisible ? Theme.paddingMedium : 0
             left: weekColumn.right
-            leftMargin: leftMargin
+            leftMargin: _gridLeftMargin
         }
         columns: 7
 

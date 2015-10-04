@@ -11,15 +11,11 @@ Dialog {
     property AccountManager accountManager
     property Provider accountProvider
 
-    property alias username: usernameField.text
-    property alias password: passwordField.text
+    property alias username: userCredentials.username
+    property alias password: userCredentials.password
 
     property Item _termsOfServicePage
     property Item _privacyPolicyPage
-    property bool _validPassword: passwordField.text.length > 5
-    property bool _validConfirmedPassword: _validPassword && passwordField.text === passwordConfirmField.text
-    property int _usernameStatus: AccountFactory.UsernameNotChecked
-    property bool _checkingUsername
 
     property bool checkMandatoryFields
 
@@ -42,9 +38,7 @@ Dialog {
 
     canAccept: username !== ""
                && password !== ""
-               && _validPassword
-               && _validConfirmedPassword
-               && _usernameStatus == AccountFactory.UsernameAvailable
+               && userCredentials.canValidateCredentials
                && acceptDestination != null
 
     Component.onCompleted: {
@@ -107,153 +101,15 @@ Dialog {
                 text: qsTrId("settings_accounts-la-account_info")
             }
 
-            Label {
-                x: Theme.horizontalPageMargin
-                width: parent.width - x*2
-                wrapMode: Text.Wrap
-                font.pixelSize: Theme.fontSizeExtraSmall
-                color: Theme.highlightColor
-                visible: text != ""
-                text: {
-                    //: Hint text for changing keyboard layout on spacebar long press, translate only for non-latin languages
-                    //% ""
-                    var translation = qsTrId("settings_accounts-la-vkb_layout_change_hint")
-                    return (translation === "settings_accounts-la-vkb_layout_change_hint")
-                            ? ""
-                            : translation
-                }
-            }
-
             Item {
                 width: parent.width
                 height: Theme.itemSizeExtraSmall
             }
 
-            AccountUsernameField {
-                id: usernameField
-                onFocusChanged: {
-                    if (!focus
-                            && root._usernameStatus != AccountFactory.UsernameAvailable
-                            && root.status == PageStatus.Active) {
-                        checkUsername()
-                    }
-                }
-                onTextChanged: {
-                    root._usernameStatus = AccountFactory.UsernameNotChecked
-                    if (!root._checkingUsername) {
-                        usernameCheckTimer.restart()
-                    }
-                }
-
-                errorHighlight: (!text && checkMandatoryFields)
-                                || (text && root._usernameStatus != AccountFactory.UsernameAvailable)
-
-                EnterKey.enabled: text || inputMethodComposing
-                EnterKey.iconSource: "image://theme/icon-m-enter-next"
-                EnterKey.onClicked: passwordField.focus = true
-            }
-
-            Item {
-                width: parent.width
-                height: usernameCheckLabel.text.length
-                        ? usernameCheckLabel.implicitHeight + Theme.paddingLarge*2
-                        : 0
-                Behavior on height { NumberAnimation {} }
-                clip: true
-
-                Rectangle {
-                    anchors {
-                        fill: parent
-                        topMargin: Theme.paddingMedium
-                        bottomMargin: Theme.paddingMedium
-                    }
-
-                    color: Theme.highlightBackgroundColor
-                    opacity: Theme.highlightBackgroundOpacity
-                }
-
-                Label {
-                    id: usernameCheckLabel
-                    anchors {
-                        left: parent.left
-                        leftMargin: Theme.horizontalPageMargin
-                        right: usernameCheckSpinner.running ? usernameCheckSpinner.left : parent.right
-                        rightMargin: Theme.horizontalPageMargin
-                        verticalCenter: parent.verticalCenter
-                    }
-                    wrapMode: Text.Wrap
-                    font.pixelSize: Theme.fontSizeExtraSmall
-                    color: Theme.highlightColor
-                    text: {
-                        if (root._checkingUsername) {
-                            //: Tells the user that the username availability is being checked
-                            //% "Checking username availability"
-                            return qsTrId("settings_accounts-username_checking_availability")
-                        } else if (root._usernameStatus == AccountFactory.UsernameAvailable) {
-                            //: The entered username is available
-                            //% "Username is available"
-                            return qsTrId("settings_accounts-la_username_available")
-                        } else if (root._usernameStatus == AccountFactory.UsernameNotAvailable) {
-                            //: The entered username is not available as it is already taken
-                            //% "Sorry, this username is already taken"
-                            return qsTrId("settings_accounts-username_already_taken")
-                        } else if (root._usernameStatus == AccountFactory.UsernameInvalid) {
-                            //: The entered username is invalid
-                            //% "A username can only contain letters, numbers, periods, underscores, hyphens and the @ symbol."
-                            return qsTrId("settings_accounts-la_username_invalid")
-                        } else if (root._usernameStatus == AccountFactory.UsernameCheckError) {
-                            //: Tells the user that we couldn't check whether the username was available due to network or other error
-                            //% "Unable to check username availability"
-                            return qsTrId("settings_accounts-la-username_cannot_check")
-                        } else if (root._usernameStatus == AccountFactory.UsernameCheckSslError) {
-                            //: The entered username is invalid
-                            //% "Unable to check username availability. Make sure the system date and time are correct in Settings | System | Date and time."
-                            return qsTrId("settings_accounts-la_username_ssl_error")
-                        } else {
-                            return ""
-                        }
-                    }
-                }
-
-                BusyIndicator {
-                    id: usernameCheckSpinner
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        right: parent.right
-                        rightMargin: Theme.horizontalPageMargin
-                    }
-                    size: BusyIndicatorSize.ExtraSmall
-                    running: root._checkingUsername
-                }
-            }
-
-            AccountPasswordField {
-                id: passwordField
-                errorHighlight: (!text && checkMandatoryFields) || (text && !_validPassword)
-
-                EnterKey.onClicked: passwordConfirmField.focus = true
-            }
-
-            TextField {
-                id: passwordConfirmField
-                width: parent.width
-                inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
-                echoMode: TextInput.Password
-                errorHighlight: !root._validConfirmedPassword
-
-                enabled: passwordField.text || text
-                opacity: enabled ? 1 : 0.5
-                Behavior on opacity { FadeAnimation { } }
-
-                //% "Re-enter password"
-                label: qsTrId("settings_accounts-la-password_confirm")
-
-                //% "Re-enter password"
-                placeholderText: qsTrId("settings_accounts-ph-password_confirm")
-
-                EnterKey.enabled: text || inputMethodComposing
-                EnterKey.iconSource: "image://theme/icon-m-enter-close"
-                EnterKey.onClicked: root.focus = true
+            JollaAccountCredentialsInput {
+                id: userCredentials
+                state: "createNewAccount"
+                highlightInvalidFields: root.checkMandatoryFields
             }
         }
 
@@ -351,46 +207,28 @@ Dialog {
         }
     }
 
+    onStatusChanged: {
+        if (status == PageStatus.Active) {
+            userCredentials.autoValidate = true
+        }
+    }
+
     onAcceptPendingChanged: {
         if (acceptPending === true) {
             checkMandatoryFields = true
-            if (root.username.length > 0 && root._usernameStatus != AccountFactory.UsernameAvailable) {
-                // username is non-empty but last check failed or result was unknown, try again
-                checkUsername()
-            }
+            userCredentials.validateNewAccountCredentials()
         }
     }
 
     onAccepted: {
         // Left for compatibility with 1.0.0.5 updates
         root.legalDocumentsAccepted()
-    }
-
-    function checkUsername() {
-        if (_usernameStatus == AccountFactory.UsernameNotChecked
-                && !_checkingUsername
-                && usernameField.text != "") {
-            _checkingUsername = true
-            jollaAccountUtil.checkUsernameAvailability(usernameField.text)
-        }
-    }
-
-    Timer {
-        id: usernameCheckTimer
-        interval: 2500
-        onTriggered: {
-            if (!root._checkingUsername) {
-                root.checkUsername()
-            }
-        }
+        root.focus = true
+        userCredentials.autoValidate = false
     }
 
     JollaAccountUtilities {
         id: jollaAccountUtil
-        onUsernameCheckFinished: {
-            root._usernameStatus = result
-            root._checkingUsername = false
-        }
     }
 
     Component {

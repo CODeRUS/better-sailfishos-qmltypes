@@ -32,17 +32,6 @@ Module {
         prototype: "QObject"
         exports: ["com.jolla.camera/CameraExtensions 1.0"]
         exportMetaObjectRevisions: [0]
-        Property { name: "camera"; type: "QObject"; isPointer: true }
-        Property { name: "device"; type: "string" }
-        Property { name: "rotation"; type: "int" }
-        Property { name: "orientation"; type: "int"; isReadonly: true }
-        Property { name: "viewfinderResolution"; type: "QSize" }
-        Property { name: "captureTime"; type: "QDateTime" }
-        Property { name: "gpsLatitude"; type: "QVariant" }
-        Property { name: "gpsLongitude"; type: "QVariant" }
-        Property { name: "gpsAltitude"; type: "QVariant" }
-        Property { name: "manufacturer"; type: "QVariant" }
-        Property { name: "model"; type: "QVariant" }
         Method {
             name: "disableNotifications"
             Parameter { name: "item"; type: "QQuickItem"; isPointer: true }

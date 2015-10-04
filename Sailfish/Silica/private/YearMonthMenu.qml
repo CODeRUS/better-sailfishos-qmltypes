@@ -100,7 +100,7 @@ ListView {
             Grid {
                 id: monthGrid
 
-                columns: isPortrait ? 3 : 6
+                columns: screen.sizeCategory > Screen.Medium || !isPortrait ? 6 : 3
 
                 Repeater {
                     model: ListModel {
@@ -119,7 +119,7 @@ ListView {
                     BackgroundItem {
                         id: monthBox
                         width: root.width / monthGrid.columns
-                        height: width
+                        height: Theme.itemSizeHuge
 
                         onClicked: {
                             root._contextMenu.hide()

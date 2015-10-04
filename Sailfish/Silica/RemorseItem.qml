@@ -88,11 +88,13 @@ BackgroundItem {
     }
 
     property int _timeout: 5000
-    property int _secsRemaining: Math.ceil(_msRemaining/1000).toFixed(0)
+    property int _seconds: (_timeout + 999) / 1000
+    property int _secsRemaining: (_msRemaining + 999) / 1000
     property real _msRemaining: _timeout
     property Item _item
     property Item _page
     property bool _triggered
+    property real _contentOpacity
 
     signal canceled
     signal triggered
@@ -108,13 +110,25 @@ BackgroundItem {
     states: [
         State {
             name: "active"
-            PropertyChanges { target: remorseItem; anchors.fill: _item; opacity: 1.0; visible: true }
-            PropertyChanges { target: _item; opacity: 0.0 }
+            PropertyChanges {
+                target: remorseItem
+                anchors.fill: _item
+                opacity: 1
+                visible: true
+                _contentOpacity: 1
+            }
+            PropertyChanges {
+                target: _item
+                opacity: 0
+            }
         },
         State {
             name: "activePending"
             extend: "active"
-            PropertyChanges { target: remorseItem; opacity: 0.0 }
+            PropertyChanges {
+                target: remorseItem
+                opacity: 0
+            }
         },
         State {
             // Empty state to restore target item state without any transitions.
@@ -127,15 +141,35 @@ BackgroundItem {
             to: "active"
             SequentialAnimation {
                 PropertyAction { target: remorseItem; properties: "anchors.fill,visible" }
-                FadeAnimation {}
+                ParallelAnimation {
+                    FadeAnimation {
+                        target: remorseItem
+                        duration: 200
+                    }
+                    SequentialAnimation {
+                        PauseAnimation { duration: 150 }
+                        PropertyAnimation {
+                            target: remorseItem
+                            property: "_contentOpacity"
+                            duration: 150
+                        }
+                    }
+                }
             }
         },
         Transition {
             to: ""
             SequentialAnimation {
-                FadeAnimation {}
+                FadeAnimation {
+                    target: remorseItem
+                    duration: 200
+                }
                 PropertyAction { target: remorseItem; property: "visible" }
                 ScriptAction { script: { RemorseItem.remorseItemDeactivated(remorseItem) } }
+                FadeAnimation {
+                    target: _item
+                    duration: 100
+                }
             }
         }
     ]
@@ -150,23 +184,31 @@ BackgroundItem {
         }
     }
 
-    Rectangle {
-        id: progress
-        width: parent.width * _msRemaining / _timeout
-        height: parent.height
-        color: Theme.highlightBackgroundColor
-        opacity: 0.3
-    }
-    Rectangle {
-        anchors.left: progress.right
-        anchors.right: parent.right
-        height: parent.height
-        color: "black"
-        opacity: 0.15
-    }
+    Row {
+        id: row
 
+        property real cellWidth: (parent.width - ((repeater.count - 1) * spacing)) / repeater.count
+
+        height: parent.height
+        spacing: 1
+
+        Repeater {
+            id: repeater
+
+            model: _seconds
+
+            Rectangle {
+                width: row.cellWidth
+                height: parent ? parent.height : 0
+                color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
+                opacity: remorseItem._secsRemaining > Positioner.index ? 0.7 : 0
+                Behavior on opacity {
+                    FadeAnimation { duration: 200 }
+                }
+            }
+        }
+    }
     Column {
-        id: column
         anchors {
             left: parent.left
             right: parent.right
@@ -181,7 +223,7 @@ BackgroundItem {
             //% "in %n seconds"
             text: remorseItem.text + " " + qsTrId("components-la-in-n-seconds", remorseItem._secsRemaining)
             width: parent.width
-            color: Theme.highlightColor
+            color: remorseItem.down ? Theme.highlightColor : Theme.primaryColor
             font.pixelSize: Theme.fontSizeSmall
             truncationMode: wrapMode != Text.NoWrap ? TruncationMode.None : TruncationMode.Fade
         }

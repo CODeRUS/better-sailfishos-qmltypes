@@ -1,136 +1,410 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import com.jolla.settings.accounts 1.0
 
 Dialog {
     id: root
 
-    property bool canSkip
+    property bool wizardMode
+    property bool runningFromSettingsApp
 
-    signal accountCreationRequested()
-    signal signInRequested()
+    property string username: userCredentials.username
+    property string password: userCredentials.password
+
+    property var skipDestination
+    property int skipDestinationAction
+    property var skipDestinationProperties: ({})
+    property var skipDestinationReplaceTarget
+
+    signal accountCreated(var accountId)
+    signal accountCreationError(var errorMessage)
     signal skipRequested()
 
-    // Anchor the skipLink at the bottom of the screen or below the image depending on
-    // the screen space available.
-    function _positionSkipLink() {
-        if (!skipLink.visible) {
-            return
+    property Page _accountCreationPage
+    property Page _signInBusyPage
+    property int _animationDuration: 250
+    property int _animationEasingType: Easing.InOutQuad
+
+    //: Previous page
+    //% "Previous"
+    property string _previousPageText: qsTrId("settings_accounts-he-previous_page")
+
+    //: Next page
+    //% "Next"
+    property string _nextPageText: qsTrId("settings_accounts-he-next_page")
+
+    canAccept: userCredentials.canValidateCredentials
+               && ((root.state == "createNewAccount" && userCredentials.usernameValid) || root.state == "signIn")
+    acceptDestination: root.state == "createNewAccount" ? _accountCreationPage : _signInBusyPage
+
+    onStatusChanged: {
+        if (status == PageStatus.Active) {
+            if (_accountCreationPage != null) {
+                _accountCreationPage.destroy()
+                _accountCreationPage = null
+            }
+            _accountCreationPage = accountCreationComponent.createObject(root)
+
+            if (_signInBusyPage != null) {
+                _signInBusyPage.destroy()
+                _signInBusyPage = null
+            }
+            _signInBusyPage = signInBusyComponent.createObject(root)
+
+            userCredentials.autoValidate = true
+        } else if (status == PageStatus.Activating && userCredentials.signInFailed) {
+            // scroll to bottom so user sees the sign-in error message
+            flickable.contentY = flickable.contentHeight - flickable.height
         }
-        var fullContentHeight = contentColumn.y + contentColumn.height + skipLink.height + Theme.paddingLarge*2
-        skipLink.anchors.topMargin = fullContentHeight < mainFlickable.height
-                ? (mainFlickable.height - fullContentHeight + Theme.paddingLarge)
-                : Theme.paddingLarge
     }
 
-    forwardNavigation: false
+    onDone: {
+        userCredentials.autoValidate = false
+        focus = true
+        if (result == DialogResult.Rejected) {
+            userCredentials.cancel()
+        }
+    }
+
+    onAcceptPendingChanged: {
+        if (acceptPending) {
+            focus = true
+            userCredentials.highlightInvalidFields = true
+            if (!canAccept && root.state == "createNewAccount") {
+                userCredentials.validateNewAccountCredentials()
+            }
+        }
+    }
+
+    state: "signIn"
+    states: [
+        State {
+            name: "signIn"
+            PropertyChanges { target: userCredentials; state: "signIn" }
+            PropertyChanges { target: signInSwitch; checked: true }
+            PropertyChanges { target: newUserSwitch; checked: false }
+            PropertyChanges { target: forgottenPasswordDetails; opacity: 0 }
+            PropertyChanges {
+                target: forgottenPasswordSection
+                height: forgottenPasswordHeading.height
+                opacity: 1
+                enabled: true
+            }
+            PropertyChanges {
+                target: eulaReminder
+                height: 0
+                opacity: 0
+                enabled: false
+            }
+        },
+        State {
+            name: "createNewAccount"
+            PropertyChanges { target: userCredentials; state: "createNewAccount" }
+            PropertyChanges { target: signInSwitch; checked: false }
+            PropertyChanges { target: newUserSwitch; checked: true }
+            PropertyChanges { target: forgottenPasswordDetails; opacity: 0 }
+            PropertyChanges {
+                target: forgottenPasswordSection
+                height: 0
+                opacity: 0
+                enabled: false
+            }
+            PropertyChanges {
+                target: eulaReminder
+                height: eulaReminder.implicitHeight
+                opacity: 1
+                enabled: true
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "createNewAccount"; to: "signIn"
+            reversible: true
+            SequentialAnimation {
+                ParallelAnimation {
+                    NumberAnimation {
+                        property: "height"
+                        duration: root._animationDuration * 0.5
+                        easing.type: root._animationEasingType
+                    }
+                    NumberAnimation {
+                        target: eulaReminder
+                        property: "opacity"
+                        duration: root._animationDuration * 0.5
+                        easing.type: root._animationEasingType
+                    }
+                }
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: forgottenPasswordSection
+                        property: "opacity"
+                        duration: root._animationDuration * 0.5
+                        easing.type: root._animationEasingType
+                    }
+                    NumberAnimation {
+                        target: forgottenPasswordDetails
+                        property: "opacity"
+                        duration: root._animationDuration * 0.5
+                        easing.type: root._animationEasingType
+                    }
+                }
+            }
+        }
+    ]
+
+    Component {
+        id: signInBusyComponent
+        AccountBusyPage {
+            busyDescription: signingInText
+
+            onStatusChanged: {
+                if (status == PageStatus.Active) {
+                    if (root.state == "signIn") {
+                        userCredentials.signIn()
+                    }
+                } else if (status == PageStatus.Deactivating && userCredentials.busy) {
+                    userCredentials.cancel()
+                }
+            }
+        }
+    }
+
+    JollaAccountUtilities {
+        id: jollaAccountUtil
+    }
 
     SilicaFlickable {
-        id: mainFlickable
-        anchors {
-            fill: parent
-            topMargin: Theme.itemSizeLarge
-        }
-        contentHeight: skipLink.visible
-                       ? skipLink.y + skipLink.height + Theme.paddingLarge
-                       : contentColumn.height
+        id: flickable
 
-        Component.onCompleted: {
-            root._positionSkipLink()
-        }
+        property int _baseHeight: contentColumn.height + (skipLink.visible ? skipLink.anchors.topMargin + skipLink.height : 0) + Theme.paddingLarge
+        contentHeight: Math.max(_baseHeight, isPortrait ? Screen.height : Screen.width)
+        anchors.fill: parent
 
         VerticalScrollDecorator {}
 
         Column {
             id: contentColumn
-            anchors.top: parent.top
             width: parent.width
-            spacing: Theme.paddingLarge
 
-            onHeightChanged: {
-                root._positionSkipLink()
-            }
-
-            Label {
-                x: Theme.horizontalPageMargin
-                width: parent.width - x*2
-                wrapMode: Text.WordWrap
-                font {
-                    family: Theme.fontFamilyHeading
-                    pixelSize: Theme.fontSizeExtraLarge
-                }
-                color: Theme.highlightColor
+            DialogHeader {
+                dialog: root
+                acceptText: root.wizardMode ? root._nextPageText : defaultAcceptText
+                cancelText: root.wizardMode ? root._previousPageText : defaultCancelText
 
                 //: Heading for page that allows sign-up for a Jolla account
-                //% "Get the full Jolla experience with a Jolla account"
-                text: qsTrId("settings_accounts-he-get_jolla_experience_with_jolla_account")
+                //% "Add your Jolla account to get apps and updates"
+                title: qsTrId("settings_accounts-he-add_jolla_account_to_get_apps_and_updates")
             }
 
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - x*2
+                height: implicitHeight + Theme.paddingLarge * 2
+                verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.WordWrap
-                font.pixelSize: Theme.fontSizeSmall
+                font.pixelSize: Theme.fontSizeExtraSmall
                 color: Theme.highlightColor
+                visible: !root.runningFromSettingsApp
 
-                //: Description of what a Jolla account offers.
-                //% "You'll receive Sailfish OS updates, get access to essential Jolla apps, easily fetch your feeds and other content, enable app service features, and more."
-                text: qsTrId("settings_accounts-la-jolla_account_features_description")
+                //% "Other accounts can be set up later from Settings | Accounts."
+                text: qsTrId("settings_accounts-la-other_accounts_setup_later_from_settings")
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - x*2
+                height: implicitHeight + Theme.paddingLarge
+                wrapMode: Text.Wrap
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Theme.highlightColor
+                visible: text != ""
+                text: {
+                    //: Hint text for changing keyboard layout on spacebar long press, translate only for non-latin languages
+                    //% ""
+                    var translation = qsTrId("settings_accounts-la-vkb_layout_change_hint")
+                    return (translation === "settings_accounts-la-vkb_layout_change_hint")
+                            ? ""
+                            : translation
+                }
+            }
+
+            TextSwitch {
+                id: signInSwitch
+                automaticCheck: false
+
+                //: User selects this option if he/she already has a Jolla account
+                //% "I have a Jolla account"
+                text: qsTrId("settings_accounts-la-have_jolla_account_heading")
+
+                //: User selects this option if he/she already has a Jolla account
+                //% "You probably have a Jolla account if you have used a Jolla device, created an account at accounts.jolla.com or used our community platform at together.jolla.com."
+                description: qsTrId("settings_accounts-la-have_jolla_account_description")
+
+                onClicked: {
+                    root.state = "signIn"
+                }
+            }
+
+            TextSwitch {
+                id: newUserSwitch
+                automaticCheck: false
+
+                //: User selects this option if he/she already has a Jolla account
+                //% "I am a new user"
+                text: qsTrId("settings_accounts-la-new_jolla_user_heading")
+
+                //: User selects this option if he/she already has a Jolla account
+                //% "Select this if you haven't used any Jolla devices or Jolla web services before."
+                description: qsTrId("settings_accounts-la-new_jolla_user_description")
+
+                onClicked: {
+                    root.state = "createNewAccount"
+                }
             }
 
             Item {
+                width: 1
+                height: Theme.paddingLarge
+            }
+
+            JollaAccountCredentialsInput {
+                id: userCredentials
+                animationDuration: root._animationDuration
+                animationEasingType: root._animationEasingType
+
+                onSignInRequested: {
+                    if (root.state == "signIn" && root.canAccept) {
+                        root.accept()
+                    }
+                }
+                onAccountSignInSuccess: {
+                    root.accountCreated(accountId)
+                }
+                onAccountSignInError: {
+                    pageStack.pop(root)
+                    root.accountCreationError(errorMessage)
+                }
+            }
+
+            Item {
+                width: 1
+                height: Theme.paddingMedium
+            }
+
+            ClickableTextLabel {
+                id: eulaReminder
+                x: Theme.horizontalPageMargin
+                width: parent.width - x*2
+                font.pixelSize: Theme.fontSizeSmall
+
+                //: Text above the link to the Terms of Service and Privacy Policy. (Text surrounded by %1 and %2 is underlined and colored differently)
+                //% "By creating an account you accept the %1Jolla Terms of Service and Jolla Privacy Policy%2. Please read these carefully before moving forward."
+                text: qsTrId("settings_accounts-la-jolla_account_agree_terms_and_privacy")
+                                .arg("<u><font color=\"" + (pressed ? Theme.highlightColor : Theme.primaryColor) + "\">")
+                                .arg("</font></u>")
+                onClicked: {
+                    pageStack.push(legaleseComponent)
+                }
+            }
+
+            Column {
+                id: forgottenPasswordSection
                 width: parent.width
-                height: createAccountButton.height
 
-                Button {
-                    id: createAccountButton
-                    anchors {
-                        left: parent.left
-                        leftMargin: Theme.horizontalPageMargin
+                states: [
+                    State {
+                        name: "detailsShown"
+                        PropertyChanges {
+                            target: forgottenPasswordSection
+                            height: forgottenPasswordHeading.implicitHeight + forgottenPasswordDetails.implicitHeight + Theme.paddingLarge
+                        }
+                        PropertyChanges {
+                            target: forgottenPasswordDetails
+                            opacity: 1
+                        }
                     }
-                    //: Button label for creating a Jolla account
-                    //% "Create account"
-                    text: qsTrId("settings_accounts-bt-create_account")
+                ]
+
+                transitions: [
+                    Transition {
+                        from: ""; to: "detailsShown"
+                        reversible: true
+                        SequentialAnimation {
+                            NumberAnimation {
+                                target: forgottenPasswordSection
+                                property: "height"
+                                duration: root._animationDuration
+                                easing.type: root._animationEasingType
+                            }
+                            FadeAnimation {
+                                duration: root._animationDuration
+                            }
+                        }
+                    }
+                ]
+
+                ClickableTextLabel {
+                    id: forgottenPasswordHeading
+                    x: Theme.horizontalPageMargin
+                    width: parent.width - x*2
+                    height: implicitHeight + Theme.paddingLarge
+                    verticalAlignment: Text.AlignVCenter
+                    wrapMode: Text.Wrap
+                    font.pixelSize: Theme.fontSizeSmall
+
+                    //: Tap to show more information about retrieving a forgotten password (Text surrounded by %1 and %2 is underlined and colored differently)
+                    //% "%1Forgot your password?%2"
+                    text: qsTrId("settings_accounts-la-forgot_your_password_link")
+                                    .arg("<u><font color=\"" + (pressed ? Theme.highlightColor : Theme.primaryColor) + "\">")
+                                    .arg("</font></u>")
                     onClicked: {
-                        root.accountCreationRequested()
+                        forgottenPasswordSection.state = (forgottenPasswordSection.state == "detailsShown" ? "" : "detailsShown")
                     }
                 }
-                Button {
-                    anchors {
-                        right: parent.right
-                        rightMargin: Theme.horizontalPageMargin
-                    }
-                    //: Button label for creating a Jolla account
-                    //% "Sign in"
-                    text: qsTrId("settings_accounts-bt-sign_in")
-                    onClicked: {
-                        root.signInRequested()
-                    }
+
+                Label {
+                    id: forgottenPasswordDetails
+                    x: Theme.horizontalPageMargin
+                    width: parent.width - x*2
+                    wrapMode: Text.Wrap
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.highlightColor
+                    opacity: 0
+
+                    //: Explains how to deal with a forgotten password for the Jolla account
+                    //% "Please go to account.jolla.com to reset your password. You also need to have access to the email address you provided when creating the account."
+                    text: qsTrId("settings_accounts-la-forgot_your_password_solution")
                 }
             }
+        }
 
-            Image {
-                id: prettyImage
-                anchors.horizontalCenter: parent.horizontalCenter
-                source: "image://theme/graphic-store-jolla-apps"
-            }
+        Item {
+            id: spacer
+            anchors.top: contentColumn.bottom
+            width: 1
+            height: flickable.contentHeight - flickable._baseHeight
         }
 
         ClickableTextLabel {
             id: skipLink
             anchors {
-                horizontalCenter: parent.horizontalCenter
-                top: contentColumn.bottom
+                left: parent.left
+                leftMargin: Theme.horizontalPageMargin
+                top: spacer.bottom
+                topMargin: Theme.itemSizeSmall
+                right: parent.right
+                rightMargin: anchors.leftMargin
             }
-
-            horizontalAlignment: Text.AlignHCenter
-            visible: root.canSkip
+            verticalAlignment: Text.AlignBottom
+            visible: !root.runningFromSettingsApp
             font.pixelSize: Theme.fontSizeSmall
-            color: pressed ? Theme.highlightColor : Theme.secondaryColor
 
             //: Alternative option if user doesn't want to create or sign into a Jolla account at the moment. (Text surrounded by %1 and %2 is underlined and colored differently)
-            //% "Or, %1skip%2 Jolla account setup for now"
-            text: qsTrId("settings_accounts-la-sign_in_skip_jolla_account_link")
-                            .arg("<u><font color=\"" + Theme.primaryColor + "\">")
+            //% "%1Skip%2 Jolla account setup for now"
+            text: qsTrId("settings_accounts-la-sign_in_skip_jolla_account_setup_for_now")
+                            .arg("<u><font color=\"" + (pressed ? Theme.highlightColor : Theme.primaryColor) + "\">")
                             .arg("</font></u>")
             onClicked: {
                 pageStack.push(skipConfirmationComponent)
@@ -139,55 +413,120 @@ Dialog {
     }
 
     Component {
-        id: skipConfirmationComponent
-        Page {
-            // Anchor the buttons section at the bottom of the screen or below the image depending on
-            // the screen space available.
-            function _positionBottomSection() {
-                var fullContentHeight = skipConfirmationContent.y + skipConfirmationContent.height + skipConfirmationButtons.height + Theme.paddingLarge*2
-                skipConfirmationButtons.anchors.topMargin = fullContentHeight < skipFlick.height
-                        ? (skipFlick.height - fullContentHeight + Theme.paddingLarge)
-                        : Theme.paddingLarge
+        id: accountCreationComponent
+        JollaAccountCreationSecondDialog {
+            acceptDestination: busyComponent
+
+            username: root.username
+            password: root.password
+            createAccountOnAccept: false
+            acceptText: root.wizardMode ? root._nextPageText : ""
+            cancelText: root.wizardMode ? root._previousPageText : ""
+
+            onStatusChanged: {
+                if (status == PageStatus.Inactive && result == DialogResult.Accepted) {
+                    createAccount()
+                }
+            }
+            onAccountCreated: {
+                root.accountCreated(newAccountId)
+            }
+            onAccountCreationTypedError: {
+                root.accountCreationError(errorMessage)
+                acceptDestinationInstance.showError(errorCode, errorMessage)
+            }
+        }
+    }
+
+    Component {
+        id: busyComponent
+        AccountBusyPage {
+            function showError(errorCode, errorMessage) {
+                if (errorCode != AccountFactory.UnknownError && errorCode != AccountFactory.InternalError) {
+                    infoDescription = errorMessage
+                }
+                state = "info"
             }
 
-            Component.onCompleted: {
-                _positionBottomSection()
+            infoExtraDescription: !root.runningFromSettingsApp
+                    //% "Go back to try again, or skip now and add your Jolla account later from Settings | Accounts."
+                  ? qsTrId("components_accounts-la-go_back_or_skip_jolla_account")
+                  : ""
+            infoButtonText: !root.runningFromSettingsApp ? skipButtonText : ""
+
+            onInfoButtonClicked: {
+                root.skipRequested()
             }
+        }
+    }
+
+    Component {
+        id: legaleseComponent
+        JollaAccountLegaleseDialog {
+            Component.onCompleted: {
+                var termsOfService = jollaAccountUtil.termsOfService(Qt.locale().name)
+                if (termsOfService.length == 2) {
+                    termsOfServiceHeading = termsOfService[0]
+                    termsOfServiceText = termsOfService[1]
+                } else {
+                    console.log("Unable to load Terms of Service for locale:", Qt.locale().name)
+                }
+
+                var privacyPolicy = jollaAccountUtil.privacyPolicy(Qt.locale().name)
+                if (privacyPolicy.length == 2) {
+                    privacyPolicyHeading = privacyPolicy[0]
+                    privacyPolicyText = privacyPolicy[1]
+                } else {
+                    console.log("Unable to load Privacy Policy for locale:", Qt.locale().name)
+                }
+            }
+        }
+    }
+
+    Component {
+        id: skipConfirmationComponent
+        Dialog {
+            acceptDestination: root.skipDestination
+            acceptDestinationAction: root.skipDestinationAction
+            acceptDestinationProperties: root.skipDestinationProperties
+            acceptDestinationReplaceTarget: root.skipDestinationReplaceTarget
 
             SilicaFlickable {
-                id: skipFlick
                 anchors.fill: parent
-                contentHeight: skipConfirmationButtons.y + skipConfirmationButtons.height + Theme.paddingLarge
+                contentHeight: skipConfirmationContent.height
+
+                DialogHeader {
+                    id: header
+
+                    //: Answer 'Yes' to the question "Are you sure want to skip?"
+                    //% "Yes"
+                    acceptText: qsTrId("settings_accounts-la-skip_yes")
+
+                    //: Answer 'No' to the question "Are you sure want to skip?"
+                    //% "No"
+                    cancelText: qsTrId("settings_accounts-la-skip_no")
+
+                    //: Heading for page where user can confirm whether to really skip Jolla account setup
+                    //% "Are you sure you want to skip?"
+                    title: qsTrId("settings_accounts-la-skip_confirmation")
+                }
 
                 Column {
                     id: skipConfirmationContent
-                    y: Theme.itemSizeLarge
-                    width: parent.width
+                    anchors {
+                        top: header.bottom
+                        left: parent.left
+                        right: parent.right
+                    }
                     spacing: Theme.paddingLarge
 
-                    onHeightChanged: {
-                        _positionBottomSection()
-                    }
-
                     Label {
                         x: Theme.horizontalPageMargin
                         width: parent.width - x*2
-                        wrapMode: Text.WordWrap
-                        font {
-                            family: Theme.fontFamilyHeading
-                            pixelSize: Theme.fontSizeExtraLarge
-                        }
-                        color: Theme.highlightColor
-                        //: Heading for page where user can confirm whether to really skip Jolla account setup
-                        //% "Are you sure you want to skip?"
-                        text: qsTrId("settings_accounts-la-skip_confirmation")
-                    }
-
-                    Label {
-                        x: Theme.horizontalPageMargin
-                        width: parent.width - x*2
+                        height: implicitHeight + Theme.paddingLarge*3
                         wrapMode: Text.WordWrap
                         color: Theme.highlightColor
+                        font.pixelSize: Theme.fontSizeExtraSmall
                         //: Description of what user will miss if the option to set up a Jolla account is missed
                         //% "Without a Jolla account, you'll only get basic device functionality. You'll also miss out on OS updates and you won't be able to access the Jolla store."
                         text: qsTrId("settings_accounts-la-without_jolla_account")
@@ -195,40 +534,7 @@ Dialog {
 
                     Image {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        source: "image://theme/graphic-startup-skipping"
-                    }
-                }
-
-                Item {
-                    id: skipConfirmationButtons
-                    anchors.top: skipConfirmationContent.bottom
-                    width: parent.width
-                    height: noButton.height
-
-                    Button {
-                        id: noButton
-                        anchors {
-                            left: parent.left
-                            leftMargin: Theme.horizontalPageMargin
-                        }
-                        //: Button label to go back to previous page
-                        //% "Go back"
-                        text: qsTrId("settings_accounts-bt-go_back")
-                        onClicked: {
-                            pageStack.pop()
-                        }
-                    }
-                    Button {
-                        anchors {
-                            right: parent.right
-                            rightMargin: Theme.horizontalPageMargin
-                        }
-                        //: Button label to go back to skip setting up a Jolla account, and do it later instead
-                        //% "Skip"
-                        text: qsTrId("settings_accounts-bt-skip")
-                        onClicked: {
-                            root.skipRequested()
-                        }
+                        source: "image://theme/graphic-store-jolla-apps"
                     }
                 }
             }

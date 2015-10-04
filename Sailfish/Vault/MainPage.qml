@@ -96,45 +96,6 @@ Page {
         pageStack.pop();
    }
 
-    Component {
-        id: backupComponent
-        Column {
-            width: parent.width
-
-            PageHeader {
-                //% "Backup"
-                title: qsTrId("vault-he-backup")
-            }
-            Backup {
-                id: backupItem
-
-                onBusyChanged: if (busy) snapshotsList.scrollToTop()
-                onReady: {
-                    console.log("Ready, load snapshots");
-                    snapshotsList.clear()
-                    snapshotsList.load()
-                }
-                onError: errorLoading(err)
-
-                Component.onCompleted: {
-                    mainPage.backupItem = backupItem;
-                    snapshotsList.restoreItem = backupItem;
-
-                    if (mainPage.status == PageStatus.Active) {
-                        backupItem.load(!backupItem.populated);
-                    }
-                }
-            }
-            SectionHeader {
-                //% "Restore"
-                text: qsTrId("vault-la-restore")
-                opacity: snapshotsList.count > 0 && snapshotsList.enabled ? 1.0 : 0.0
-                Behavior on opacity { FadeAnimation {} }
-            }
-
-        }
-    }
-
     function getActionName(action) {
         var actions = {
             //% "Restore from memory card"
@@ -180,7 +141,9 @@ Page {
             //% "Error while copying to SD card"
             Export: qsTrId("vault-la-notify-export-error"),
             //% "Unexpected error"
-            Logic: qsTrId("vault-la-notify-unexpected-error")
+            Logic: qsTrId("vault-la-notify-unexpected-error"),
+            //% "Backup is failed"
+            Backup: qsTrId("vault-la-backup-failed")
         };
         var action_msgs = {
             //% "Can't import for some reason"
@@ -220,10 +183,60 @@ Page {
         id: snapshotsList
 
         enabled: !backupItem.busy && backupItem.populated
-        header: backupComponent
+        header: Column {
+            width: backupItem.width
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            PageHeader {
+                //% "Backup"
+                title: qsTrId("vault-he-backup")
+                rightMargin: backupItem.contentMargin
+            }
+            Backup {
+                id: backupItem
+
+                onBusyChanged: if (busy) snapshotsList.scrollToTop()
+                onReady: {
+                    console.log("Ready, load snapshots");
+                    snapshotsList.clear()
+                    snapshotsList.load()
+                }
+                onError: {
+                    if (!backupItem.populated) {
+                        errorLoading(err)
+                    } else {
+                        showError(err)
+                    }
+                }
+
+                Component.onCompleted: {
+                    mainPage.backupItem = backupItem;
+                    snapshotsList.restoreItem = backupItem;
+
+                    if (mainPage.status == PageStatus.Active) {
+                        backupItem.load(!backupItem.populated);
+                    }
+                }
+            }
+            SectionHeader {
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    margins: backupItem.contentMargin
+                }
+                //% "Restore"
+                text: qsTrId("vault-la-restore")
+                opacity: snapshotsList.count > 0 && snapshotsList.enabled ? 1.0 : 0.0
+                Behavior on opacity { FadeAnimation {} }
+            }
+
+        }
+
+        contentWidth: backupItem.width
+        contentMargin: backupItem.contentMargin
         anchors.fill: parent
         property real scrollMarginVertical: Theme.itemSizeLarge/2
-            + Theme.paddingSmall + Theme.itemSizeSmall
+            + Theme.paddingLarge + Theme.itemSizeSmall
 
         onError: errorLoading(err)
 

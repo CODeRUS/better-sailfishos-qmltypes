@@ -16,7 +16,7 @@ Item {
     property Item splitView
     property int editOperation
     property real explicitWidth
-    property real explicitHeight    
+    property real explicitHeight
     // Aspect ratio as width / height
     property real aspectRatio
     property string aspectRatioType: splitView.avatarCrop ? "avatar" : "original"

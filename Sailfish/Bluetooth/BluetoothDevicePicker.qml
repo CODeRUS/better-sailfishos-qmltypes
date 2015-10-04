@@ -135,9 +135,7 @@ Column {
                             text: qsTrId("components_bluetooth-me-pairing_remove")
 
                             onClicked: {
-                                //: Removing bluetooth device pairing
-                                //% "Removing pairing"
-                                pairedDelegate.remorseAction(qsTrId("components_bluetooth-la-removing_pairing"), pairedDelegate._removePairing)
+                                pairedDelegate._removePairing()
                             }
                         }
                     }
@@ -157,7 +155,7 @@ Column {
                     id: icon
                     x: Theme.horizontalPageMargin
                     anchors.verticalCenter: parent.verticalCenter
-                    source: "image://theme/" + model.jollaIcon + (pairedDelegate.useHighlight ? "?" + Theme.highlightColor : "")
+                    source: model.jollaIcon !== undefined ? ("image://theme/" + model.jollaIcon + (pairedDelegate.useHighlight ? "?" + Theme.highlightColor : "")) : ""
                     opacity: pairedDelegate.matchesProfileHint || pairedDelegate.useHighlight ? 1 : 0.5
                 }
 

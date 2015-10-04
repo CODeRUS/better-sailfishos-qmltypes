@@ -34,6 +34,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0
 import "private"
 
 MouseArea {
@@ -42,10 +43,14 @@ MouseArea {
     property bool checked
     property alias iconSource: image.source //XXX Deprecated
     property alias icon: image
-    property bool down: pressed && containsMouse
+    property bool down: pressed && containsMouse && !DragFilter.canceled
     property bool highlighted: down
     property bool busy
     property bool automaticCheck: true
+
+    onPressed: switchItem.DragFilter.begin(mouse.x, mouse.y)
+    onCanceled: switchItem.DragFilter.end()
+    onPreventStealingChanged: if (preventStealing) switchItem.DragFilter.end()
 
     onClicked: {
         if (automaticCheck) {

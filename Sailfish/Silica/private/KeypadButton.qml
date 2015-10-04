@@ -50,8 +50,8 @@ MouseArea {
     onEntered: dialer._buttonEntered()
     onExited: dialer._buttonExited()
 
-    width: dialer.width / 3
-    height: Theme.itemSizeLarge
+    width: dialer._buttonWidth
+    height: dialer._buttonHeight
 
     Label {
         id: numberLabel

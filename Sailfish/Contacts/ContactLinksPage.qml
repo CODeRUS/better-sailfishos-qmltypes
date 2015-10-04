@@ -13,10 +13,8 @@ Page {
     property bool _fetchedConstituents
     property bool _fetchedMergeCandidates
 
-    property var _remorseItems
     property var _aggregationIds
     property var _disaggregationIds
-    property var _forceTrigger
 
     function _addContactIdsToModel(contactIds, model) {
         for (var i=0; i<contactIds.length; i++) {
@@ -75,28 +73,8 @@ Page {
     }
 
     function _applyAllPendingChanges() {
-        // If there are any pending deletions, we should ignore their
-        // remorse timers and effect them now
-        _forceTrigger = true
-        while (_remorseItems && _remorseItems.length) {
-            var item = _remorseItems[0]
-            _remorseItems.splice(0, 1)
-            if (item) {
-                item.trigger()
-            }
-        }
-        _forceTrigger = false
-
         if (!_tryDisaggregateContact()) {
             _tryAggregateContact()
-        }
-    }
-
-    function _remorseItemExpired(item) {
-        for (var i = 0; i < _remorseItems.length; ++i) {
-            if (_remorseItems[i] === item) {
-                _remorseItems.splice(i, 1)
-            }
         }
     }
 
@@ -222,41 +200,15 @@ Page {
                     delegate: ContactLinkItem {
                         enabled: constituentsModel.count > 1
                         onClicked: {
-                            //: Removes a link for this contact
-                            //% "Unlinking"
-                            var item = remorseAction(qsTrId("components_contacts-la-unlinking"), function() {
-                                animateRemoval()  // animate before removal to avoid waiting for model to update
+                            animateRemoval()  // animate before removal to avoid waiting for model to update
 
-                                if (root._disaggregationIds === undefined) {
-                                    root._disaggregationIds = [ model.person.id ]
-                                } else {
-                                    root._disaggregationIds.push(model.person.id)
-                                }
-
-                                if (!root._forceTrigger) {
-                                    // If there are any other pending removals, we must wait for all of them to expire
-                                    // before starting to modify the contact
-                                    if (root._remorseItems && root._remorseItems.length) {
-                                        for (var i = 0; i < root._remorseItems.length; ++i) {
-                                            var item = root._remorseItems[i]
-                                            if (item.pending) {
-                                                return
-                                            }
-                                        }
-                                    }
-
-                                    _tryDisaggregateContact()
-                                }
-                            })
-
-                            if (_remorseItems == undefined) {
-                                _remorseItems = [ item ]
+                            if (root._disaggregationIds === undefined) {
+                                root._disaggregationIds = [ model.person.id ]
                             } else {
-                                _remorseItems.push(item)
+                                root._disaggregationIds.push(model.person.id)
                             }
 
-                            item.triggered.connect(function() { root._remorseItemExpired(item) } )
-                            item.canceled.connect(function() { root._remorseItemExpired(item) } )
+                            _tryDisaggregateContact()
                         }
                     }
                 }

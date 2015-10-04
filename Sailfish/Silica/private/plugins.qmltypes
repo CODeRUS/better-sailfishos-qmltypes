@@ -16,6 +16,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "wayland"; type: "bool"; isReadonly: true }
         Property { name: "demoMode"; type: "bool"; isReadonly: true }
+        Property { name: "layoutGrid"; type: "bool"; isReadonly: true }
         Property { name: "sailfishVersion"; type: "float"; isReadonly: true }
         Method {
             name: "setCompositorWindows"
@@ -29,7 +30,7 @@ Module {
         exports: ["Sailfish.Silica.private/CoverWindow 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "cover"; type: "DeclarativeCover"; isPointer: true }
-        Property { name: "mainWindow"; type: "DeclarativeWindow"; isPointer: true }
+        Property { name: "mainWindow"; type: "QObject"; isPointer: true }
         Method {
             name: "setContentSize"
             Parameter { name: "w"; type: "float" }
@@ -75,6 +76,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "canceled"; type: "bool"; isReadonly: true }
         Property { name: "screenMargin"; type: "float" }
+        Property { name: "orientations"; type: "Qt::Orientations" }
         Method {
             name: "begin"
             Parameter { name: "x"; type: "float" }
@@ -147,6 +149,7 @@ Module {
         exports: ["Sailfish.Silica.private/Window 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "orientation"; type: "DeclarativeOrientation::Orientation"; isReadonly: true }
+        Property { name: "_pageOrientation"; type: "DeclarativeOrientation::Orientation" }
         Property { name: "deviceOrientation"; type: "DeclarativeOrientation::Orientation" }
         Property {
             name: "defaultAllowedOrientations"
@@ -155,9 +158,15 @@ Module {
         }
         Property { name: "_allowedOrientations"; type: "DeclarativeOrientation::Orientations" }
         Property { name: "screenRotation"; type: "int"; isReadonly: true }
+        Property { name: "_backgroundVisible"; type: "bool" }
         Property { name: "_persistentOpenGLContext"; type: "bool" }
         Property { name: "_persistentSceneGraph"; type: "bool" }
+        Property { name: "_haveCoverHint"; type: "bool" }
+        Property { name: "_backgroundColor"; type: "QColor" }
         Signal { name: "_orientationLockedChanged" }
+        Signal { name: "backgroundColorChanged" }
+        Signal { name: "backgroundVisibleChanged" }
+        Signal { name: "haveCoverChanged" }
         Method { name: "activate" }
         Method { name: "deactivate" }
         Method { name: "_processPendingDeletions" }
@@ -184,6 +193,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "pullDownType"; type: "bool" }
         Property { name: "flickable"; type: "QObject"; isPointer: true }
+        Property { name: "dragDistance"; type: "float"; isReadonly: true }
         Signal { name: "finalPositionReached" }
         Signal {
             name: "flickableChanged"
@@ -235,6 +245,7 @@ Module {
         Signal { name: "beforeSynchronizing" }
         Signal { name: "beforeRendering" }
         Signal { name: "afterRendering" }
+        Signal { name: "sceneGraphAboutToStop" }
         Signal {
             name: "closing"
             revision: 1
@@ -400,6 +411,7 @@ Module {
             revision: 1
             Parameter { name: "msec"; type: "int" }
         }
+        Method { name: "requestUpdate"; revision: 3 }
     }
     Component {
         name: "TemporaryFileWriter"

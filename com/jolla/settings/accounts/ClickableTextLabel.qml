@@ -6,7 +6,7 @@ Label {
 
     property bool pressed: mouseArea.pressed
 
-    color: mouseArea.pressed && mouseArea.containsMouse ? Theme.highlightColor : Theme.primaryColor
+    color: Theme.highlightColor
     width: parent.width
     wrapMode: Text.Wrap
     textFormat: Text.StyledText

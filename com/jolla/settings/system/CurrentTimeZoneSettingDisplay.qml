@@ -16,7 +16,7 @@ ValueButton {
     //: %1 will be replaced by localized country and %2 with localized city
     //% "%1, %2"
     value: qsTrId("settings_datetime-la-localized-timezone").arg(localizer.country).arg(localizer.city)
-    enabled: !dateTimeSettings.automaticTimeUpdate
+    enabled: !dateTimeSettings.automaticTimezoneUpdate
 
     onClicked: {
         var timezonePicker = pageStack.push(timezonePickerComponent)

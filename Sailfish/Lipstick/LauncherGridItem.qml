@@ -6,6 +6,7 @@ MouseArea {
     id: appItem
 
     property alias icon: appIcon.icon
+    property alias iconStatus: appIcon.status
     property alias text: appTitle.text
 
     property bool down: pressed && containsMouse

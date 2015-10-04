@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Rectangle {
+Item {
     // Visualizes the edge of the page exiting the view
     property Item stack
     property bool active: container && container.parent
@@ -44,9 +44,27 @@ Rectangle {
                                  : (stack._currentContainer.page.status === PageStatus.Activating
                                     ? stack._currentContainer.transitionPartner
                                     : stack._currentContainer)
+    property bool landscape: container && container.page.isLandscape
 
-    color: Theme.highlightDimmerColor
+    width: parent ? (landscape ? container.width : container.width/2) : 0
+    height: parent ? (landscape ? container.height/2 : container.height) : 0
+    x: parent && !landscape ? (container.x < 0 ? container.x + width : container.x) : 0
+    y: parent && landscape ? (container.y < 0 ? container.y + height : container.y) : 0
     parent: active ? container.parent : null
-    anchors.fill: parent ? container : undefined
-    opacity: active ? Math.min(0.6, Math.abs(container.lateralOffset/Screen.width)*0.6) : 0.0
+
+
+    Rectangle {
+        anchors.centerIn: parent
+        width: landscape ? parent.width : parent.height
+        height: landscape ? parent.height : parent.width
+        color: Theme.highlightDimmerColor
+        opacity: active ? Math.min(0.6, Math.abs(container.lateralOffset/container.width)*0.7) : 0.0
+        rotation: landscape ? (container && container.y < 0 ? 180 : 0)
+                            : (container && container.x < 0 ? 90 : 270)
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: Theme.highlightDimmerColor }
+            GradientStop { position: 0.7; color: Theme.highlightDimmerColor }
+            GradientStop { position: 1.0; color: "transparent" }
+        }
+    }
 }

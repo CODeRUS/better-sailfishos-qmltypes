@@ -41,7 +41,7 @@ Rectangle {
     property alias textColor: label.color
     property color backgroundColor: Theme.rgba(Theme.highlightDimmerColor, 0.9)
 
-    height: width
+    height: parent.height / 2
     width: parent.width
     gradient: Gradient {
         GradientStop { position: invert ? 1.0 : 0.0; color: "transparent" }

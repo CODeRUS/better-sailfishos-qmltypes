@@ -35,37 +35,24 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Image {
+HighlightImageBase {
     id: image
 
-    property bool highlighted
-    property string _highlightSource
+    // shadow source property from Image so that highlight can be applied in HighlightImageBase
+    property url source
     property color highlightColor: Theme.highlightColor
 
-    function updateHighlightSource() {
-        if (state === "") {
-            if (source != "") {
-                var tmpSource = image.source.toString()
-                var index = tmpSource.lastIndexOf("?")
-                if (index !== -1) {
-                    tmpSource = tmpSource.substring(0, index)
-                }
-                _highlightSource = tmpSource + "?" + highlightColor
-            } else {
-                _highlightSource = ""
+    _imageSource: source
+    _highlightSource: {
+        if (source != "") {
+            var tmpSource = image.source.toString()
+            var index = tmpSource.lastIndexOf("?")
+            if (index !== -1) {
+                tmpSource = tmpSource.substring(0, index)
             }
-        }
-    }
-
-    onHighlightColorChanged: updateHighlightSource()
-    onSourceChanged: updateHighlightSource()
-    Component.onCompleted: updateHighlightSource()
-
-    states: State {
-        when: image.highlighted && image._highlightSource != ""
-        PropertyChanges {
-            target: image
-            source: image._highlightSource
+            return tmpSource + "?" + highlightColor
+        } else {
+            return ""
         }
     }
 }

@@ -17,3 +17,4 @@ SimPinQuerySkippedNotice 1.0 SimPinQuerySkippedNotice.qml
 LanguagePickerPage 1.0 LanguagePickerPage.qml
 NetworkAddressField 1.0 NetworkAddressField.qml
 DeviceLockQuery 1.0 DeviceLockQuery.qml
+AboutText 1.0 AboutText.qml

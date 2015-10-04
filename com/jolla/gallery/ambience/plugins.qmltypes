@@ -11,37 +11,36 @@ Module {
         name: "DeclarativeColor"
         prototype: "QObject"
         exports: ["com.jolla.gallery.ambience/Color 1.0"]
+        isCreatable: false
+        isSingleton: true
         exportMetaObjectRevisions: [0]
-        Property { name: "color"; type: "QColor" }
-        Property { name: "hue"; type: "float" }
-        Property { name: "saturation"; type: "float" }
-        Property { name: "lightness"; type: "float" }
-        Property { name: "alpha"; type: "float" }
-        Method { name: "toHexString"; type: "string" }
-        Method { name: "remap" }
         Method {
-            name: "equals"
-            type: "bool"
+            name: "fromHsva"
+            type: "QColor"
+            Parameter { name: "h"; type: "float" }
+            Parameter { name: "s"; type: "float" }
+            Parameter { name: "v"; type: "float" }
+            Parameter { name: "a"; type: "float" }
+        }
+        Method {
+            name: "hue"
+            type: "float"
             Parameter { name: "color"; type: "QColor" }
         }
-    }
-    Component {
-        name: "DeclarativeProfileProvider"
-        prototype: "QObject"
-        exports: ["com.jolla.gallery.ambience/ProfileManager 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "profileNames"; type: "QStringList"; isReadonly: true }
-        Property { name: "profileCount"; type: "int"; isReadonly: true }
-        Property { name: "currentProfile"; type: "string" }
         Method {
-            name: "profileName"
-            type: "string"
-            Parameter { name: "index"; type: "int" }
+            name: "saturation"
+            type: "float"
+            Parameter { name: "color"; type: "QColor" }
         }
         Method {
-            name: "indexOfProfile"
-            type: "int"
-            Parameter { name: "profileName"; type: "string" }
+            name: "value"
+            type: "float"
+            Parameter { name: "color"; type: "QColor" }
+        }
+        Method {
+            name: "toHighlight"
+            type: "QColor"
+            Parameter { name: "color"; type: "QColor" }
         }
     }
 }

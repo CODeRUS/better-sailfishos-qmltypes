@@ -49,6 +49,7 @@ Text {
 
     color: Theme.primaryColor
     font.pixelSize: Theme.fontSizeMedium
+    textFormat: _defaultLabelFormat
 
     on_FadeTextChanged: {
         if (_fadeText) {

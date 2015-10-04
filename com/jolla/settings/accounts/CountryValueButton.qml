@@ -7,6 +7,9 @@ import MeeGo.QOfono 0.2
 ValueButton {
     id: root
 
+    property string countryCode
+    property string countryName
+
     property bool _defaultCountrySet
 
     signal countrySelected(string countryName, string countryCode)
@@ -15,9 +18,17 @@ ValueButton {
     //% "Country:"
     label: qsTrId("settings_accounts-la-country")
 
+    value: countryName
+           ? countryName
+             //: Select the country that the user is currently in
+             //% "Select country"
+           : qsTrId("settings_accounts-la-select_country")
+
     onClicked: {
         var picker = pageStack.push(countryPickerComponent)
         picker.countryClicked.connect(function(countryName, countryCode) {
+            root.countryCode = countryCode
+            root.countryName = countryName
             root.countrySelected(countryName, countryCode)
             if (picker === pageStack.currentPage) {
                 pageStack.pop()

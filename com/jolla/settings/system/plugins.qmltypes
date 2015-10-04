@@ -60,6 +60,21 @@ Module {
         }
     }
     Component {
+        name: "EventsWidgetsModel"
+        prototype: "QAbstractListModel"
+        exports: ["com.jolla.settings.system/EventsWidgetsModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "enableWidget"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "disableWidget"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method { name: "updateAvailable" }
+    }
+    Component {
         name: "LocationSettings"
         prototype: "QObject"
         exports: ["com.jolla.settings.system/LocationSettings 1.0"]
@@ -75,6 +90,36 @@ Module {
         Property { name: "agreementText"; type: "string"; isReadonly: true }
         Property { name: "locationEnabled"; type: "bool" }
         Property { name: "hereState"; type: "HereState" }
+    }
+    Component {
+        name: "QuickActionsModel"
+        prototype: "QAbstractListModel"
+        exports: ["com.jolla.settings.system/QuickActionsModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "showPotential"; type: "bool" }
+        Method {
+            name: "enableAction"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "disableAction"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "triggerAction"
+            Parameter { name: "index"; type: "int" }
+        }
+    }
+    Component {
+        name: "TitlesView"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.system/TitlesView 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "model"; type: "QObject"; isPointer: true }
+        Property { name: "matchRole"; type: "string" }
+        Property { name: "match"; type: "QVariant" }
+        Property { name: "role"; type: "string" }
+        Property { name: "value"; type: "string"; isReadonly: true }
     }
     Component {
         name: "TohInfo"

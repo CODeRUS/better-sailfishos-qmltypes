@@ -34,6 +34,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0
 
 MouseArea {
     id: root
@@ -46,7 +47,7 @@ MouseArea {
     property real leftMargin: Theme.horizontalPageMargin
     property real rightMargin: Theme.horizontalPageMargin
     property real _rightPadding
-    property bool down: pressed && containsMouse
+    property bool down: pressed && containsMouse && !DragFilter.canceled
     property bool highlighted: down
     property bool busy
 
@@ -129,6 +130,10 @@ MouseArea {
         font.pixelSize: Theme.fontSizeExtraSmall
         color: highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
     }
+
+    onPressed: root.DragFilter.begin(mouse.x, mouse.y)
+    onCanceled: root.DragFilter.end()
+    onPreventStealingChanged: if (preventStealing) root.DragFilter.end()
 
     onClicked: {
         if (automaticCheck) {

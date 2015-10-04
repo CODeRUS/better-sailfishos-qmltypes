@@ -3,7 +3,7 @@
 ** Copyright (C) 2013 Jolla Ltd.
 ** Contact: Bea Lam <bea.lam@jollamobile.com>
 ** All rights reserved.
-** 
+**
 ** This file is part of Sailfish Silica UI component package.
 **
 ** You may use this file under the terms of BSD license as follows:
@@ -18,7 +18,7 @@
 **     * Neither the name of the Jolla Ltd nor the
 **       names of its contributors may be used to endorse or promote products
 **       derived from this software without specific prior written permission.
-** 
+**
 ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -48,7 +48,7 @@ PathView {
     property real _prevOffset
 
     flickDeceleration: Theme.flickDeceleration
-    maximumFlickVelocity: Theme.maximumFlickVelocity
+    maximumFlickVelocity: Theme.maximumFlickVelocity * width / Screen.height
     width: parent ? parent.width : Screen.width
     height: parent ? parent.height : Screen.width
     preferredHighlightBegin: _multiplier / pathItemCount

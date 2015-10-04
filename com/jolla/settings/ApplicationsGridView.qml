@@ -7,6 +7,8 @@ import com.jolla.settings 1.0
 SilicaGridView {
     id: gridView
 
+    property real minimumDelegateSize: Theme.iconSizeLauncher
+
     // The multipliers below for Large screens are magic. They look good on Jolla tablet.
     property real minimumCellWidth: Screen.sizeCategory >= Screen.Large ? Theme.itemSizeExtraLarge * 1.6 : Theme.itemSizeExtraLarge
     // phone reference row height: 960 / 6
@@ -19,7 +21,7 @@ SilicaGridView {
 
     anchors.horizontalCenter: parent.horizontalCenter
 
-    cellWidth: Math.floor(initialCellWidth + (initialCellWidth - Theme.iconSizeLauncher) / (columnCount - 1))
+    cellWidth: Math.floor(initialCellWidth + (initialCellWidth - minimumDelegateSize) / (columnCount - 1))
     cellHeight: Math.round(parent.height / rowCount)
 
     width: cellWidth * columnCount

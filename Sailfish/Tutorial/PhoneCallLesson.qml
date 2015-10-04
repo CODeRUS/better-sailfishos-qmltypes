@@ -13,6 +13,7 @@ Item {
 
     SequentialAnimation {
         id: timeline
+        PauseAnimation { duration: 1000 }
         FadeAnimation {
             target: root
             to: 1.0
@@ -35,7 +36,7 @@ Item {
         PauseAnimation { duration: 1000 }
         ScriptAction  {
             script: {
-                //% "The glows on top and bottom indicate the pulley menus"
+                //% "The lines at the top and bottom indicate the pulley menus"
                 hintLabel.text = qsTrId("tutorial-la-pulley_explanation")
                 hintLabel.opacity = 1.0
                 answerMenu.busy = true
@@ -55,7 +56,7 @@ Item {
                 hintLabel.text = qsTrId("tutorial-la-pull_down_to_answer")
                 hintLabel.opacity = 1.0
                 hintLabel.atBottom = true
-                hint.running = true
+                hint.start()
                 answerMenu.busy = false
                 answerMenu.acceptAction = true
                 rejectMenu.busy = false
@@ -74,7 +75,7 @@ Item {
                 hintLabel.opacity = 1.0
                 hintLabel.atBottom = false
                 hint.direction = TouchInteraction.Up
-                hint.running = true
+                hint.start()
                 rejectMenu.acceptAction = true
                 touchBlocker.enabled = false
             }
@@ -92,13 +93,10 @@ Item {
     }
 
     Image {
-        source: Qt.resolvedUrl("/usr/share/sailfish-tutorial/graphics/tutorial-incoming-call.png")
-        sourceSize {
-            width: 540 * xScale
-            height: 960 * yScale
-        }
-        width: sourceSize.width
-        height: sourceSize.height
+        parent: applicationBackground
+        anchors.fill: parent
+        opacity: root.opacity
+        source: Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-incoming-call.png")
     }
 
     SilicaFlickable {
@@ -111,7 +109,10 @@ Item {
         onMenuActiveChanged: {
             if (answerMenu.acceptAction || rejectMenu.acceptAction) {
                 hintLabel.opacity = menuActive ? 0.0 : 1.0
-                hint.running = menuActive ? false : true
+                if (menuActive)
+                    hint.stop()
+                else
+                    hint.start()
             }
         }
 
@@ -235,8 +236,8 @@ Item {
     TouchInteractionHint {
         id: hint
         direction: TouchInteraction.Down
+        interactionMode: TouchInteraction.Pull
         loops: Animation.Infinite
-        anchors.horizontalCenter: parent.horizontalCenter
     }
 
     MouseArea {

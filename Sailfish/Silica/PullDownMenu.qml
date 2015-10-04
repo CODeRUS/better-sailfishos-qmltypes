@@ -42,7 +42,16 @@ PulleyMenuBase {
     id: pullDownMenu
 
     property real topMargin: Theme.itemSizeSmall
-    property real bottomMargin
+    property real bottomMargin: _menuLabel ? 0 : Theme.itemSizeExtraSmall - Theme.paddingLarge
+    property real _contentEnd: contentColumn.height + bottomMargin
+    property Item _menuLabel: {
+        var lastChild = contentColumn.visible && contentColumn.childAt(width/2, contentColumn.height-1)
+        if (lastChild && lastChild.hasOwnProperty("__silica_menulabel")) {
+            return lastChild
+        }
+        return null
+    }
+    property real _bottomDragMargin: (_menuLabel ? _menuLabel.height : 0) + bottomMargin
     default property alias _content: contentColumn.children
 
     spacing: 0
@@ -51,28 +60,29 @@ PulleyMenuBase {
     _contentColumn: contentColumn
     _isPullDownMenu: true
     _inactiveHeight: 0
-    _activeHeight: contentColumn.height + Theme.paddingLarge + topMargin + bottomMargin
+    _activeHeight: contentColumn.height + topMargin + bottomMargin
     _inactivePosition: Math.round(flickable.originY - (_inactiveHeight + spacing))
     _finalPosition: _inactivePosition - _activeHeight
+    _menuIndicatorPosition: height - Theme.itemSizeExtraSmall + Theme.paddingSmall - spacing
+    _highlightIndicatorPosition: Math.min(height - Math.min(_dragDistance, _contentEnd) - spacing,
+        _menuIndicatorPosition - (_dragDistance/(Theme.itemSizeExtraSmall+_bottomDragMargin)*(Theme.paddingSmall+_bottomDragMargin)))
 
     property Component background: Rectangle {
-        anchors { fill: parent; bottomMargin: parent.spacing }
+        id: bg
+        anchors { fill: parent; bottomMargin: (pullDownMenu.spacing - _shadowHeight) * Math.min(1, _dragDistance/Theme.itemSizeSmall) }
+        opacity: pullDownMenu.active ? 1.0 : 0.0
         gradient: Gradient {
-            GradientStop { position: 0.0; color: Theme.rgba(pullDownMenu.backgroundColor, Theme.highlightBackgroundOpacity) }
-            GradientStop { position: 0.5; color: Theme.rgba(pullDownMenu.backgroundColor, Theme.highlightBackgroundOpacity) }
-            GradientStop { position: 1.0; color: Theme.rgba(pullDownMenu.highlightColor, 2*Theme.highlightBackgroundOpacity) }
+            GradientStop { position: 0.0; color: Theme.rgba(pullDownMenu.backgroundColor, 0.4) }
+            GradientStop {
+                position: (pullDownMenu.height-pullDownMenu.spacing)/bg.height
+                color: Theme.rgba(pullDownMenu.backgroundColor, Theme.highlightBackgroundOpacity)
+            }
+            GradientStop { position: 1.0; color: Theme.rgba(pullDownMenu.backgroundColor, 0.0) }
         }
     }
 
-    property Component menuIndicator: MenuIndicator {
-        color: pullDownMenu.enabled ? pullDownMenu.highlightColor : Theme.primaryColor
-        opacity: pullDownMenu.enabled ? 1 : 0.5
-        busy: pullDownMenu.busy
-        anchors {
-            verticalCenter: parent.bottom
-            verticalCenterOffset: -parent.spacing
-        }
-    }
+    property Component menuIndicator // Remains for API compatibility
+    onMenuIndicatorChanged: console.log("WARNING: PullDownMenu.menuIndicator is no longer supported.")
 
     property Item _pageStack: Util.findPageStack(pullDownMenu)
 
@@ -87,13 +97,13 @@ PulleyMenuBase {
 
         property int __silica_pulleymenu_content
 
-        property real menuContentY: pullDownMenu.active ? flickable.contentY - (_inactivePosition - _activeHeight) : -1
+        property real menuContentY: pullDownMenu.active ? pullDownMenu.height - _dragDistance - pullDownMenu.spacing : -1
         onMenuContentYChanged: {
             if (menuContentY >= 0) {
                 if (flickable.dragging && !_bounceBackRunning) {
-                    _highlightMenuItem(contentColumn, menuContentY - Theme.paddingMedium)
+                    _highlightMenuItem(contentColumn, menuContentY - y + Theme.itemSizeExtraSmall)
                 } else if (quickSelect){
-                    _quickSelectMenuItem(contentColumn, menuContentY - Theme.paddingMedium)
+                    _quickSelectMenuItem(contentColumn, menuContentY - y + Theme.itemSizeExtraSmall)
                 }
             }
         }
@@ -106,7 +116,7 @@ PulleyMenuBase {
     Binding {
         target: flickable
         property: "topMargin"
-        value: pullDownMenu.height
+        value: active ? pullDownMenu.height : _inactiveHeight + spacing
     }
 
     // Create a bottomMargin to fill the remaining space in views
@@ -140,9 +150,6 @@ PulleyMenuBase {
     Component.onCompleted: {
         if (background) {
             background.createObject(pullDownMenu, {"z": -2})
-        }
-        if (menuIndicator) {
-            _menuIndicatorItem = menuIndicator.createObject(pullDownMenu, {"z": -1})
         }
         _updateFlickable()
     }

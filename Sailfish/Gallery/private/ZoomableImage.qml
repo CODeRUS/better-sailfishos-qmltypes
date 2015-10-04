@@ -17,6 +17,8 @@ SilicaFlickable {
     property int imageWidth
     property int status: Image.Null
 
+    property real maximumZoom: Math.max(Screen.width, Screen.height) / 200
+
     property int orientation
 
     readonly property bool _transpose: (orientation % 180) != 0
@@ -45,7 +47,7 @@ SilicaFlickable {
         enabled: interactive && photo.status == Image.Ready
         pinch.target: photo
         pinch.minimumScale: Math.max(minimumWidth / flickable.implicitWidth, minimumHeight / flickable.implicitHeight)
-        pinch.maximumScale: Math.min(maximumWidth / flickable.implicitWidth, maximumHeight / flickable.implicitHeight)
+        pinch.maximumScale: Math.max(flickable.maximumZoom, pinch.minimumScale)
         pinch.dragAxis: Pinch.XandYAxis
         onPinchFinished: flickable.returnToBounds()
 
@@ -60,7 +62,8 @@ SilicaFlickable {
                 var fittedScale
                 var isImagePortrait = flickable.implicitWidth < flickable.implicitHeight
                 var minimumDimension = Math.min(initialImageHeight, initialImageWidth)
-                fittedScale = minimumDimension / (isImagePortrait ? flickable.implicitWidth : flickable.implicitHeight)
+                fittedScale = Math.min(minimumDimension / (isImagePortrait ? flickable.implicitWidth : flickable.implicitHeight),
+                                       pinchArea.pinch.maximumScale)
 
                 scale = fittedScale
                 flickable.contentX = (flickable.implicitWidth * scale - flickable.width) / 2

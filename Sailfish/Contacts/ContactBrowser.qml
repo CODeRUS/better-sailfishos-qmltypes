@@ -165,8 +165,8 @@ SilicaFlickable {
         }
     }
     onAtYBeginningChanged: {
-        if ((atYBeginning && _searchFiltered && (searchView.height > _searchListSpace)) ||
-            (!atYBeginning && contactSearchField.focus)) {
+        if (dragging && ((atYBeginning && _searchFiltered && searchView.height > _searchListSpace) ||
+            (!atYBeginning && contactSearchField.focus))) {
             (atYBeginning ? contactSearchField : root).focus = true
         }
     }

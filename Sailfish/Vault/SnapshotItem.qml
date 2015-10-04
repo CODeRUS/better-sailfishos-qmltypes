@@ -4,6 +4,7 @@ import Sailfish.Silica 1.0
 ListItem {
     id: contentItem
     property string tag: name
+    property real contentMargin: Theme.horizontalPageMargin
 
     showMenuOnPressAndHold: false
     contentHeight: Theme.itemSizeLarge
@@ -16,8 +17,8 @@ ListItem {
         anchors {
             left: parent.left
             right: parent.right
-            leftMargin: Theme.paddingLarge
-            rightMargin: Theme.paddingLarge
+            leftMargin: contentMargin
+            rightMargin: contentMargin
             verticalCenter: parent.verticalCenter
         }
 

@@ -47,18 +47,26 @@ Item {
     readonly property int year: date.getFullYear()
     readonly property int month: date.getMonth()+1
     readonly property int day: date.getDate()
-    property real leftMargin: Theme.horizontalPageMargin - Theme.paddingLarge
-    property real rightMargin: Theme.horizontalPageMargin - Theme.paddingLarge
+    property real leftMargin: screen.sizeCategory > Screen.Medium ? Theme.horizontalPageMargin : 0
+    property real rightMargin: screen.sizeCategory > Screen.Medium ? Theme.horizontalPageMargin : 0
 
     property date date: new Date()
     property string dateText: Qt.formatDate(date)
     property alias viewMoving: view.viewMovingImmediate
 
+    property bool daysVisible
+    property bool weeksVisible: screen.sizeCategory > Screen.Medium
+    property bool monthYearVisible: true
+    readonly property int weekColumnWidth: weekLabel.width + Theme.paddingMedium
+    readonly property int dayRowHeight: weekLabel.height + Theme.paddingMedium
+    readonly property int cellWidth: (width - leftMargin - rightMargin - (weeksVisible ? weekColumnWidth : 0)) / 7
+    property int cellHeight: cellWidth
+
     property Component modelComponent
     property Component delegate: Component {
         MouseArea {
-            width: datePicker._dateBoxSize
-            height: datePicker._dateBoxSize
+            width: datePicker.cellWidth
+            height: datePicker.cellHeight
 
             Label {
                 anchors.centerIn: parent
@@ -97,7 +105,7 @@ Item {
     property bool _changingDate
     property bool _changeWithoutAnimation
     property bool _loadNonVisibleGridsImmediately: true
-    property int _dateBoxSize: (width - leftMargin - rightMargin) / 7
+    property real _gridLeftMargin: weeksVisible ? Theme.paddingMedium : leftMargin + Theme.paddingMedium
     property alias _gridView: view  // for testing
 
     signal updateModel(variant modelObject, variant fromDate, variant toDate, int primaryMonth)
@@ -171,11 +179,21 @@ Item {
     }
 
     width: Screen.width
-    height: _dateBoxSize * 6
+    height: cellHeight * 6 + (daysVisible ? dayRowHeight : 0)
 
     Timer {
         id: interactivityPrevention
         interval: view.highlightMoveDuration
+    }
+
+    // This label is used only to determine the width of the week column
+    Label {
+        id: weekLabel
+        //: Used to show week text and week number: %1 == weeknumber
+        //% "week %1"
+        text: qsTrId("components-la-week_and_weeknumber").arg(52)
+        font.pixelSize: Theme.fontSizeExtraSmall
+        visible: false
     }
 
     ListModel {
@@ -228,19 +246,17 @@ Item {
     SlideshowView {
         id: view
 
-        property int weekColumnWidth: 140/480*Screen.width
-
         property bool viewMovingImmediate: view.moving || ((view.offset - Math.floor(view.offset)) != 0.)
         property bool noUpdateDelegate: false
 
         function loadNonVisibleGrids() {
             if (pathItemCount == 1) {
-                // tell PathView to generate the rest of the grid delegates and adjust highlight accordingly
+                // tell PathView to generate the rest of the grid delegates
                 pathItemCount = 3
-                preferredHighlightBegin = 0.4625
-                preferredHighlightEnd = 0.4625
             }
         }
+
+        clip: true
 
         // prevent double tap from stopping just initiated month change
         interactive: !interactivityPrevention.running
@@ -269,14 +285,13 @@ Item {
 
         width: parent.width
         height: parent.height
-        itemWidth: view.width + weekColumnWidth
+        itemWidth: view.width + (weeksVisible ? 0 : weekColumnWidth) - (leftMargin + rightMargin)/2 + Theme.paddingLarge
         itemHeight: view.height
-        clip: true
         model: monthModel
 
-        // set an appropriate highlight range for the initial display of a single grid delegate
-        preferredHighlightBegin: 0.8875
-        preferredHighlightEnd: 0.8875
+        preferredHighlightBegin: pathItemCount == 1 ? (weeksVisible ? 0.9999 : 1.0 - weekColumnWidth/2/itemWidth)
+                                                    : (weeksVisible ? 0.5 : 0.5 - weekColumnWidth/2/(itemWidth*3))
+        preferredHighlightEnd: preferredHighlightBegin
 
         Timer {
             id: createNonVisibleGridsTimer
@@ -307,12 +322,16 @@ Item {
                        && (!gridDelegate.viewMoving || (gridDelegate.x <= view.width && (gridDelegate.x + gridDelegate.width) > 0))
             }
 
-            gridWidth: view.width; height: view.height
-            weekColumnWidth: view.weekColumnWidth
+            width: view.width + (weeksVisible ? 0 : weekColumnWidth)
+            height: view.height
+            weekColumnWidth: datePicker.weekColumnWidth
+            daysVisible: datePicker.daysVisible
+            monthYearVisible: datePicker.monthYearVisible
             displayedYear: model.year
             displayedMonth: model.month
             selectedDate: datePicker.date
-            _dateBoxSize: datePicker._dateBoxSize
+            cellWidth: datePicker.cellWidth
+            cellHeight: datePicker.cellHeight
             highlightedDate: datePicker._highlightedDate
             modelComponent: datePicker.modelComponent
             delegate: datePicker.delegate

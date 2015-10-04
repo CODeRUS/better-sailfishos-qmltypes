@@ -34,10 +34,6 @@
 
 .pragma library
 
-// if this can change dynamically, needs to be a QML property instead
-// and also should refer to some settings instead (theme?)
-var _weekStartsOnMonday = true
-
 function _isLeapYear(year) {
     return ((year % 4 == 0) && (year % 100 != 0))
             || (year % 400 == 0)
@@ -61,18 +57,17 @@ function _maxDaysForMonth(month, year) {
 // the given month. Given month should be 1-12.
 // i.e. the returned date is in either this month or the last week of the
 // previous month
-function _getStartDateForMonthView(year, month) {
+// weekstart indicates on which day a week starts, sunday=0, monday=1
+function _getStartDateForMonthView(year, month, weekstart) {
     var start = new Date(Date.UTC(year, month-1, 1))
     if (start.getDay() > 0) {
         start.setDate(start.getDate() - start.getDay())
     }
-    if (_weekStartsOnMonday) {
-        start.setDate(start.getDate() + 1)
-        if (start.getDate() > 1 && start.getMonth()+1 === month) {
-            // shifting forward to Monday skipped over the 1st of this month, go back a week
-            // to the last Monday of last month
-            start.setDate(start.getDate() - 7)
-        }
+    start.setDate(start.getDate() + weekstart)
+    if (start.getDate() > 1 && start.getMonth()+1 === month) {
+        // shifting forward to week start skipped over the 1st of this month, go back a week
+        // to the last week day of previous month
+        start.setDate(start.getDate() - 7)
     }
     return start
 }

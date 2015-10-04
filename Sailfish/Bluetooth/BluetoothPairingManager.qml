@@ -1,7 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Bluetooth 1.0
-import org.nemomobile.notifications 1.0
 
 BluetoothAgent {
     id: root
@@ -149,10 +148,6 @@ BluetoothAgent {
             if (_pairingDialog.result === DialogResult.Accepted) {
                 // We got an error even though the dialog was accepted. This means the other side
                 // rejected the pairing, then we accepted it, so bluez sends us AuthenticationFailed.
-
-                //: Short error message shown when a bluetooth pairing attempt failed
-                //% "Pairing failed"
-                _notification.previewBody = qsTrId("components_bluetooth-la-pairing_failed_short")
                 _notification.publish()
             } else if (_pairingDialog.result !== DialogResult.Rejected) {
                 if (errorMsg == "") {
@@ -247,6 +242,7 @@ BluetoothAgent {
         // try to pair again with the new passkey
         _usingDefaultPin = false
         _pendingAuthPasskey = newPasskey
+        _canRetry = true
         _retryPairing()
     }
 
@@ -313,9 +309,7 @@ BluetoothAgent {
         }
     }
 
-    property QtObject _notification: Notification {
-        category: "x-jolla.settings.bluetooth"
-    }
+    property QtObject _notification: BluetoothPairingNotification {}
 
     property QtObject _pairingDialogComponent: Component {
         BluetoothPairingDialog {

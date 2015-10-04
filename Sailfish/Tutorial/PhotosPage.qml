@@ -4,11 +4,15 @@ import Sailfish.Silica 1.0
 Page {
     id: page
 
+    _clickablePageIndicators: false
+    showNavigationIndicator: false
+
     onStatusChanged: {
         if (status === PageStatus.Active) {
             timeline.restart()
         } else if (status === PageStatus.Deactivating) {
             hintLabel.opacity = 0.0
+            hint.stop()
         }
     }
 
@@ -37,9 +41,10 @@ Page {
         PauseAnimation { duration: 1000 }
         ScriptAction  {
             script: {
-                //% "Flick right to go back to previous view"
-                hintLabel.text = qsTrId("tutorial-la-flick_to_previous")
+                //% "Swipe right to go back to previous page"
+                hintLabel.text = qsTrId("tutorial-la-swipe_to_previous")
                 hintLabel.opacity = 1.0
+                hint.start()
 
                 // This is a workaround for JB#20714, making the MouseArea
                 // invisible effectively disables it:
@@ -54,32 +59,53 @@ Page {
         onPressedChanged: {
             if (page.status === PageStatus.Active && !touchBlocker.enabled) {
                 hintLabel.opacity = pageStack.pressed ? 0.0 : 1.0
+                if (pageStack.pressed)
+                    hint.stop()
+                else
+                    hint.start()
             }
         }
     }
 
-    Image {
-        source: Qt.resolvedUrl("/usr/share/sailfish-tutorial/graphics/tutorial-gallery-photos.png")
-        sourceSize {
-            width: 540 * xScale
-            height: 960 * yScale
-        }
-        width: sourceSize.width
-        height: sourceSize.height
+    GlassItem {
+        id: pageIndicator
+
+        x: -width/2 + (pageStack && pageStack._currentContainer ? pageStack._currentContainer.x : 0)
+        color: Theme.primaryColor
+        radius: 0.22
+        falloffRadius: 0.18
+        parent: __silica_applicationwindow_instance.indicatorParentItem
     }
 
-    Item {
-        id: pageIndicator
-        width: Theme.itemSizeSmall
-        height: Theme.itemSizeLarge
+    SilicaFlickable {
+        anchors.fill: parent
+
+        interactive: false
+
+        PullDownMenu {
+            highlightColor: tutorialTheme.highlightColor
+            backgroundColor: tutorialTheme.highlightBackgroundColor
+        }
+    }
+
+    PageHeader {
+        id: pageHeader
+
+        //% "Photos"
+        title: qsTrId("tutorial-la-gallery_photos_album")
+        _titleItem.color: tutorialTheme.highlightColor
+    }
+
+    Image {
+        source: Screen.sizeCategory >= Screen.Large
+                ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-gallery-app-grid.png")
+                : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-gallery-app-grid.png")
     }
 
     TouchInteractionHint {
         id: hint
         direction: TouchInteraction.Right
         loops: Animation.Infinite
-        running: hintLabel.opacity > 0
-        anchors.verticalCenter: parent.verticalCenter
     }
 
     HintLabel {
@@ -130,6 +156,7 @@ Page {
         }
         color: tutorialTheme.primaryColor
         highlightColor: tutorialTheme.highlightColor
+        highlightBackgroundColor: tutorialTheme.highlightBackgroundColor
         opacity: enabled ? infoLabel.opacity : 0
         enabled: false
         //% "Got it!"

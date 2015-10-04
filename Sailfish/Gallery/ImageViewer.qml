@@ -8,31 +8,39 @@ SilicaFlickable {
 
     property bool scaled: false
     property bool menuOpen
-    property bool enableZoom: !menuOpen
+    property bool enableZoom
     property alias source: photo.source
     property int fit
 
     property bool active: true
 
-    property real _fittedScale: Math.min(width / implicitWidth, height / implicitHeight)
-    property real _menuOpenScale: Math.max(_viewOpenWidth / implicitWidth, _viewOpenHeight / implicitHeight)
+    property real _fittedScale: Math.min(maximumZoom, Math.min(width / implicitWidth,
+                                                               height / implicitHeight))
+    property real _menuOpenScale: Math.max(_viewOpenWidth / implicitWidth,
+                                           _viewOpenHeight / implicitHeight)
     property real _scale
 
     property int orientation: metadata.orientation
 
-    property int maximumWidth
-    property int maximumHeight
-
-    // Prefer the maximumWidth and maximumHeight values supplied by the user as these may be more
-    // cheaply obtained, but if those values aren't valid then fall back to the ImageMetadata type.
-    property int _actualWidth: maximumWidth > 1 ? maximumWidth : metadata.width
-    property int _actualHeight: maximumHeight > 1 ? maximumHeight : metadata.height
+    // Calculate a default value which produces approximately same level of zoom
+    // on devices with different screen resolutions.
+    property real maximumZoom: Math.max(Screen.width, Screen.height) / 200
+    property int _maximumZoomedWidth: _fullWidth * maximumZoom
+    property int _maximumZoomedHeight: _fullHeight * maximumZoom
+    property int _minimumZoomedWidth: implicitWidth * _fittedScale
+    property int _minimumZoomedHeight: implicitHeight * _fittedScale
+    property bool _zoomAllowed: enableZoom && !menuOpen && _fittedScale !== maximumZoom && !_menuAnimating
+    property int _fullWidth: _transpose ? Math.max(photo.implicitHeight, largePhoto.implicitHeight)
+                                        : Math.max(photo.implicitWidth, largePhoto.implicitWidth)
+    property int _fullHeight: _transpose ? Math.max(photo.implicitWidth, largePhoto.implicitWidth)
+                                         : Math.max(photo.implicitHeight, largePhoto.implicitHeight)
 
     property int _viewOrientation: fit == Fit.Width ? Orientation.Portrait : Orientation.Landscape
     property int _viewOpenWidth: _viewOrientation == Orientation.Portrait ? Screen.width : Screen.height / 2
     property int _viewOpenHeight: _viewOrientation == Orientation.Portrait ? Screen.height / 2 : Screen.width
 
     readonly property bool _transpose: (orientation % 180) != 0
+    property bool _menuAnimating
 
     signal clicked
 
@@ -42,8 +50,8 @@ SilicaFlickable {
 
     flickableDirection: Flickable.HorizontalAndVerticalFlick
 
-    implicitWidth: !_transpose ? flickable._actualWidth : flickable._actualHeight
-    implicitHeight: !_transpose ? flickable._actualHeight : flickable._actualWidth
+    implicitWidth: _transpose ? photo.implicitHeight : photo.implicitWidth
+    implicitHeight: _transpose ? photo.implicitWidth : photo.implicitHeight
 
     contentWidth: container.width
     contentHeight: container.height
@@ -76,39 +84,39 @@ SilicaFlickable {
         if (largePhoto.source != photo.source) {
             largePhoto.source = photo.source
         }
+
         var newWidth
         var newHeight
         var oldWidth = contentWidth
         var oldHeight = contentHeight
 
-        // move center
-        contentX += prevCenter.x - center.x
-        contentY += prevCenter.y - center.y
-
         if (fit == Fit.Width) {
             // Scale and bounds check the width, and then apply the same scale to height.
-            newWidth = (!flickable._transpose ? photo.width : photo.height) * scale
-
-            if (newWidth <= _fittedScale * flickable.implicitWidth) {
+            newWidth = (flickable._transpose ? photo.height : photo.width) * scale
+            if (newWidth <= flickable._minimumZoomedWidth) {
                 _resetScale()
                 return
             } else {
-                newWidth = Math.min(newWidth, flickable._actualWidth)
-                _scale = newWidth / flickable.implicitWidth
-                newHeight = Math.max(!_transpose ? photo.height : photo.width, Screen.height)
+                newWidth = Math.min(newWidth, flickable._maximumZoomedWidth)
+                _scale = newWidth / implicitWidth
+                newHeight = _transpose ? photo.width : photo.height
             }
         } else {
             // Scale and bounds check the height, and then apply the same scale to width.
-            newHeight = (!flickable._transpose ? photo.height: photo.width) * scale
-            if (newHeight <= _fittedScale * flickable.implicitHeight) {
+            newHeight = (flickable._transpose ? photo.width : photo.height) * scale
+            if (newHeight <= flickable._minimumZoomedHeight) {
                 _resetScale()
                 return
             } else {
-                newHeight = Math.min(newHeight, flickable._actualHeight)
-                _scale = newHeight / flickable.implicitHeight
-                newWidth = Math.max(!_transpose ? photo.width : photo.height, Screen.height)
+                newHeight = Math.min(newHeight, flickable._maximumZoomedHeight)
+                _scale = newHeight / implicitHeight
+                newWidth = _transpose ? photo.height : photo.width
             }
         }
+
+        // move center
+        contentX += prevCenter.x - center.x
+        contentY += prevCenter.y - center.y
 
         // scale about center
         if (newWidth > flickable.width)
@@ -143,11 +151,12 @@ SilicaFlickable {
 
     PinchArea {
         id: container
-        enabled: !flickable.menuOpen && flickable.enableZoom && photo.status == Image.Ready
-        onPinchUpdated: flickable._scaleImage(1.0 + pinch.scale - pinch.previousScale, pinch.center, pinch.previousCenter)
+        enabled: photo.status == Image.Ready
+        onPinchStarted: if (flickable.menuOpen) flickable.clicked()
+        onPinchUpdated: if (flickable._zoomAllowed) flickable._scaleImage(1.0 + pinch.scale - pinch.previousScale, pinch.center, pinch.previousCenter)
         onPinchFinished: flickable.returnToBounds()
-        width: Math.max(flickable.width, !flickable._transpose ? photo.width : photo.height)
-        height: Math.max(flickable.height, !flickable._transpose ? photo.height : photo.width)
+        width: Math.max(flickable.width, flickable._transpose ? photo.height : photo.width)
+        height: Math.max(flickable.height, flickable._transpose ? photo.width : photo.height)
 
         Image {
             id: photo
@@ -155,8 +164,8 @@ SilicaFlickable {
             objectName: "zoomableImage"
 
             smooth: !(flickable.movingVertically || flickable.movingHorizontally)
-            width: Math.ceil(flickable._actualWidth * flickable._scale)
-            height: Math.ceil(flickable._actualHeight * flickable._scale)
+            width: Math.ceil(implicitWidth * flickable._scale)
+            height: Math.ceil(implicitHeight * flickable._scale)
             sourceSize.width: Screen.height
             fillMode:  Image.PreserveAspectFit
             asynchronous: true
@@ -167,7 +176,6 @@ SilicaFlickable {
             verticalAlignment: Image.Top
 
             onStatusChanged: {
-
                 if (status == Image.Ready) {
                     flickable._updateScale()
                 }
@@ -204,8 +212,6 @@ SilicaFlickable {
 
         MouseArea {
             anchors.fill: parent
-            enabled: !flickable.scaled
-
             onClicked: {
                 flickable.clicked()
             }
@@ -245,8 +251,7 @@ SilicaFlickable {
             name: "fullscreen"
             PropertyChanges {
                 target: flickable
-                // 1.0 for smaller images. _fittedScale for images which are larger than view
-                _scale: flickable._fittedScale >= 1 ? 1.0 : flickable._fittedScale
+                _scale: flickable._fittedScale
                 scaled: false
                 contentX: 0
                 contentY: 0
@@ -268,22 +273,31 @@ SilicaFlickable {
         Transition {
             from: '*'
             to: 'menuOpen'
-            PropertyAnimation {
-                target: flickable
-                properties: "_scale,contentX,contentY"
-                duration: 300
-                easing.type: Easing.InOutCubic
+            SequentialAnimation {
+                ScriptAction { script: flickable._menuAnimating = true }
+                PropertyAnimation {
+                    target: flickable
+                    properties: "_scale,contentX,contentY"
+                    duration: 300
+                    easing.type: Easing.InOutCubic
+                }
+                ScriptAction { script: flickable._menuAnimating = false }
             }
         },
         Transition {
             from: 'menuOpen'
             to: '*'
-            PropertyAnimation {
-                target: flickable
-                properties: "_scale,contentX,contentY"
-                duration: 300
-                easing.type: Easing.InOutCubic
+            SequentialAnimation {
+                ScriptAction { script: flickable._menuAnimating = true }
+                PropertyAnimation {
+                    target: flickable
+                    properties: "_scale,contentX,contentY"
+                    duration: 300
+                    easing.type: Easing.InOutCubic
+                }
+                ScriptAction { script: flickable._menuAnimating = false }
             }
         }
     ]
+
 }

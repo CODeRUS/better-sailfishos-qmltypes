@@ -13,12 +13,16 @@ Dialog {
 
     property string username
     property string password
+    property bool createAccountOnAccept: true
+    property string acceptText
+    property string cancelText
 
     property alias firstName: firstNameField.text
     property alias lastName: lastNameField.text
     property alias email: emailField.text
-    property string countryCode
-    property alias countryName: countryButton.value
+    property alias phoneNumber: phoneField.text
+    property alias countryCode: countryButton.countryCode
+    property alias countryName: countryButton.countryName
     property string languageLocale: languageModel.locale(languageModel.currentIndex)
     property var birthday: _selfPerson != null && _selfPerson.complete ? _selfPerson.birthday : undefined
 
@@ -35,6 +39,20 @@ Dialog {
     signal accountCreated(int newAccountId)
     signal accountCreationTypedError(int errorCode, string errorMessage)
 
+    function createAccount() {
+        accountFactory.createNewJollaAccount(
+                    username,
+                    password,
+                    emailField.text,
+                    firstNameField.text,
+                    lastNameField.text,
+                    birthday,
+                    phoneField.text,
+                    countryCode,
+                    languageLocale,
+                    "Jolla", "Jolla")
+    }
+
 
     // --- end public api ---
 
@@ -44,6 +62,43 @@ Dialog {
     // Check that the email is basically in the format "blah@blah.com[...]", without any whitespace.
     // We don't want the regex to be too strict because a wide variety of characters are acceptable in an email address.
     property var _emailRegex: /^\S+@\S+\.\S+$/
+
+    function _saveContactDetails() {
+        var index = 0
+
+        if (firstName.trim() !== "") {
+            _selfPerson.firstName = firstName.trim()
+        }
+        if (lastName.trim() !== "") {
+            _selfPerson.lastName = lastName.trim()
+        }
+        var myEmail = email.trim()
+        if (myEmail !== "") {
+            var emails = _selfPerson.emailDetails
+            emails.push({
+                'type': Person.EmailAddressType,
+                'address': myEmail,
+                'index': -1
+            })
+            _selfPerson.emailDetails = emails
+        }
+        var myPhone = phoneNumber.trim()
+        if (myPhone !== "") {
+            var numbers = _selfPerson.phoneDetails
+            numbers.push({
+                'type': Person.PhoneNumberType,
+                'number': myPhone,
+                'index': -1
+            })
+            _selfPerson.phoneDetails = numbers
+        }
+        if (birthday && !isNaN(birthday.getTime())) {
+            _selfPerson.birthday = birthday
+        }
+        if (!peopleModel.savePerson(_selfPerson)) {
+            console.log("Unable to save self contact details!")
+        }
+    }
 
     function _selectSelfPersonMultiValueField(details, property) {
         if (details.length === 0) {
@@ -66,20 +121,13 @@ Dialog {
                && !emailField.errorHighlight
                && countryCode !== ""
                && languageLocale !== ""
-               && (birthday != null && birthday.toString() !== "Invalid Date")
+               && (birthday != null && !isNaN(birthday.getTime()))
 
     onAccepted: {
-        accountFactory.createNewJollaAccount(
-                    username,
-                    password,
-                    emailField.text,
-                    firstNameField.text,
-                    lastNameField.text,
-                    birthday,
-                    phoneField.text,
-                    countryCode,
-                    languageLocale,
-                    "Jolla", "Jolla")
+        _saveContactDetails()
+        if (createAccountOnAccept) {
+            createAccount()
+        }
     }
 
     onAcceptPendingChanged: {
@@ -129,6 +177,12 @@ Dialog {
 
             DialogHeader {
                 dialog: root
+                acceptText: root.acceptText.length ? root.acceptText : defaultAcceptText
+                cancelText: root.cancelText.length ? root.cancelText : defaultCancelText
+
+                //: Description for page that requests user's name, email and other details in order to create a Jolla account
+                //% "Almost done, we just need a few more details"
+                title: qsTrId("settings_accounts-he-almost_done")
 
                 // Ensure checkMandatoryFields is set if 'accept' is tapped and some fields
                 // are not valid
@@ -139,32 +193,6 @@ Dialog {
                         onClicked: root.checkMandatoryFields = true
                     }
                 }
-            }
-
-            Label {
-                x: Theme.horizontalPageMargin
-                width: parent.width - x*2
-                height: implicitHeight + Theme.paddingLarge
-                wrapMode: Text.Wrap
-                font.pixelSize: Theme.fontSizeExtraLarge
-                color: Theme.highlightColor
-
-                // Heading for page that requests user's name, email and other details in order to create a Jolla account
-                //% "Personal Info"
-                text: qsTrId("settings_accounts-he-personal_info")
-            }
-
-            Label {
-                x: Theme.horizontalPageMargin
-                width: parent.width - x*2
-                height: implicitHeight + Theme.itemSizeExtraSmall
-                wrapMode: Text.Wrap
-                font.pixelSize: Theme.fontSizeExtraSmall
-                color: Theme.highlightColor
-
-                // Description for page that requests user's name, email and other details in order to create a Jolla account
-                //% "Almost done, we just need a few more details."
-                text: qsTrId("settings_accounts-la-personal_info")
             }
 
             TextField {
@@ -206,7 +234,7 @@ Dialog {
             TextField {
                 id: emailField
                 width: parent.width
-                inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
+                inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase | Qt.ImhEmailCharactersOnly
                 validator: RegExpValidator { regExp: root._emailRegex }
 
                 //% "Email address"
@@ -240,7 +268,7 @@ Dialog {
                       ? root._selectSelfPersonMultiValueField(root._selfPerson.phoneDetails, 'number')
                       : ""
 
-                EnterKey.enabled: text || inputMethodComposing
+                EnterKey.enabled: true
                 EnterKey.iconSource: "image://theme/icon-m-enter-close"
                 EnterKey.onClicked: root.focus = true
             }
@@ -249,13 +277,12 @@ Dialog {
                 id: countryButton
 
                 // TODO: change hardcoded color to upcoming theme error color
-                labelColor: countryCode === "" && checkMandatoryFields
-                            ? "#ff4d4d": Theme.primaryColor
+                valueColor: countryCode === "" && checkMandatoryFields
+                            ? "#ff4d4d"
+                            : Theme.highlightColor
 
                 onCountrySelected: {
                     root.focus = true
-                    root.countryCode = countryCode
-                    root.countryName = countryName
                 }
             }
 
@@ -266,8 +293,9 @@ Dialog {
                 //% "Language:"
                 label: qsTrId("settings_accounts-la-language")
                 // TODO: change hardcoded color to upcoming theme error color
-                labelColor: languageLocale === "" && checkMandatoryFields
-                            ? "#ff4d4d": Theme.primaryColor
+                valueColor: languageLocale === "" && checkMandatoryFields
+                            ? "#ff4d4d"
+                            : Theme.highlightColor
 
                 value: languageModel.languageName(languageModel.currentIndex)
 
@@ -302,17 +330,26 @@ Dialog {
                 //% "Birthday:"
                 label: qsTrId("settings_accounts-la-birthday")
                 // TODO: change hardcoded color to upcoming theme error color
-                labelColor: (root.birthday == null || root.birthday.toString() === "Invalid Date") && checkMandatoryFields
-                            ? "#ff4d4d": Theme.primaryColor
+                valueColor: (root.birthday == null || isNaN(root.birthday.getTime())) && checkMandatoryFields
+                            ? "#ff4d4d"
+                            : Theme.highlightColor
 
-                value: root.birthday != null && root.birthday.toString() !== "Invalid Date"
+                value: root.birthday != null && !isNaN(root.birthday.getTime())
                        ? Format.formatDate(root.birthday, Format.DateLong)
                          //% "Select your birthday"
                        : qsTrId("settings_accounts-bt-select_birthday")
 
                 onClicked: {
                     root.focus = true
-                    var dialog = pageStack.push(datePickerComponent, { date: root.birthday, _showYearSelectionFirst: true })
+                    var defaultBirthday
+                    if (root.birthday && !isNaN(root.birthday.getTime())) {
+                        defaultBirthday = root.birthday
+                    } else {
+                        // set a sensible default birthday date rather than the current date
+                        defaultBirthday = new Date()
+                        defaultBirthday.setFullYear(defaultBirthday.getFullYear() - 20)
+                    }
+                    var dialog = pageStack.push(datePickerComponent, { date: defaultBirthday, _showYearSelectionFirst: true })
                     dialog.accepted.connect(function() {
                         root.birthday = dialog.date
                         birthdayButton.value = Format.formatDate(root.birthday, Format.DateLong)
@@ -323,6 +360,20 @@ Dialog {
                     id: datePickerComponent
                     DatePickerDialog {}
                 }
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - x*2
+                height: implicitHeight + Theme.paddingLarge * 2
+                verticalAlignment: Text.AlignVCenter
+                wrapMode: Text.Wrap
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Theme.highlightColor
+
+                //: Explains why it's necessary to ask for the user's birthday and country information when creating a Jolla account.
+                //% "This information is needed to show appropriate content in the Jolla Store. Some apps or content may be age-restricted or only released in certain areas."
+                text: qsTrId("settings_accounts-la-why_ask_for_personal_info")
             }
         }
     }

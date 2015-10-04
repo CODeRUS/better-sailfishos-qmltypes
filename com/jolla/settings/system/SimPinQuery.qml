@@ -9,6 +9,7 @@ Item {
     property alias enteredPin: pinInput.enteredPin
     property alias modemPath: ofonoSimManager.modemPath
     property alias showCancelButton: pinInput.showCancelButton
+    property alias showBackgroundGradient: pinInput.showBackgroundGradient
     property alias cancelText: pinInput.cancelText
 
     property int _confirmedPinType

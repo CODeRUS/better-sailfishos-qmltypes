@@ -12,8 +12,8 @@ MprisControls {
         var song = ""
 
         if (mprisManager.currentService) {
-            var artistTag = mpris.metadataToString(Mpris.Artist)
-            var titleTag = mpris.metadataToString(Mpris.Title)
+            var artistTag = Mpris.metadataToString(Mpris.Artist)
+            var titleTag = Mpris.metadataToString(Mpris.Title)
 
             artist = (artistTag in mprisManager.metadata) ? mprisManager.metadata[artistTag].toString() : ""
             song = (titleTag in mprisManager.metadata) ? mprisManager.metadata[titleTag].toString() : ""
@@ -35,8 +35,4 @@ MprisControls {
     }
     onNextRequested: if (mprisManager.canGoNext) mprisManager.next()
     onPreviousRequested: if (mprisManager.canGoPrevious) mprisManager.previous()
-
-    Mpris {
-        id: mpris
-    }
 }

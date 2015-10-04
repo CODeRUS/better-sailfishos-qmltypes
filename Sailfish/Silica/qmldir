@@ -4,7 +4,6 @@ AddAnimation 1.0 AddAnimation.qml
 RemoveAnimation 1.0 RemoveAnimation.qml
 ApplicationWindow 1.0 ApplicationWindow.qml
 BackgroundItem 1.0 BackgroundItem.qml
-BackButton 1.0 BackButton.qml
 Button 1.0 Button.qml
 BusyIndicator 1.0 BusyIndicator.qml
 ColorPicker 1.0 ColorPicker.qml
@@ -18,6 +17,7 @@ DatePickerDialog 1.0 DatePickerDialog.qml
 DetailItem 1.0 DetailItem.qml
 Drawer 1.0 Drawer.qml
 FadeAnimation 1.0 FadeAnimation.qml
+FadeAnimator 1.0 FadeAnimator.qml
 FirstTimeUseCounter 1.0 FirstTimeUseCounter.qml
 HighlightBar 1.0 HighlightBar.qml
 IconButton 1.0 IconButton.qml

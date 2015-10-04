@@ -4,9 +4,10 @@ import Sailfish.Media 1.0
 import com.jolla.settings 1.0
 import com.jolla.settings.system 1.0
 import org.nemomobile.systemsettings 1.0
+import org.freedesktop.contextkit 1.0
 
 Item {
-    // Object which should containt tone related properties.
+    // Object which should contain tone related properties.
     property QtObject toneSettings
 
     height: toneItems.height
@@ -20,12 +21,23 @@ Item {
         id: metadataReader
     }
 
+    ContextProperty {
+        id: capabilityVoiceContextProperty
+        key: "Cellular.CapabilityVoice"
+    }
+
+    ContextProperty {
+        id: capabilityDataContextProperty
+        key: "Cellular.CapabilityData"
+    }
+
     Column {
         id: toneItems
 
         width: parent.width
 
         ToneItem {
+            visible: capabilityVoiceContextProperty.value || capabilityVoiceContextProperty.value === undefined
             //% "Ringtone"
             defaultText: qsTrId("settings_sound-la-ringtone")
             //% "Current ringtone"
@@ -44,6 +56,7 @@ Item {
         }
 
         ToneItem {
+            visible: capabilityDataContextProperty.value || capabilityDataContextProperty.value === undefined
             //% "Message"
             defaultText: qsTrId("settings_sound-la-message")
             //% "Current message tone"

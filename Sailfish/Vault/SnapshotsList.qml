@@ -10,6 +10,8 @@ SilicaListView {
     property bool enabled: true
     property Item restoreItem: null
     property bool empty: !model || model.count == 0
+    property real contentWidth: width
+    property real contentMargin: Theme.horizontalPageMargin
 
     signal error(variant err)
 
@@ -90,6 +92,9 @@ SilicaListView {
 
     delegate: SnapshotItem {
         menu: menuComponent
+        width: snapshotsList.contentWidth
+        anchors.horizontalCenter: parent.horizontalCenter
+        contentMargin: snapshotsList.contentMargin
     }
 
     VerticalScrollDecorator {}

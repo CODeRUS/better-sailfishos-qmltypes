@@ -39,9 +39,8 @@ ListModel {
                             //: ambience aspect ratio
                             //% "Ambience"
                             text: qsTrId("components_gallery-li-aspect_ratio_ambience"),
-                            ratio: 27/80,
+                            ratio: 1.0,
                             type: "Ambience"
-
                         },
 
                         {
@@ -58,7 +57,6 @@ ListModel {
                             text: qsTrId("components_gallery-li-aspect_ratio_4_3"),
                             ratio: 4/3,
                             type: "4:3"
-
                         }
                     ]
         }

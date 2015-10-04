@@ -125,8 +125,8 @@ Item {
             anchors {
                 left: summaryLabel.left
                 right: summaryLabel.right
-                bottom: parent.bottom
-                bottomMargin: Theme.paddingSmall
+                top: summaryLabel.bottom
+                topMargin: Theme.paddingMedium
             }
             color: Theme.primaryColor
             opacity: 0.6
@@ -139,8 +139,8 @@ Item {
             anchors {
                 left: summaryLabel.left
                 right: summaryLabel.right
-                bottom: labelItem.top
-                bottomMargin: Theme.paddingSmall/2
+                bottom: summaryLabel.bottom
+                bottomMargin: -(Theme.paddingMedium - (Theme.paddingSmall / 2))
             }
             color: summaryLabel.color
         }

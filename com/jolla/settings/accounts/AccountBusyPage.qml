@@ -50,6 +50,10 @@ Page {
     //% "Creating account..."
     property string creatingAccountText: qsTrId("components_accounts-la-creating_account")
 
+    //: Notifies the device is in the process of signing into the account
+    //% "Signing in..."
+    property string signingInText: qsTrId("components_accounts-la-signing_into_account")
+
     //: Notifies user that the updated account credentials are currently being saved
     //% "Saving credentials..."
     property string updatingAccountText: qsTrId("components_accounts-la-updating_account_credentials")

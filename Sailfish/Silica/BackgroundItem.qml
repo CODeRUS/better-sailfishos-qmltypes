@@ -48,13 +48,14 @@ MouseArea {
     property bool _showPress: highlighted || pressTimer.running
     property alias contentItem: content
     property alias _backgroundColor: content.color
+    property real _screenMargin: Theme.paddingLarge
 
     default property alias children: content.data
 
     width: parent ? parent.width : Screen.width
     implicitHeight: Theme.itemSizeSmall
 
-    DragFilter.screenMargin: Theme.paddingLarge
+    DragFilter.screenMargin: item._screenMargin
 
     onPressed: {
         item.DragFilter.begin(mouse.x, mouse.y)
@@ -71,7 +72,7 @@ MouseArea {
     Rectangle {
         id: content
         width: parent.width
-        height: parent.height
+        height: item.height
 
         color: _showPress ? highlightedColor : "transparent"
     }

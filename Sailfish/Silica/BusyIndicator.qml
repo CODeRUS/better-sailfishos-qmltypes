@@ -45,7 +45,9 @@ Image {
     function _updateSize() {
         var prefix = "image://theme/graphic-busyindicator-"
         var indicatorSize
-        if (size == BusyIndicatorSize.Small) {
+        if (size == BusyIndicatorSize.ExtraSmall) {
+            indicatorSize = "extra-small"
+        } else if (size == BusyIndicatorSize.Small) {
             indicatorSize = "small"
         } else if (size == BusyIndicatorSize.Medium) {
             indicatorSize = "medium"
@@ -64,11 +66,11 @@ Image {
     transformOrigin: Item.Center
     opacity: running ? 1.0 : 0.0
 
-    Behavior on opacity { FadeAnimation {}}
+    Behavior on opacity { FadeAnimation { id: fadeAnimation }}
     RotationAnimator on rotation {
         from: 0; to: 360
         duration: 2000
-        running: busyIndicator.running && busyIndicator.visible && Qt.application.active
+        running: (busyIndicator.running || fadeAnimation.running) && busyIndicator.visible && Qt.application.active
         loops: Animation.Infinite
     }
 }

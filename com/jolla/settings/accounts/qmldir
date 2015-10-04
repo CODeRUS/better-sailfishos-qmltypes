@@ -39,3 +39,6 @@ EmailIntervalListModel 1.0 EmailIntervalListModel.qml
 SyncIntervalOptions 1.0 SyncIntervalOptions.qml
 WeekDaySelector 1.0 WeekDaySelector.qml
 AccountSettingsSaveHint 1.0 AccountSettingsSaveHint.qml
+JollaAccountCredentialsInput 1.0 JollaAccountCredentialsInput.qml
+ValidatedTextInput 1.0 ValidatedTextInput.qml
+AddAccountMenuItem 1.0 AddAccountMenuItem.qml

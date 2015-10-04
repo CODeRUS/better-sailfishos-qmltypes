@@ -65,6 +65,7 @@ Dialog {
     property bool _initialDateSet
     property QtObject _revealAnim
     property bool _delayedLoadNonVisibleGrids
+    property bool _largeScreen: screen.sizeCategory > Screen.Medium
 
     canAccept: !isNaN(selectedDate.getTime())
     forwardNavigation: _showYearSelectionFirst ? false : !_belowTop
@@ -174,6 +175,7 @@ Dialog {
 
             property alias selectedDate: datePicker.date
             property alias selectedDateText: datePicker.dateText
+            property bool dateAboveGrid: _largeScreen || isPortrait
 
             function loadNonVisibleGrids() {
                 datePicker._loadNonVisibleGrids()
@@ -183,54 +185,20 @@ Dialog {
 
             DialogHeader {
                 id: header
-                acceptText: Format.formatDate(datePicker.date, Format.DateMedium)
                 dialog: datePickerDialog
+                spacing: !_largeScreen && isLandscape ? 0 : Theme.paddingLarge
             }
-            Row {
-                id: weekDays
+
+            BackgroundItem {
+                id: yearPicker
+
                 anchors {
                     top: header.bottom
-                    horizontalCenter: parent.horizontalCenter
+                    left: dateAboveGrid ? parent.left : datePicker.right
+                    right: parent.right
                 }
-                width: datePicker.width - datePicker.leftMargin - datePicker.rightMargin
-                Repeater {
-                    model: weekdayModel
-                    MenuLabel {
-                        text: model.name
-                        width: weekDays.width / 7
-                    }
-                }
-            }
-            DatePicker {
-                id: datePicker
-                anchors {
-                    top: weekDays.bottom
-                    horizontalCenter: parent.horizontalCenter
-                }
-                date: _initialDateSet
-                      ? datePickerDialog._initialDate
-                      : (datePickerDialog.date.toString() !== "Invalid Date") ? datePickerDialog.date : new Date()
+                height: dateLabel.height + 2*Theme.paddingSmall
 
-                // Don't want the datepicker to scroll to the set date because we are already
-                // animating the datepicker into view
-                _changeWithoutAnimation: datePickerDialog._showYearSelectionFirst
-
-                // Avoid stuttering when the dialog transitions into view
-                _loadNonVisibleGridsImmediately: false
-            }
-
-            ValueButton {
-                id: yearPicker
-                anchors{
-                    top: datePicker.bottom
-                    topMargin: Theme.paddingLarge
-                    left: datePicker.left
-                    right: datePicker.right
-                }
-                //: Show and allow changing the currently displayed year and month for date selection
-                //% "Year"
-                label: qsTrId("components-la-datepickerdialog_year")
-                value: datePicker.date.getFullYear()
                 onClicked: {
                     if (_yearSelectionPage == null) {
                         _yearSelectionPage = yearSelectionPageComponent.createObject(datePickerDialog,
@@ -244,12 +212,59 @@ Dialog {
                     }
                     pageStack.push(_yearSelectionPage)
                 }
+
+                Label {
+                    id: dateLabel
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        leftMargin: dateAboveGrid ? Theme.horizontalPageMargin : Theme.paddingMedium
+                        rightMargin: Theme.horizontalPageMargin
+                        verticalCenter: parent.verticalCenter
+                    }
+                    color: yearPicker.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    font.pixelSize: _largeScreen ? Theme.fontSizeExtraLarge : Theme.fontSizeLarge
+                    text: Format.formatDate(datePicker.date, Format.DateLong)
+                    wrapMode: Text.Wrap
+                    horizontalAlignment: dateAboveGrid ? Text.AlignHCenter : Text.AlignRight
+                }
+            }
+
+            DatePicker {
+                id: datePicker
+
+                anchors {
+                    top: dateAboveGrid ? yearPicker.bottom : header.bottom
+                    topMargin: dateAboveGrid ? Theme.paddingLarge : 0
+                    horizontalCenter: dateAboveGrid ? parent.horizontalCenter : undefined
+                    left: dateAboveGrid ? undefined : parent.left
+                }
+                // Show week column on larger displays or smaller displays in landscape.
+                weeksVisible: _largeScreen || isLandscape
+                daysVisible: true
+                monthYearVisible: false
+                width: Math.min(parent.width, Screen.width + (_largeScreen
+                                                              ? (isLandscape ? -Theme.horizontalPageMargin*2 : 0)
+                                                              : (isLandscape ? weekColumnWidth : 0)))
+                cellHeight: !_largeScreen && isLandscape ? Theme.itemSizeExtraSmall : cellWidth
+                leftMargin: isLandscape ? Theme.horizontalPageMargin : (_largeScreen ? Theme.horizontalPageMargin*2 : 0)
+                rightMargin: isLandscape ? Theme.horizontalPageMargin : (_largeScreen ? Theme.horizontalPageMargin*2 : 0)
+                date: _initialDateSet
+                      ? datePickerDialog._initialDate
+                      : (datePickerDialog.date.toString() !== "Invalid Date") ? datePickerDialog.date : new Date()
+
+                // Don't want the datepicker to scroll to the set date because we are already
+                // animating the datepicker into view
+                _changeWithoutAnimation: datePickerDialog._showYearSelectionFirst
+
+                // Avoid stuttering when the dialog transitions into view
+                _loadNonVisibleGridsImmediately: false
             }
 
             MouseArea {
                 anchors {
-                    top: yearPicker.bottom
-                    left: parent.left
+                    top: dateAboveGrid ? datePicker.bottom : yearPicker.bottom
+                    left: dateAboveGrid ? parent.left : yearPicker.left
                     right: parent.right
                     bottom: parent.bottom
                 }
@@ -274,17 +289,6 @@ Dialog {
                     duration: 300
                     easing.type: Easing.OutCubic
                 }
-            }
-        }
-    }
-
-    ListModel {
-        id: weekdayModel
-        Component.onCompleted: {
-            var dt = new Date(2012, 0, 2)   // Jan 2, 2012 is a Monday
-            for (var i=0; i<7; i++) {
-                append({"name": Qt.formatDateTime(dt, "ddd")})
-                dt.setDate(dt.getDate() + 1)
             }
         }
     }

@@ -1,11 +1,17 @@
 import QtQuick 2.0
 import QtDocGallery 5.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Gallery 1.0
 import Sailfish.Pickers 1.0
 
 PickerDialog {
     id: imagePickerDialog
+
+    orientationTransitions: Private.PageOrientationTransition {
+        fadeTarget: _background ? gridView : __silica_applicationwindow_instance.contentItem
+        targetPage: imagePickerDialog
+    }
 
     ImageGridView {
         id: gridView

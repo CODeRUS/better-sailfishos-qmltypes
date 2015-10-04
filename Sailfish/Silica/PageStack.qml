@@ -101,6 +101,8 @@ PageStackBase {
     property bool acceptAnimationRunning: _pageStackIndicator == null ? false : _pageStackIndicator.animatingPosition
 
     property int _currentOrientation: currentPage ? currentPage.orientation : Orientation.Portrait
+    property int _currentWallpaperOrientation: currentPage ? currentPage._wallpaperOrientation : Orientation.Portrait
+
     property real _currentWidth: currentPage ? currentPage.width : 0
 
     // The number of ongoing transitions.
@@ -750,6 +752,7 @@ PageStackBase {
             property bool containsDialog: page !== null && page.hasOwnProperty('__silica_dialog')
             property bool fixLateralPosition
             property int __silica_pagestack_container
+            property int direction
 
             property real lateralOffset
 
@@ -758,6 +761,9 @@ PageStackBase {
 
             width: parent ? parent.width : 0
             height: parent ? parent.height : 0
+
+            // This needs to be a binding rather than static assignment so that the value is restored by the Binding element
+            opacity: { return 1.0 }
 
             focus: page !== null && page.status === PageStatus.Active
 
@@ -816,13 +822,15 @@ PageStackBase {
                 if (!transitionPartner) {
                     return false
                 }
-                // Use a fade transition we're going to a page that doesn't allow backstepping
-                if ((push && !page.backNavigation) || (!push && !transitionPartner.page.backNavigation)) {
+                // Use a fade transition we're going to a page that doesn't allow backstepping and
+                // the page is not already partially in view
+                if (!dragInProgress &&
+                        ((push && !page.backNavigation) || (!push && !transitionPartner.page.backNavigation))) {
                     return false
                 }
 
                 // Use fade transition if orientation will change
-                var nextOrientation = __silica_applicationwindow_instance._selectOrientation(page.allowedOrientations)
+                var nextOrientation = __silica_applicationwindow_instance._selectOrientation(page._allowedOrientations)
                 if (transitionPartner.page.orientation !== nextOrientation) {
                     if (dragInProgress) {
                         // A drag has been used - continue to use slide transition, but don't move with it
@@ -848,6 +856,7 @@ PageStackBase {
                     animation = fadeAnimation
                 }
 
+                direction = PageNavigation.Forward
                 page.pageContainer = root
                 transitionStarted()
             }
@@ -869,17 +878,20 @@ PageStackBase {
                     animation = fadeAnimation
                 }
 
+                direction = transitionPartner.page._navigation
                 page.pageContainer = root
                 transitionStarted()
             }
             function pushExit(partner) {
                 resetPending()
                 transitionPartner = partner
+                direction = PageNavigation.Forward
                 _setPageStatus(page, PageStatus.Deactivating)
             }
             function popExit(partner) {
                 resetPending()
                 transitionPartner = partner
+                direction = page._navigation
                 _setPageStatus(page, PageStatus.Deactivating)
             }
             function transitionStarted() {
@@ -944,6 +956,8 @@ PageStackBase {
                         }
                     }
                 }
+
+                direction = PageNavigation.None
             }
             function cleanup() {
                 if (attachedContainer !== null && attachedContainer.pageStackIndex == -1) {
@@ -988,14 +1002,14 @@ PageStackBase {
                 value: !transitionPartner
                        ? container.lateralOffset
                        : (transitionPartner.lateralOffset === 0
-                            ? (container.attached ? _currentWidth : -_currentWidth)
+                            ? (container.direction == PageNavigation.Back ? _currentWidth : -_currentWidth)
                             : transitionPartner.lateralOffset + (transitionPartner.lateralOffset < 0 ? _currentWidth : -_currentWidth))
             }
             Binding {
                 // When the container is involved in a lateral transition
                 target: container
                 property: "opacity"
-                when: container.lateralOffset !== 0
+                when: container.lateralOffset !== 0 && transitionPartner && container.page.rotation !== transitionPartner.page.rotation
                 value: transitionPartner
                        ? (!fixLateralPosition && (page.status === PageStatus.Activating
                          || (_currentContainer == transitionPartner && page.status !== PageStatus.Deactivating))

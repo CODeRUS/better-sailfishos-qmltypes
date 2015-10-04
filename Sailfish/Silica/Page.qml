@@ -74,6 +74,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 
 MouseArea {
     id: page
@@ -103,6 +104,7 @@ MouseArea {
 
     property int _navigation: PageNavigation.None
     property int _navigationPending: PageNavigation.None
+    property int _wallpaperOrientation: Orientation.Portrait
 
     property int _allowedOrientations: {
         var allowed = allowedOrientations & __silica_applicationwindow_instance.allowedOrientations
@@ -110,8 +112,15 @@ MouseArea {
             // No common supported orientations, let the page decide
             allowed = allowedOrientations
         }
+        if (allowed & Orientation.Portrait || allowed & Orientation.PortraitInverted) {
+            allowed = allowed | Orientation.Portrait | Orientation.PortraitInverted
+        }
+        if (allowed & Orientation.Landscape || allowed & Orientation.LandscapeInverted) {
+            allowed = allowed | Orientation.Landscape | Orientation.LandscapeInverted
+        }
         return allowed
     }
+    property alias _windowOrientation: orientationState.pageOrientation
 
     property int _horizontalDimension: (pageContainer && _exposed && parent) ? parent.width : Screen.width
     property int _verticalDimension: (pageContainer && _exposed && parent) ? parent.height : Screen.height
@@ -174,16 +183,19 @@ MouseArea {
 
         property bool completed
         // Choose the orientation this page will have given the current device orientation
-        property int pageOrientation: {
-            var next = __silica_applicationwindow_instance._selectOrientation(page._allowedOrientations, __silica_applicationwindow_instance.deviceOrientation)
-            nextOrientation = next
-            return next
-        }
+        property int pageOrientation: Orientation.None
+        property int desiredPageOrientation: __silica_applicationwindow_instance._selectOrientation(page._allowedOrientations, __silica_applicationwindow_instance.deviceOrientation)
+        property bool desiredPageOrientationSuitable: desiredPageOrientation & __silica_applicationwindow_instance.deviceOrientation
 
-        property int nextOrientation
-        onNextOrientationChanged: {
-            blocker.restart()
-            _defaultTransition = (transitions.length === 1 && transitions[0] === defaultTransition)
+        onDesiredPageOrientationChanged: _updatePageOrientation()
+        onDesiredPageOrientationSuitableChanged: _updatePageOrientation()
+
+        function _updatePageOrientation() {
+            if (pageOrientation !== desiredPageOrientation) {
+                blocker.restart()
+                _defaultTransition = (transitions.length === 1 && transitions[0] === defaultTransition)
+                pageOrientation = desiredPageOrientation
+            }
         }
 
         state: 'Unanimated'
@@ -204,6 +216,7 @@ MouseArea {
                     height: _verticalDimension
                     rotation: 0
                     orientation: Orientation.Portrait
+                    _wallpaperOrientation: Orientation.Portrait
                 }
             },
             State {
@@ -217,6 +230,7 @@ MouseArea {
                     height: _horizontalDimension
                     rotation: 90
                     orientation: Orientation.Landscape
+                    _wallpaperOrientation: Orientation.Landscape
                 }
             },
             State {
@@ -230,6 +244,7 @@ MouseArea {
                     height: _verticalDimension
                     rotation: 180
                     orientation: Orientation.PortraitInverted
+                    _wallpaperOrientation: Orientation.PortraitInverted
                 }
             },
             State {
@@ -243,46 +258,13 @@ MouseArea {
                     height: _horizontalDimension
                     rotation: 270
                     orientation: Orientation.LandscapeInverted
+                    _wallpaperOrientation: Orientation.LandscapeInverted
                 }
             }
         ]
 
-        property Transition defaultTransition: Transition {
-            to: 'Portrait,Landscape,PortraitInverted,LandscapeInverted'
-            from: 'Portrait,Landscape,PortraitInverted,LandscapeInverted'
-            SequentialAnimation {
-                PropertyAction {
-                    target: page
-                    property: 'orientationTransitionRunning'
-                    value: true
-                }
-                FadeAnimation {
-                    target: __silica_applicationwindow_instance.contentItem
-                    to: 0
-                    duration: 150
-                }
-                PropertyAction {
-                    target: page
-                    properties: 'width,height,rotation,orientation'
-                }
-                ScriptAction {
-                    script: {
-                        // Restores the Bindings to width, height and rotation
-                        _defaultTransition = false
-                        _defaultTransition = true
-                    }
-                }
-                FadeAnimation {
-                    target: __silica_applicationwindow_instance.contentItem
-                    to: 1
-                    duration: 150
-                }
-                PropertyAction {
-                    target: page
-                    property: 'orientationTransitionRunning'
-                    value: false
-                }
-            }
+        property Transition defaultTransition: Private.PageOrientationTransition {
+            targetPage: page
         }
 
         Component.onCompleted: {
