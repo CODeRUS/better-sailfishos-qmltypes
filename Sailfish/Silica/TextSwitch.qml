@@ -121,7 +121,7 @@ MouseArea {
     }
     Label {
         id: desc
-        width: parent.width - toggle.width - root.leftMargin - root.rightMargin - root._rightPadding
+        width: label.width
         height: text.length ? (implicitHeight + Theme.paddingMedium) : 0
         opacity: root.enabled ? 1.0 : 0.4
         anchors.top: label.bottom

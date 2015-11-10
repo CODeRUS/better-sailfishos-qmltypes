@@ -124,7 +124,7 @@ Item {
     }
 
     Image {
-        source: "image://theme/graphics-edge-swipe-handle"
+        source: "image://theme/graphic-edge-swipe-handle-top"
 
         anchors {
             bottom: applicationGrid.top
@@ -132,19 +132,24 @@ Item {
         }
     }
 
-    Rectangle {
+    Image {
         id: applicationGrid
 
-        color: "black"
         width: parent.width
         height: parent.height
         y: parent.height
 
-        Image {
-            anchors.fill: parent
-            source: Screen.sizeCategory >= Screen.Large
-                    ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-launcher.png")
-                    : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-launcher.png")
+        source: Screen.sizeCategory >= Screen.Large
+                ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-launcher.png")
+                : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-launcher.png")
+    }
+
+    Image {
+        source: "image://theme/graphic-edge-swipe-handle-bottom"
+
+        anchors {
+            top: applicationGrid.top
+            horizontalCenter: applicationGrid.horizontalCenter
         }
     }
 

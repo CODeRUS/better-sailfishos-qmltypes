@@ -99,8 +99,15 @@ Dialog {
 
     Column {
         id: retryText
+
+        property bool display: root._connectionSelectorClosed && !openConnSelector.running
+                               && root.status != PageStatus.Activating
+                               && root.status != PageStatus.Inactive    // don't show when backstepping to this page
+
         width: parent.width
-        visible: !root._connectionSelected
+
+        opacity: display ? 1.0 : 0
+        Behavior on opacity { FadeAnimation {} }
 
         // show a header to be consistent with other dialogs, but do not show
         // the accept/cancel navigation
@@ -138,7 +145,6 @@ Dialog {
         Button {
             id: retryButton
             anchors.horizontalCenter: parent.horizontalCenter
-            visible: retryText.visible
             //: Display the dialog to set up the internet connection
             //% "Connect"
             text: qsTrId("settings_accounts-bt-connect")
@@ -161,7 +167,11 @@ Dialog {
         }
         verticalAlignment: Text.AlignBottom
         font.pixelSize: Theme.fontSizeSmall
-        visible: text != "" && retryText.visible
+        visible: text != ""
+
+        // even when other explanatory text is hidden, show the skip label but dim it to still indicate skipping is possible
+        opacity: retryText.display ? 1.0 : Theme.highlightBackgroundOpacity
+        Behavior on opacity { FadeAnimation {} }
 
         onClicked: {
             root.forwardNavigation = true

@@ -12,6 +12,7 @@ Dialog {
     property bool showSearchPatternAsNewContact: false
     property alias requiredProperty: contactBrowser.requiredProperty
     property alias showRecentContactList: contactBrowser.showRecentContactList
+    property alias recentContactsCategoryMask: contactBrowser.recentContactsCategoryMask
     property alias searchEnabled: contactBrowser.searchEnabled
 
     signal contactClicked(variant contact, variant clickedItemY, variant property, string propertyType)

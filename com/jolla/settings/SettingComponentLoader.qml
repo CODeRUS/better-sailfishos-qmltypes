@@ -6,11 +6,10 @@ Loader {
 
     property variant settingsObject
     property bool gridMode
-
-    signal contextMenuRequested(string settingEntryPath)
+    property url sectionSource: "SettingsSectionLink.qml"
+    property url pageSource: gridMode ? "SettingsPageLinkGrid.qml" : "SettingsPageLink.qml"
 
     width: parent.width
-//    height: item && item.height > 0 ? item.height : 50
 
     source: {
         var objType = settingsObject.type
@@ -20,13 +19,9 @@ Loader {
         } else if (objType === "integer") {
             return "SliderSetting.qml"
         } else if (objType === "section") {
-            return "SettingsSectionLink.qml"
+            return sectionSource
         } else if (objType === "page") {
-            if (gridMode) {
-                return "SettingsPageLinkGrid.qml"
-            } else {
-                return "SettingsPageLink.qml"
-            }
+            return pageSource
         } else if (objType === "custom") {
             // notice custom QML screens will not use SettingsItem
             // so will not have entryPath properties etc.
@@ -45,7 +40,9 @@ Loader {
         if (item.hasOwnProperty("entryPath") && item.entryPath === "") {
             item.entryPath = settingsObject.location().join("/")
         }
-
+        if (params && item.hasOwnProperty("depth")) {
+            item.depth = params.depth && params.depth > 0 ? params.depth : 1
+        }
         if (objType === "bool") {
             item.iconSource = settingsObject.icon ? settingsObject.icon : ""
             if (params) {
@@ -68,9 +65,6 @@ Loader {
         } else if (objType === "section") {
             item.name = settingsObject.title
             item.iconSource = settingsObject.icon ? settingsObject.icon : ""
-            if (params) {
-                item.depth = params.depth && params.depth > 0 ? params.depth : 1
-            }
         } else if (objType === "page") {
             // Special handling for applications/something.desktop. Get icon used in the desktop file.
             var location = settingsObject.location()
@@ -87,12 +81,6 @@ Loader {
                 item.pageSource = params.source ? params.source : ""
             }
         }
-    }
-
-    Connections {
-        target: item
-        ignoreUnknownSignals: true
-        onPressAndHold: root.contextMenuRequested(item.entryPath)
     }
 }
 

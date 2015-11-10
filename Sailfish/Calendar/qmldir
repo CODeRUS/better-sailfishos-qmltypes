@@ -1,0 +1,3 @@
+module Sailfish.Calendar
+plugin sailfishcalendarplugin
+CalendarWidget 1.0 CalendarWidget.qml

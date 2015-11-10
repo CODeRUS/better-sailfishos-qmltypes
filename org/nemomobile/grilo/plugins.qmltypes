@@ -121,10 +121,19 @@ Module {
         Property { name: "trackNumber"; type: "int"; isReadonly: true }
         Property { name: "childCount"; type: "int"; isReadonly: true }
         Property { name: "mimeType"; type: "string"; isReadonly: true }
+        Property { name: "modificationDate"; type: "QDateTime"; isReadonly: true }
+        Property { name: "height"; type: "int"; isReadonly: true }
+        Property { name: "orientation"; type: "int"; isReadonly: true }
+        Property { name: "width"; type: "int"; isReadonly: true }
         Method {
             name: "get"
             type: "QVariant"
             Parameter { name: "keyId"; type: "string" }
+        }
+        Method {
+            name: "get"
+            type: "QVariant"
+            Parameter { name: "keyId"; type: "uint" }
         }
         Method { name: "serialize"; type: "string" }
     }

@@ -15,6 +15,7 @@ Item {
     property int requiredProperty: PeopleModel.EmailAddressRequired
     property alias multipleAllowed: namesList.multipleAllowed
     property alias inputMethodHints: namesList.inputMethodHints
+    property alias recentContactsCategoryMask: namesList.recentContactsCategoryMask
 
     // A model with the following roles:
     // "property" - an object containing the value of the property that the user chose:
@@ -73,6 +74,7 @@ Item {
 
     AutoCompleteFieldList {
         id: namesList
+        requiredProperty: root.requiredProperty
         opacity: _editing ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation {} }
         visible: opacity > 0.0

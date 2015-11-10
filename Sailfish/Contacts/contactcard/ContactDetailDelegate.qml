@@ -5,27 +5,15 @@ import Sailfish.Contacts 1.0
 import "contactcardmodelfactory.js" as ModelFactory
 import "numberutils.js" as NumberUtils
 
-Column {
+ExpandingDelegate {
     id: detailItem
+
     property string detailType
-    property alias detailValue: contactDetailValue.text
-    property alias detailTypeValue: contactDetailType.text
     property variant detailData
-    property real activationProgress
     property bool hidePhoneActions
     property bool disablePhoneActions
 
-    property alias active: contactDetailActions.active
-    property bool _wasActive
     property bool _disableActionButtons
-    onActivationProgressChanged: {
-        if (activationProgress == 1) {
-            _wasActive = false
-        }
-    }
-
-    // Signal that tells that the header needs to be opened/closed.
-    signal contactDetailClicked(variant detailItem)
 
     // Signals to tell that some contact card action item has been clicked.
     // Yep, it's a string because the phone number can start with the '+' char.
@@ -36,8 +24,6 @@ Column {
     signal addressClicked(string address, variant addressParts)
     signal websiteClicked(string url)
     signal dateClicked(variant date)
-
-    width: parent.width
 
     function handleActionClicked(actionType) {
         var actionValue = detailValue
@@ -75,7 +61,6 @@ Column {
     }
 
     onActiveChanged: {
-        _wasActive = !active
         if (actionDetailsModel.count == 0) {
             if (hidePhoneActions && detailType === "phone") {
                 return
@@ -97,74 +82,18 @@ Column {
         }
     }
 
-    MouseArea {
-        width: parent.width
-        height: childrenRect.height
+    expandingContent: [
+        Grid {
+            id: grid
+            columns: 2
+            spacing: actionDetailsModel.count > 1 ? Theme.paddingLarge : 0
 
-        onClicked: contactDetailClicked(detailItem)
-
-        Item {
-            id: labelWrapper
-
-            property bool active: contactDetailActions.active || (pressed && containsMouse)
-
-            width: parent.width
-            height: childrenRect.height
-
-            // Opacity must be controlled here, as truncation/fade will override it inside the label
-            opacity: active ? 1.0 : 0.5
-
-            Label {
-                id: contactDetailType
-                color: parent.active ? Theme.highlightColor : Theme.primaryColor
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width - 2*Theme.horizontalPageMargin
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.Wrap
-                font {
-                    family: Theme.fontFamilyHeading
-                    pixelSize: Theme.fontSizeLarge
-                }
-            }
-
-            Label {
-                id: contactDetailValue
-                color: parent.active ? Theme.highlightColor : Theme.primaryColor
-                font.pixelSize: Theme.fontSizeExtraSmall
-                y: contactDetailType.y + contactDetailType.height - 6  // TODO: Stupid font marginals.
-                width: parent.width - 2*Theme.paddingSmall
-                x: Theme.paddingSmall
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.Wrap
+            Repeater {
+                model: actionDetailsModel
+                Button { text: actionLabel; enabled: !_disableActionButtons; onClicked: handleActionClicked(actionType) }
             }
         }
-
-        Column {
-            id: contactDetailActions
-            property bool active
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                top: labelWrapper.bottom
-                topMargin: Theme.paddingMedium
-            }
-
-            property real animationProgress: active ? activationProgress : (_wasActive ? (1 - activationProgress) : 0)
-
-            height: grid.height * animationProgress
-            opacity: 1 * animationProgress
-
-            Grid {
-                id: grid
-                columns: 2
-                spacing: actionDetailsModel.count > 1 ? Theme.paddingLarge : 0
-
-                Repeater {
-                    model: actionDetailsModel
-                    Button { text: actionLabel; enabled: !_disableActionButtons; onClicked: handleActionClicked(actionType) }
-                }
-            }
-        }
-    }
+    ]
 
     ListModel { id: actionDetailsModel }
 }

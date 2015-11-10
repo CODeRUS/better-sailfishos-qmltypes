@@ -71,3 +71,4 @@ Separator 1.0 Separator.qml
 ValueButton 1.0 ValueButton.qml
 ColumnView 1.0 ColumnView.qml
 NestedGridView 1.0 NestedGridView.qml
+PasswordField 1.0 PasswordField.qml

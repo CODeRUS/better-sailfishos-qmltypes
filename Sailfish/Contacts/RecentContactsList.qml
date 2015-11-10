@@ -11,6 +11,7 @@ ListView {
     property PeopleModel contactsModel
     property var selectionModel
     property int requiredProperty: PeopleModel.NoPropertyRequired
+    property int eventCategoryMask: CommHistory.AnyCategory
     property Component contextMenuComponent
     property bool ready: recentContactsModel.resolved
 
@@ -39,6 +40,8 @@ ListView {
         id: recentContactsModel
         limit: 10
         requiredProperty: root.requiredProperty
+        eventCategoryMask: root.eventCategoryMask
+        excludeFavorites: true
 
         property bool resolved
         function checkResolved() {

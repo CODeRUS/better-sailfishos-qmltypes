@@ -41,7 +41,7 @@ Item {
     property real verticalOffset
     property int __silica_menulabel
 
-    height: Theme.itemSizeExtraSmall - Theme.paddingLarge
+    height: Theme.itemSizeExtraSmall - (screen.sizeCategory <= Screen.Medium ? Theme.paddingLarge : Theme.paddingMedium)
     width: parent ? parent.width : Screen.width
     Label {
         id: text

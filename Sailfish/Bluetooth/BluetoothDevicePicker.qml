@@ -35,55 +35,33 @@ Column {
 
     width: parent.width
 
-    Column {
+    Item {
         width: parent.width
-        height: root._showDiscoveryProgress
-                ? discoveryProgressBar.height
-                : (root._showPairedDevicesHeader ? pairedDevicesHeader.height : 0)
-        clip: true
-
-        Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
+        height: discoveryProgressBar.height
 
         SectionHeader {
             id: pairedDevicesHeader
-            visible: root._showPairedDevicesHeader
+            height: discoveryProgressBar.height
+            opacity: root._showPairedDevicesHeader ? 1.0 : 0
 
             //% "Paired devices"
             text: qsTrId("components_bluetooth-la-paired-devices")
+
+            Behavior on opacity { FadeAnimation {} }
         }
 
         ProgressBar {
             id: discoveryProgressBar
 
             width: parent.width
-            maximumValue: 100
-            enabled: false
             opacity: root._showDiscoveryProgress ? 1.0 : 0
+            indeterminate: true
 
             //: Informs user that we are currently searching for nearby Bluetooth devices
             //% "Searching for devices"
             label: qsTrId("components_bluetooth-he-discovering")
 
             Behavior on opacity { FadeAnimation {} }
-
-            // JB#5123 the progress is hardcoded for now
-            SequentialAnimation {
-                id: discoveryDummyAnim
-                running: false
-
-                NumberAnimation {
-                    target: discoveryProgressBar
-                    property: "value"
-                    from: 0
-                    to: discoveryProgressBar.maximumValue
-                    duration: 11000
-                }
-                ScriptAction {
-                    script: {
-                        discoveryProgressBar.indeterminate = true
-                    }
-                }
-            }
         }
     }
 
@@ -323,12 +301,9 @@ Column {
                 return
             }
             if (adapter.discovering) {
-                discoveryProgressBar.indeterminate = false
                 root._showDiscoveryProgress = true
                 nearbyDevicesModel.clear()
-                discoveryDummyAnim.start()
             } else {
-                discoveryDummyAnim.stop()
                 root._showDiscoveryProgress = false
             }
             _prevDiscoveryValue = adapter.discovering

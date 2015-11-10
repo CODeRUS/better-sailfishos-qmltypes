@@ -117,6 +117,11 @@ Rectangle {
         onHeightChanged: highlight(highlightedItem)
     }
 
+    Behavior on height {
+        enabled: yBehavior.enabled
+        NumberAnimation { duration: 100; easing.type: Easing.InOutQuad }
+    }
+
     Behavior on opacity {
         id: opacityBehavior
         SmoothedAnimation { duration: highlightItem.opacityAnimationDuration; velocity: -1 }

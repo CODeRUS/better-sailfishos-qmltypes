@@ -171,7 +171,7 @@ Page {
         // card). TODO it should be implemented correctly, e.g. ask
         // user to choose when exporting and check where is the vault
         // archive when importing
-        drives.sort(function(a, b) { return (a.total - b.total); });
+        drives.sort(function(a, b) { return (b.total - a.total); });
         var path = drives[0].path;
         console.log(action, " path:", path);
         currAction = action;

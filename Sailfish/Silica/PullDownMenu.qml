@@ -42,10 +42,10 @@ PulleyMenuBase {
     id: pullDownMenu
 
     property real topMargin: Theme.itemSizeSmall
-    property real bottomMargin: _menuLabel ? 0 : Theme.itemSizeExtraSmall - Theme.paddingLarge
+    property real bottomMargin: _menuLabel ? 0 : Theme.paddingLarge
     property real _contentEnd: contentColumn.height + bottomMargin
     property Item _menuLabel: {
-        var lastChild = contentColumn.visible && contentColumn.childAt(width/2, contentColumn.height-1)
+        var lastChild = contentColumn.visible && Util.childAt(contentColumn, width/2, contentColumn.height-1)
         if (lastChild && lastChild.hasOwnProperty("__silica_menulabel")) {
             return lastChild
         }
@@ -63,9 +63,9 @@ PulleyMenuBase {
     _activeHeight: contentColumn.height + topMargin + bottomMargin
     _inactivePosition: Math.round(flickable.originY - (_inactiveHeight + spacing))
     _finalPosition: _inactivePosition - _activeHeight
-    _menuIndicatorPosition: height - Theme.itemSizeExtraSmall + Theme.paddingSmall - spacing
+    _menuIndicatorPosition: height - _menuItemHeight + Theme.paddingSmall - spacing
     _highlightIndicatorPosition: Math.min(height - Math.min(_dragDistance, _contentEnd) - spacing,
-        _menuIndicatorPosition - (_dragDistance/(Theme.itemSizeExtraSmall+_bottomDragMargin)*(Theme.paddingSmall+_bottomDragMargin)))
+        _menuIndicatorPosition - (_dragDistance/(_menuItemHeight+_bottomDragMargin)*(Theme.paddingSmall+_bottomDragMargin)))
 
     property Component background: Rectangle {
         id: bg
@@ -101,9 +101,9 @@ PulleyMenuBase {
         onMenuContentYChanged: {
             if (menuContentY >= 0) {
                 if (flickable.dragging && !_bounceBackRunning) {
-                    _highlightMenuItem(contentColumn, menuContentY - y + Theme.itemSizeExtraSmall)
+                    _highlightMenuItem(contentColumn, menuContentY - y + _menuItemHeight)
                 } else if (quickSelect){
-                    _quickSelectMenuItem(contentColumn, menuContentY - y + Theme.itemSizeExtraSmall)
+                    _quickSelectMenuItem(contentColumn, menuContentY - y + _menuItemHeight)
                 }
             }
         }

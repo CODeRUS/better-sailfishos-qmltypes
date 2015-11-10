@@ -50,11 +50,15 @@ function _initialize(flickable, quickScroll) {
 }
 
 function scrollToTop(flickable, quickScroll) {
-    _initialize(flickable, quickScroll)
-    flickable._scrollAnimation.scrollToTop()
+    if (flickable.contentHeight > flickable.height && !flickable.atYBeginning) {
+        _initialize(flickable, quickScroll)
+        flickable._scrollAnimation.scrollToTop()
+    }
 }
 
 function scrollToBottom(flickable, quickScroll) {
-    _initialize(flickable, quickScroll)
-    flickable._scrollAnimation.scrollToBottom()
+    if (flickable.contentHeight > flickable.height && !flickable.atYEnd) {
+        _initialize(flickable, quickScroll)
+        flickable._scrollAnimation.scrollToBottom()
+    }
 }

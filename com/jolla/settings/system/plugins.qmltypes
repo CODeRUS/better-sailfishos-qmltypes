@@ -75,6 +75,18 @@ Module {
         Method { name: "updateAvailable" }
     }
     Component {
+        name: "HwSettings"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.system/HwSettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "features"; type: "QStringList"; isReadonly: true }
+        Method {
+            name: "hasFeature"
+            type: "bool"
+            Parameter { name: "feature"; type: "string" }
+        }
+    }
+    Component {
         name: "LocationSettings"
         prototype: "QObject"
         exports: ["com.jolla.settings.system/LocationSettings 1.0"]
@@ -106,6 +118,11 @@ Module {
             Parameter { name: "path"; type: "string" }
         }
         Method {
+            name: "move"
+            Parameter { name: "index"; type: "int" }
+            Parameter { name: "newIndex"; type: "int" }
+        }
+        Method {
             name: "triggerAction"
             Parameter { name: "index"; type: "int" }
         }
@@ -120,6 +137,12 @@ Module {
         Property { name: "match"; type: "QVariant" }
         Property { name: "role"; type: "string" }
         Property { name: "value"; type: "string"; isReadonly: true }
+        Property { name: "values"; type: "QStringList"; isReadonly: true }
+        Method {
+            name: "joined"
+            type: "string"
+            Parameter { name: "list"; type: "QStringList" }
+        }
     }
     Component {
         name: "TohInfo"

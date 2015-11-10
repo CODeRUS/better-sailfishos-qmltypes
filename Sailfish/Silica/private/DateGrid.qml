@@ -34,6 +34,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0
 import "DatePicker.js" as DatePickerScript
 
 Item {
@@ -191,7 +192,7 @@ Item {
                     color: Theme.highlightColor
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
-                    opacity: DatePickerScript._weekNumberForDate(selectedDate) == model.weekNumber ? 1.0 : 0.5
+                    opacity: Util.weekNumber(selectedDate) === model.weekNumber ? 1.0 : 0.5
                 }
             }
         }

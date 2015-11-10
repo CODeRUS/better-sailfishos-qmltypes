@@ -100,6 +100,12 @@ Module {
                 "Unread": 10
             }
         }
+        Property { name: "accountIdFilter"; type: "QVariantList" }
+        Method {
+            name: "remove"
+            Parameter { name: "notificationId"; type: "string" }
+        }
+        Method { name: "clear" }
     }
     Component {
         name: "FacebookPostsModel"
@@ -115,6 +121,29 @@ Module {
         Property { name: "facebookClientId"; type: "string"; isReadonly: true }
         Property { name: "twitterConsumerKey"; type: "string"; isReadonly: true }
         Property { name: "twitterConsumerSecret"; type: "string"; isReadonly: true }
+    }
+    Component {
+        name: "SocialImageDownloader"
+        prototype: "AbstractImageDownloader"
+        exports: ["org.nemomobile.socialcache/SocialImageCache 1.0"]
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "imageFile"
+            Parameter { name: "imageUrl"; type: "string" }
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "caller"; type: "QObject"; isPointer: true }
+            Parameter { name: "expiresInDays"; type: "int" }
+        }
+        Method {
+            name: "imageFile"
+            Parameter { name: "imageUrl"; type: "string" }
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "caller"; type: "QObject"; isPointer: true }
+        }
+        Method {
+            name: "removeFromRecentlyUsed"
+            Parameter { name: "imageUrl"; type: "string" }
+        }
     }
     Component {
         name: "SocialSyncInterface"
@@ -175,5 +204,6 @@ Module {
         prototype: "AbstractSocialCacheModel"
         exports: ["org.nemomobile.socialcache/TwitterPostsModel 1.0"]
         exportMetaObjectRevisions: [0]
+        Property { name: "accountIdFilter"; type: "QVariantList" }
     }
 }

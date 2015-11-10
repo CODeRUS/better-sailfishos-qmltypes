@@ -40,7 +40,7 @@ TextSwitch {
     id: root
 
     property alias icon: image
-    _rightPadding: image.width + Theme.paddingMedium
+    _rightPadding: image.width + Theme.paddingMedium - image.anchors.rightMargin
 
     HighlightImage {
         id: image

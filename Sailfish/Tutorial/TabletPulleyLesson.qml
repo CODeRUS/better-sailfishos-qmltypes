@@ -181,7 +181,7 @@ Item {
     }
 
     Image {
-        source: "image://theme/graphics-edge-swipe-handle"
+        source: "image://theme/graphic-edge-swipe-handle-top"
         opacity: 1 - appMainPage.opacity
         anchors {
             bottom: applicationGrid.top
@@ -189,22 +189,18 @@ Item {
         }
     }
 
-    Rectangle {
+    Image {
         id: applicationGrid
 
-        color: "black"
         width: parent.width
         height: parent.height
         opacity: timeline2.running ? 0 : 1
 
         y: parent.height
 
-        Behavior on y { NumberAnimation { duration: 400; easing.type: Easing.InOutQuad } }
+        source: Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-launcher.png")
 
-        Image {
-            source: Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-launcher.png")
-            anchors.fill: parent
-        }
+        Behavior on y { NumberAnimation { duration: 400; easing.type: Easing.InOutQuad } }
     }
 
     LauncherItem {

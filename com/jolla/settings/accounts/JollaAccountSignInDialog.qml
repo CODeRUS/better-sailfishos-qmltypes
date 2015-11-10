@@ -116,7 +116,7 @@ Dialog {
 
 
         Column {
-            width: parent.width - Theme.horizontalPageMargin*2
+            width: parent.width
 
             Row {
                 x: Theme.horizontalPageMargin
@@ -172,14 +172,8 @@ Dialog {
                 EnterKey.onClicked: field_password.focus = true
             }
 
-            TextField {
+            PasswordField {
                 id: field_password
-                width: parent.width
-                inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
-                echoMode: TextInput.Password
-
-                //% "Password"
-                label: qsTrId("settings_accounts-la-password")
 
                 //% "Enter password"
                 placeholderText: qsTrId("settings_accounts-ph-password")
@@ -188,6 +182,8 @@ Dialog {
                 EnterKey.iconSource: "image://theme/icon-m-enter-accept"
                 EnterKey.onClicked: root.accept()
             }
+
+            JollaAccountForgotPasswordInfo {}
         }
     }
 }

@@ -174,4 +174,10 @@ Module {
             Parameter { name: "id"; type: "ToneId" }
         }
     }
+    Component {
+        name: "ToneModel"
+        prototype: "AbstractContentModel"
+        exports: ["Sailfish.Ambience/ToneModel 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
 }

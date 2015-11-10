@@ -185,8 +185,11 @@ Module {
         Property { name: "adaptiveDimmingEnabled"; type: "bool" }
         Property { name: "lowPowerModeEnabled"; type: "bool" }
         Property { name: "ambientLightSensorEnabled"; type: "bool" }
+        Property { name: "autoBrightnessEnabled"; type: "bool" }
         Property { name: "doubleTapMode"; type: "int" }
         Property { name: "orientationLock"; type: "QVariant" }
+        Property { name: "lidSensorEnabled"; type: "bool" }
+        Property { name: "lidSensorFilteringEnabled"; type: "bool" }
     }
     Component {
         name: "LanguageModel"

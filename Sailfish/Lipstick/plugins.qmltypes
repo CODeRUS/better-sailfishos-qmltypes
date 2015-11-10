@@ -323,6 +323,11 @@ Module {
             Parameter { name: "before"; type: "QQuickItem"; isPointer: true }
             Parameter { name: "item"; type: "QQuickItem"; isPointer: true }
         }
+        Method {
+            name: "lastItemAfter"
+            type: "QQuickItem*"
+            Parameter { name: "after"; type: "QQuickItem"; isPointer: true }
+        }
     }
     Component {
         name: "SystemDialogWindow"
@@ -334,7 +339,8 @@ Module {
             name: "DialogCategory"
             values: {
                 "Dialog": 0,
-                "Alarm": 1
+                "Alarm": 1,
+                "Call": 2
             }
         }
         Property { name: "category"; type: "DialogCategory" }

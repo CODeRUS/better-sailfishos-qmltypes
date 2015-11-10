@@ -25,27 +25,6 @@ MainPage {
         }
     }
 
-    Binding {
-       target: __quickWindow
-       property: "color"
-       value: "black"
-       when: _tutorialStarted
-    }
-
-    Binding {
-       target: __silica_applicationwindow_instance
-       property: "_backgroundVisible"
-       value: false
-       when: _tutorialStarted
-    }
-
-    Binding {
-       target: __silica_applicationwindow_instance
-       property: "dimmedRegionColor"
-       value: tutorialThemeId.highlightDimmerColor
-       when: _tutorialStarted
-    }
-
     QtObject {
         id: tutorialThemeId
         property color highlightColor: "#88f5e0"

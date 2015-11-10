@@ -83,7 +83,7 @@ ValueButton {
         // If the schedule uses a daily sync time rather than an interval, force
         // it to use an interval instead, since the UI doesn't allow a daily sync
         // time to be used.
-        if (schedule.interval === AccountSyncSchedule.NoInterval) {
+        if (isNaN(schedule.dailySyncTime)) {
             schedule.setIntervalSyncMode(AccountSyncSchedule.TwiceDailyInterval)
         }
         _resetValueText()

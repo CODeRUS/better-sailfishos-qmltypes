@@ -104,7 +104,7 @@ Item {
             repeat: true
             interval: 16
             onTriggered: {
-                highlight.dashOffset += 1
+                highlight.dashOffset = (highlight.dashOffset+1)%(highlight.dashMargin+highlight.dashLength)
                 if (running) {
                     // try to hit every 3rd frame
                     restart()

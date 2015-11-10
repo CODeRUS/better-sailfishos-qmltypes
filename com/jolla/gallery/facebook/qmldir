@@ -1,9 +1,10 @@
 module com.jolla.gallery.facebook
 plugin jollagalleryfacebookplugin
-FacebookGalleryIcon 1.0 FacebookGalleryIcon.qml
-UsersPage 1.0 UsersPage.qml
-AlbumsPage 1.0 AlbumsPage.qml
-AlbumDelegate 1.0 AlbumDelegate.qml
-PhotoGridPage 1.0 PhotoGridPage.qml
-FullscreenPhotoPage 1.0 FullscreenPhotoPage.qml
+AccessTokensProvider 1.0 AccessTokensProvider.qml
 AddCommentPage 1.0 AddCommentPage.qml
+AlbumDelegate 1.0 AlbumDelegate.qml
+AlbumsPage 1.0 AlbumsPage.qml
+FacebookGalleryIcon 1.0 FacebookGalleryIcon.qml
+FullscreenPhotoPage 1.0 FullscreenPhotoPage.qml
+PhotoGridPage 1.0 PhotoGridPage.qml
+UsersPage 1.0 UsersPage.qml

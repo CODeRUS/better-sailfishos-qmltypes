@@ -263,7 +263,7 @@ Item {
         anchors.verticalCenter: pinInputDisplay.verticalCenter
         enabled: showEmergencyButton && !root.emergency && root.enteredPin.length < 5
         opacity: enabled ? 1 : 0
-        icon.source: "image://theme/icon-lock-emergency-call"
+        icon.source: "image://theme/icon-lockscreen-emergency-call"
 
         Behavior on opacity { FadeAnimation {} }
 

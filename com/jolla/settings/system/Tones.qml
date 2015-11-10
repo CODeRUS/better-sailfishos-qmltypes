@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Ambience 1.0
 import Sailfish.Media 1.0
 import com.jolla.settings 1.0
 import com.jolla.settings.system 1.0
@@ -13,7 +14,7 @@ Item {
     height: toneItems.height
     width: parent.width
 
-    AlarmToneModel {
+    ToneModel {
         id: alarmToneModel
     }
 

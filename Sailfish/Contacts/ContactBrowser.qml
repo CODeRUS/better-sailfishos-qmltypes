@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import org.nemomobile.commhistory 1.0
 import org.nemomobile.configuration 1.0
 import org.nemomobile.contacts 1.0
 import "contactcard/ContactsDBusService.js" as ContactsService
@@ -25,6 +26,7 @@ SilicaFlickable {
     property alias hasSearchFocus: searchView.hasSearchFocus
 
     property bool showRecentContactList: true
+    property int recentContactsCategoryMask: CommHistory.AnyCategory
 
     // If requiredProperty is 0, selections correspond to contacts.  If requiredProperty
     // is specified, the browser requires the selection of a specific property within a contact.
@@ -222,7 +224,7 @@ SilicaFlickable {
     }
 
     width: parent ? parent.width : Screen.width
-    height: parent ? parent.height : Screen.height
+    height: parent ? parent.height + pageStack.panelSize : Screen.height
     contentHeight: Math.max(1, contentColumn.height)
 
     onFlickStarted: _contentYBeforeGroupOpen = -1
@@ -406,9 +408,10 @@ SilicaFlickable {
 
             Column {
                 width: contentColumn.width
+                visible: !_searchFiltered && recentContactsList.count > 0
+                height: visible ? implicitHeight : 0
 
                 SectionHeader {
-                    visible: !_searchFiltered && recentContactsList.count > 0
                     //% "Recent"
                     text: qsTrId("components_contacts-he-recent")
                     opacity: recentContactsList.opacity
@@ -420,10 +423,10 @@ SilicaFlickable {
 
                     RecentContactsList {
                         id: recentContactsList
-                        visible: !_searchFiltered
                         contactsModel: allContactsModel
                         selectionModel: root.selectionModel
                         requiredProperty: root._filterProperty
+                        eventCategoryMask: root.recentContactsCategoryMask
                         contextMenuComponent: contactContextMenuComponent
 
                         enabled: !_searchFiltered && root.favoriteContactsModel.populated

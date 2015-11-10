@@ -25,6 +25,19 @@ Module {
         Method { name: "clearHandlerData" }
     }
     Component {
+        name: "KeyboardSupport"
+        prototype: "QObject"
+        exports: ["com.jolla.keyboard/KeyboardSupport 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "isNumber"
+            type: "bool"
+            Parameter { name: "input"; type: "string" }
+        }
+    }
+    Component {
         name: "LayoutModel"
         prototype: "QAbstractListModel"
         exports: ["com.jolla.keyboard/LayoutModel 1.0"]
@@ -55,6 +68,7 @@ Module {
         isCreatable: false
         isSingleton: true
         exportMetaObjectRevisions: [0]
+        Property { name: "outputEnabled"; type: "bool" }
         Method {
             name: "play"
             type: "bool"

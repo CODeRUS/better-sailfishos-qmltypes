@@ -1013,12 +1013,17 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "modemPath"; type: "string" }
         Property { name: "technologyPreference"; type: "string" }
+        Property { name: "availableTechnologies"; type: "QStringList"; isReadonly: true }
         Property { name: "gsmBand"; type: "string" }
         Property { name: "umtsBand"; type: "string" }
         Property { name: "fastDormancy"; type: "bool" }
         Signal {
             name: "technologyPreferenceChanged"
             Parameter { name: "preference"; type: "string" }
+        }
+        Signal {
+            name: "availableTechnologiesChanged"
+            Parameter { name: "technologies"; type: "QStringList" }
         }
         Signal {
             name: "gsmBandChanged"

@@ -51,7 +51,8 @@ Item {
     Label {
         id: label
         anchors.centerIn: parent
-        width: parent.width - 2*Theme.paddingLarge
+        width: parent.width - (screen.sizeCategory > Screen.Medium
+                               ? 2*Theme.paddingMedium : 2*Theme.paddingLarge)
         height: width
         color: Theme.secondaryColor
         horizontalAlignment: Text.AlignHCenter

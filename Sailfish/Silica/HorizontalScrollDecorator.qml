@@ -52,7 +52,9 @@ Rectangle {
     opacity: timer.moving || timer.running ? 1.0 : 0.0
     visible: flickable.contentWidth > flickable.width
     Behavior on opacity { FadeAnimation { duration: 400 } }
-    x: (flickable.contentX - flickable.originX) * _sizeRatio
+    x: Math.max(0, Math.min(
+                    ((flickable.contentX - flickable.originX) * _sizeRatio),
+                    (flickable.width - width)))
 
     Component.onCompleted: {
         if (!flickable) {

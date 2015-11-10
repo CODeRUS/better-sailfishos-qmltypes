@@ -83,13 +83,7 @@ Dialog {
             PropertyChanges { target: userCredentials; state: "signIn" }
             PropertyChanges { target: signInSwitch; checked: true }
             PropertyChanges { target: newUserSwitch; checked: false }
-            PropertyChanges { target: forgottenPasswordDetails; opacity: 0 }
-            PropertyChanges {
-                target: forgottenPasswordSection
-                height: forgottenPasswordHeading.height
-                opacity: 1
-                enabled: true
-            }
+            PropertyChanges { target: forgottenPasswordSection; state: "visible" }
             PropertyChanges {
                 target: eulaReminder
                 height: 0
@@ -102,13 +96,7 @@ Dialog {
             PropertyChanges { target: userCredentials; state: "createNewAccount" }
             PropertyChanges { target: signInSwitch; checked: false }
             PropertyChanges { target: newUserSwitch; checked: true }
-            PropertyChanges { target: forgottenPasswordDetails; opacity: 0 }
-            PropertyChanges {
-                target: forgottenPasswordSection
-                height: 0
-                opacity: 0
-                enabled: false
-            }
+            PropertyChanges { target: forgottenPasswordSection; state: "hidden" }
             PropertyChanges {
                 target: eulaReminder
                 height: eulaReminder.implicitHeight
@@ -131,20 +119,6 @@ Dialog {
                     }
                     NumberAnimation {
                         target: eulaReminder
-                        property: "opacity"
-                        duration: root._animationDuration * 0.5
-                        easing.type: root._animationEasingType
-                    }
-                }
-                ParallelAnimation {
-                    NumberAnimation {
-                        target: forgottenPasswordSection
-                        property: "opacity"
-                        duration: root._animationDuration * 0.5
-                        easing.type: root._animationEasingType
-                    }
-                    NumberAnimation {
-                        target: forgottenPasswordDetails
                         property: "opacity"
                         duration: root._animationDuration * 0.5
                         easing.type: root._animationEasingType
@@ -309,74 +283,10 @@ Dialog {
                 }
             }
 
-            Column {
+            JollaAccountForgotPasswordInfo {
                 id: forgottenPasswordSection
-                width: parent.width
-
-                states: [
-                    State {
-                        name: "detailsShown"
-                        PropertyChanges {
-                            target: forgottenPasswordSection
-                            height: forgottenPasswordHeading.implicitHeight + forgottenPasswordDetails.implicitHeight + Theme.paddingLarge
-                        }
-                        PropertyChanges {
-                            target: forgottenPasswordDetails
-                            opacity: 1
-                        }
-                    }
-                ]
-
-                transitions: [
-                    Transition {
-                        from: ""; to: "detailsShown"
-                        reversible: true
-                        SequentialAnimation {
-                            NumberAnimation {
-                                target: forgottenPasswordSection
-                                property: "height"
-                                duration: root._animationDuration
-                                easing.type: root._animationEasingType
-                            }
-                            FadeAnimation {
-                                duration: root._animationDuration
-                            }
-                        }
-                    }
-                ]
-
-                ClickableTextLabel {
-                    id: forgottenPasswordHeading
-                    x: Theme.horizontalPageMargin
-                    width: parent.width - x*2
-                    height: implicitHeight + Theme.paddingLarge
-                    verticalAlignment: Text.AlignVCenter
-                    wrapMode: Text.Wrap
-                    font.pixelSize: Theme.fontSizeSmall
-
-                    //: Tap to show more information about retrieving a forgotten password (Text surrounded by %1 and %2 is underlined and colored differently)
-                    //% "%1Forgot your password?%2"
-                    text: qsTrId("settings_accounts-la-forgot_your_password_link")
-                                    .arg("<u><font color=\"" + (pressed ? Theme.highlightColor : Theme.primaryColor) + "\">")
-                                    .arg("</font></u>")
-                    onClicked: {
-                        forgottenPasswordSection.state = (forgottenPasswordSection.state == "detailsShown" ? "" : "detailsShown")
-                    }
-                }
-
-                Label {
-                    id: forgottenPasswordDetails
-                    x: Theme.horizontalPageMargin
-                    width: parent.width - x*2
-                    wrapMode: Text.Wrap
-                    font.pixelSize: Theme.fontSizeSmall
-                    color: Theme.highlightColor
-                    opacity: 0
-
-                    //: Explains how to deal with a forgotten password for the Jolla account
-                    //% "Please go to account.jolla.com to reset your password. You also need to have access to the email address you provided when creating the account."
-                    text: qsTrId("settings_accounts-la-forgot_your_password_solution")
-                }
+                animationDuration: root._animationDuration
+                animationEasingType: root._animationEasingType
             }
         }
 

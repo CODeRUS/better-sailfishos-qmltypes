@@ -241,7 +241,7 @@ Column {
         }
     }
 
-    AccountPasswordField {
+    PasswordField {
         id: passwordField
 
         errorHighlight: (!text && highlightInvalidFields)
@@ -254,6 +254,7 @@ Column {
             }
         }
 
+        EnterKey.iconSource: root.state == "createNewAccount" ? "image://theme/icon-m-enter-next" : "image://theme/icon-m-enter-accept"
         EnterKey.onClicked: {
             if (root.state == "createNewAccount") {
                 passwordValidator.validateAndFocusNextField(passwordConfirmField, true)
@@ -297,11 +298,9 @@ Column {
         height: 0
         clip: true
 
-        TextField {
+        PasswordField {
             id: passwordConfirmField
             width: parent.width
-            inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
-            echoMode: TextInput.Password
             errorHighlight: !text && root.highlightInvalidFields
                             || (!confirmPasswordValidator.hasValidValue && confirmPasswordValidator.progressDisplayed)
 

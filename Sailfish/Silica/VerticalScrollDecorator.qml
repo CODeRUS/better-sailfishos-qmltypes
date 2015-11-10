@@ -49,6 +49,10 @@ Rectangle {
     property bool _inBounds: (!flickable.pullDownMenu || !flickable.pullDownMenu.active) && (!flickable.pushUpMenu || !flickable.pushUpMenu.active)
     property real _sizeRatio: (flickable.height - _headerSpacing) / (flickable.contentHeight + _topMenuSpacing + _bottomMenuSpacing)
 
+    function showDecorator() {
+        timer.showDecorator = true
+    }
+
     // If we were declared in a Flickable then our parent is contentItem rather than the Flickable itself
     onFlickableChanged: parent = flickable
 
@@ -59,7 +63,9 @@ Rectangle {
     opacity: (timer.moving && _inBounds) || timer.running ? 1.0 : 0.0
     visible: flickable.contentHeight > flickable.height
     Behavior on opacity { FadeAnimation { duration: 400 } }
-    y: _headerSpacing + (flickable.contentY - flickable.originY + _topMenuSpacing) * _sizeRatio
+    y: Math.max(0, Math.min(
+                (_headerSpacing + (flickable.contentY - flickable.originY + _topMenuSpacing) * _sizeRatio),
+                (flickable.height - height)))
 
     Component.onCompleted: {
         if (!flickable) {
@@ -80,7 +86,16 @@ Rectangle {
         id: timer
 
         property bool moving: flickable.movingVertically
-        onMovingChanged: if (!moving && _inBounds) restart()
-        interval: 300
+        property bool showDecorator
+
+        onMovingChanged: {
+            if (!moving && _inBounds) {
+                showDecorator = false
+                restart()
+            }
+        }
+        onShowDecoratorChanged: if (showDecorator) restart()
+        interval: showDecorator ? 800 : 300
+        onTriggered: showDecorator = false
     }
 }

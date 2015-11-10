@@ -84,6 +84,7 @@ Module {
             Parameter { name: "w"; type: "float" }
             Parameter { name: "h"; type: "float" }
         }
+        Signal { name: "applicationWindowChanged" }
         Method {
             name: "tryResize"
             Parameter { name: "w"; type: "float" }
@@ -236,20 +237,21 @@ Module {
                 "TimepointRelative": 1,
                 "TimepointRelativeCurrentDay": 2,
                 "TimepointSectionRelative": 3,
-                "WeekdayNameStandalone": 4,
-                "DurationElapsed": 5,
-                "DurationElapsedShort": 6,
-                "TimeValueTwelveHours": 7,
-                "TimeValueTwentyFourHours": 8,
-                "TimeValue": 9,
-                "DurationShort": 10,
-                "DurationLong": 11,
-                "DateFull": 12,
-                "DateLong": 13,
-                "MonthNameStandalone": 14,
-                "MonthNameStandaloneShort": 15,
-                "DateMedium": 16,
-                "DateMediumWithoutYear": 17
+                "TimepointSectionHistorical": 4,
+                "WeekdayNameStandalone": 5,
+                "DurationElapsed": 6,
+                "DurationElapsedShort": 7,
+                "TimeValueTwelveHours": 8,
+                "TimeValueTwentyFourHours": 9,
+                "TimeValue": 10,
+                "DurationShort": 11,
+                "DurationLong": 12,
+                "DateFull": 13,
+                "DateLong": 14,
+                "MonthNameStandalone": 15,
+                "MonthNameStandaloneShort": 16,
+                "DateMedium": 17,
+                "DateMediumWithoutYear": 18
             }
         }
         Enum {
@@ -558,6 +560,14 @@ Module {
         }
     }
     Component {
+        name: "FormattingProxyModel"
+        prototype: "QIdentityProxyModel"
+        exports: ["Sailfish.Silica/FormattingProxyModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "sourceModel"; type: "QAbstractItemModel"; isPointer: true }
+        Property { name: "formattedProperties"; type: "QVariantList" }
+    }
+    Component {
         name: "MInverseMouseArea"
         defaultProperty: "data"
         prototype: "QQuickItem"
@@ -577,6 +587,12 @@ Module {
         }
         Method { name: "cancelTouch" }
     }
+    Component {
+        name: "QAbstractProxyModel"
+        prototype: "QAbstractItemModel"
+        Property { name: "sourceModel"; type: "QAbstractItemModel"; isPointer: true }
+    }
+    Component { name: "QIdentityProxyModel"; prototype: "QAbstractProxyModel" }
     Component {
         name: "RecyclingDelegate"
         defaultProperty: "data"

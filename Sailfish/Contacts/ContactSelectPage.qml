@@ -13,6 +13,7 @@ Page {
     property alias allContactsModel: contactBrowser.allContactsModel
     property alias requiredProperty: contactBrowser.requiredProperty
     property alias showRecentContactList: contactBrowser.showRecentContactList
+    property alias recentContactsCategoryMask: contactBrowser.recentContactsCategoryMask
     property alias searchEnabled: contactBrowser.searchEnabled
     property bool searchMenuEnabled
 

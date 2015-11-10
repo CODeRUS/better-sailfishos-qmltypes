@@ -84,7 +84,7 @@ Module {
             values: {
                 "GroupByNone": 1,
                 "GroupByContact": 0,
-                "GroupByContactAndType": 4
+                "GroupByContactAndType": 2
             }
         }
         Property { name: "groupBy"; type: "GroupBy" }
@@ -111,7 +111,7 @@ Module {
         name: "CommHistory::ContactGroup"
         prototype: "QObject"
         Property { name: "contactIds"; type: "QList<int>"; isReadonly: true }
-        Property { name: "contactNames"; type: "QStringList"; isReadonly: true }
+        Property { name: "displayNames"; type: "QStringList"; isReadonly: true }
         Property { name: "startTime"; type: "QDateTime"; isReadonly: true }
         Property { name: "endTime"; type: "QDateTime"; isReadonly: true }
         Property { name: "unreadMessages"; type: "int"; isReadonly: true }
@@ -130,6 +130,7 @@ Module {
         Property { name: "lastEventIsDraft"; type: "bool"; isReadonly: true }
         Property { name: "lastModified"; type: "QDateTime"; isReadonly: true }
         Property { name: "groups"; type: "QList<QObject*>"; isReadonly: true }
+        Property { name: "subscriberIdentity"; type: "string"; isReadonly: true }
         Signal { name: "contactsChanged" }
         Signal { name: "lastEventChanged" }
         Method {
@@ -183,7 +184,9 @@ Module {
                 "LastModified": 12,
                 "StartTime": 13,
                 "Groups": 14,
-                "NumberOfColumns": 15
+                "DisplayNames": 15,
+                "SubscriberIdentity": 16,
+                "NumberOfColumns": 17
             }
         }
         Property { name: "manager"; type: "QObject"; isPointer: true }
@@ -239,6 +242,8 @@ Module {
         Property { name: "limit"; type: "int" }
         Property { name: "offset"; type: "int" }
         Property { name: "ready"; type: "bool"; isReadonly: true }
+        Property { name: "defaultAccept"; type: "bool" }
+        Property { name: "eventCategoryMask"; type: "int" }
         Signal {
             name: "modelReady"
             Parameter { name: "successful"; type: "bool" }
@@ -289,6 +294,7 @@ Module {
             name: "groupDeleted"
             Parameter { name: "group"; type: "GroupObject"; isPointer: true }
         }
+        Signal { name: "resolveContactsChanged" }
         Method {
             name: "group"
             type: "CommHistory::GroupObject*"
@@ -356,25 +362,22 @@ Module {
         Property { name: "isValid"; type: "bool"; isReadonly: true }
         Property { name: "id"; type: "int"; isReadonly: true }
         Property { name: "localUid"; type: "string"; isReadonly: true }
+        Property { name: "recipients"; type: "RecipientList"; isReadonly: true }
         Property { name: "remoteUids"; type: "QStringList"; isReadonly: true }
         Property { name: "chatType"; type: "int"; isReadonly: true }
         Property { name: "chatName"; type: "string"; isReadonly: true }
         Property { name: "startTime"; type: "QDateTime"; isReadonly: true }
         Property { name: "endTime"; type: "QDateTime"; isReadonly: true }
         Property { name: "unreadMessages"; type: "int"; isReadonly: true }
-        Property { name: "contactId"; type: "int"; isReadonly: true }
-        Property { name: "contactIds"; type: "QList<int>"; isReadonly: true }
-        Property { name: "contactName"; type: "string"; isReadonly: true }
-        Property { name: "contactNames"; type: "QStringList"; isReadonly: true }
         Property { name: "lastEventId"; type: "int"; isReadonly: true }
         Property { name: "lastMessageText"; type: "string"; isReadonly: true }
         Property { name: "lastVCardFileName"; type: "string"; isReadonly: true }
         Property { name: "lastVCardLabel"; type: "string"; isReadonly: true }
+        Property { name: "subscriberIdentity"; type: "string"; isReadonly: true }
         Property { name: "lastEventType"; type: "int"; isReadonly: true }
         Property { name: "lastEventStatus"; type: "int"; isReadonly: true }
         Property { name: "lastEventIsDraft"; type: "bool"; isReadonly: true }
         Property { name: "lastModified"; type: "QDateTime"; isReadonly: true }
-        Signal { name: "contactsChanged" }
         Signal { name: "groupDeleted" }
         Method { name: "markAsRead"; type: "bool" }
         Method { name: "deleteGroup"; type: "bool" }
@@ -394,8 +397,13 @@ Module {
             }
         }
         Property { name: "requiredProperty"; type: "int" }
+        Property { name: "excludeFavorites"; type: "bool" }
         Property { name: "resolving"; type: "bool"; isReadonly: true }
         Method { name: "getEvents"; type: "bool" }
+    }
+    Component {
+        name: "CommHistory::SingleContactEventModel"
+        prototype: "CommHistory::EventModel"
     }
     Component {
         name: "CommHistoryConstants"
@@ -456,23 +464,26 @@ Module {
                 "ChatTypeRoom": 2
             }
         }
+        Enum {
+            name: "EventCategory"
+            values: {
+                "AnyCategory": 0,
+                "VoicecallCategory": 1,
+                "VoicemailCategory": 2,
+                "ShortMessagingCategory": 4,
+                "MultimediaMessagingCategory": 8,
+                "InstantMessagingCategory": 16,
+                "OtherCategory": 32
+            }
+        }
     }
     Component {
-        name: "ContactAddressLookup"
-        prototype: "QObject"
-        exports: ["org.nemomobile.commhistory/ContactAddressLookup 1.0"]
+        name: "ContactEventModel"
+        prototype: "CommHistory::SingleContactEventModel"
+        exports: ["org.nemomobile.commhistory/CommContactEventModel 1.0"]
         exportMetaObjectRevisions: [0]
-        Property { name: "localUid"; type: "string" }
-        Property { name: "remoteUid"; type: "string" }
-        Property { name: "contactId"; type: "int"; isReadonly: true }
-        Signal {
-            name: "contactUpdated"
-            Parameter { name: "contactId"; type: "int" }
-        }
-        Signal {
-            name: "contactRemoved"
-            Parameter { name: "contactId"; type: "int" }
-        }
+        Property { name: "contactId"; type: "int" }
+        Method { name: "reload" }
     }
     Component {
         name: "ConversationProxyModel"
@@ -492,6 +503,7 @@ Module {
         exports: ["org.nemomobile.commhistory/CommGroupManager 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "useBackgroundThread"; type: "bool" }
+        Property { name: "resolveContacts"; type: "bool" }
         Signal { name: "backgroundThreadChanged" }
         Method { name: "reload" }
         Method {
@@ -509,6 +521,22 @@ Module {
             Parameter { name: "localUid"; type: "string" }
             Parameter { name: "remoteUids"; type: "QStringList" }
             Parameter { name: "text"; type: "string" }
+        }
+        Method {
+            name: "createOutgoingMessageEvent"
+            Parameter { name: "groupId"; type: "int" }
+            Parameter { name: "localUid"; type: "string" }
+            Parameter { name: "remoteUid"; type: "string" }
+            Parameter { name: "text"; type: "string" }
+            Parameter { name: "callback"; type: "QJSValue" }
+        }
+        Method {
+            name: "createOutgoingMessageEvent"
+            Parameter { name: "groupId"; type: "int" }
+            Parameter { name: "localUid"; type: "string" }
+            Parameter { name: "remoteUids"; type: "QStringList" }
+            Parameter { name: "text"; type: "string" }
+            Parameter { name: "callback"; type: "QJSValue" }
         }
         Method {
             name: "setEventStatus"

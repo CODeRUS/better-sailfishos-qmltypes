@@ -72,8 +72,10 @@ Module {
         isCreatable: false
         isSingleton: true
         exportMetaObjectRevisions: [0]
+        Property { name: "ready"; type: "bool"; isReadonly: true }
         Property { name: "globalPresenceState"; type: "int"; isReadonly: true }
         Property { name: "accounts"; type: "QVariantList"; isReadonly: true }
+        Property { name: "selfDetails"; type: "QVariantMap"; isReadonly: true }
         Method {
             name: "presenceStateText"
             type: "string"

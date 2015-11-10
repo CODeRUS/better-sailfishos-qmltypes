@@ -110,6 +110,8 @@ MouseArea {
     property bool _atFinalPosition: Math.abs(flickable.contentY - _finalPosition) < 1.0 && active
     property bool _pullDown: _inactivePosition > _finalPosition
     property real _menuIndicatorPosition // The position of the highlight when the menu is closed
+    property real _menuItemHeight: screen.sizeCategory <= Screen.Medium ? Theme.itemSizeExtraSmall : Theme.itemSizeSmall
+
 
     property bool _activationInhibited
     property bool _activationPermitted: visible && enabled && _atInitialPosition && !_activationInhibited
@@ -298,8 +300,8 @@ MouseArea {
             if (count == 1) {
                 _quickSelected = true
                 var xPos = width/2
-                if ((_pullDown && parentItem.mapToItem(child, xPos, yPos).y < 0)
-                        || (!_pullDown && parentItem.mapToItem(child, xPos, yPos).y > 0)) {
+                if ((_pullDown && parentItem.mapToItem(child, xPos, yPos).y <= 0)
+                        || (!_pullDown && parentItem.mapToItem(child, xPos, yPos).y >= 0)) {
                     menuItem = child
                     highlightItem.highlight(menuItem, pulleyBase)
                     return menuItem
@@ -321,7 +323,11 @@ MouseArea {
         }
 
         var xPos = width/2
-        child = parentItem.childAt(xPos, yPos)
+
+        // Only try to highlight if we haven't dragged to the final position
+        if (!flickable.dragging || !_atFinalPosition) {
+            child = Util.childAt(parentItem, xPos, yPos)
+        }
         while (child) {
             if (child && child.hasOwnProperty("__silica_menuitem") && child.enabled && child.visible) {
                 menuItem = child
@@ -331,7 +337,7 @@ MouseArea {
             }
             parentItem = child
             yPos = parentItem.mapToItem(child, xPos, yPos).y
-            child = parentItem.childAt(xPos, yPos)
+            child = Util.childAt(parentItem, xPos, yPos)
         }
         if (!child) {
             menuItem = null
@@ -405,6 +411,8 @@ MouseArea {
             return _highlightIndicatorPosition
         }
 
+        height: highlightedItem ? highlightedItem.height : _menuItemHeight
+
         yAnimationDuration: 120
         color: pulleyBase.highlightColor
         audioEnabled: flickable.dragging || quickSelect
@@ -415,7 +423,7 @@ MouseArea {
             if (highlightedItem) return 1.0
             if ((!active && !_hinting) || _bounceBackRunning) return busyOpacity
             if (!_hasMenuItems(_contentColumn)) return 1.0 - logic.dragDistance/Theme.paddingMedium
-            return Math.max(1.5 - logic.dragDistance/Theme.itemSizeExtraSmall,
+            return Math.max(1.5 - logic.dragDistance/_menuItemHeight,
                             logic.dragDistance <= _contentEnd && !flickAnimation.running ? 0.5 : 0.0)
         }
 
@@ -460,22 +468,22 @@ MouseArea {
                 SequentialAnimation {
                     FadeAnimation {
                         target: highlightItem
-                        duration: 200
-                        to: 0.1
+                        duration: 135
+                        to: 0.15
                     }
                     FadeAnimation {
                         target: highlightItem
-                        duration: 100
+                        duration: 65
                         to: Theme.highlightBackgroundOpacity
                     }
                     FadeAnimation {
                         target: highlightItem
-                        duration: 200
-                        to: 0.1
+                        duration: 135
+                        to: 0.15
                     }
                     FadeAnimation {
                         target: highlightItem
-                        duration: 100
+                        duration: 65
                         to: Theme.highlightBackgroundOpacity
                     }
                     PauseAnimation {

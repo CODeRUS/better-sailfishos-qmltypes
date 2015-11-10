@@ -13,6 +13,8 @@ Page {
     property alias foregroundItem: drawer.foregroundItem
     property alias foreground: drawer.foreground
 
+    property alias closeOnMinimize: drawer.hideOnMinimize
+
     default property alias data: drawer.data
 
     backNavigation: drawer.open

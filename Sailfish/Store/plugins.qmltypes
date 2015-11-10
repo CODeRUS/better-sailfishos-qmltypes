@@ -14,6 +14,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "category"; type: "string" }
         Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "populated"; type: "bool"; isReadonly: true }
         Method {
             name: "setCategory"
             Parameter { name: "category"; type: "string" }

@@ -25,21 +25,8 @@ AccountBusyPage {
         }
         _busy = true
 
-        // pass through the signon session data from the extension ui
-        var params = {}
-        for (var i in signonSessionData) {
-            params[i] = signonSessionData[i]
-        }
-
-        // also ensure that we set up embedding / etc correctly:
-        if (typeof jolla_signon_ui_service !== "undefined") {
-            params["Title"] = accountProvider.displayName
-            params["InProcessServiceName"] = jolla_signon_ui_service.inProcessServiceName
-            params["InProcessObjectPath"] = jolla_signon_ui_service.inProcessObjectPath
-            jolla_signon_ui_service.inProcessParent = webViewContainer
-        }
-
-        // and trigger signon / account creation
+        // trigger signon / account creation
+        var params = _prepareSignonParams(signonSessionData)
         accountFactory.createOAuthAccount(accountProvider.name, signonServiceName, params, "Jolla", "Jolla")
         webViewLoadedTimer.start()
     }
@@ -51,31 +38,48 @@ AccountBusyPage {
         }
         _busy = true
         _accountToUpdate = account
+        _recreatingCredentials = !account.hasSignInCredentials("Jolla", "Jolla")
 
-        // set up our sign in parameters
-        var sip = account.signInParameters(signonServiceName)
-        for (var i in signonSessionData) {
-            sip.setParameter(i, signonSessionData[i])
+        // update/create will trigger oauth web view
+        if (_recreatingCredentials) {
+            // the account somehow lost its credentials (perhaps due to fault during backup/restore)
+            console.log("Account has no credentials specified - triggering recreation instead of update")
+            // build account configuration map, to avoid another asynchronous state round trip.
+            var configValues = { "": account.configurationValues("") }
+            var serviceNames = account.supportedServiceNames
+            for (var si in serviceNames) {
+                configValues[serviceNames[si]] = account.configurationValues(serviceNames[si])
+            }
+
+            var params = _prepareSignonParams(signonSessionData)
+            accountFactory.recreateOAuthAccountCredentials(account.identifier, signonServiceName,
+                                                           params, "Jolla", "Jolla", configValues)
+        } else {
+            // set up our sign in parameters
+            var sip = account.signInParameters(signonServiceName)
+            for (var i in signonSessionData) {
+                sip.setParameter(i, signonSessionData[i])
+            }
+
+            // also ensure that we set up embedding / etc correctly:
+            if (typeof jolla_signon_ui_service !== "undefined") {
+                sip.setParameter("Title", accountProvider.displayName)
+                sip.setParameter("InProcessServiceName", jolla_signon_ui_service.inProcessServiceName)
+                sip.setParameter("InProcessObjectPath", jolla_signon_ui_service.inProcessObjectPath)
+                jolla_signon_ui_service.inProcessParent = webViewContainer
+            }
+
+            account.signInCredentialsUpdated.connect(_accountUpdateSucceeded)
+            account.signInError.connect(_accountUpdateFailed)
+            account.updateSignInCredentials("Jolla", "Jolla", sip)
         }
 
-        // also ensure that we set up embedding / etc correctly:
-        if (typeof jolla_signon_ui_service !== "undefined") {
-            sip.setParameter("Title", accountProvider.displayName)
-            sip.setParameter("InProcessServiceName", jolla_signon_ui_service.inProcessServiceName)
-            sip.setParameter("InProcessObjectPath", jolla_signon_ui_service.inProcessObjectPath)
-            jolla_signon_ui_service.inProcessParent = webViewContainer
-        }
-
-        // update will trigger oauth web view
-        account.signInCredentialsUpdated.connect(_accountUpdateSucceeded)
-        account.signInError.connect(_accountUpdateFailed)
-        account.updateSignInCredentials("Jolla", "Jolla", sip)
         webViewLoadedTimer.start()
     }
 
     function cancelSignIn() {
         if (_busy) {
-            if (_accountToUpdate != null) {
+            if (_accountToUpdate != null && _recreatingCredentials == false) {
                 _accountToUpdate.cancelSignInOperation()
             } else {
                 accountFactory.cancel()
@@ -109,6 +113,7 @@ AccountBusyPage {
             _accountToUpdate.signInError.disconnect(_accountUpdateFailed)
             _accountToUpdate = null
         }
+        _recreatingCredentials = false
         _busy = false
     }
 
@@ -116,6 +121,7 @@ AccountBusyPage {
 
     property bool _busy
     property Account _accountToUpdate
+    property bool _recreatingCredentials
 
     function _accountUpdateSucceeded(data) {
         var accountId = _accountToUpdate.identifier
@@ -127,6 +133,24 @@ AccountBusyPage {
         console.log("OAuthAccountSetupPage: account update failed:", errorType, message)
         done(false, errorType, message)
         accountCredentialsUpdateError(message)
+    }
+
+    function _prepareSignonParams(signonSessionData) {
+        // pass through the signon session data from the extension ui
+        var params = {}
+        for (var i in signonSessionData) {
+            params[i] = signonSessionData[i]
+        }
+
+        // also ensure that we set up embedding / etc correctly:
+        if (typeof jolla_signon_ui_service !== "undefined") {
+            params["Title"] = accountProvider.displayName
+            params["InProcessServiceName"] = jolla_signon_ui_service.inProcessServiceName
+            params["InProcessObjectPath"] = jolla_signon_ui_service.inProcessObjectPath
+            jolla_signon_ui_service.inProcessParent = webViewContainer
+        }
+
+        return params
     }
 
     backNavigation: true
@@ -156,12 +180,22 @@ AccountBusyPage {
     AccountFactory {
         id: accountFactory
         onSuccess: {
-            root.done(true)
-            root.accountCreated(newAccountId, responseData)
+            if (root._recreatingCredentials) {
+                root.done(true)
+                root._accountUpdateSucceeded(responseData)
+            } else {
+                root.done(true)
+                root.accountCreated(newAccountId, responseData)
+            }
         }
         onError: {
-            root.done(false, errorCode, message)
-            root.accountCreationError(message)
+            if (root._recreatingCredentials) {
+                root.done(false, errorCode, message)
+                root._accountUpdateFailed(message, errorCode)
+            } else {
+                root.done(false, errorCode, message)
+                root.accountCreationError(message)
+            }
         }
     }
 

@@ -87,6 +87,7 @@ function getContactCardDetailsModel(model, contact)
     addressDetails(details, contact)
     websiteDetails(details, contact)
     dateDetails(details, contact)
+    activityDetails(details, contact)
 
     var i
     var j
@@ -127,7 +128,11 @@ function getContactCardDetailsModel(model, contact)
             }
         }
         if (j == model.count) {
-            model.append(details[i])
+            if (i > model.count) {
+                model.append(details[i])
+            } else {
+                model.insert(i, details[i])
+            }
         }
     }
 }
@@ -244,6 +249,26 @@ function dateDetails(details, contact)
                 "detailsValue": Silica.Format.formatDate(detail.originalDate, Silica.Format.DateLong),
                 "detailsData": { "date": detail.originalDate }
             })
+        }
+    }
+}
+
+function activityDetails(details, contact)
+{
+    var currentDetail = {}
+
+    // Show activity if this contact has any phone or IM details
+    for (var i = 0; i < details.length; ++i) {
+        var type = details[i].detailsType
+        if (type == "phone" || type == "im") {
+            details.push({
+                "detailsType": "activity",
+                //% "Activity"
+                "detailsLabel": qsTrId("components_contacts-la-activity"),
+                //% "Past communication events"
+                "detailsValue": qsTrId("components_contacts-la-activity_description")
+            })
+            return
         }
     }
 }

@@ -10,26 +10,54 @@ Item {
 
     anchors.fill: parent
 
-    Image {
-        anchors.fill: parent
-
-        source: Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-gallery-app-main.png")
-    }
-
-    BackgroundItem {
+    GalleryItemLarge {
         id: photosItem
 
+        y: 2*Theme.paddingLarge
+
+        count: 251
+        thumbnail: "photos"
+
+        //% "Photos"
+        title: qsTrId("tutorial-la-gallery_photos_album")
+
+        enabled: appInfoLabel.opacity > 0
+
+        onClicked: root.itemClicked()
+    }
+
+    Column {
         anchors {
-            top: parent.top
+            top: photosItem.bottom
             topMargin: 2*Theme.paddingLarge
             left: parent.left
             right: parent.right
         }
-        height: 825 * yScale
 
-        highlightedColor: Theme.rgba(tutorialTheme.highlightColor, 0.3)
-        enabled: appInfoLabel.opacity > 0
+        spacing: 2*Theme.paddingLarge
 
-        onClicked: root.itemClicked()
+        GalleryItemLarge {
+            id: videosItem
+
+            count: 21
+            thumbnail: "videos"
+
+            //% "Videos"
+            title: qsTrId("tutorial-la-gallery_videos_album")
+
+            enabled: false
+        }
+
+        GalleryItemLarge {
+            id: facebookItem
+
+            count: 23
+            thumbnail: "facebook"
+
+            //% "Facebook"
+            title: qsTrId("tutorial-la-gallerty_facebook_album")
+
+            enabled: false
+        }
     }
 }

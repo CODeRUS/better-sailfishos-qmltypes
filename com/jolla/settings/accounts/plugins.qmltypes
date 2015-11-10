@@ -88,6 +88,27 @@ Module {
             Parameter { name: "params"; type: "QVariantMap" }
             Parameter { name: "applicationName"; type: "string" }
         }
+        Method {
+            name: "recreateAccountCredentials"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "username"; type: "string" }
+            Parameter { name: "password"; type: "string" }
+            Parameter { name: "params"; type: "QVariantMap" }
+            Parameter { name: "applicationName"; type: "string" }
+            Parameter { name: "symmetricKey"; type: "string" }
+            Parameter { name: "credentialsName"; type: "string" }
+            Parameter { name: "config"; type: "QVariantMap" }
+        }
+        Method {
+            name: "recreateOAuthAccountCredentials"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "params"; type: "QVariantMap" }
+            Parameter { name: "applicationName"; type: "string" }
+            Parameter { name: "credentialsName"; type: "string" }
+            Parameter { name: "config"; type: "QVariantMap" }
+        }
         Method { name: "jollaAccountExists"; type: "bool" }
         Method {
             name: "createNewJollaAccount"

@@ -9,19 +9,18 @@ import QtQuick 2.0
 import QtQuick.Window 2.1 as QtQuick
 import Sailfish.Silica 1.0
 import Sailfish.Lipstick 1.0
+import org.nemomobile.configuration 1.0
 
 SystemDialogWindow {
     id: dialog
 
-    property alias buttons: layout.buttons
-    property alias buttonCount: layout.buttonCount
-    property alias selectedButton: layout.selectedButton
-    property alias contentWidth: layout.contentWidth
     property alias contentHeight: layout.contentHeight
-
-    default property alias _data: layout._data
+    property alias bottomPadding: layout.bottomPadding
+    property alias allowedOrientations: window.allowedOrientations
+    readonly property alias orientation: window.orientation
 
     property bool _closing
+    default property alias _data: layout._data
 
     width: Screen.width
     height: Screen.height
@@ -37,9 +36,16 @@ SystemDialogWindow {
     SystemDialogApplicationWindow {
         id: window
 
-        allowedOrientations: Orientation.Portrait
         _backgroundVisible: false
         cover: null
+        allowedOrientations: lipstickSettings.dialog_orientation || QtQuick.Screen.primaryOrientation
+    }
+
+    ConfigurationGroup {
+        id: lipstickSettings
+        path: "/desktop/lipstick-jolla-home"
+
+        property int dialog_orientation
     }
 
     SystemDialogLayout {
@@ -48,14 +54,6 @@ SystemDialogWindow {
         // but parented to that page when it exists so that it receives orientation transforms
         // and transitions.
         parent: window.pageStack.currentPage ? window.pageStack.currentPage : window.contentItem
-        title: dialog.title
-        anchors.fill: parent
-        headerLayout: !window.pageStack.currentPage
-                    || window.pageStack.currentPage.orientation == Orientation.Portrait
-                    || window.pageStack.currentPage.orientation == Orientation.PortraitInverted
-                ? Qt.Vertical
-                : Qt.Horizontal
-        maximumHeight: Math.min(layout.height, window._rotatingItem.height * 2 / 3)
 
         onDismiss: {
             dialog._closing = true

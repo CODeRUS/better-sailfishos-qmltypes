@@ -571,3 +571,47 @@ function presenceDescription(presenceState) {
     return '<Unknown:' + presenceState + '>'
 }
 
+function descriptionForPhoneNumber(source, normalized, minimized, deduplicator) {
+    var i
+    var detail
+
+    // Find a matching phone number
+    var phoneDetails = source.phoneDetails
+    if (deduplicator && deduplicator.removeDuplicatePhoneNumbers) {
+        phoneDetails = deduplicator.removeDuplicatePhoneNumbers(phoneDetails)
+    }
+    for (i = 0; i < phoneDetails.length; ++i) {
+        if (phoneDetails[i].normalizedNumber == normalized) {
+            detail = phoneDetails[i]
+            break;
+        }
+    }
+    if (!detail) {
+        for (i = 0; i < phoneDetails.length; ++i) {
+            if (phoneDetails[i].minimizedNumber == minimized) {
+                detail = phoneDetails[i]
+                break;
+            }
+        }
+    }
+    if (detail) {
+        return getNameForDetailSubType(detail.type, detail.subTypes, detail.label, true)
+    }
+
+    return ""
+}
+
+function descriptionForAccountUri(source, localUid, remoteUid, deduplicator) {
+    var accountDetails = source.accountDetails
+    if (deduplicator && deduplicator.removeDuplicateOnlineAccounts) {
+        accountDetails = deduplicator.removeDuplicateOnlineAccounts(accountDetails)
+    }
+    for (var i = 0; i < accountDetails.length; ++i) {
+        var detail = accountDetails[i]
+        if (detail.accountPath == localUid && detail.accountUri == remoteUid)
+            return getNameForImProvider(detail.serviceProviderName, detail.serviceProvider, detail.label)
+    }
+
+    return ""
+}
+

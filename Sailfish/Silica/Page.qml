@@ -112,12 +112,6 @@ MouseArea {
             // No common supported orientations, let the page decide
             allowed = allowedOrientations
         }
-        if (allowed & Orientation.Portrait || allowed & Orientation.PortraitInverted) {
-            allowed = allowed | Orientation.Portrait | Orientation.PortraitInverted
-        }
-        if (allowed & Orientation.Landscape || allowed & Orientation.LandscapeInverted) {
-            allowed = allowed | Orientation.Landscape | Orientation.LandscapeInverted
-        }
         return allowed
     }
     property alias _windowOrientation: orientationState.pageOrientation

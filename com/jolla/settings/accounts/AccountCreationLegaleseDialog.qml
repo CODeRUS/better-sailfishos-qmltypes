@@ -49,6 +49,8 @@ Dialog {
                 horizontalCenter: consentLabel.horizontalCenter
             }
             text: root.externalUrlText
+            preferredWidth: Theme.buttonWidthLarge
+
             onClicked: {
                 flick.visible = false
                 consentLabel.visible = false

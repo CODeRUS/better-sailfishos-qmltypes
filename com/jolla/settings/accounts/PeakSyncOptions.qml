@@ -8,6 +8,11 @@ Column {
 
     property AccountSyncSchedule schedule
     property IntervalListModel intervalModel: IntervalListModel { }
+    property IntervalListModel offPeakIntervalModel: IntervalListModel {
+        Component.onCompleted: {
+            append({"interval": AccountSyncSchedule.NoInterval})
+        }
+    }
 
     property int peakInterval: schedule ? schedule.peakInterval : 0
     property int offPeakInterval: schedule ? schedule.interval : 0
@@ -38,7 +43,7 @@ Column {
         label: qsTrId("settings-accounts-la-peak_interval")
         value: root.alwaysOnPeak ? _textAlwaysOn : root.intervalModel.intervalText(root.peakInterval)
         onClicked: {
-            var obj = pageStack.push(intervalPickerDialog, {"showAlwaysOn" : showAlwaysOn})
+            var obj = pageStack.push(intervalPickerDialog, {"showAlwaysOn": showAlwaysOn, "intervalModel": root.intervalModel})
             obj.intervalClicked.connect(function(interval, text) {
                 root.peakInterval = interval
                 if (text == _textAlwaysOn) {
@@ -55,9 +60,9 @@ Column {
         //: Peak interval for data sync (e.g. user can click to choose to sync every 15 minutes, every hour, etc.) during designated off-peak period
         //% "Off-peak interval"
         label: qsTrId("settings-accounts-la-off_peak_interval")
-        value: root.intervalModel.intervalText(root.offPeakInterval)
+        value: root.offPeakIntervalModel.intervalText(root.offPeakInterval)
         onClicked: {
-            var obj = pageStack.push(intervalPickerDialog)
+            var obj = pageStack.push(intervalPickerDialog, {"intervalModel": root.offPeakIntervalModel})
             obj.intervalClicked.connect(function(interval, text) {
                 root.offPeakInterval = interval
                 root._updateSchedule()
@@ -125,6 +130,7 @@ Column {
         Page {
             id: intervalPickerPage
             property bool showAlwaysOn
+            property var intervalModel
             signal intervalClicked(int accountSyncInterval, string intervalText)
 
             Column {
@@ -156,7 +162,7 @@ Column {
                 }
 
                 SyncIntervalOptions {
-                    intervalModel: root.intervalModel
+                    intervalModel: intervalPickerPage.intervalModel
                     onIntervalClicked: {
                         intervalPickerPage.intervalClicked(accountSyncInterval, intervalText)
                         pageStack.pop()

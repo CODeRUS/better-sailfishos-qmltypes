@@ -33,6 +33,7 @@
 ****************************************************************************************/
 
 .pragma library
+.import Sailfish.Silica.private 1.0 as SilicaPrivate
 
 function _isLeapYear(year) {
     return ((year % 4 == 0) && (year % 100 != 0))
@@ -79,7 +80,7 @@ function _getStartDateForMonthView(year, month, weekstart) {
 // Given month should be 1-12.
 function _loadWeekNumbers(model, year, month, weekCount) {
     var dt = new Date(Date.UTC(year, month-1, 1))
-    var num = _weekNumberForDate(dt)
+    var num = SilicaPrivate.Util.weekNumber(dt)
     for (var i=0; i<weekCount; i++) {
         if (model.count <= i) {
             model.append({'weekNumber': num})
@@ -91,25 +92,9 @@ function _loadWeekNumbers(model, year, month, weekCount) {
         dt.setDate(dt.getDate() + 7)
         if ((month === 1 && num !== 1) || month === 12) {
             // may display week 52 in Jan calendar or week 1 in Dec
-            num = _weekNumberForDate(dt)
+            num = SilicaPrivate.Util.weekNumber(dt)
         } else {
             num++
         }
     }
 }
-
-// Qt.weekNumber() is not available in Qt5 - using:
-// http://stackoverflow.com/questions/6117814/get-week-of-year-in-javascript-like-in-php
-function _weekNumberForDate(dt) {
-    //return Qt.weekNumber(dt)
-
-    // Set to nearest Thursday: current date + 4 - current day number
-    // Make Sunday's day number 7
-    dt.setDate(dt.getDate() + 4 - (dt.getDay()||7))
-    // Get first day of year
-    var yearStart = new Date(dt.getFullYear(),0,1)
-    // Calculate full weeks to nearest Thursday
-    var weekNo = Math.ceil(( ( (dt - yearStart) / 86400000) + 1)/7)
-    return weekNo
-}
-

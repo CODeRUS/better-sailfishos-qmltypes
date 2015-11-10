@@ -8,34 +8,24 @@ SilicaGridView {
     id: gridView
 
     property real minimumDelegateSize: Theme.iconSizeLauncher
-
+    property real pageHeight: parent.height
     // The multipliers below for Large screens are magic. They look good on Jolla tablet.
     property real minimumCellWidth: Screen.sizeCategory >= Screen.Large ? Theme.itemSizeExtraLarge * 1.6 : Theme.itemSizeExtraLarge
     // phone reference row height: 960 / 6
     property real minimumCellHeight: Screen.sizeCategory >= Screen.Large ? Theme.itemSizeExtraLarge * 1.6 : Theme.pixelRatio * 160
     property int columnCount: Math.floor(parent.width / minimumCellWidth)
     // reference row height: 960 / 6
-    property int rowCount: Math.floor(parent.height / minimumCellHeight)
+    property int rowCount: Math.floor(pageHeight / minimumCellHeight)
     property int horizontalMargin: Screen.sizeCategory >= Screen.Large ? 6 * Theme.paddingLarge : Theme.paddingLarge
     property int initialCellWidth: (parent.width - 2*horizontalMargin) / columnCount
 
     anchors.horizontalCenter: parent.horizontalCenter
 
     cellWidth: Math.floor(initialCellWidth + (initialCellWidth - minimumDelegateSize) / (columnCount - 1))
-    cellHeight: Math.round(parent.height / rowCount)
+    cellHeight: Math.round(pageHeight / rowCount)
 
     width: cellWidth * columnCount
     height: parent.height
-
-    header: Item {
-        height: pageHeader.height
-        width: gridView.parent.width - (gridView.parent.width - gridView.width)/2
-        PageHeader {
-            id: pageHeader
-            //% "Applications"
-            title: qsTrId("settings-he-applications")
-        }
-    }
 
     VerticalScrollDecorator {
         anchors.rightMargin: -(gridView.parent.width - gridView.width)/2

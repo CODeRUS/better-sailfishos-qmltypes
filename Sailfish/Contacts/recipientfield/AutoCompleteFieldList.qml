@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import org.nemomobile.commhistory 1.0
 import org.nemomobile.contacts 1.0
 import "../common/common.js" as ContactsUtils
 
@@ -18,6 +19,8 @@ Item {
     property int inputMethodHints
     property bool showLabel: true
     property bool multipleAllowed: true
+    property int requiredProperty
+    property int recentContactsCategoryMask: CommHistory.AnyCategory
 
     onFocusedChildCountChanged: {
         editing = (focusedChildCount > 0)
@@ -211,7 +214,10 @@ Item {
                     return
                 }
 
-                var page = comp.createObject(root, {"requiredProperty": requiredProperty})
+                var page = comp.createObject(root, {
+                    "requiredProperty": requiredProperty,
+                    "recentContactsCategoryMask": recentContactsCategoryMask
+                })
                 page.selectedRecipients.connect(addContacts)
                 page.statusChanged.connect(function() {
                     if (page.status == PageStatus.Deactivating) {
@@ -274,8 +280,11 @@ Item {
                     tempSummary += tempStr
                 }
             }
-            summary = tempSummary
-            root.selectionChanged()
+
+            if (tempSummary != summary) {
+                summary = tempSummary
+                root.selectionChanged()
+            }
         }
     }
 

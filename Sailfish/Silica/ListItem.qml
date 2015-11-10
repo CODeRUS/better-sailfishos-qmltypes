@@ -43,6 +43,7 @@ BackgroundItem {
 
     property Item _menuItem
     property bool _menuItemCreated
+    property bool _connectPressAndHold: showMenuOnPressAndHold && menu !== null && menu !== undefined
 
     // If this item is removed by a RemorseItem, do not restore visibility
     // This binding should be removed when JB#8682 is addressed
@@ -124,10 +125,16 @@ BackgroundItem {
     contentHeight: Theme.itemSizeSmall
     _backgroundColor: Theme.rgba(Theme.highlightBackgroundColor, _showPress && !menuOpen ? Theme.highlightBackgroundOpacity : 0)
 
-    onPressAndHold: {
-        if (down && showMenuOnPressAndHold) {
+    on_ConnectPressAndHoldChanged: {
+        if (_connectPressAndHold)
+            listItem.pressAndHold.connect(handlePressAndHold)
+        else
+            listItem.pressAndHold.disconnect(handlePressAndHold)
+    }
+
+    function handlePressAndHold() {
+        if (down)
             showMenu()
-        }
     }
 
     onMenuChanged: {

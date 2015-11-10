@@ -10,6 +10,7 @@ Page {
     property alias applicationBackground: applicationBackgroundItem
     property alias applicationGridIndicator: swipeHandle
     property alias upgradeMode: recap.upgradeMode
+    property alias applicationSwitcher: switcher
     property int lessonCounter: 0
     property int maxLessons: androidLauncher ? 3 : 5
     property bool showApplicationOverlay: false
@@ -73,7 +74,8 @@ Page {
 
     onStatusChanged: {
         if (status === PageStatus.Active && lessonCounter === 0) {
-            recap.show(1000)
+            content.opacity = 1
+            recap.show(1)
         }
     }
 
@@ -98,9 +100,13 @@ Page {
     }
 
     Item {
+        id: content
         parent: __silica_applicationwindow_instance._wallpaperItem
         anchors.fill: parent
         z: -1
+        opacity: 0
+
+        Behavior on opacity { FadeAnimation { duration: 1000 } }
 
         Image {
             anchors.fill: parent
@@ -116,6 +122,8 @@ Page {
         }
 
         Row {
+            id: home
+
             height: parent.height
             x: -flickable.contentX
 
@@ -127,6 +135,7 @@ Page {
                 height: flickable.height
 
                 Image {
+                    visible: home.x > -flickable.width
                     anchors.fill: parent
                     source: Screen.sizeCategory >= Screen.Large
                             ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-events.png")
@@ -134,20 +143,15 @@ Page {
                 }
             }
 
-            Item {
+            Switcher {
+                id: switcher
+
                 width: flickable.width
                 height: flickable.height
 
-                Image {
-                    source: Screen.sizeCategory >= Screen.Large
-                            ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-switcher.png")
-                            : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-switcher.png")
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    visible: opacity > 0
-                    opacity: showApplicationOverlay ? 1 : 0
-                    Behavior on opacity { FadeAnimation { duration: 400 } }
-                }
+                visible: opacity > 0 && home.x < 0
+                opacity: showApplicationOverlay ? 1 : 0
+                Behavior on opacity { FadeAnimation { duration: 400 } }
             }
         }
 
@@ -161,7 +165,7 @@ Page {
             BatteryStatusIndicator {
                 id: batteryIndicator
 
-                property real iconWidth: Math.floor(Theme.iconSizeSmall*0.75)
+                property real iconWidth: Theme.iconSizeExtraSmall
                 property size iconSize: Qt.size(iconWidth,iconWidth)
                 property string iconSuffix: ""
 
@@ -184,7 +188,7 @@ Page {
             }
 
             ConnectionStatusIndicator {
-                property real iconWidth: Math.floor(Theme.iconSizeSmall*0.75)
+                property real iconWidth: Theme.iconSizeExtraSmall
                 property size iconSize: Qt.size(iconWidth,iconWidth)
                 property string iconSuffix: ""
 
@@ -199,7 +203,7 @@ Page {
         Image {
             id: swipeHandle
 
-            source: "image://theme/graphics-edge-swipe-handle"
+            source: "image://theme/graphic-edge-swipe-handle-top"
 
             anchors {
                 bottom: parent.bottom

@@ -91,6 +91,7 @@ Item {
             property bool _emitFinishedWhenSaved
             property bool _savingAfterCredentialsUpdated
             property bool _settingInitialCredentialsFlag
+            property bool _reloadingPriorToLoweringCnuFlag
 
             signal credentialsAgentReady(var credentialsAgent)
             signal credentialsUpdated(int accountId)
@@ -118,8 +119,11 @@ Item {
             function _credentialsUpdated(accountId) {
                 if (accountId == identifier) {
                     // Set CredentialsNeedUpdate=false now that the new credentials have been set.
-                    _savingAfterCredentialsUpdated = true
-                    _setCredentialsNeedUpdateFlag(false)
+                    // Note that the update may have caused changes to the account, so first we
+                    // need to reload the account.
+                    _reloadingPriorToLoweringCnuFlag = true
+                    identifier = 0
+                    identifier = accountId
                 } else {
                     // The updated account id is different from the original. This means the old
                     // account is no longer relevant and it's not necessary to set the credentials
@@ -165,7 +169,15 @@ Item {
             }
 
             onStatusChanged: {
+                if (identifier == 0) {
+                    return
+                }
                 if (status == Account.Initialized) {
+                    if (_reloadingPriorToLoweringCnuFlag) {
+                        _savingAfterCredentialsUpdated = true
+                        _setCredentialsNeedUpdateFlag(false)
+                        return
+                    }
                     _loadCredentialsAgent()
                     var credentialsFlagAlreadySet = (configurationValues("")["CredentialsNeedUpdate"] === true)
                     if (_credentialsAgentRunner.agent.canCancelUpdate

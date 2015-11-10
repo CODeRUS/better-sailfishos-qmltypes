@@ -14,8 +14,16 @@ Module {
         isCreatable: false
         isSingleton: true
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "DemoMode"
+            values: {
+                "Normal": 0,
+                "Demo": 1,
+                "Retail": 2
+            }
+        }
         Property { name: "wayland"; type: "bool"; isReadonly: true }
-        Property { name: "demoMode"; type: "bool"; isReadonly: true }
+        Property { name: "demoMode"; type: "DemoMode"; isReadonly: true }
         Property { name: "layoutGrid"; type: "bool"; isReadonly: true }
         Property { name: "sailfishVersion"; type: "float"; isReadonly: true }
         Method {
@@ -134,6 +142,19 @@ Module {
         Property { name: "secondaryColor"; type: "QColor" }
     }
     Component {
+        name: "DeclarativeUtil"
+        prototype: "QObject"
+        exports: ["Sailfish.Silica.private/Util 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "weekNumber"
+            type: "int"
+            Parameter { name: "datetime"; type: "QDateTime" }
+        }
+    }
+    Component {
         name: "DeclarativeVisibilityCull"
         defaultProperty: "data"
         prototype: "QQuickItem"
@@ -163,9 +184,21 @@ Module {
         Property { name: "_persistentSceneGraph"; type: "bool" }
         Property { name: "_haveCoverHint"; type: "bool" }
         Property { name: "_backgroundColor"; type: "QColor" }
+        Property { name: "_coverIsPrimaryWindow"; type: "bool" }
+        Property { name: "_coverVisible"; type: "bool" }
+        Property { name: "_proxyWindow"; type: "QQuickWindow"; isPointer: true }
+        Property { name: "_mainWindow"; type: "QWindow"; isPointer: true }
         Signal { name: "_orientationLockedChanged" }
         Signal { name: "backgroundColorChanged" }
         Signal { name: "backgroundVisibleChanged" }
+        Signal { name: "coverIsPrimaryWindowChanged" }
+        Signal { name: "coverVisibleChanged" }
+        Signal { name: "proxyWindowChanged" }
+        Signal { name: "mainWindowChanged" }
+        Signal {
+            name: "switcherWindowChanged"
+            Parameter { name: "window"; type: "QQuickWindow"; isPointer: true }
+        }
         Signal { name: "haveCoverChanged" }
         Method { name: "activate" }
         Method { name: "deactivate" }
@@ -185,6 +218,7 @@ Module {
             name: "_setCover"
             Parameter { name: "window"; type: "QObject"; isPointer: true }
         }
+        Method { name: "_updateCoverVisibility" }
     }
     Component {
         name: "PulleyMenuLogic"
@@ -412,19 +446,5 @@ Module {
             Parameter { name: "msec"; type: "int" }
         }
         Method { name: "requestUpdate"; revision: 3 }
-    }
-    Component {
-        name: "TemporaryFileWriter"
-        prototype: "QObject"
-        exports: ["Sailfish.Silica.private/TemporaryFileWriter 1.0"]
-        isCreatable: false
-        isSingleton: true
-        exportMetaObjectRevisions: [0]
-        Method {
-            name: "writeToFile"
-            type: "string"
-            Parameter { name: "text"; type: "string" }
-            Parameter { name: "extension"; type: "string" }
-        }
     }
 }

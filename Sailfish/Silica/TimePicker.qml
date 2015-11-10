@@ -110,7 +110,7 @@ Item {
             varying highp vec2 qt_TexCoord0;
             uniform lowp float qt_Opacity;
             void main() {
-                float dist = length(qt_TexCoord0 - vec2(0.5));
+                highp float dist = length(qt_TexCoord0 - vec2(0.5));
                 gl_FragColor = vec4(0.1, 0.1, 0.1, 0.1) * (smoothstep(0.5-border,0.505-border, dist) - smoothstep(0.5-0.005, 0.5, dist)) * qt_Opacity;
             }"
     }

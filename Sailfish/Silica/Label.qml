@@ -57,7 +57,7 @@ Text {
             layer.smooth = true
             layer.effect = rampComponent
         } else {
-            layer.layer = false
+            layer.enabled = false
             layer.effect = null
         }
     }

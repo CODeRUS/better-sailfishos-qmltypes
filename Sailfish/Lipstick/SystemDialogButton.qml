@@ -16,6 +16,7 @@ MouseArea {
     property url iconSource
     property alias icon: icon
     property bool selected: parent && parent.selectedButton == button
+    property bool highlight: (button.pressed && button.containsMouse) || button.selected
 
     width: parent ? parent.buttonWidth : label.implicitWidth + Theme.paddingMedium
     implicitHeight: label.y + label.height + Theme.paddingMedium
@@ -23,14 +24,9 @@ MouseArea {
     onClicked: parent.selectedButton = button
 
     Rectangle {
-        id: highlightBackground
-        visible: (button.pressed && button.containsMouse) || button.selected
-
+        visible: (button.pressed && button.containsMouse)
         anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightDimmerColor, 0) }
-            GradientStop { position: 1.0; color: Theme.rgba(Theme.highlightDimmerColor, 0.2) }
-        }
+        color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
     }
 
     Image {
@@ -40,7 +36,7 @@ MouseArea {
         width: Theme.iconSizeLarge
         height: Theme.iconSizeLarge
         anchors.horizontalCenter: parent.horizontalCenter
-        source: button.iconSource != "" ? button.iconSource + "?" + Theme.highlightDimmerColor : ""
+        source: button.iconSource != "" ? button.iconSource + "?" + (button.highlight ? Theme.highlightColor : Theme.primaryColor) : ""
     }
     Label {
         id: label
@@ -56,6 +52,6 @@ MouseArea {
         wrapMode: Text.Wrap
         maximumLineCount: 2
         elide: Text.ElideRight
-        color: Theme.rgba("black", 0.4)
+        color: button.highlight ? Theme.highlightColor : Theme.primaryColor
     }
 }

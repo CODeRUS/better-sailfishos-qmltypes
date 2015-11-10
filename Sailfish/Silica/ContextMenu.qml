@@ -216,7 +216,7 @@ MouseArea {
 
     function _highlightMenuItem(yPos) {
         var xPos = width/2
-        var child = contentColumn.childAt(xPos, yPos)
+        var child = Util.childAt(contentColumn, xPos, yPos)
         if (!child) {
             _setHighlightedItem(null)
             return
@@ -229,7 +229,7 @@ MouseArea {
             }
             parentItem = child
             yPos = parentItem.mapToItem(child, xPos, yPos).y
-            child = parentItem.childAt(xPos, yPos)
+            child = Util.childAt(parentItem, xPos, yPos)
         }
     }
 
@@ -282,6 +282,14 @@ MouseArea {
         for (var i=0; i<children.length; i++) {
             var childItem = children[i]
             if (childItem.visible && childItem.width > 0 && childItem.height > 0) {
+                if (childItem.layer.enabled && childItem.layer.effect) {
+                    // This child has a layer with an effect applied.
+                    // The ShaderEffect will have been made a sibling, with
+                    // setTransparentForPositioner(true). We can't query for
+                    // isTransparentForPositioner, so instead we ignore this item
+                    // and add the layer's height instead, which will be the same as ours.
+                    continue
+                }
                 total += childItem.height
             }
         }
@@ -359,6 +367,7 @@ MouseArea {
 
     HighlightBar {
         id: highlightBar
+        height: _highlightedItem ? _highlightedItem.height : Theme.itemSizeSmall
     }
 
     Column {

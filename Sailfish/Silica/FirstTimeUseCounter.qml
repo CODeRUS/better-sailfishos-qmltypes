@@ -33,13 +33,14 @@
 ****************************************************************************************/
 
 import QtQuick 2.0
+import Sailfish.Silica.private 1.0
 import org.nemomobile.configuration 1.0
 
 ConfigurationValue {
     id: configurationValue
     property int count
     property int limit
-    property bool active: _initiated && count <= limit
+    property bool active: _initiated && count <= limit && Config.demoMode !== Config.Demo
     property bool _initiated
 
     function increase() {

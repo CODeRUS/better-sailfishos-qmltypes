@@ -220,6 +220,7 @@ Page {
                 color: status == TransferModel.TransferInterrupted
                        ? Theme.highlightColor
                        : (transferEntry.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                truncationMode: TruncationMode.Fade
                 anchors {
                     verticalCenter: transferTypeIcon.verticalCenter
                     left: transferTypeIcon.right
@@ -265,8 +266,8 @@ Page {
 
             Image {
                 id: serviceTypeImage
-                source: serviceIcon + (transferEntry.highlighted ? "?" + Theme.highlightColor : "")
-                width: Theme.itemSizeSmall / 2
+                source: serviceIcon
+                width: Theme.iconSizeSmall
                 height: width
                 anchors {
                     right: parent.right
@@ -324,11 +325,13 @@ Page {
                 }
 
                 // There must be cancel or restart enabled in order to show context menu
-                if (cancelEnabled || restartEnabled) {
+                var canCancel = model.cancelEnabled && status == TransferModel.TransferStarted
+                var canRestart = model.restartEnabled
+                        && (status == TransferModel.TransferInterrupted || status == TransferModel.TransferCanceled)
+                if (canCancel || canRestart) {
                     showMenu({"transferId": transferId,
-                              "status": status,
-                              "cancelEnabled": cancelEnabled,
-                              "restartEnabled": restartEnabled})
+                              "cancelEnabled": canCancel,
+                              "restartEnabled": canRestart})
                 }
             }
         }
@@ -395,46 +398,28 @@ Page {
 
         ContextMenu {
             property int transferId
-            property int status
             property bool cancelEnabled
             property bool restartEnabled
 
-            function setText()
-            {
-                switch (status) {
-                case TransferModel.TransferStarted:
-                    //% "Stop"
-                    return qsTrId("transferui-la_stop-transfer")
-                case TransferModel.TransferCanceled:
-                case TransferModel.TransferInterrupted:
-                    //% "Restart"
-                    return qsTrId("transferui-la_restart-transfer")
-                case TransferModel.TransferFinished:
-                default:
+            MenuItem {
+                text: {
+                    if (cancelEnabled) {
+                        //% "Stop"
+                        return qsTrId("transferui-la_stop-transfer")
+                    } else if (restartEnabled) {
+                        //% "Restart"
+                        return qsTrId("transferui-la_restart-transfer")
+                    }
                     return ""
                 }
 
-            }
-
-            function menuAction()
-            {
-                switch (status) {
-                case TransferModel.TransferStarted:
-                    transferInterface.cbCancelTransfer(transferId)
-                    break;
-                case TransferModel.TransferCanceled:
-                case TransferModel.TransferInterrupted:
-                    transferInterface.cbRestartTransfer(transferId)
-                    break;
-                case TransferModel.TransferFinished:
-                    console.log("Not implemented")
-                    break
+                onClicked: {
+                    if (cancelEnabled) {
+                        transferInterface.cbCancelTransfer(transferId)
+                    } else if (restartEnabled) {
+                        transferInterface.cbRestartTransfer(transferId)
+                    }
                 }
-            }
-
-            MenuItem {
-                text: setText()
-                onClicked: menuAction()
             }
         }
     }

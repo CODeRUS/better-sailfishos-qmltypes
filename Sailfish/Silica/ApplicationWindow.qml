@@ -53,10 +53,12 @@ Window {
 
     // This does not change on runtime
     property bool _transpose: (screenRotation % 180) != 0
+             // HACK: This fixes VKB in emulator, where currently screen rotation is fixed and
+             // screen size changes when switching between portrait/landscape mode.
+             || (width > height != Screen.width > Screen.height)
 
     property QtObject _coverWindow
     property Item _coverObject
-    property bool _coverVisible: !Qt.application.active && _coverObject !== null
     property bool _incubatingCoverWindow
 
     // parent items declared within ApplicationWindow to
@@ -133,7 +135,7 @@ Window {
                     }
                     _coverObject.visible = true
                     if (!Config.wayland) _coverObject.rotation = 0 - window.screenRotation
-                    _coverWindow.show()
+                    _updateCoverVisibility()
                 } else if (_coverWindow) {
                     _coverWindow.destroy()
                     _coverWindow = null
@@ -341,7 +343,7 @@ Window {
         if (cover) {
             _loadCover()
         }
-        if (Config.demoMode) {
+        if (Config.demoMode === Config.Retail) {
             var component = Qt.createComponent(Qt.resolvedUrl("private/ReturnToHomeHintCounter.qml"))
             if (component.status == Component.Ready) {
                 component.createObject(contentItem)

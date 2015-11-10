@@ -42,7 +42,7 @@ Dialog {
                 }
                 previewPlayer.toggle(soundDialog.selectedFilename)
             }
-            onAccepted: soundDialog.accept()
+            onAccepted: soundDialog.accepted()
             onRejected: {
                 if (previewPlayer.playbackState == Audio.PlayingState) {
                     previewPlayer.stop()
@@ -92,7 +92,8 @@ Dialog {
                 enabled: !noSound
                 opacity: enabled ? 1.0 : 0.5
                 onClicked: pageStack.push(musicPicker, {
-                                                    acceptDestination: pageStack.previousPage(soundDialog),
+                                                    acceptDestination: soundDialog.acceptDestination
+                                                                || pageStack.previousPage(soundDialog),
                                                     acceptDestinationAction: PageStackAction.Pop
                                                 })
 
@@ -145,7 +146,12 @@ Dialog {
         model: alarmModel
         delegate: AudioItem {
             id: alarmDelegate
-            title: model.title
+            title: {
+                var suffixPos = fileName.lastIndexOf('.')
+                var baseName = suffixPos > 0 ? fileName.substring(0, suffixPos) : fileName
+                return baseName.replace(/_/g, ' ')
+            }
+
             icon: "image://theme/icon-m-pause"
             iconOpacity: previewPlayer.playbackState === Audio.PlayingState && alarmToneList.currentIndex == index
                          ? 1.0 : 0.0
@@ -153,8 +159,8 @@ Dialog {
             enabled: !noSound
             onClicked: {
                 alarmToneList.currentIndex = index
-                soundDialog.selectedFilename = filename
-                soundDialog.selectedSoundTitle = model.title
+                soundDialog.selectedFilename = filePath
+                soundDialog.selectedSoundTitle = alarmDelegate.title
                 previewPlayer.toggle(soundDialog.selectedFilename)
             }
         }
