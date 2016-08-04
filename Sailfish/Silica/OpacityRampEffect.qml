@@ -51,6 +51,6 @@ OpacityRampEffectBase {
         id: effectsource
         hideSource: root.enabled
         smooth: true
-        sourceItem: root.enabled ? root.sourceItem : root._nullItem
+        sourceItem: root.enabled ? root.sourceItem : null
     }
 }

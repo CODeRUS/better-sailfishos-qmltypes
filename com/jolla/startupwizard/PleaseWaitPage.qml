@@ -9,34 +9,29 @@ Page {
     property string localeName
     property StartupWizardManager startupWizardManager
 
-    Column {
+    Label {
+        anchors.centerIn: parent
+        horizontalAlignment: Text.AlignHCenter
+        width: parent.width - Theme.horizontalPageMargin*2
+        wrapMode: Text.Wrap
+        textFormat: Text.StyledText // render <br>
+
+        text: {
+            //: Shown when Sailfish OS is starting up
+            //% "Starting,<br>please wait"
+            qsTrId("startupwizard-la-starting_sailfish_please_wait") // trigger Qt Linguist translation
+            return startupWizardManager.translatedText("startupwizard-la-starting_sailfish_please_wait", root.localeName)
+        }
+        font.pixelSize: Theme.fontSizeLarge
+        color: startupWizardManager.defaultHighlightColor()
+    }
+
+    Image {
         anchors {
-            left: parent.left
-            right: parent.right
-            verticalCenter: parent.verticalCenter
-            verticalCenterOffset: -Theme.paddingLarge*2
+            bottom: parent.bottom
+            bottomMargin: parent.height/8
+            horizontalCenter: parent.horizontalCenter
         }
-        spacing: Theme.paddingMedium
-
-        Image {
-            anchors.horizontalCenter: parent.horizontalCenter
-            source: "image://theme/icon-os-state-update?" + startupWizardManager.defaultHighlightColor()
-        }
-
-        Label {
-            horizontalAlignment: Text.AlignHCenter
-            width: parent.width - Theme.horizontalPageMargin
-            wrapMode: Text.Wrap
-            textFormat: Text.StyledText // render <br>
-
-            text: {
-                //: Shown when Sailfish OS is starting up
-                //% "Starting,<br>please wait"
-                qsTrId("startupwizard-la-starting_sailfish_please_wait") // trigger Qt Linguist translation
-                return startupWizardManager.translatedText("startupwizard-la-starting_sailfish_please_wait", root.localeName)
-            }
-            font.pixelSize: Theme.fontSizeLarge
-            color: startupWizardManager.defaultHighlightColor()
-        }
+        source: "image://theme/icon-os-state-update?" + startupWizardManager.defaultHighlightColor()
     }
 }

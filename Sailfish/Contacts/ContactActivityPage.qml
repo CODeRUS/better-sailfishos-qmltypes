@@ -7,7 +7,7 @@ Page {
 
     property alias contact: activityList.contact
 
-    signal startPhoneCall(string number)
+    signal startPhoneCall(string number, string modemPath)
     signal startSms(string number)
     signal startInstantMessage(string localUid, string remoteUid)
 
@@ -58,7 +58,7 @@ Page {
             }
         }
 
-        onStartPhoneCall: root.startPhoneCall(number)
+        onStartPhoneCall: root.startPhoneCall(number, modemPath)
         onStartSms: root.startSms(number)
         onStartInstantMessage: root.startInstantMessage(localUid, remoteUid)
 

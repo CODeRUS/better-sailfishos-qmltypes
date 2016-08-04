@@ -48,7 +48,7 @@ MouseArea {
     property real rightMargin: Theme.horizontalPageMargin
     property real _rightPadding
     property bool down: pressed && containsMouse && !DragFilter.canceled
-    property bool highlighted: down
+    property bool highlighted: down || pressTimer.running
     property bool busy
 
     // This is only used by ButtonGroup - if ButtonGroup is removed, this should be also:
@@ -130,9 +130,19 @@ MouseArea {
         font.pixelSize: Theme.fontSizeExtraSmall
         color: highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
     }
+    Timer {
+        id: pressTimer
+        interval: Theme.minimumPressHighlightTime
+    }
 
-    onPressed: root.DragFilter.begin(mouse.x, mouse.y)
-    onCanceled: root.DragFilter.end()
+    onPressed: {
+        root.DragFilter.begin(mouse.x, mouse.y)
+        pressTimer.restart()
+    }
+    onCanceled: {
+        root.DragFilter.end()
+        pressTimer.stop()
+    }
     onPreventStealingChanged: if (preventStealing) root.DragFilter.end()
 
     onClicked: {

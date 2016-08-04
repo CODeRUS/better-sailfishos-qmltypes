@@ -21,40 +21,36 @@ import Sailfish.Silica 1.0
 import Sailfish.Office.PDF 1.0 as PDF
 
 SilicaFlickable {
-    id: base;
+    id: base
 
-    contentWidth: pdfCanvas.width;
-    contentHeight: pdfCanvas.height;
+    contentWidth: pdfCanvas.width
+    contentHeight: pdfCanvas.height
 
-    property alias itemWidth: pdfCanvas.width;
-    property alias itemHeight: pdfCanvas.height;
-    property alias document: pdfCanvas.document;
+    property alias itemWidth: pdfCanvas.width
+    property alias itemHeight: pdfCanvas.height
+    property alias document: pdfCanvas.document
     property alias currentPage: pdfCanvas.currentPage
 
-    property bool scaled: pdfCanvas.width != width;
+    property bool scaled: pdfCanvas.width != width
+    property QtObject _feedbackEffect
 
-    signal clicked();
-    signal updateSize(real newWidth, real newHeight);
+    signal clicked()
+    signal linkClicked(string linkTarget)
+    signal pageSizesReady()
+    signal updateSize(real newWidth, real newHeight)
 
     function clamp(value) {
-        if (value < width) {
-            return width;
-        }
-
-        if (value > width * 2.5) {
-            return width * 2.5;
-        }
-
-        return value;
+        var maximumZoom = Math.min(Screen.height, Screen.width) * 2.5
+        return Math.max(width, Math.min(value, maximumZoom))
     }
 
     function zoom(amount, center) {
-        var oldWidth = pdfCanvas.width;
+        var oldWidth = pdfCanvas.width
         var oldHeight = pdfCanvas.height
         var oldContentX = contentX
         var oldContentY = contentY
 
-        pdfCanvas.width = clamp(pdfCanvas.width * amount);
+        pdfCanvas.width = clamp(pdfCanvas.width * amount)
 
         /* One cannot use += here because changing contentX will change contentY
            to adjust to new height, so we use saved values. */
@@ -118,39 +114,114 @@ SilicaFlickable {
             NumberAnimation { id: scaleOut; property: "scale"; duration: 200; to: 1.; easing.type: Easing.InOutCubic }
         }
     }
+    NumberAnimation {
+        id: selectionOffset
+        property real start
+        duration: 200
+        easing.type: Easing.InOutCubic
+        target: base
+        property: "contentY"
+    }
 
     // Ensure proper zooming level when device is rotated.
     onWidthChanged: adjust()
+    Component.onCompleted: {
+        // Avoid hard dependency to feedback
+        _feedbackEffect = Qt.createQmlObject("import QtQuick 2.0; import QtFeedback 5.0; ThemeEffect { effect: ThemeEffect.PressWeak }",
+                                             base, 'ThemeEffect')
+        if (_feedbackEffect && !_feedbackEffect.supported) {
+            _feedbackEffect = null
+        }
+    }
+
+    PDF.Selection {
+        id: selection
+        
+        property bool dragging: drag1.pressed || drag2.pressed
+        property bool selected: count > 0
+
+        canvas: pdfCanvas
+        wiggle: Theme.itemSizeSmall / 2
+        
+        onDraggingChanged: {
+            if (dragging) {
+                if (!selectionOffset.running)
+                    selectionOffset.start = base.contentY
+
+                // Limit offset when being at the bottom of the view.
+                selectionOffset.to = selectionOffset.start +
+                    Math.min(Theme.itemSizeSmall,
+                             Math.max(0, base.itemHeight - base.height - base.contentY))
+                // Limit offset when being at the top of screen
+                selectionOffset.to =
+                    Math.max(base.contentY,
+                             Math.min(selectionOffset.to,
+                                      (drag1.pressed ? handle1.y : handle2.y)
+                                      - Theme.itemSizeSmall / 2)
+                            )
+            } else {
+                selectionOffset.to = selectionOffset.start
+            }
+            selectionOffset.restart()
+            
+            // Copy selection to clipboard when dragging finishes
+            if (!dragging) Clipboard.text = text
+        }
+        // Copy selection to clipboard on first selection
+        onSelectedChanged: if (selected) Clipboard.text = text
+    }
 
     PDF.Canvas {
-        id: pdfCanvas;
+        id: pdfCanvas
 
-        width: base.width;
+        property bool _pageSizesReady
 
-        spacing: Theme.paddingLarge;
-        flickable: base;
-        linkColor: Theme.highlightColor;
+        width: base.width
+
+        spacing: Theme.paddingLarge
+        flickable: base
+        linkWiggle: Theme.itemSizeMedium / 2
+        linkColor: Theme.highlightColor
+        pagePlaceholderColor: Theme.highlightColor
+
+        onPageLayoutChanged: {
+            if (!_pageSizesReady) {
+                _pageSizesReady = true
+                base.pageSizesReady()
+            }
+        }
 
         PinchArea {
-            anchors.fill: parent;
+            anchors.fill: parent
             onPinchUpdated: {
                 var newCenter = mapToItem(pdfCanvas, pinch.center.x, pinch.center.y)
-                base.zoom(1.0 + (pinch.scale - pinch.previousScale), newCenter);
+                base.zoom(1.0 + (pinch.scale - pinch.previousScale), newCenter)
             }
-            onPinchFinished: base.returnToBounds();
+            onPinchFinished: base.returnToBounds()
 
             PDF.LinkArea {
-                anchors.fill: parent;
+                anchors.fill: parent
 
-                canvas: pdfCanvas;
-                onLinkClicked: Qt.openUrlExternally(linkTarget);
-                onClicked: base.clicked();
+                canvas: pdfCanvas
+                onLinkClicked: base.linkClicked(linkTarget)
+                onGotoClicked: base.goToPage(page - 1, top, left,
+                                             Theme.paddingLarge, Theme.paddingLarge)
+                onClicked: {
+                    if (selection.text.length > 0) {
+                        selection.unselect()
+                    } else {
+                        base.clicked()
+                    }
+                }
+                onLongPress: selection.selectAt(pressAt)
             }
         }
 
         Repeater {
             id: searchDisplay
+
             property int currentIndex
+
             model: pdfCanvas.document.searchModel
             onModelChanged: moveToSearchMatch(0)
 
@@ -163,22 +234,72 @@ SilicaFlickable {
                     onPageLayoutChanged: match = pdfCanvas.fromPageToItem(page, pageRect)
                 }
 
-                opacity: 0.5;
-                color: Theme.highlightColor;
-                x: match.x - Theme.paddingSmall / 2;
-                y: match.y - Theme.paddingSmall / 4;
-                width: match.width + Theme.paddingSmall;
-                height: match.height + Theme.paddingSmall / 2;
+                opacity: 0.5
+                color: Theme.highlightColor
+                x: match.x - Theme.paddingSmall / 2
+                y: match.y - Theme.paddingSmall / 4
+                width: match.width + Theme.paddingSmall
+                height: match.height + Theme.paddingSmall / 2
             }
+        }
+
+        PDFSelectionView {
+            model: selection
+            flickable: base
+            dragHandle1: drag1.pressed
+            dragHandle2: drag2.pressed
+            onVisibleChanged: if (visible && _feedbackEffect) _feedbackEffect.play()
+        }
+        PDFSelectionDrag {
+            id: drag1
+            visible: selection.selected
+            flickable: base
+            handle: selection.handle1
+            onDragged: selection.handle1 = at
+        }
+        PDFSelectionDrag {
+            id: drag2
+            visible: selection.selected
+            flickable: base
+            handle: selection.handle2
+            onDragged: selection.handle2 = at
         }
     }
 
     children: [
-        HorizontalScrollDecorator { color: Theme.highlightDimmerColor; },
-        VerticalScrollDecorator { color: Theme.highlightDimmerColor; }
+        HorizontalScrollDecorator { color: Theme.highlightDimmerColor },
+        VerticalScrollDecorator { color: Theme.highlightDimmerColor }
     ]
 
-    function goToPage(pageNumber) {
-        base.contentY = pdfCanvas.pagePosition( pageNumber );
+    function goToPage(pageNumber, top, left, topSpacing, leftSpacing) {
+        var rect = pdfCanvas.pageRectangle( pageNumber )
+        var scrollX, scrollY
+        // Adjust horizontal position if required.
+        scrollX = base.contentX
+        if (left !== undefined && left >= 0.) {
+            scrollX = rect.x + left * rect.width - ( leftSpacing !== undefined ? leftSpacing : 0.)
+        }
+        if (scrollX > contentWidth - width) {
+            scrollX = contentWidth - width
+        }
+        // Adjust vertical position.
+        scrollY = rect.y + (top === undefined ? 0. : top * rect.height) - ( topSpacing !== undefined ? topSpacing : 0.)
+        if (scrollY > contentHeight - height) {
+            scrollY = contentHeight - height
+        }
+        contentX = Math.max(0, scrollX)
+        contentY = Math.max(0, scrollY)
+    }
+    // This function is the inverse of goToPage(), returning (pageNumber, top, left).
+    function getPagePosition() {
+        // Find the page on top
+        var i = currentPage - 1
+        var rect = pdfCanvas.pageRectangle( i )
+        while (rect.y > contentY && i > 0) {
+            rect = pdfCanvas.pageRectangle( --i )
+        }
+        var top  = (contentY - rect.y) / rect.height
+        var left = (contentX - rect.x) / rect.width
+        return [i, top, left]
     }
 }

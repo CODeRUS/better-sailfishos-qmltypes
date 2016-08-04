@@ -6,7 +6,8 @@ DateTimeDialog 1.0 DateTimeDialog.qml
 LanguagePickerDialog 1.0 LanguagePickerDialog.qml
 ApplicationInstallationDialog 1.0 ApplicationInstallationDialog.qml
 AndroidInstallationDialog 1.0 AndroidInstallationDialog.qml
-TermsOfUseDialog 1.0 TermsOfUseDialog.qml
+PlatformTermsOfUseDialog 1.0 PlatformTermsOfUseDialog.qml
+VendorTermsOfUseDialog 1.0 VendorTermsOfUseDialog.qml
 WizardSimPinQuery 1.0 WizardSimPinQuery.qml
 WizardClickableLabel 1.0 WizardClickableLabel.qml
 WizardDialogHeader 1.0 WizardDialogHeader.qml

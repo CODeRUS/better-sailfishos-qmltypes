@@ -236,22 +236,23 @@ Module {
                 "Timepoint": 0,
                 "TimepointRelative": 1,
                 "TimepointRelativeCurrentDay": 2,
-                "TimepointSectionRelative": 3,
-                "TimepointSectionHistorical": 4,
-                "WeekdayNameStandalone": 5,
-                "DurationElapsed": 6,
-                "DurationElapsedShort": 7,
-                "TimeValueTwelveHours": 8,
-                "TimeValueTwentyFourHours": 9,
-                "TimeValue": 10,
-                "DurationShort": 11,
-                "DurationLong": 12,
-                "DateFull": 13,
-                "DateLong": 14,
-                "MonthNameStandalone": 15,
-                "MonthNameStandaloneShort": 16,
-                "DateMedium": 17,
-                "DateMediumWithoutYear": 18
+                "TimepointRelativeCurrentDayDetailed": 3,
+                "TimepointSectionRelative": 4,
+                "TimepointSectionHistorical": 5,
+                "WeekdayNameStandalone": 6,
+                "DurationElapsed": 7,
+                "DurationElapsedShort": 8,
+                "TimeValueTwelveHours": 9,
+                "TimeValueTwentyFourHours": 10,
+                "TimeValue": 11,
+                "DurationShort": 12,
+                "DurationLong": 13,
+                "DateFull": 14,
+                "DateLong": 15,
+                "MonthNameStandalone": 16,
+                "MonthNameStandaloneShort": 17,
+                "DateMedium": 18,
+                "DateMediumWithoutYear": 19
             }
         }
         Enum {
@@ -313,6 +314,32 @@ Module {
             type: "string"
             Parameter { name: "first"; type: "string" }
             Parameter { name: "second"; type: "string" }
+        }
+        Method {
+            name: "trId"
+            type: "string"
+            Parameter { name: "id"; type: "string" }
+            Parameter { name: "catalog"; type: "string" }
+            Parameter { name: "n"; type: "int" }
+            Parameter { name: "localeName"; type: "string" }
+        }
+        Method {
+            name: "trId"
+            type: "string"
+            Parameter { name: "id"; type: "string" }
+            Parameter { name: "catalog"; type: "string" }
+            Parameter { name: "n"; type: "int" }
+        }
+        Method {
+            name: "trId"
+            type: "string"
+            Parameter { name: "id"; type: "string" }
+            Parameter { name: "catalog"; type: "string" }
+        }
+        Method {
+            name: "textDirection"
+            type: "int"
+            Parameter { name: "s"; type: "string" }
         }
     }
     Component {
@@ -505,12 +532,15 @@ Module {
         isCreatable: false
         isSingleton: true
         exportMetaObjectRevisions: [0]
+        Property { name: "cache"; type: "string"; isReadonly: true }
         Property { name: "data"; type: "string"; isReadonly: true }
         Property { name: "documents"; type: "string"; isReadonly: true }
+        Property { name: "download"; type: "string"; isReadonly: true }
         Property { name: "genericData"; type: "string"; isReadonly: true }
         Property { name: "music"; type: "string"; isReadonly: true }
         Property { name: "pictures"; type: "string"; isReadonly: true }
         Property { name: "videos"; type: "string"; isReadonly: true }
+        Property { name: "home"; type: "string"; isReadonly: true }
     }
     Component {
         name: "DeclarativeTouchBlocker"
@@ -629,6 +659,15 @@ Module {
         isCreatable: false
         isSingleton: true
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "PresenceMode"
+            values: {
+                "PresenceAvailable": 0,
+                "PresenceAway": 1,
+                "PresenceBusy": 2,
+                "PresenceOffline": 3
+            }
+        }
         Property { name: "fontFamilyHeading"; type: "string"; isReadonly: true }
         Property { name: "fontFamily"; type: "string"; isReadonly: true }
         Property { name: "fontSizeTiny"; type: "int"; isReadonly: true }
@@ -673,6 +712,8 @@ Module {
         Property { name: "secondaryHighlightColor"; type: "QColor"; isReadonly: true }
         Property { name: "backgroundImage"; type: "QUrl"; isReadonly: true }
         Property { name: "startDragDistance"; type: "int"; isReadonly: true }
+        Property { name: "minimumPressHighlightTime"; type: "int"; isReadonly: true }
+        Property { name: "_webviewCustomLayoutWidthScalingFactor"; type: "float"; isReadonly: true }
         Method {
             name: "highlightText"
             type: "string"
@@ -685,6 +726,11 @@ Module {
             type: "QColor"
             Parameter { name: "color"; type: "QColor" }
             Parameter { name: "opacity"; type: "float" }
+        }
+        Method {
+            name: "presenceColor"
+            type: "QColor"
+            Parameter { name: "presenceMode"; type: "PresenceMode" }
         }
     }
 }

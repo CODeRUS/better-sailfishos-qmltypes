@@ -36,6 +36,7 @@ import QtQuick 2.1
 import QtQuick.Window 2.1 as QtQuick
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
+import org.nemomobile.thumbnailer 1.0
 import "CoverLoader.js" as CoverLoader
 import "private"
 
@@ -169,6 +170,8 @@ Window {
             title: "_CoverWindow"
             width: (window._transpose && !Config.wayland) ? Theme.coverSizeLarge.height : Theme.coverSizeLarge.width
             height: (window._transpose && !Config.wayland) ? Theme.coverSizeLarge.width : Theme.coverSizeLarge.height
+
+            Thumbnail.maxCost: Theme.coverSizeLarge.width * Theme.coverSizeLarge.height * 3
 
             mainWindow: window
 

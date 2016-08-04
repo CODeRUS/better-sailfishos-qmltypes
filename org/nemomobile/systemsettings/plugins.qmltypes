@@ -17,10 +17,17 @@ Module {
         Property { name: "imei"; type: "string"; isReadonly: true }
         Property { name: "serial"; type: "string"; isReadonly: true }
         Property { name: "softwareVersion"; type: "string"; isReadonly: true }
+        Property { name: "softwareVersionId"; type: "string"; isReadonly: true }
         Property { name: "adaptationVersion"; type: "string"; isReadonly: true }
+        Property { name: "vendorName"; type: "string"; isReadonly: true }
+        Property { name: "vendorVersion"; type: "string"; isReadonly: true }
+        Property { name: "internalStorageUsageModel"; type: "QVariant"; isReadonly: true }
+        Property { name: "externalStorageUsageModel"; type: "QVariant"; isReadonly: true }
+        Signal { name: "storageChanged" }
         Method { name: "totalDiskSpace"; type: "qlonglong" }
         Method { name: "availableDiskSpace"; type: "qlonglong" }
         Method { name: "diskUsageModel"; type: "QVariant" }
+        Method { name: "refreshStorageModels" }
     }
     Component {
         name: "AlarmToneModel"
@@ -84,6 +91,7 @@ Module {
         }
         Property { name: "wlanIpAddress"; type: "string"; isReadonly: true }
         Property { name: "usbIpAddress"; type: "string"; isReadonly: true }
+        Property { name: "username"; type: "string"; isReadonly: true }
         Property { name: "developerModeEnabled"; type: "bool"; isReadonly: true }
         Property { name: "remoteLoginEnabled"; type: "bool"; isReadonly: true }
         Property { name: "workerWorking"; type: "bool"; isReadonly: true }
@@ -111,6 +119,13 @@ Module {
         prototype: "QObject"
         exports: ["org.nemomobile.systemsettings/DeviceLockInterface 1.0"]
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "ResetMode"
+            values: {
+                "Shutdown": 0,
+                "Reboot": 1
+            }
+        }
         Property { name: "isSet"; type: "bool"; isReadonly: true }
         Method {
             name: "checkCode"
@@ -130,6 +145,12 @@ Module {
         }
         Method { name: "isSet"; type: "bool" }
         Method { name: "refresh" }
+        Method {
+            name: "clearDevice"
+            type: "bool"
+            Parameter { name: "code"; type: "string" }
+            Parameter { name: "mode"; type: "ResetMode" }
+        }
         Method {
             name: "clearDevice"
             type: "bool"
@@ -190,6 +211,7 @@ Module {
         Property { name: "orientationLock"; type: "QVariant" }
         Property { name: "lidSensorEnabled"; type: "bool" }
         Property { name: "lidSensorFilteringEnabled"; type: "bool" }
+        Property { name: "flipoverGestureEnabled"; type: "bool" }
     }
     Component {
         name: "LanguageModel"
@@ -287,11 +309,30 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "available"; type: "bool"; isReadonly: true }
         Property { name: "supportedModes"; type: "QStringList"; isReadonly: true }
+        Property { name: "hiddenModes"; type: "QStringList"; isReadonly: true }
         Property { name: "currentMode"; type: "string" }
         Property { name: "configMode"; type: "string" }
         Signal {
             name: "usbStateError"
             Parameter { name: "error"; type: "string" }
+        }
+        Signal {
+            name: "hideModeFailed"
+            Parameter { name: "mode"; type: "string" }
+        }
+        Signal {
+            name: "unhideModeFailed"
+            Parameter { name: "mode"; type: "string" }
+        }
+        Method {
+            name: "hideMode"
+            type: "bool"
+            Parameter { name: "mode"; type: "string" }
+        }
+        Method {
+            name: "unhideMode"
+            type: "bool"
+            Parameter { name: "mode"; type: "string" }
         }
     }
 }

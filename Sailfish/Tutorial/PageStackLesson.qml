@@ -3,14 +3,15 @@ import Sailfish.Silica 1.0
 import Sailfish.Tutorial 1.0
 import "private"
 
-Item {
+Lesson {
     id: page
 
-    anchors.fill: parent
+    //% "Now you know that the dot on the top left indicates that you are in a subpage and swipe to right moves you to previous page"
+    recapText: qsTrId("tutorial-la-recap_page_navigation")
 
     Component.onCompleted: {
         // Make sure the background is at correct position
-        background.currentIndex = 1
+        background.currentItem = background.switcherItem
         timeline.restart()
     }
 
@@ -196,7 +197,6 @@ Item {
         id: photosPage
         PhotosPage {
             Component.onDestruction: {
-                background.returnToBounds()
                 closeAnimation.restart()
                 lessonCompleted(200)
             }

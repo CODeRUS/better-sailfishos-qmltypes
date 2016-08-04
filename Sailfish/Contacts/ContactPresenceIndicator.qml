@@ -13,12 +13,12 @@ Rectangle {
 
     color: {
         if (offline) {
-            return '#999999'
+            return Theme.presenceColor(Theme.PresenceOffline)
         }
         switch (presenceState) {
-            case Person.PresenceAvailable: return '#00ff23'
-            case Person.PresenceBusy: return '#ff0f00'
-            default: return '#ffa600'
+            case Person.PresenceAvailable: return Theme.presenceColor(Theme.PresenceAvailable)
+            case Person.PresenceBusy: return Theme.presenceColor(Theme.PresenceBusy)
+            default: return Theme.presenceColor(Theme.PresenceAway)
         }
     }
 

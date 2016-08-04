@@ -6,8 +6,10 @@ BackgroundItem {
 
     property alias text: label.text
     property string iconSource
+    property bool contentHighlighted
     property real topPadding: Theme.paddingLarge
     property real bottomPadding: 2*Theme.paddingLarge
+    property alias font: label.font
 
     implicitHeight: content.height + topPadding + bottomPadding
     width: label.implicitWidth + 2*Theme.paddingMedium
@@ -22,8 +24,8 @@ BackgroundItem {
 
         Image {
             anchors.horizontalCenter: parent.horizontalCenter
-            source: root.iconSource + "?" + (root.down ? Theme.highlightColor
-                                                       : Theme.primaryColor)
+            source: root.iconSource + "?" + (root.down || root.contentHighlighted ? Theme.highlightColor
+                                                                                  : Theme.primaryColor)
         }
 
         Label {
@@ -32,7 +34,7 @@ BackgroundItem {
             width: parent.width - 2*Theme.paddingMedium
             horizontalAlignment: Text.AlignHCenter
             anchors.horizontalCenter: parent.horizontalCenter
-            color: root.down ? Theme.highlightColor : Theme.primaryColor
+            color: root.down || root.contentHighlighted ? Theme.highlightColor : Theme.primaryColor
             font.pixelSize: Theme.fontSizeSmall
             wrapMode: Text.Wrap
             textFormat: Text.AutoText

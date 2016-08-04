@@ -1,5 +1,7 @@
 import QtQuick 2.0
+import org.nemomobile.configuration 1.0
 import Sailfish.Silica 1.0
+import Sailfish.Telephony 1.0
 import MeeGo.QOfono 0.2
 
 PinInput {
@@ -9,6 +11,8 @@ PinInput {
     property int requestedPinType
     property bool retrying
     property bool showBackgroundGradient: true
+
+    property var multiSimManager
 
     property string _currentPinType: enteringNewPin && simManager.isPukType(requestedPinType)
                                      ? simManager.pukToPin(requestedPinType)
@@ -66,6 +70,8 @@ PinInput {
             return ""
         }
     }
+
+    subTitleText: multiSimManager && multiSimManager.valid ? multiSimManager.simNames[multiSimManager.indexOfModem(simManager.modemPath)] : ""
 
     warningText: {
         if (enteringNewPin) {

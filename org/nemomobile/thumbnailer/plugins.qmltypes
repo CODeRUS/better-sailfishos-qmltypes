@@ -13,6 +13,7 @@ Module {
         prototype: "QQuickItem"
         exports: ["org.nemomobile.thumbnailer/Thumbnail 1.0"]
         exportMetaObjectRevisions: [0]
+        attachedType: "NemoThumbnailLoader"
         Enum {
             name: "FillMode"
             values: {
@@ -44,5 +45,23 @@ Module {
         Property { name: "fillMode"; type: "FillMode" }
         Property { name: "priority"; type: "Priority" }
         Property { name: "status"; type: "Status"; isReadonly: true }
+    }
+    Component {
+        name: "NemoThumbnailLoader"
+        prototype: "QThread"
+        Property { name: "maxCost"; type: "int" }
+    }
+    Component {
+        name: "QThread"
+        prototype: "QObject"
+        Signal { name: "started" }
+        Signal { name: "finished" }
+        Method {
+            name: "start"
+            Parameter { type: "Priority" }
+        }
+        Method { name: "start" }
+        Method { name: "terminate" }
+        Method { name: "quit" }
     }
 }

@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Telephony 1.0
 import org.nemomobile.contacts 1.0
 import "common/common.js" as CommonJs
 
@@ -86,6 +87,13 @@ ContactItem {
             selectedPropertyType = addressesModel.get(0).type
         }
 
+        if (selectedPropertyType == 'phoneNumber' && Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
+            // Select a SIM via menu
+            properties = { 'person': getPerson(), 'clickedItemY': itemY, 'property': selectedProperty, 'type': selectedPropertyType, 'simPickerActive': true }
+            _showContextMenu(propertyMenuComponent.createObject(contactItem, properties))
+            return
+        }
+
         _contactClicked(getPerson(), itemY, selectedProperty, selectedPropertyType)
     }
 
@@ -97,6 +105,19 @@ ContactItem {
 
             property Person person
             property real clickedItemY
+            property var property
+            property string type
+            property alias simPickerActive: simPicker.active
+
+            SimPickerMenuItem {
+                id: simPicker
+                menu: contextMenu
+                fadeAnimationEnabled: addressesModel.count > 1
+                onSimSelected: {
+                    property['modemPath'] = modemPath
+                    _contactClicked(contextMenu.person, contextMenu.clickedItemY, property, type)
+                }
+            }
 
             Repeater {
                 id: repeater
@@ -105,7 +126,15 @@ ContactItem {
                 MenuItem {
                     text: displayLabel
                     truncationMode: TruncationMode.Fade
-                    onClicked: _contactClicked(contextMenu.person, contextMenu.clickedItemY, property, type)
+                    onClicked: {
+                        if (type == 'phoneNumber' && Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
+                            contextMenu.property = property
+                            contextMenu.type = type
+                            simPicker.active = true
+                        } else {
+                            _contactClicked(contextMenu.person, contextMenu.clickedItemY, property, type)
+                        }
+                    }
                 }
             }
         }

@@ -60,45 +60,46 @@ TextField {
 
     inputMethodHints: Qt.ImhNoPredictiveText
 
-    background: Component {
-        Item {
-            anchors.fill: parent
+    background: null
 
-            IconButton {
-                x: searchField.textLeftMargin - width - Theme.paddingSmall
-                width: icon.width
-                height: parent.height
-                icon.source: "image://theme/icon-m-search"
-                highlighted: down || searchField._editor.activeFocus
+    Item {
+        parent: searchField // avoid TextBase contentItem auto-parenting
+        anchors.fill: parent
 
-                enabled: searchField.enabled
+        IconButton {
+            x: searchField.textLeftMargin - width - Theme.paddingSmall
+            width: icon.width
+            height: parent.height
+            icon.source: "image://theme/icon-m-search"
+            highlighted: down || searchField._editor.activeFocus
 
-                onClicked: {
-                    searchField._editor.forceActiveFocus()
-                }
+            enabled: searchField.enabled
+
+            onClicked: {
+                searchField._editor.forceActiveFocus()
+            }
+        }
+
+        IconButton {
+            id: clearButton
+            anchors {
+                right: parent.right
+                rightMargin: Theme.horizontalPageMargin
+            }
+            width: icon.width
+            height: parent.height
+            icon.source: "image://theme/icon-m-clear"
+
+            enabled: searchField.enabled
+
+            opacity: searchField.text.length > 0 ? 1 : 0
+            Behavior on opacity {
+                FadeAnimation {}
             }
 
-            IconButton {
-                id: clearButton
-                anchors {
-                    right: parent.right
-                    rightMargin: Theme.horizontalPageMargin
-                }
-                width: icon.width
-                height: parent.height
-                icon.source: "image://theme/icon-m-clear"
-
-                enabled: searchField.enabled
-
-                opacity: searchField.text.length > 0 ? 1 : 0
-                Behavior on opacity {
-                    FadeAnimation {}
-                }
-
-                onClicked: {
-                    searchField.text = ""
-                    searchField._editor.forceActiveFocus()
-                }
+            onClicked: {
+                searchField.text = ""
+                searchField._editor.forceActiveFocus()
             }
         }
     }

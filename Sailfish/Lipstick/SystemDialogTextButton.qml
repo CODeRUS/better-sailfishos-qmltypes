@@ -9,15 +9,18 @@ BackgroundItem {
     property real bottomPadding: 2*Theme.paddingLarge
 
     implicitHeight: label.height + topPadding + bottomPadding
-    width: label.width + 2*Theme.paddingLarge
+    width: label.implicitWidth + 2*Theme.paddingLarge
 
     Label {
         id: label
 
         y: topPadding
-        anchors.horizontalCenter: parent.horizontalCenter
+        x: Theme.paddingMedium
+        width: parent.width - 2*Theme.paddingMedium
+        horizontalAlignment: Text.AlignHCenter
         color: root.down ? Theme.highlightColor : Theme.primaryColor
         font.pixelSize: Theme.fontSizeMedium
         textFormat: Text.AutoText
+        wrapMode: Text.Wrap
     }
 }

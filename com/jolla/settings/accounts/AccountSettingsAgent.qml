@@ -83,9 +83,21 @@ Item {
         //% "Allow apps to show and update your %1 photos, videos and other content."
         QT_TRID_NOOP("components_accounts-la-service_description_sharing")
 
+        //: Name of the "Storage" service type for an account (enables cloud storage and backup from the device)
+        //% "Storage"
+        QT_TRID_NOOP("components_accounts-la-service_name_storage")
+
+        //: Describes the effect of enabling the "Storage" service for a particular user account.
+        //% "Allow apps to backup or otherwise store data to the %1 cloud"
+        QT_TRID_NOOP("components_accounts-la-service_description_storage")
+
         //: Notifications
         //% "Notifications"
         QT_TRID_NOOP("components_accounts-la-sync_service_name_notifications")
+
+        //: More precise name for cloud storage services
+        //% "Cloud storage"
+        QT_TRID_NOOP("components_accounts-la-service_name_cloud_storage")
     }
 
     FirstTimeUseCounter {

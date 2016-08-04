@@ -16,8 +16,16 @@ Dialog {
 
     Component.onCompleted: {
         if (timeFormatConfig.value == undefined) {
-            // If time format has never been set, default to 24hr.
-            timeFormatConfig.value = "24"
+            var timeFormat = Qt.locale().timeFormat(Locale.ShortFormat)
+            var twelveHourClock = timeFormat.indexOf("ap") >= 0 || timeFormat.indexOf("AP") >= 0
+
+            if (twelveHourClock) {
+                timeFormatConfig.value = "12"
+                dateTimeSettings.setHourMode(DateTimeSettings.TwelveHours)
+            } else {
+                timeFormatConfig.value = "24"
+                dateTimeSettings.setHourMode(DateTimeSettings.TwentyFourHours)
+            }
         }
         _reloadDateString()
 

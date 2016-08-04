@@ -71,12 +71,30 @@ Module {
         Property { name: "iface"; type: "string" }
         Property { name: "bus"; type: "DeclarativeDBus::BusType" }
         Property { name: "signalsEnabled"; type: "bool" }
+        Property { name: "propertiesEnabled"; type: "bool" }
         Signal { name: "interfaceChanged" }
         Signal { name: "propertiesChanged" }
         Method {
             name: "call"
             Parameter { name: "method"; type: "string" }
             Parameter { name: "arguments"; type: "QJSValue" }
+            Parameter { name: "callback"; type: "QJSValue" }
+            Parameter { name: "errorCallback"; type: "QJSValue" }
+        }
+        Method {
+            name: "call"
+            Parameter { name: "method"; type: "string" }
+            Parameter { name: "arguments"; type: "QJSValue" }
+            Parameter { name: "callback"; type: "QJSValue" }
+        }
+        Method {
+            name: "call"
+            Parameter { name: "method"; type: "string" }
+            Parameter { name: "arguments"; type: "QJSValue" }
+        }
+        Method {
+            name: "call"
+            Parameter { name: "method"; type: "string" }
         }
         Method {
             name: "typedCall"

@@ -10,8 +10,8 @@ Module {
     Component {
         name: "Vault"
         prototype: "QObject"
-        exports: ["NemoMobile.Vault/Vault 1.0"]
-        exportMetaObjectRevisions: [0]
+        exports: ["NemoMobile.Vault/Vault 1.0", "NemoMobile.Vault/Vault 1.1"]
+        exportMetaObjectRevisions: [0, 0]
         Enum {
             name: "ImportExportAction"
             values: {
@@ -27,7 +27,16 @@ Module {
                 "Restore": 2,
                 "RemoveSnapshot": 3,
                 "ExportImportPrepare": 4,
-                "ExportImportExecute": 5
+                "ExportImportExecute": 5,
+                "Data": 6,
+                "Maintenance": 7,
+                "ExportSnapshot": 8
+            }
+        }
+        Enum {
+            name: "DataType"
+            values: {
+                "SnapshotUnits": 0
             }
         }
         Property { name: "root"; type: "string" }
@@ -46,6 +55,11 @@ Module {
             name: "error"
             Parameter { name: "operation"; type: "Operation" }
             Parameter { name: "error"; type: "QVariantMap" }
+        }
+        Signal {
+            name: "data"
+            Parameter { name: "id"; type: "DataType" }
+            Parameter { name: "context"; type: "QVariantMap" }
         }
         Method {
             name: "connectVault"
@@ -85,5 +99,29 @@ Module {
             Parameter { name: "global"; type: "bool" }
         }
         Method { name: "startGc" }
+        Method {
+            name: "requestData"
+            Parameter { type: "DataType" }
+            Parameter { type: "QVariantMap" }
+        }
+        Method { name: "reset" }
+        Method {
+            name: "backupUnit"
+            Parameter { name: "unit"; type: "string" }
+        }
+        Method {
+            name: "tagSnapshot"
+            Parameter { name: "message"; type: "string" }
+        }
+        Method {
+            name: "restoreUnit"
+            Parameter { type: "string" }
+            Parameter { type: "string" }
+        }
+        Method {
+            name: "exportSnapshot"
+            Parameter { type: "string" }
+            Parameter { type: "string" }
+        }
     }
 }

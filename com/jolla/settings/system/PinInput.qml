@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import MeeGo.QOfono 0.2
 import org.nemomobile.lipstick 0.1
+import org.nemomobile.ofono 1.0
 
 Item {
     id: root
@@ -17,7 +18,7 @@ Item {
     property int maximumLength
 
     // modem for emergency calls
-    property string modemPath: manager.defaultModem
+    property string modemPath: modemManager.defaultVoiceModem || manager.defaultModem
 
     //: Confirms the entered PIN
     //% "Enter"
@@ -29,6 +30,7 @@ Item {
 
     property string titleText
     property color titleColor: Theme.secondaryHighlightColor
+    property string subTitleText
     property string warningText
     property color warningTextColor: Theme.primaryColor
     property bool highlightTitle
@@ -41,6 +43,8 @@ Item {
     property string _displayedPin
     property string _oldPin
     property string _newPin
+
+    property real headingVerticalOffset
 
     property string _pinConfirmTitleText
     property string _badPinWarning
@@ -214,7 +218,7 @@ Item {
 
     Label {
         id: headingLabel
-        y: Theme.itemSizeExtraSmall
+        y: Theme.itemSizeExtraSmall + headingVerticalOffset
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width - Theme.paddingLarge * 2
         horizontalAlignment: Text.AlignHCenter
@@ -235,9 +239,24 @@ Item {
     }
 
     Label {
+        id: subHeadingLabel
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: headingLabel.bottom
+        }
+        width: parent.width - Theme.paddingLarge * 2
+        wrapMode: Text.Wrap
+        horizontalAlignment: Text.AlignHCenter
+        color: headingLabel.color
+
+        font.pixelSize: Theme.fontSizeExtraLarge
+        text: root.subTitleText
+    }
+
+    Label {
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: subHeadingLabel.bottom
         }
         width: parent.width - Theme.paddingLarge * 2
         wrapMode: Text.Wrap
@@ -472,6 +491,7 @@ Item {
         EnterKey.iconSource: "image://theme/icon-m-enter-accept"
     }
 
+    OfonoModemManager { id: modemManager }
     OfonoManager { id: manager }
 
     OfonoModem {
@@ -479,7 +499,10 @@ Item {
         modemPath: root.modemPath
     }
 
-    OfonoVoiceCallManager { id: voiceCallManager }
+    OfonoVoiceCallManager {
+        id: voiceCallManager
+        modemPath: root.modemPath
+    }
 
     // To make an emergency call: (as per ofono emergency-call-handling.txt)
     // 1) Set org.ofono.Modem online=true
@@ -492,11 +515,10 @@ Item {
             return
         }
         modem.onlineChanged.disconnect(_dialEmergencyNumber)
-        voiceCallManager.modemPath = modem.modemPath
         var emergencyNumbers = voiceCallManager.emergencyNumbers
         if (root.enteredPin !== "" && emergencyNumbers.indexOf(root.enteredPin) === -1) {
             //: Indicates that user has entered invalid emergency number
-            //% "Only emergency calls  permitted"
+            //% "Only emergency calls permitted"
             root._overridingWarningText = qsTrId("settings_pin-la-invalid_emergency_number")
             return
         }
@@ -512,8 +534,9 @@ Item {
         if (!_voiceCallManager) {
             _voiceCallManager = Qt.createQmlObject("import QtQuick 2.0; import org.nemomobile.voicecall 1.0; VoiceCallManager {}",
                                root, 'VoiceCallManager');
+            _voiceCallManager.modemPath = Qt.binding(function() { return root.modemPath })
         }
-        _voiceCallManager.dial(_voiceCallManager.defaultProviderId, root.enteredPin)
+        _voiceCallManager.dial(root.enteredPin)
     }
 
     function _resetView() {

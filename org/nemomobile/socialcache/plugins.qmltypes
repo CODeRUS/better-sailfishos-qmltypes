@@ -37,6 +37,54 @@ Module {
         }
     }
     Component {
+        name: "DropboxImageCacheModel"
+        prototype: "AbstractSocialCacheModel"
+        exports: ["org.nemomobile.socialcache/DropboxImageCacheModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "DropboxGalleryRole"
+            values: {
+                "DropboxId": 0,
+                "Thumbnail": 1,
+                "Image": 2,
+                "Title": 3,
+                "DateTaken": 4,
+                "Width": 5,
+                "Height": 6,
+                "Count": 7,
+                "MimeType": 8,
+                "AccountId": 9,
+                "UserId": 10,
+                "AccessToken": 11
+            }
+        }
+        Enum {
+            name: "ModelDataType"
+            values: {
+                "None": 0,
+                "Users": 1,
+                "Albums": 2,
+                "Images": 3
+            }
+        }
+        Property { name: "type"; type: "DropboxImageCacheModel::ModelDataType" }
+        Property { name: "downloader"; type: "DropboxImageDownloader"; isPointer: true }
+        Method { name: "loadImages" }
+        Method { name: "refresh" }
+        Method {
+            name: "removeImage"
+            Parameter { name: "imageUrl"; type: "string" }
+        }
+    }
+    Component {
+        name: "DropboxImageDownloader"
+        prototype: "AbstractImageDownloader"
+        exports: ["org.nemomobile.socialcache/DropboxImageDownloader 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+    }
+    Component {
         name: "FacebookImageCacheModel"
         prototype: "AbstractSocialCacheModel"
         exports: ["org.nemomobile.socialcache/FacebookImageCacheModel 1.0"]
@@ -121,12 +169,99 @@ Module {
         Property { name: "facebookClientId"; type: "string"; isReadonly: true }
         Property { name: "twitterConsumerKey"; type: "string"; isReadonly: true }
         Property { name: "twitterConsumerSecret"; type: "string"; isReadonly: true }
+        Property { name: "oneDriveClientId"; type: "string"; isReadonly: true }
+        Property { name: "dropboxClientId"; type: "string"; isReadonly: true }
+        Property { name: "vkClientId"; type: "string"; isReadonly: true }
+    }
+    Component {
+        name: "OneDriveImageCacheModel"
+        prototype: "AbstractSocialCacheModel"
+        exports: ["org.nemomobile.socialcache/OneDriveImageCacheModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "OneDriveGalleryRole"
+            values: {
+                "OneDriveId": 0,
+                "Thumbnail": 1,
+                "Image": 2,
+                "Title": 3,
+                "DateTaken": 4,
+                "Width": 5,
+                "Height": 6,
+                "Count": 7,
+                "MimeType": 8,
+                "AccountId": 9,
+                "UserId": 10,
+                "Description": 11
+            }
+        }
+        Enum {
+            name: "ModelDataType"
+            values: {
+                "None": 0,
+                "Users": 1,
+                "Albums": 2,
+                "Images": 3
+            }
+        }
+        Property { name: "type"; type: "OneDriveImageCacheModel::ModelDataType" }
+        Property { name: "downloader"; type: "OneDriveImageDownloader"; isPointer: true }
+        Method { name: "loadImages" }
+        Method { name: "refresh" }
+        Method {
+            name: "removeImage"
+            Parameter { name: "imageId"; type: "string" }
+        }
+    }
+    Component {
+        name: "OneDriveImageDownloader"
+        prototype: "AbstractImageDownloader"
+        exports: ["org.nemomobile.socialcache/OneDriveImageDownloader 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Property { name: "optimalThumbnailSize"; type: "int" }
+        Signal {
+            name: "accessTokenRequested"
+            Parameter { name: "accountId"; type: "int" }
+        }
+        Method {
+            name: "accessTokenRetrived"
+            Parameter { name: "accessToken"; type: "string" }
+            Parameter { name: "accountId"; type: "int" }
+        }
+        Method {
+            name: "accessTokenFailed"
+            Parameter { name: "accountId"; type: "int" }
+        }
     }
     Component {
         name: "SocialImageDownloader"
         prototype: "AbstractImageDownloader"
         exports: ["org.nemomobile.socialcache/SocialImageCache 1.0"]
         exportMetaObjectRevisions: [0]
+        Method {
+            name: "cached"
+            type: "string"
+            Parameter { name: "imageId"; type: "string" }
+        }
+        Method {
+            name: "imageFile"
+            Parameter { name: "imageUrl"; type: "string" }
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "caller"; type: "QObject"; isPointer: true }
+            Parameter { name: "expiresInDays"; type: "int" }
+            Parameter { name: "imageId"; type: "string" }
+            Parameter { name: "accessToken"; type: "string" }
+        }
+        Method {
+            name: "imageFile"
+            Parameter { name: "imageUrl"; type: "string" }
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "caller"; type: "QObject"; isPointer: true }
+            Parameter { name: "expiresInDays"; type: "int" }
+            Parameter { name: "imageId"; type: "string" }
+        }
         Method {
             name: "imageFile"
             Parameter { name: "imageUrl"; type: "string" }
@@ -144,6 +279,10 @@ Module {
             name: "removeFromRecentlyUsed"
             Parameter { name: "imageUrl"; type: "string" }
         }
+        Method {
+            name: "removeFromRecentlyUsedById"
+            Parameter { name: "imageId"; type: "string" }
+        }
     }
     Component {
         name: "SocialSyncInterface"
@@ -160,7 +299,9 @@ Module {
                 "Google": 3,
                 "VK": 4,
                 "Diaspora": 5,
-                "CalDAV": 6
+                "CalDAV": 6,
+                "OneDrive": 7,
+                "Dropbox": 8
             }
         }
         Enum {
@@ -195,6 +336,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "socialNetwork"; type: "SocialSyncInterface::SocialNetwork" }
         Property { name: "dataType"; type: "SocialSyncInterface::DataType" }
+        Property { name: "syncProfiles"; type: "QStringList"; isReadonly: true }
         Property { name: "loading"; type: "bool"; isReadonly: true }
         Signal { name: "profileDeleted" }
         Method { name: "sync" }
@@ -205,5 +347,101 @@ Module {
         exports: ["org.nemomobile.socialcache/TwitterPostsModel 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "accountIdFilter"; type: "QVariantList" }
+    }
+    Component {
+        name: "VKImageCacheModel"
+        prototype: "AbstractSocialCacheModel"
+        exports: ["org.nemomobile.socialcache/VKImageCacheModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "VKGalleryRole"
+            values: {
+                "PhotoId": 0,
+                "AlbumId": 1,
+                "UserId": 2,
+                "AccountId": 3,
+                "Text": 4,
+                "Date": 5,
+                "Width": 6,
+                "Height": 7,
+                "Thumbnail": 8,
+                "Image": 9,
+                "Count": 10,
+                "MimeType": 11,
+                "ImageSource": 12
+            }
+        }
+        Enum {
+            name: "ModelDataType"
+            values: {
+                "None": 0,
+                "Users": 1,
+                "Albums": 2,
+                "Images": 3
+            }
+        }
+        Property { name: "type"; type: "VKImageCacheModel::ModelDataType" }
+        Property { name: "downloader"; type: "VKImageDownloader"; isPointer: true }
+        Method { name: "loadImages" }
+        Method { name: "refresh" }
+        Method {
+            name: "constructNodeIdentifier"
+            type: "string"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "user_id"; type: "string" }
+            Parameter { name: "album_id"; type: "string" }
+            Parameter { name: "photo_id"; type: "string" }
+        }
+        Method {
+            name: "parseNodeIdentifier"
+            type: "QVariantMap"
+            Parameter { name: "nid"; type: "string" }
+        }
+        Method {
+            name: "removeImage"
+            Parameter { name: "imageId"; type: "string" }
+        }
+    }
+    Component {
+        name: "VKImageDownloader"
+        prototype: "AbstractImageDownloader"
+        exports: ["org.nemomobile.socialcache/VKImageDownloader 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+    }
+    Component {
+        name: "VKPostsModel"
+        prototype: "AbstractSocialCacheModel"
+        exports: ["org.nemomobile.socialcache/VKPostsModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "VKPostsRole"
+            values: {
+                "VkId": 0,
+                "Name": 1,
+                "Body": 2,
+                "Timestamp": 3,
+                "Icon": 4,
+                "Images": 5,
+                "Extra": 6,
+                "Accounts": 7,
+                "RepostType": 8,
+                "RepostOwnerName": 9,
+                "RepostOwnerAvatar": 10,
+                "RepostText": 11,
+                "RepostVideo": 12,
+                "RepostLink": 13,
+                "RepostTimestamp": 14,
+                "RepostImages": 15,
+                "Link": 16
+            }
+        }
+        Property { name: "accountIdFilter"; type: "QVariantList" }
+        Method {
+            name: "remove"
+            Parameter { name: "postId"; type: "string" }
+        }
+        Method { name: "clear" }
     }
 }

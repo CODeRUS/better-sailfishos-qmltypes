@@ -22,53 +22,46 @@ import Sailfish.Silica 1.0
 PanelBackground {
     id: toolbar
 
-    property variant flickable: undefined
-    property int parentHeight
-    property bool hidden: false
-    property bool autoHide: true
+    property Item flickable
+    property bool forceHidden
+    property bool autoShowHide: true
+    property int offset: _active && !forceHidden ? height : 0
 
-    anchors.top: flickable.bottom
-
-    states: [
-        State {
-            name: "visible"
-            when: !hidden && _dragUp
-            PropertyChanges { target: flickable; height: parentHeight - toolbar.height }
-        },
-        State {
-            name: "hidden"
-            when: hidden || !_dragUp
-            PropertyChanges { target: flickable; height: parentHeight }
-        }
-    ]
-    transitions: Transition {
-        NumberAnimation { target: flickable; property: "height"; duration: 400; easing.type: Easing.InOutQuad }
-    }
-
-    Binding {
-        target: flickable
-        property: "clip"
-        value: enabled
-    }
+    property bool _active
     property int _previousContentY
-    property bool _dragUp
+
+    onAutoShowHideChanged: {
+        if (autoShowHide && _active) {
+            autoHideTimer.start()
+        } else {
+            autoHideTimer.stop()
+        }
+    }
+
+    Behavior on offset { NumberAnimation { duration: 400; easing.type: Easing.InOutQuad } }
+
     Connections {
         target: flickable
-        onContentYChanged:  {
-        if (!flickable.movingVertically) return
+        onContentYChanged: {
+            if (!flickable.movingVertically) {
+                return
+            }
 
-        _dragUp = !autoHide || (flickable.contentY < _previousContentY)
-        if (_dragUp) autoHideTimer.restart()
+            if (autoShowHide) {
+                _active = flickable.contentY < _previousContentY
 
-        _previousContentY = flickable.contentY
+                if (_active) {
+                    autoHideTimer.restart()
+                }
+            }
+
+            _previousContentY = flickable.contentY
         }
     }
 
-    // Auto hide toolbar
     Timer {
         id: autoHideTimer
         interval: 4000
-        onTriggered: _dragUp = !autoHide
+        onTriggered: _active = false
     }
-    onAutoHideChanged: if (autoHide && !autoHideTimer.running) autoHideTimer.start()
 }

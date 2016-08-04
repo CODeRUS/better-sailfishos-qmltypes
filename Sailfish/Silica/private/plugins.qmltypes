@@ -153,6 +153,10 @@ Module {
             type: "int"
             Parameter { name: "datetime"; type: "QDateTime" }
         }
+        Method {
+            name: "asyncInvoke"
+            Parameter { name: "callable"; type: "QJSValue" }
+        }
     }
     Component {
         name: "DeclarativeVisibilityCull"
@@ -446,5 +450,28 @@ Module {
             Parameter { name: "msec"; type: "int" }
         }
         Method { name: "requestUpdate"; revision: 3 }
+    }
+    Component {
+        name: "TextLayoutModel"
+        prototype: "QAbstractListModel"
+        exports: ["Sailfish.Silica.private/TextLayoutModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Role"
+            values: {
+                "LineNumberRole": 256,
+                "TextRole": 257,
+                "LengthRole": 258,
+                "WidthRole": 259,
+                "HeightRole": 260,
+                "ElidedRole": 261
+            }
+        }
+        Property { name: "text"; type: "string" }
+        Property { name: "font"; type: "QFont" }
+        Property { name: "width"; type: "float" }
+        Property { name: "wrapMode"; type: "int" }
+        Property { name: "maximumLineCount"; type: "int" }
+        Property { name: "lineCount"; type: "int"; isReadonly: true }
     }
 }

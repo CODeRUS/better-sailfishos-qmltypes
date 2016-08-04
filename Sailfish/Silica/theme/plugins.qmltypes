@@ -14,6 +14,15 @@ Module {
         isCreatable: false
         isSingleton: true
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "PresenceMode"
+            values: {
+                "PresenceAvailable": 0,
+                "PresenceAway": 1,
+                "PresenceBusy": 2,
+                "PresenceOffline": 3
+            }
+        }
         Property { name: "fontFamilyHeading"; type: "string"; isReadonly: true }
         Property { name: "fontFamily"; type: "string"; isReadonly: true }
         Property { name: "fontSizeTiny"; type: "int"; isReadonly: true }
@@ -58,6 +67,8 @@ Module {
         Property { name: "secondaryHighlightColor"; type: "QColor"; isReadonly: true }
         Property { name: "backgroundImage"; type: "QUrl"; isReadonly: true }
         Property { name: "startDragDistance"; type: "int"; isReadonly: true }
+        Property { name: "minimumPressHighlightTime"; type: "int"; isReadonly: true }
+        Property { name: "_webviewCustomLayoutWidthScalingFactor"; type: "float"; isReadonly: true }
         Method {
             name: "highlightText"
             type: "string"
@@ -70,6 +81,11 @@ Module {
             type: "QColor"
             Parameter { name: "color"; type: "QColor" }
             Parameter { name: "opacity"; type: "float" }
+        }
+        Method {
+            name: "presenceColor"
+            type: "QColor"
+            Parameter { name: "presenceMode"; type: "PresenceMode" }
         }
     }
 }

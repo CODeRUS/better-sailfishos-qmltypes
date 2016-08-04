@@ -1,3 +1,4 @@
 module Sailfish.Tutorial
 plugin sailfishtutorialplugin
 TutorialEntryPage 1.0 TutorialEntryPage.qml
+CornerTapItem 1.0 CornerTapItem.qml

@@ -1043,6 +1043,23 @@ Module {
         }
     }
     Component {
+        name: "QOfonoSimListModel"
+        prototype: "QAbstractListModel"
+        exports: ["MeeGo.QOfono/OfonoSimListModel 0.2"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "requireSubscriberIdentity"; type: "bool" }
+        Signal {
+            name: "simAdded"
+            Parameter { name: "sim"; type: "QOfonoSimManager"; isPointer: true }
+        }
+        Signal {
+            name: "simRemoved"
+            Parameter { name: "sim"; type: "QOfonoSimManager"; isPointer: true }
+        }
+    }
+    Component {
         name: "QOfonoSimManager"
         prototype: "QOfonoModemInterface"
         exports: ["MeeGo.QOfono/OfonoSimManager 0.2"]
@@ -1083,6 +1100,7 @@ Module {
         Property { name: "subscriberIdentity"; type: "string"; isReadonly: true }
         Property { name: "mobileCountryCode"; type: "string"; isReadonly: true }
         Property { name: "mobileNetworkCode"; type: "string"; isReadonly: true }
+        Property { name: "serviceProviderName"; type: "string"; isReadonly: true }
         Property { name: "subscriberNumbers"; type: "QStringList" }
         Property { name: "serviceNumbers"; type: "QVariantMap"; isReadonly: true }
         Property { name: "pinRequired"; type: "PinType"; isReadonly: true }
@@ -1107,6 +1125,10 @@ Module {
         Signal {
             name: "mobileNetworkCodeChanged"
             Parameter { name: "mnc"; type: "string" }
+        }
+        Signal {
+            name: "serviceProviderNameChanged"
+            Parameter { name: "spn"; type: "string" }
         }
         Signal {
             name: "subscriberNumbersChanged"

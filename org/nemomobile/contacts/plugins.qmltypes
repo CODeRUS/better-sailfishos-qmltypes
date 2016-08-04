@@ -283,6 +283,7 @@ Module {
         Property { name: "syncTarget"; type: "string"; isReadonly: true }
         Property { name: "constituents"; type: "QList<int>"; isReadonly: true }
         Property { name: "mergeCandidates"; type: "QList<int>"; isReadonly: true }
+        Property { name: "resolving"; type: "bool"; isReadonly: true }
         Signal { name: "contactChanged" }
         Signal { name: "contactRemoved" }
         Signal { name: "aggregationOperationFinished" }

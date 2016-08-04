@@ -15,6 +15,9 @@ Page {
     property alias contentId: ambience.contentId
     property alias source: ambience.url
     property alias ambience: ambience
+    property bool allowRemove: Ambience.source != ambience.url
+    readonly property bool wasRemoved: _removed || removeRemorse.visible
+    property bool _removed
     property color _originalHighlightColor
     property color _originalSecondaryHighlightColor
     property bool _colorChanged
@@ -22,11 +25,13 @@ Page {
     property bool _hasDataCapability: capabilityDataContextProperty.value || capabilityDataContextProperty.value === undefined
     property bool _hasVoiceCapability: capabilityVoiceContextProperty.value || capabilityVoiceContextProperty.value === undefined
 
+    signal ambienceRemoved()
+
     allowedOrientations: Orientation.All
 
     // Save only when user leaves the app or goes back to the previous page
     onStatusChanged: {
-        if (status === PageStatus.Deactivating && !removeRemorse.visible) {
+        if (status === PageStatus.Deactivating && !wasRemoved) {
             ambience.commitChanges()
         } else if (status === PageStatus.Inactive) {
             contentList.positionViewAtBeginning()
@@ -158,6 +163,7 @@ Page {
             backgroundColor: Ambience.highlightBackgroundColor(ambience.highlightColor)
 
             MenuItem {
+                enabled: root.allowRemove
                 //: Remove ambience from the ambience list
                 //% "Remove ambience"
                 text: qsTrId("jolla-gallery-ambience-me-remove_ambience")
@@ -167,6 +173,8 @@ Page {
                     //% "Deleting Ambience"
                     removeRemorse.execute(qsTrId("jolla-gallery-ambience-delete-ambience"),
                                           function() {
+                                              root._removed = true
+                                              root.ambienceRemoved()
                                               ambience.remove()
                                               pageStack.pop()
                                           })
@@ -177,6 +185,7 @@ Page {
                 //% "Set Ambience"
                 text: qsTrId("jolla-gallery-ambience-me-set_ambience")
                 color: down || highlighted ? Theme.primaryColor : ambience.highlightColor
+                visible: Ambience.source != ambience.url
                 onClicked: {
                     ambience.save()
                     Ambience.source = ambience.url

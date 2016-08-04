@@ -44,6 +44,7 @@ MouseArea {
     property color highlightedColor: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
     property alias contentHeight: content.height
     property alias contentWidth: content.width
+    property alias contentX: content.x
 
     property bool _showPress: highlighted || pressTimer.running
     property alias contentItem: content
@@ -78,6 +79,6 @@ MouseArea {
     }
     Timer {
         id: pressTimer
-        interval: 50
+        interval: Theme.minimumPressHighlightTime
     }
 }

@@ -32,7 +32,7 @@ Dialog {
 
         minimumDelegateSize: Screen.sizeCategory >= Screen.Large
                              ? Theme.iconSizeLauncher
-                             : Theme.itemSizeExtraLarge + Theme.paddingSmall
+                             : initialCellWidth
         width: parent.width
         model: applicationModel
 
@@ -102,7 +102,8 @@ Dialog {
                     centerIn: parent
                     horizontalCenterOffset: appGrid.contentOffset
                 }
-                width: Theme.itemSizeExtraLarge + Theme.paddingSmall * 2
+                width: Math.min(appGrid.cellWidth, Theme.itemSizeExtraLarge
+                            + (Screen.sizeCategory >= Screen.Large ? Theme.paddingSmall * 2 : 0))
                 height: Theme.itemSizeExtraLarge + Theme.paddingSmall
                 icon: model.icon
                 text: model.displayName
@@ -115,8 +116,7 @@ Dialog {
 
             BusyIndicator {
                 anchors {
-                    centerIn: parent
-                    horizontalCenterOffset: appGrid.contentOffset
+                    centerIn: appDisplay
                     verticalCenterOffset: -Theme.paddingMedium
                 }
                 running: appDelegate.beingInstalled || appDisplay.iconStatus !== Image.Ready

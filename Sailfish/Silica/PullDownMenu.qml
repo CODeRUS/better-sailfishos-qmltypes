@@ -34,7 +34,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Silica.private 1.0
+import Sailfish.Silica.private 1.0 as SilicaPrivate
 import "private"
 import "private/Util.js" as Util
 
@@ -78,6 +78,21 @@ PulleyMenuBase {
                 color: Theme.rgba(pullDownMenu.backgroundColor, Theme.highlightBackgroundOpacity)
             }
             GradientStop { position: 1.0; color: Theme.rgba(pullDownMenu.backgroundColor, 0.0) }
+        }
+    }
+
+    function _resetPosition() {
+        flickable.contentY = _inactivePosition
+    }
+    on_AtInitialPositionChanged: {
+        if (!_atInitialPosition && !flickable.moving && _page && _page.orientationTransitionRunning) {
+            // If this flickable has a context menu open, the menu visibility takes precedence over initial position reset
+            if (('__silica_contextmenu_instance' in flickable) && flickable.__silica_contextmenu_instance && flickable.__silica_contextmenu_instance._open) {
+                return
+            }
+
+            // If the menu was at the inactive position before the orientation transition, it should still be afterward
+            SilicaPrivate.Util.asyncInvoke(_resetPosition)
         }
     }
 

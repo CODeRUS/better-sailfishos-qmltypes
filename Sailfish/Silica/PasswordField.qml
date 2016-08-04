@@ -37,7 +37,7 @@ import Sailfish.Silica 1.0
 TextField {
     id: root
 
-    property bool showEchoModeToggle: true
+    property bool showEchoModeToggle: activeFocus
     property int passwordEchoMode: TextInput.Password
 
     property bool _usePasswordEchoMode: true
@@ -55,8 +55,8 @@ TextField {
     label: qsTrId("components-la-password")
 
     states: State {
-        name: "hasFocus"
-        when: root.activeFocus && root.showEchoModeToggle
+        name: "showToggle"
+        when: root.showEchoModeToggle
         PropertyChanges {
             target: root
             textRightMargin: root._buttonLeftMargin/2 + passwordVisibilityButton.width + root.textMargin
@@ -69,7 +69,7 @@ TextField {
     }
 
     transitions: Transition {
-        from: ""; to: "hasFocus"
+        from: ""; to: "showToggle"
         reversible: true
         NumberAnimation {
             property: "textRightMargin"

@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Contacts 1.0
+import Sailfish.Telephony 1.0
 
 import "contactcardmodelfactory.js" as ModelFactory
 import "numberutils.js" as NumberUtils
@@ -14,10 +15,11 @@ ExpandingDelegate {
     property bool disablePhoneActions
 
     property bool _disableActionButtons
+    property Item _menu
 
     // Signals to tell that some contact card action item has been clicked.
     // Yep, it's a string because the phone number can start with the '+' char.
-    signal callClicked(string number, string connection)
+    signal callClicked(string number, string connection, string modemPath)
     signal smsClicked(string number, string connection)
     signal emailClicked(string email)
     signal imClicked(string localUid, string remoteUid)
@@ -37,7 +39,12 @@ ExpandingDelegate {
 
         switch(actionType) {
         case "call":
-            callClicked(actionValue, "gsm")
+            if (Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
+                _menu = simSelectorComponent.createObject(null)
+                _menu.show(menuContainer)
+            } else {
+                callClicked(actionValue, "gsm", "")
+            }
             break;
         case "sms":
             smsClicked(actionValue, "gsm")
@@ -83,17 +90,44 @@ ExpandingDelegate {
     }
 
     expandingContent: [
-        Grid {
-            id: grid
-            columns: 2
-            spacing: actionDetailsModel.count > 1 ? Theme.paddingLarge : 0
+        Item {
+            width: detailItem.width
+            height: Math.max(grid.height, menuContainer.height)
+            Grid {
+                id: grid
+                columns: 2
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: actionDetailsModel.count > 1 ? Theme.paddingLarge : 0
+                opacity: _menu && _menu.active ? 0.0 : 1.0
+                Behavior on opacity { FadeAnimator {} }
 
-            Repeater {
-                model: actionDetailsModel
-                Button { text: actionLabel; enabled: !_disableActionButtons; onClicked: handleActionClicked(actionType) }
+                Repeater {
+                    model: actionDetailsModel
+                    Button { text: actionLabel; enabled: !_disableActionButtons; onClicked: handleActionClicked(actionType) }
+                }
+            }
+            Item {
+                id: menuContainer
+                width: detailItem.width
+                height: _menu ? _menu.height : 0
             }
         }
     ]
+
+    Component {
+        id: simSelectorComponent
+        ContextMenu {
+            id: contextMenu
+            onClosed: destroy()
+            SimPicker {
+                onSimSelected: {
+                    var actionValue = NumberUtils.sanitizePhoneNumber(detailValue)
+                    callClicked(actionValue, "gsm", modemPath)
+                    contextMenu.hide()
+                }
+            }
+        }
+    }
 
     ListModel { id: actionDetailsModel }
 }

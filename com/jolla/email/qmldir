@@ -1,0 +1,3 @@
+module com.jolla.email
+plugin jollaemailplugin
+EmailComposer 1.1 EmailComposer.qml

@@ -1,12 +1,15 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Item {
+Lesson {
     id: root
 
     property bool completed
 
-    anchors.fill: parent
+    //: This text has a full stop at the end unlike the other "recap labels" because
+    //: it's shown together with tutorial-la-recap_tutorial_completed
+    //% "Now you know that the line at the top of the view is the pulley menu and learned how to find more information about Jolla Launcher."
+    recapText: qsTrId("tutorial-la-recap_pulley_menu_alternative")
 
     Component.onCompleted: {
         // Make sure the background is at correct position

@@ -8,6 +8,7 @@ Item {
 
     property alias enteredPin: pinInput.enteredPin
     property alias modemPath: ofonoSimManager.modemPath
+    property alias multiSimManager: pinInput.multiSimManager
     property alias showCancelButton: pinInput.showCancelButton
     property alias showBackgroundGradient: pinInput.showBackgroundGradient
     property alias cancelText: pinInput.cancelText
@@ -90,22 +91,23 @@ Item {
         id: pinInput
 
         simManager: ofonoSimManager
-        requestedPinType: ofonoSimManager.pinRequired
+        // Default to querying for PIN if no type is currently required
+        requestedPinType: ofonoSimManager.pinRequired > 0 ? ofonoSimManager.pinRequired : OfonoSimManager.SimPin
 
         onPinConfirmed: {
-            root._confirmedPinType = ofonoSimManager.pinRequired
+            root._confirmedPinType = requestedPinType
 
-            if (ofonoSimManager.isPukType(ofonoSimManager.pinRequired)) {
+            if (ofonoSimManager.isPukType(requestedPinType)) {
                 if (root._enteredPuk === "") {
                     // PUK has been entered, now ask user for the new PIN so it can be reset
                     root._enteredPuk = enteredPin
                     requestAndConfirmNewPin()
                 } else {
-                    ofonoSimManager.resetPin(ofonoSimManager.pinRequired, root._enteredPuk, enteredPin)
+                    ofonoSimManager.resetPin(requestedPinType, root._enteredPuk, enteredPin)
                     root._enteredPuk = ""
                 }
             } else {
-                ofonoSimManager.enterPin(ofonoSimManager.pinRequired, enteredPin)
+                ofonoSimManager.enterPin(requestedPinType, enteredPin)
             }
         }
 

@@ -41,6 +41,9 @@ Page {
                 anchors.verticalCenter: parent.verticalCenter
 
                 focus: true
+                EnterKey.iconSource: "image://theme/icon-m-enter-close"
+                EnterKey.onClicked: focus = false
+
                 Binding {
                     target: view.model
                     property: "filter"

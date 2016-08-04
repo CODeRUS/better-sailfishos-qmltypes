@@ -10,25 +10,16 @@ Dialog {
     property alias excludedDevices: picker.excludedDevices
     property alias preferredProfileHint: picker.preferredProfileHint
 
-    function _doDiscovery() {
-        if (adapter.powered) {
-            adapter.startDiscovery()
-            picker.selectedDevice = ""
-        } else {
-            adapter.startDiscoveryWhenPowered = true
-        }
-    }
-
     canAccept: selectedDevice != ""
     forwardNavigation: canAccept
 
     onOpened: {
-        adapter.startSession()
+        picker.adapter.startSession()
     }
 
     onDone: {
-        adapter.stopDiscovery()
-        adapter.endSession()
+        picker.adapter.stopDiscovery()
+        picker.adapter.endSession()
     }
 
     BluetoothViewPlaceholder {
@@ -59,8 +50,9 @@ Dialog {
         BluetoothDevicePicker {
             id: picker
             anchors.top: header.bottom
-            visible: adapter.discovering || !empty
+            visible: discovering || !empty
             width: parent.width
+            startDiscoveryWhenPowered: true
             onDeviceClicked: root.accept()
         }
 
@@ -68,31 +60,9 @@ Dialog {
             MenuItem {
                 //% "Search for devices"
                 text: qsTrId("components_bluetooth-me-start_discovery")
-                enabled: !adapter.discovering
+                enabled: !picker.discovering
 
-                onClicked: {
-                    root._doDiscovery()
-                }
-            }
-        }
-    }
-
-    BluetoothAdapter {
-        id: adapter
-
-        property bool startDiscoveryWhenPowered
-
-        onReadyChanged: {
-            if (ready) {
-                root._doDiscovery()
-            }
-        }
-
-        onPoweredChanged: {
-            if (startDiscoveryWhenPowered && powered) {
-                startDiscovery()
-                picker.selectedDevice = ""
-                startDiscoveryWhenPowered = false
+                onClicked: picker.discoverDevices()
             }
         }
     }

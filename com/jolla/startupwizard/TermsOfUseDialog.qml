@@ -1,6 +1,5 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Lipstick 1.0
 import com.jolla.startupwizard 1.0
 import com.jolla.settings.accounts 1.0
 
@@ -15,10 +14,24 @@ Dialog {
     property string localeName
     property StartupWizardManager startupWizardManager
 
+    property int party: StartupWizardManager.SailfishOS
+
+    property alias dialogHeader: dialogHeader
+
+    property alias headerText: headerLabel.text
+    property string summaryText
+    property string linkText
+    property string rejectLinkText
+    property string rejectHeaderText
+    property string rejectBodyText
+
+    signal shutdown()
+
+
     Flickable {
         id: flickable
 
-        property int _baseHeight: dialogHeader.height + contentColumn.height + bottomLabel.anchors.topMargin + bottomLabel.height + 2*Theme.paddingLarge
+        property int _baseHeight: dialogHeader.height + contentColumn.height + rejectLabel.anchors.topMargin + rejectLabel.height + 2*Theme.paddingLarge
         contentHeight: Math.max(_baseHeight, isPortrait ? Screen.height : Screen.width)
         anchors.fill: parent
 
@@ -27,7 +40,7 @@ Dialog {
             dialog: root
             cancelText: startupWizardManager.translatedText("startupwizard-he-previous_page", root.localeName)  // translation string defined in WizardDialogHeader
             acceptText: {
-                //: Agree to and accept the legal terms of Sailfish OS End User License Agreement. User must agree to this before beginning to use the Jolla device.
+                //: Agree to and accept the legal terms of Sailfish OS End User License Agreement. User must agree to this before beginning to use the device.
                 //% "Agree"
                 qsTrId("startupwizard-he-agree") // trigger Qt Linguist translation
                 return startupWizardManager.translatedText("startupwizard-he-agree", root.localeName)
@@ -45,51 +58,35 @@ Dialog {
             }
             spacing: Theme.paddingLarge
 
-            Image {
-                source: "image://theme/icon-os-state-update?" + startupWizardManager.defaultHighlightColor()
-            }
-
             Label {
+                id: headerLabel
+
                 width: parent.width
                 wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeExtraLarge
                 color: startupWizardManager.defaultHighlightColor()
-                text: {
-                    //% "End User License Agreement"
-                    qsTrId("startupwizard-he-eula") // trigger Qt Linguist translation
-                    return startupWizardManager.translatedText("startupwizard-he-eula", root.localeName)
-                }
             }
 
             Label {
+                id: summaryLabel
                 width: parent.width
                 wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeExtraSmall
                 color: startupWizardManager.defaultHighlightColor()
-                text: {
-                    //: %1 = a copy of the translated text of startupwizard-he-agree
-                    //% "Jolla runs Sailfish OS. By selecting '%1' and starting to use Sailfish OS you agree to the Sailfish OS End User License Agreement."
-                    qsTrId("startupwizard-la-sailfish_eula_intro") // trigger Qt Linguist translation
-                    return startupWizardManager.translatedText("startupwizard-la-sailfish_eula_intro", root.localeName)
-                            .arg(dialogHeader.acceptText)
-                }
+                text: root.summaryText.arg(dialogHeader.acceptText)
             }
 
             WizardClickableLabel {
+                id: linkLabel
                 width: parent.width
                 font.pixelSize: Theme.fontSizeExtraSmall
                 color: startupWizardManager.defaultHighlightColor()
-                text: {
-                    //: Text surrounded by %1 and %2 is underlined and colored differently
-                    //% "Please read the %1Sailfish OS End User License Agreement%2 carefully before accepting."
-                    qsTrId("startupwizard-la-sailfish_eula_read_carefully") // trigger Qt Linguist translation
-                    return startupWizardManager.translatedText("startupwizard-la-sailfish_eula_read_carefully", root.localeName)
+                text: root.linkText
                             .arg("<u><font color=\"" + (pressed ? startupWizardManager.defaultHighlightColor() : startupWizardManager.defaultPrimaryColor()) + "\">")
                             .arg("</font></u>")
-                }
 
                 onClicked: {
-                    var translatedText = startupWizardManager.termsOfUse(root.localeName)
+                    var translatedText = startupWizardManager.termsOfUse(root.localeName, root.party)
                     if (translatedText.length === 2) {
                         var props = {
                             "headingText": translatedText[0],
@@ -109,7 +106,7 @@ Dialog {
         }
 
         WizardClickableLabel {
-            id: bottomLabel
+            id: rejectLabel
             anchors {
                 left: parent.left
                 leftMargin: Theme.horizontalPageMargin
@@ -120,14 +117,9 @@ Dialog {
             }
             font.pixelSize: Theme.fontSizeExtraSmall
             color: startupWizardManager.defaultHighlightColor()
-            text: {
-                //: Text surrounded by %1 and %2 is underlined and colored differently
-                //% "%1Reject the Sailfish OS End User License Agreement%2 and turn the device off"
-                qsTrId("startupwizard-la-reject_sailfish_eula_and_turn_off") // trigger Qt Linguist translation
-                return startupWizardManager.translatedText("startupwizard-la-reject_sailfish_eula_and_turn_off", root.localeName)
-                        .arg("<u><font color=\"" + (pressed ? startupWizardManager.defaultHighlightColor() : startupWizardManager.defaultPrimaryColor()) + "\">")
-                        .arg("</font></u>")
-            }
+            text: root.rejectLinkText
+                    .arg("<u><font color=\"" + (pressed ? startupWizardManager.defaultHighlightColor() : startupWizardManager.defaultPrimaryColor()) + "\">")
+                    .arg("</font></u>")
 
             onClicked: {
                 pageStack.push(rejectDialogComponent)
@@ -211,11 +203,7 @@ Dialog {
                         return startupWizardManager.translatedText("startupwizard-he-go_back", root.localeName)
                     }
                     acceptText: ""
-                    title: {
-                        //% "Are you sure you want to reject the Sailfish OS End User License Agreement?"
-                        qsTrId("startupwizard-he-reject_eula_heading_text") // trigger Qt Linguist translation
-                        return startupWizardManager.translatedText("startupwizard-he-reject_eula_heading_text", root.localeName)
-                    }
+                    title: root.rejectHeaderText
                 }
 
                 Column {
@@ -230,11 +218,7 @@ Dialog {
                         wrapMode: Text.Wrap
                         font.pixelSize: Theme.fontSizeExtraSmall
                         color: Theme.highlightColor
-                        text: {
-                            //% "If you cannot accept the terms of this Agreement after having purchased a product incorporating Software, please return the product containing the Software to the seller within the return period provided for in the seller's return policy for a full refund. If you purchased the product directly from us, the applicable return period is stated in our Jolla Return Policy, available at http://www.jolla.com/care."
-                            qsTrId("startupwizard-la-reject_eula_body_text") // trigger Qt Linguist translation
-                            return startupWizardManager.translatedText("startupwizard-la-reject_eula_body_text", root.localeName)
-                        }
+                        text: root.rejectBodyText
                     }
 
                     Button {
@@ -250,29 +234,14 @@ Dialog {
                         onClicked: {
                             if (!rejectDialog._shutdownTriggered) {
                                 rejectDialog._shutdownTriggered = true
-                                rejectDialog.enabled = false
-                                rejectDialog.backNavigation = false
                                 rejectDialogFlickable.opacity = 0
-                                shutdownScreen.opacity = 1
+                                root.shutdown()
                             }
                         }
                     }
                 }
 
                 VerticalScrollDecorator {}
-            }
-
-            ShutDownItem {
-                id: shutdownScreen
-                opacity: 0
-                message: {
-                    //: Shut down message
-                    //% "Goodbye!"
-                    qsTrId("startupwizard-la-goodbye") // trigger Qt Linguist translation
-                    return startupWizardManager.translatedText("startupwizard-la-goodbye", root.localeName)
-                }
-
-                onOpacityAnimationFinished: if (opacity == 1) startupWizardManager.triggerShutdown()
             }
         }
     }

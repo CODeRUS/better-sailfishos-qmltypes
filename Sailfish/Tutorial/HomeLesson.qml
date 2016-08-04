@@ -1,27 +1,74 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Lipstick 1.0
 import Sailfish.Tutorial 1.0
+import org.nemomobile.configuration 1.0
 import "private"
 
-Item {
+Lesson {
     id: root
 
-    anchors.fill: parent
-
-    property int originalIndex
-    property int targetIndex: -1
+    property Item targetItem
     property int timelineCounter: -1
+
+    property int _maximumTimelineCounter: 3 + partnerSpaceItems.count
+
+    recapText: partnerSpaceItems.count === 0
+                 //% "Now you know how to navigate between Lock screen, Home and Events"
+               ? qsTrId("tutorial-la-recap_home")
+               : partnerSpaceItems.item ? partnerSpaceItems.item.recapText : ""
+
+    Item {
+        visible: false
+
+        PannableItem {
+            id: eventsViewItem
+
+            property bool dimBackground: true
+
+            width: background.width
+            height: background.height
+
+            visible: false
+
+            Image {
+                anchors.fill: parent
+                source: Screen.sizeCategory >= Screen.Large
+                        ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-events.png")
+                        : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-events.png")
+            }
+        }
+
+        Loader {
+            id: partnerSpaceItems
+
+            property int count: item ? item.count : 0
+
+            function itemAt(index) {
+                return item ? item.itemAt(index) : null
+            }
+
+            source: Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/PartnerSpaceItems.qml")
+        }
+    }
 
     Component.onCompleted: {
         // Make sure the background is at correct position
         showApplicationOverlay = false
         showStatusBarClock = false
-        background.currentIndex = 1
+
+        // Add Partner Spaces to homescreen courasel
+        var pannableItems = [ eventsViewItem, background.switcherItem ]
+        for (var i = 0; i < partnerSpaceItems.count; ++i)
+            pannableItems.push(partnerSpaceItems.itemAt(i))
+        background.pannableItems = pannableItems
+        background.currentItem = background.switcherItem
+
         lockHintTimeline.restart()
     }
 
     onTimelineCounterChanged: {
-        if (timelineCounter === 3)
+        if (timelineCounter === _maximumTimelineCounter)
             lessonCompleted()
         else
             timeline.restart()
@@ -99,14 +146,31 @@ Item {
         ScriptAction  {
             script: {
                 hintLabel.atBottom = false
-                hintLabel.text = timelineCounter === 0
-                        //% "Here is Lock screen"
-                        ? qsTrId("tutorial-la-lock_screen")
-                        : timelineCounter === 1
-                          //% "This is Home, showing your minimized apps"
-                          ? qsTrId("tutorial-la-home")
-                          //% "Here are your notifications and social feeds"
-                          : qsTrId("tutorial-la-events_view_description")
+                switch (timelineCounter) {
+                case 0:
+                    //% "Here is Lock screen"
+                    hintLabel.text = qsTrId("tutorial-la-lock_screen")
+                    break
+                case 1:
+                    //% "This is Home, showing your minimized apps"
+                    hintLabel.text = qsTrId("tutorial-la-home")
+                    break
+                case 2:
+                    //% "Here are your notifications and social feeds"
+                    hintLabel.text = qsTrId("tutorial-la-events_view_description")
+                    break
+                default:
+                    if (timelineCounter === _maximumTimelineCounter) {
+                        hintLabel.text = ""
+                    } else {
+                        var index = _maximumTimelineCounter - timelineCounter - 1
+
+                        //: %1 is partner space name
+                        //% "Here is %1"
+                        hintLabel.text = qsTrId("tutorial-la-partner_space_description").arg(partnerSpaceItems.itemAt(index).name)
+                    }
+                }
+
                 hintLabel.opacity = 1.0
             }
         }
@@ -120,23 +184,48 @@ Item {
         ScriptAction  {
             script: {
                 hintLabel.atBottom = true
-                hintLabel.text = timelineCounter === 0
-                        ? //% "Swipe from the left or right edge to unlock"
-                          qsTrId("tutorial-la-unlock_to_home")
-                        : timelineCounter === 1
-                          //% "Swipe right to access Events"
-                          ? qsTrId("tutorial-la-swipe_to_eventsview")
-                          //% "Swipe left to go back Home"
-                          : qsTrId("tutorial-la-swipe_left_to_home")
+
+                switch (timelineCounter) {
+                case 0:
+                    //% "Swipe from the left or right edge to unlock"
+                    hintLabel.text = qsTrId("tutorial-la-unlock_to_home")
+                    hint.direction = TouchInteraction.Right
+                    break
+                case 1:
+                    //% "Swipe right to access Events"
+                    hintLabel.text = qsTrId("tutorial-la-swipe_to_eventsview")
+                    hint.direction = TouchInteraction.Right
+                    targetItem = eventsViewItem
+                    background.allowPanLeft = true
+                    break
+                default:
+                    if (partnerSpaceItems.count === 0) {
+                        //% "Swipe left to go back Home"
+                        hintLabel.text = qsTrId("tutorial-la-swipe_left_to_home")
+                        hint.direction = TouchInteraction.Left
+                        targetItem = background.switcherItem
+                        background.allowPanRight = true
+                    } else if (timelineCounter === _maximumTimelineCounter - 1) {
+                        //% "Swipe right to go back Home"
+                        hintLabel.text = qsTrId("tutorial-la-swipe_right_to_home")
+                        hint.direction = TouchInteraction.Right
+                        targetItem = background.switcherItem
+                        background.allowPanLeft = true
+                    } else {
+                        var index = _maximumTimelineCounter - timelineCounter - 2
+
+                        //: %1 is partner space name
+                        //% "Swipe right to access %1"
+                        hintLabel.text = qsTrId("tutorial-la-swipe_to_partner_space").arg(partnerSpaceItems.itemAt(index).name)
+                        hint.direction = TouchInteraction.Right
+                        targetItem = partnerSpaceItems.itemAt(index)
+                        background.allowPanLeft = true
+                    }
+                }
+
                 hintLabel.opacity = 1.0
-                hint.direction = timelineCounter === 2
-                        ? TouchInteraction.Left
-                        : TouchInteraction.Right
                 hint.start()
                 lock.interactive = timelineCounter === 0
-                background.interactive = timelineCounter > 0
-                originalIndex = background.currentIndex
-                targetIndex = timelineCounter === 1 ? 0 : 1
             }
         }
     }
@@ -170,20 +259,19 @@ Item {
         target: background
 
         onMovingChanged: {
-            if (targetIndex !== -1) {
-                if (!background.moving && background.currentIndex === targetIndex) {
-                    background.interactive = false
-                    targetIndex = -1
+            if (targetItem) {
+                if (!background.moving && background.currentItem === targetItem) {
+                    background.allowPanLeft = false
+                    background.allowPanRight = false
+                    targetItem = null
                     timelineCounter++
                 } else {
                     hintLabel.opacity = background.moving ? 0.0 : 1.0
+
                     if (background.moving)
                         hint.stop()
                     else
                         hint.start()
-                    if (!background.moving) {
-                        background.currentIndex = originalIndex
-                    }
                 }
             }
         }
@@ -230,8 +318,9 @@ Item {
                     return
 
                 lock.interactive = false
-                background.interactive = false
-                targetIndex = -1
+                background.allowPanLeft = false
+                background.allowPanRight = false
+                targetItem = null
                 clock.hintOffset = 0
                 unlockAnimation.restart()
             }

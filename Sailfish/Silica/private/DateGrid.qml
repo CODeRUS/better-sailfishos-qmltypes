@@ -109,7 +109,7 @@ Item {
         DatePickerScript._loadWeekNumbers(weekNumberModel, year, month, 6)
 
         monthName.text = Format.formatDate(theMonth, Format.MonthNameStandaloneShort)
-        monthYear.text = theMonth.getFullYear()
+        monthYear.text = Qt.formatDateTime(theMonth, "yyyy")
     }
 
     function _loadDateGrid(fromDate, totalDays) {
@@ -187,7 +187,7 @@ Item {
                     id: weekLabel
                     //: Used to show week text and week number: %1 == weeknumber
                     //% "week %1"
-                    text: qsTrId("components-la-week_and_weeknumber").arg(model.weekNumber)
+                    text: qsTrId("components-la-week_and_weeknumber").arg(model.weekNumber.toLocaleString())
                     font.pixelSize: Theme.fontSizeExtraSmall
                     color: Theme.highlightColor
                     anchors.verticalCenter: parent.verticalCenter

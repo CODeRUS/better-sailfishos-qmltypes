@@ -53,9 +53,12 @@ BackgroundItem {
         value: 0.0
     }
 
+    property Item __silica_remorse_item
+
     onMenuOpenChanged: {
-        if (ListView.view && ('__silica_contextmenu_instance' in ListView.view)) {
-            ListView.view.__silica_contextmenu_instance = menuOpen ? _menuItem : null
+        var viewItem = listItem.ListView.view || listItem.GridView.view
+        if (viewItem && ('__silica_contextmenu_instance' in viewItem)) {
+            viewItem.__silica_contextmenu_instance = menuOpen ? _menuItem : null
         }
     }
 

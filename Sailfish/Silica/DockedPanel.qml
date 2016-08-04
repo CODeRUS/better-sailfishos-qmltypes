@@ -42,6 +42,8 @@ SilicaFlickable {
     property bool open
     property bool moving: horizontalAnimation.running || verticalAnimation.running || mouseArea.drag.active
     property int dock: Dock.Bottom
+    property bool modal
+    property int animationDuration: 500
     property bool _immediate
 
     function _visibleSize() {
@@ -98,6 +100,35 @@ SilicaFlickable {
         _immediate = false
     }
 
+    InverseMouseArea {
+        anchors.fill: parent
+        enabled: open && modal
+        stealPress: true
+        onPressedOutside: open = false
+    }
+
+    Binding {
+        when: open && modal
+        target: __silica_applicationwindow_instance
+        property: "_dimScreen"
+        value: open
+    }
+
+    // Effect to eliminate the opacity applied by application window dimming
+    layer.enabled: modal && expanded && __silica_applicationwindow_instance._dimmingActive
+    layer.smooth: true
+    layer.effect: ShaderEffect {
+        fragmentShader: "
+            uniform sampler2D source;
+            varying highp vec2 qt_TexCoord0;
+            void main(void)
+            {
+                highp vec4 pixelColor = texture2D(source, qt_TexCoord0);
+                gl_FragColor = pixelColor;
+            }
+            "
+    }
+
     Binding {
         target: panel
         property: "x"
@@ -117,7 +148,7 @@ SilicaFlickable {
         enabled: !mouseArea.drag.active && !panel._immediate && panel._initialized
         NumberAnimation {
             id: horizontalAnimation
-            duration: 500; easing.type: Easing.OutQuad
+            duration: animationDuration; easing.type: Easing.OutQuad
         }
     }
 
@@ -140,7 +171,7 @@ SilicaFlickable {
         enabled: !mouseArea.drag.active && !panel._immediate && panel._initialized 
         NumberAnimation {
             id: verticalAnimation
-            duration: 500; easing.type: Easing.OutQuad
+            duration: animationDuration; easing.type: Easing.OutQuad
         }
     }
 

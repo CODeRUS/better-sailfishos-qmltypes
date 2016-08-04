@@ -751,6 +751,7 @@ Module {
         defaultProperty: "data"
         Property { name: "shuffle"; type: "bool" }
         Property { name: "repeat"; type: "bool" }
+        Property { name: "repeatOne"; type: "bool" }
         Property { name: "rewinding"; type: "bool" }
         Property { name: "forwarding"; type: "bool" }
         Property { name: "_resume"; type: "bool" }

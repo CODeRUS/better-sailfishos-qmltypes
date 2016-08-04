@@ -1,21 +1,3 @@
-/*
- * Copyright (C) 2012-2015 Jolla Ltd.
- *
- * The code in this file is distributed under multiple licenses, and as such,
- * may be used under any one of the following licenses:
- *
- *   - GNU General Public License as published by the Free Software Foundation;
- *     either version 2 of the License (see LICENSE.GPLv2 in the root directory
- *     for full terms), or (at your option) any later version.
- *   - GNU Lesser General Public License as published by the Free Software
- *     Foundation; either version 2.1 of the License (see LICENSE.LGPLv21 in the
- *     root directory for full terms), or (at your option) any later version.
- *   - Alternatively, if you have a commercial license agreement with Jolla Ltd,
- *     you may use the code under the terms of that license instead.
- *
- * You can visit <https://sailfishos.org/legal/> for more information
- */
-
 // -*- qml -*-
 
 import QtQuick 2.0
@@ -31,36 +13,13 @@ Item {
 
     property int count
 
-    Timer {
-        id: timer
-        interval: 50
-        onTriggered: root.count = viewModel.count
-    }
-
-    Connections {
-        // Due to JB#21453, we are using a timer to change the count
-        // property in a delayed/lazy way so we won't update the UI so
-        // often with a lot of count changes instead of a big one.
-        target: viewModel
-        onCountChanged: timer.restart()
-    }
-
-    PlaylistSaver {
-        id: saver
-    }
-
-    PlaylistModel {
-        id: playlistModel
-        store: store
-    }
-
     function refresh() {
         addModel.refresh()
         viewModel.refresh()
     }
 
     function isEditable(uri) {
-        return saver.isEditable(uri, playlistsLocation);
+        return saver.isEditable(uri, playlistsLocation)
     }
 
     function appendToPlaylist(playlist, media) {
@@ -180,6 +139,29 @@ Item {
         if (refreshModels) {
             refresh()
         }
+    }
+
+    Timer {
+        id: timer
+        interval: 50
+        onTriggered: root.count = viewModel.count
+    }
+
+    Connections {
+        // Due to JB#21453, we are using a timer to change the count
+        // property in a delayed/lazy way so we won't update the UI so
+        // often with a lot of count changes instead of a big one.
+        target: viewModel
+        onCountChanged: timer.restart()
+    }
+
+    PlaylistSaver {
+        id: saver
+    }
+
+    PlaylistModel {
+        id: playlistModel
+        store: store
     }
 
     Component {

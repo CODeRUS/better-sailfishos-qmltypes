@@ -8,6 +8,36 @@ SettingsBase {
     property alias global: globalSettings
     property string cameraDevice: global.cameraDevice
 
+    readonly property var settingsDefaults: ({
+                                                 "iso": 0,
+                                                 "timer": 0,
+                                                 "viewfinderGrid": "none",
+                                                 "whiteBalance": CameraImageProcessing.WhiteBalanceAuto,
+                                                 "focusDistance": (modeSettings.focusDistanceValues.length == 1
+                                                                   ? modeSettings.focusDistanceValues[0]
+                                                                   : Camera.FocusContinuous),
+                                                 "flash": ((modeSettings.captureMode == Camera.CaptureStillImage) &&
+                                                           (globalSettings.cameraDevice === "primary") ?
+                                                               Camera.FlashAuto : Camera.FlashOff)
+                                             })
+
+    readonly property bool defaultSettings: modeSettings.iso === settingsDefaults["iso"] &&
+                                            modeSettings.timer === settingsDefaults["timer"] &&
+                                            modeSettings.viewfinderGrid === settingsDefaults["viewfinderGrid"] &&
+                                            modeSettings.whiteBalance == settingsDefaults["whiteBalance"] &&
+                                            modeSettings.focusDistance == settingsDefaults["focusDistance"] &&
+                                            modeSettings.flash == settingsDefaults["flash"]
+
+    function reset() {
+        var basePath = globalSettings.path + "/" + modeSettings.path
+        for (var i in settingsDefaults) {
+            _singleValue.key = basePath + "/" + i
+            _singleValue.value = settingsDefaults[i]
+        }
+    }
+
+    property ConfigurationValue _singleValue: ConfigurationValue {}
+
     property ConfigurationGroup _global: ConfigurationGroup {
         id: globalSettings
 
@@ -136,6 +166,8 @@ SettingsBase {
         case 200: return qsTrId("camera_settings-la-light-sensitivity-200")
         //% "Light sensitivity • ISO 400"
         case 400: return qsTrId("camera_settings-la-light-sensitivity-400")
+        //% "Light sensitivity • ISO 800"
+        case 800: return qsTrId("camera_settings-la-light-sensitivity-800")
         }
     }
 
@@ -151,6 +183,7 @@ SettingsBase {
         switch (flash) {
         case Camera.FlashAuto:              return "image://theme/icon-camera-flash-automatic"
         case Camera.FlashOff:               return "image://theme/icon-camera-flash-off"
+        case Camera.FlashTorch:
         case Camera.FlashOn:                return "image://theme/icon-camera-flash-on"
         case Camera.FlashRedEyeReduction:   return "image://theme/icon-camera-flash-redeye"
         }
@@ -167,6 +200,9 @@ SettingsBase {
         //: "Camera flash enabled"
         //% "Flash enabled"
         case Camera.FlashOn:      return qsTrId("camera_settings-la-flash-on")
+        //: "Camera flash in torch mode"
+        //% "Flash on"
+        case Camera.FlashTorch:   return qsTrId("camera_settings-la-flash-torch")
         //: "Camera flash with red eye reduction"
         //% "Flash red eye"
         case Camera.FlashRedEyeReduction: return qsTrId("camera_settings-la-flash-redeye")
@@ -216,9 +252,13 @@ SettingsBase {
     function focusDistanceIcon(focusDistance) {
         switch (focusDistance) {
         case Camera.FocusAuto:       return "image://theme/icon-camera-focus"
+        case Camera.FocusHyperfocal:
         case Camera.FocusInfinity:   return "image://theme/icon-camera-focus-infinity"
         case Camera.FocusMacro:      return "image://theme/icon-camera-focus-macro"
         case Camera.FocusContinuous: return "image://theme/icon-camera-focus-auto"
+        default:
+            console.warning("Unhandled mapping from focus distance to icon", focusDistance)
+            return ""
         }
     }
 
@@ -228,6 +268,7 @@ SettingsBase {
         case Camera.FocusAuto:       return qsTrId("camera_settings-la-focus-auto")
         //: "Infinite focus distance"
         //% "Infinity focus"
+        case Camera.FocusHyperfocal:
         case Camera.FocusInfinity:   return qsTrId("camera_settings-la-focus-infinity")
         //: "Macro/close up focus distance"
         //% "Macro focus"
@@ -235,6 +276,9 @@ SettingsBase {
         //: "Continuous auto focus"
         //% "Continuous"
         case Camera.FocusContinuous: return qsTrId("camera_settings-la-focus-continuous")
+        default:
+            console.warning("Unhandled mapping from focus distance to text", focusDistance)
+            return ""
         }
     }
 

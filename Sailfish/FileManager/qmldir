@@ -1,0 +1,4 @@
+module Sailfish.FileManager
+plugin sailfishfilemanagerplugin
+DirectoryPage 1.0 DirectoryPage.qml
+WindowOverride 1.0 WindowOverride.qml

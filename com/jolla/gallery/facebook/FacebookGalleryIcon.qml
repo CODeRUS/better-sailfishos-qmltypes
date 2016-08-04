@@ -43,7 +43,6 @@ MediaSourceIcon {
         Image {
             id: fbIcon
             anchors.fill: parent
-            visible: timerEnabled
             Behavior on opacity { NumberAnimation { duration: 5000 }}
             source: "image://theme/graphic-service-facebook"
             fillMode: Image.PreserveAspectCrop

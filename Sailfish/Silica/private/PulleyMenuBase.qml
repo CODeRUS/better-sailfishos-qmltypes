@@ -122,8 +122,8 @@ MouseArea {
     property bool _bounceBackEnabled: false
     property bool _bounceBackRunning: bounceBackAnimation.running
 
-    property real _snapThreshold: 80
-    property real _snapCalculationThreshold: 240
+    property real _snapThreshold: Theme.itemSizeSmall
+    property real _snapCalculationThreshold: Theme.itemSizeSmall * 3
     property real _snapCalculationVelocity: flickable ? Math.pow(2 * flickable.flickDeceleration * _snapCalculationThreshold, 0.5) : 0
 
     property bool _inListView: flickable !== null && flickable.hasOwnProperty('highlightRangeMode')
@@ -286,7 +286,7 @@ MouseArea {
         return null
     }
 
-    function _quickSelectMenuItem(parentItem, yPos) {
+    function _quickSelectItem(parentItem) {
         if (quickSelect) {
             var child = null
             var count = 0
@@ -298,13 +298,26 @@ MouseArea {
                 }
             }
             if (count == 1) {
+                return child
+            }
+        }
+
+        return null
+    }
+
+    function _quickSelectMenuItem(parentItem, yPos) {
+        if (quickSelect) {
+            var child = _quickSelectItem(parentItem)
+            if (child) {
                 _quickSelected = true
                 var xPos = width/2
-                if ((_pullDown && parentItem.mapToItem(child, xPos, yPos).y <= 0)
+                if ((_pullDown && parentItem.mapToItem(child, xPos, yPos).y <= _menuItemHeight)
                         || (!_pullDown && parentItem.mapToItem(child, xPos, yPos).y >= 0)) {
-                    menuItem = child
-                    highlightItem.highlight(menuItem, pulleyBase)
-                    return menuItem
+                    if (flickable.dragging) {
+                        menuItem = child
+                    }
+                    highlightItem.highlight(child, pulleyBase)
+                    return child
                 }
             } else {
                 _quickSelected = false
@@ -563,8 +576,8 @@ MouseArea {
 
     function _interceptFlick() {
         // Do not permit flicking inside the menu (unless it is a small flick that does not present
-        // a danger of accidentally selecting the wrong item, or quickSelect is enabled)
-        if (active && !quickSelect && (Math.abs(flickable.verticalVelocity) > 500)) {
+        // a danger of accidentally selecting the wrong item)
+        if (active && !_quickSelected && (Math.abs(flickable.verticalVelocity) > 500 * Theme.pixelRatio)) {
             var opening = _pullDown ? flickable.verticalVelocity < 0 : flickable.verticalVelocity > 0
             flickAnimation.to = opening ? _finalPosition : _inactivePosition
             flickAnimation.duration = 300
@@ -579,7 +592,13 @@ MouseArea {
         if (!flickAnimation.running) {
             if (menuItem) {
                 _doClick = true
-            } else if (!_atFinalPosition) {
+            } else if (_atFinalPosition) {
+                var quickSelectItem = _quickSelectItem(_contentColumn)
+                if (quickSelectItem) {
+                    menuItem = quickSelectItem
+                    _doClick = true
+                }
+            } else {
                 hide()
             }
         }
@@ -618,7 +637,7 @@ MouseArea {
         id: logic
         flickable: pulleyBase.flickable
         onFinalPositionReached: {
-            if (active && _ngfEffect && !menuItem) {
+            if (active && _ngfEffect && !menuItem && !delayedBounceTimer.running && !bounceBackAnimation.running) {
                 _ngfEffect.play()
             }
         }
@@ -681,7 +700,7 @@ MouseArea {
         property: "contentY"
         easing.type: Easing.OutQuad
         onStopped: {
-            if (quickSelect && menuItem && _atFinalPosition) {
+            if (quickSelect && _quickSelected && _atFinalPosition) {
                 _bounceBack()
             }
         }

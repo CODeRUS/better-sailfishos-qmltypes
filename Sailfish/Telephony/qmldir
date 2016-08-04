@@ -1,0 +1,10 @@
+module Sailfish.Telephony
+plugin sailfishtelephonyplugin
+SimManager 1.0 SimManager.qml
+# Temporary - remove after migration
+MultiSimManager 1.0 SimManager.qml
+SimErrorState 1.0 SimErrorState.qml
+SimPicker 1.0 SimPicker.qml
+SimPickerMenuItem 1.0 SimPickerMenuItem.qml
+SimSelector 1.0 SimSelector.qml
+SimSelectorBase 1.0 SimSelectorBase.qml

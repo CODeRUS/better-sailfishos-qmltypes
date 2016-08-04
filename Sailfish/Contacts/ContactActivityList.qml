@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Contacts 1.0
+import Sailfish.Telephony 1.0
 import org.nemomobile.contacts 1.0
 import org.nemomobile.commhistory 1.0
 import "common/common.js" as ContactsUtils
@@ -18,7 +19,7 @@ SilicaListView {
     property bool _animationEnabled: contactEventModel.ready
     property var _dateThreshold
 
-    signal startPhoneCall(string number)
+    signal startPhoneCall(string number, string modemPath)
     signal startSms(string number)
     signal startInstantMessage(string localUid, string remoteUid)
 
@@ -52,6 +53,7 @@ SilicaListView {
         property bool isPhone: localUid.indexOf('/ring/tel/') >= 0
         property bool isMessage: (eventType != CommCallModel.CallEvent) && (eventType != CommCallModel.VoicemailEvent)
         property string iconSource: isMessage ? "image://theme/icon-launcher-messaging" : "image://theme/icon-launcher-phone"
+        property string directionIconSource: direction === CommCallModel.Inbound ? (isMissedCall ? "image://theme/icon-phone-missed-call" : "image://theme/icon-phone-incoming-call") : ''
 
         width: root.width
         contentHeight: Theme.itemSizeMedium
@@ -116,7 +118,8 @@ SilicaListView {
                 leftMargin: Theme.horizontalPageMargin - Theme.paddingLarge
                 top: eventTypeLabel.top
             }
-            source: direction === CommCallModel.Inbound ? (isMissedCall ? "image://theme/icon-phone-missed-call" : "image://theme/icon-phone-incoming-call") : ''
+            source: directionIconSource ? directionIconSource + "?" + (highlighted ? Theme.highlightColor: Theme.primaryColor) : ''
+            visible: directionIconSource != ''
         }
         Label {
             id: eventTypeLabel
@@ -186,6 +189,14 @@ SilicaListView {
 
         menu: Component {
             ContextMenu {
+                id: contextMenu
+
+                SimPickerMenuItem {
+                    id: simPicker
+                    menu: contextMenu
+                    onTriggerAction: root.startPhoneCall(remoteUid, modemPath)
+                }
+
                 Item {
                     width: 1
                     height: Theme.paddingSmall
@@ -227,7 +238,13 @@ SilicaListView {
                     visible: isPhone
                     //% "Call"
                     text: qsTrId("components_contacts-me-call")
-                    onClicked: root.startPhoneCall(remoteUid)
+                    onClicked: {
+                        if (Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
+                            simPicker.active = true
+                        } else {
+                            root.startPhoneCall(remoteUid, "")
+                        }
+                    }
                 }
                 MenuItem {
                     visible: isPhone

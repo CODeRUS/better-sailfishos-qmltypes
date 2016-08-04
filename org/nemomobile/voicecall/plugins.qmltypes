@@ -8,6 +8,50 @@ import QtQuick.tooling 1.1
 
 Module {
     Component {
+        name: "VoiceCallAudioRecorder"
+        prototype: "QObject"
+        exports: ["org.nemomobile.voicecall/VoiceCallAudioRecorder 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "ErrorCondition"
+            values: {
+                "FileCreation": 0,
+                "FileStorage": 1,
+                "AudioRouting": 2
+            }
+        }
+        Property { name: "available"; type: "bool"; isReadonly: true }
+        Property { name: "recording"; type: "bool"; isReadonly: true }
+        Signal {
+            name: "recordingError"
+            Parameter { name: "error"; type: "ErrorCondition" }
+        }
+        Signal {
+            name: "callRecorded"
+            Parameter { name: "fileName"; type: "string" }
+            Parameter { name: "label"; type: "string" }
+        }
+        Method {
+            name: "startRecording"
+            Parameter { name: "name"; type: "string" }
+            Parameter { name: "uid"; type: "string" }
+            Parameter { name: "incoming"; type: "bool" }
+        }
+        Method { name: "stopRecording" }
+        Method {
+            name: "decodeRecordingFileName"
+            type: "string"
+            Parameter { name: "fileName"; type: "string" }
+        }
+        Method {
+            name: "deleteRecording"
+            type: "bool"
+            Parameter { name: "fileName"; type: "string" }
+        }
+    }
+    Component {
         name: "VoiceCallHandler"
         prototype: "QObject"
         exports: ["org.nemomobile.voicecall/VoiceCall 1.0"]
@@ -70,8 +114,9 @@ Module {
         Property { name: "interface"; type: "QDBusInterface"; isReadonly: true; isPointer: true }
         Property { name: "voiceCalls"; type: "VoiceCallModel"; isReadonly: true; isPointer: true }
         Property { name: "providers"; type: "VoiceCallProviderModel"; isReadonly: true; isPointer: true }
-        Property { name: "defaultProviderId"; type: "string"; isReadonly: true }
         Property { name: "activeVoiceCall"; type: "VoiceCallHandler"; isReadonly: true; isPointer: true }
+        Property { name: "defaultProviderId"; type: "string"; isReadonly: true }
+        Property { name: "modemPath"; type: "string" }
         Property { name: "audioMode"; type: "string" }
         Property { name: "isAudioRouted"; type: "bool" }
         Property { name: "isMicrophoneMuted"; type: "bool" }
@@ -86,7 +131,11 @@ Module {
         Signal { name: "speakerMutedChanged" }
         Method {
             name: "dial"
-            Parameter { name: "providerId"; type: "string" }
+            Parameter { name: "msisdn"; type: "string" }
+        }
+        Method {
+            name: "dial"
+            Parameter { name: "provider"; type: "string" }
             Parameter { name: "msisdn"; type: "string" }
         }
         Method { name: "silenceRingtone" }

@@ -27,22 +27,23 @@ ShareMethodList {
     id: menuList
     objectName: "menuList"
 
-    property Item visualParent;
-    property string title;
-    property string path;
-    property string mimeType;
+    property Item visualParent
+    property string title
+    property string path
+    property string mimeType
 
     model: SailfishTransferMethodsModel {
-        id: transferMethodsModel;
-        filter: menuList.mimeType;
+        id: transferMethodsModel
+        filter: menuList.mimeType
     }
-    source: menuList.path;
+    source: menuList.path
 
-    //: Share documents
-    //% "Share"
-    listHeader: qsTrId( "sailfish-office-la-share" );
-
-    header: PageHeader{ title: menuList.title }
+    header: PageHeader {
+        title: menuList.title
+        //: Share documents
+        //% "Share"
+        description: qsTrId("sailfish-office-la-share")
+    }
 
     // Add "add account" to the footer. User must be able to
     // create accounts in a case there are none.
@@ -50,7 +51,7 @@ ShareMethodList {
         Label {
             //: Add a share account
             //% "Add account"
-            text: qsTrId( "sailfish-office-me-add_account" );
+            text: qsTrId("sailfish-office-me-add_account")
             x: Theme.horizontalPageMargin
             width: parent.width - x*2
             truncationMode: TruncationMode.Fade
@@ -61,19 +62,19 @@ ShareMethodList {
 
         onClicked: {
             jolla_signon_ui_service.inProcessParent = visualParent
-            accountCreator.startAccountCreation();
+            accountCreator.startAccountCreation()
         }
     }
 
     SignonUiService {
         id: jolla_signon_ui_service;
-        inProcessServiceName: "org.sailfish.office";
+        inProcessServiceName: "org.sailfish.office"
         inProcessObjectPath: "/SailfishOfficeSignonUi"
     }
 
     AccountCreationManager {
-        id: accountCreator;
-        endDestination: menuList.visualParent;
-        endDestinationAction: PageStackAction.Pop;
+        id: accountCreator
+        endDestination: menuList.visualParent
+        endDestinationAction: PageStackAction.Pop
     }
 }

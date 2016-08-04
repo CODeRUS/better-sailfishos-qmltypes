@@ -1,0 +1,2 @@
+module Nemo.Ssu
+plugin declarativessu

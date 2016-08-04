@@ -71,6 +71,7 @@ SilicaListView {
                 MenuItem {
                     // Defined in AmbienceSettingsPage.qml
                     text: qsTrId("jolla-gallery-ambience-me-remove_ambience")
+                    enabled: !listItem.active
                     onClicked: {
                         listItem.remorse().execute(
                                     listItem,

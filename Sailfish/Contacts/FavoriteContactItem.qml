@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Telephony 1.0
 import org.nemomobile.contacts 1.0
 import "common/common.js" as ContactsUtils
 
@@ -101,6 +102,15 @@ Item {
                 selectedProperty = properties[0]
             }
 
+            if (selectedProperty.propertyType == 'phoneNumber' && Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
+                // Select a SIM via menu
+                _openPropertyMenu(properties)
+                _propertyMenu.property = selectedProperty.property
+                _propertyMenu.type = selectedProperty.propertyType
+                _propertyMenu.simPickerActive = true
+                return
+            }
+
             favoriteItem.clicked(selectedProperty.property, selectedProperty.propertyType)
         }
 
@@ -190,17 +200,38 @@ Item {
             id: propertyMenuComponent
 
             ContextMenu {
-                id: menu
+                id: contextMenu
 
                 property ContactAddressesModel addressesModel: ContactAddressesModel {
                     requiredProperty: favoriteItem.requiredProperty
                 }
+                property var property
+                property string type
+                property alias simPickerActive: simPicker.active
+
+                SimPickerMenuItem {
+                    id: simPicker
+                    menu: contextMenu
+                    fadeAnimationEnabled: addressesModel.count > 1
+                    onSimSelected: {
+                        property['modemPath'] = modemPath
+                        favoriteItem.clicked(property, type)
+                    }
+                }
 
                 Repeater {
-                    model: menu.addressesModel
+                    model: contextMenu.addressesModel
                     MenuItem {
                         text: displayLabel
-                        onClicked: favoriteItem.clicked(property, type)
+                        onClicked: {
+                            if (type == 'phoneNumber' && Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
+                                contextMenu.property = property
+                                contextMenu.type = type
+                                simPicker.active = true
+                            } else {
+                                favoriteItem.clicked(property, type)
+                            }
+                        }
                     }
                 }
             }

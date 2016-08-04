@@ -21,80 +21,80 @@ import Sailfish.Silica 1.0
 import org.kde.calligra 1.0 as Calligra
 
 DocumentPage {
-    id: page;
+    id: page
+
+    busy: doc.status != Calligra.DocumentStatus.Loaded
+    source: doc.source
+    indexCount: doc.indexCount
 
     attachedPage: Component {
         SpreadsheetListPage {
-            document: doc;
+            document: doc
+        }
+    }
+
+    onStatusChanged: {
+        //Delay loading the document until the page has been activated.
+        if (status == PageStatus.Active) {
+            doc.source = page.path
+        }
+
+        //Reset the position when we change sheets
+        if (status == PageStatus.Activating) {
+            documentFlickable.contentX = 0
+            documentFlickable.contentY = 0
         }
     }
 
     Calligra.Document {
-        id: doc;
+        id: doc
     }
 
     Calligra.View {
-        id: v;
+        id: documentView
 
-        width: page.width;
-        height: page.height;
+        width: page.width
+        height: page.height
 
-        document: doc;
+        document: doc
     }
 
 
     SilicaFlickable {
-        id: f;
+        id: documentFlickable
 
-        width: page.width;
-        height: page.height;
+        width: page.width
+        height: page.height
 
         Calligra.ViewController {
-            id: controller;
-            view: v;
-            flickable: f;
-            useZoomProxy: false;
-            maximumZoom: 5.0;
+            id: controller
+            view: documentView
+            flickable: documentFlickable
+            useZoomProxy: false
+            maximumZoom: 5.0
         }
 
         children: [
-            HorizontalScrollDecorator { color: Theme.highlightDimmerColor; },
-            VerticalScrollDecorator { color: Theme.highlightDimmerColor; }
+            HorizontalScrollDecorator { color: Theme.highlightDimmerColor },
+            VerticalScrollDecorator { color: Theme.highlightDimmerColor }
         ]
 
         PinchArea {
-            anchors.fill: parent;
+            anchors.fill: parent
 
             onPinchUpdated: {
-                var newCenter = mapToItem( f, pinch.center.x, pinch.center.y );
-                controller.zoomAroundPoint(controller.zoom * (pinch.scale - pinch.previousScale), newCenter.x, newCenter.y);
+                var newCenter = mapToItem(documentFlickable, pinch.center.x, pinch.center.y)
+                controller.zoomAroundPoint(controller.zoom * (pinch.scale - pinch.previousScale), newCenter.x, newCenter.y)
             }
-            onPinchFinished: controller.zoomTimeout();
+            onPinchFinished: controller.zoomTimeout()
 
             Calligra.LinkArea {
-                anchors.fill: parent;
-                document: doc;
-                onClicked: page.open = !page.open;
-                onLinkClicked: Qt.openUrlExternally(linkTarget);
-                controllerZoom: controller.zoom;
+                anchors.fill: parent
+                document: doc
+                onClicked: page.open = !page.open
+                onLinkClicked: Qt.openUrlExternally(linkTarget)
+                controllerZoom: controller.zoom
             }
-        }
-    }
-
-    busy: doc.status != Calligra.DocumentStatus.Loaded;
-    source: doc.source;
-    indexCount: doc.indexCount;
-
-    onStatusChanged: {
-        //Delay loading the document until the page has been activated.
-        if(status == PageStatus.Active) {
-            doc.source = page.path;
-        }
-
-        //Reset the position when we change sheets
-        if(status == PageStatus.Activating) {
-            f.contentX = 0;
-            f.contentY = 0;
         }
     }
 }

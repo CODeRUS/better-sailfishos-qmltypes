@@ -9,7 +9,7 @@ import QtQuick.tooling 1.1
 Module {
     Component {
         name: "CallProxyModel"
-        prototype: "QSortFilterProxyModel"
+        prototype: "CommHistory::CallModel"
         exports: ["org.nemomobile.commhistory/CommCallModel 1.0"]
         exportMetaObjectRevisions: [0]
         Enum {
@@ -94,18 +94,22 @@ Module {
         Property { name: "_limit"; type: "int" }
         Signal { name: "limitChanged" }
         Method {
-            name: "setSortRole"
-            Parameter { name: "role"; type: "int" }
-        }
-        Method {
-            name: "setFilterRole"
-            Parameter { name: "role"; type: "int" }
-        }
-        Method {
             name: "deleteAt"
             Parameter { name: "index"; type: "int" }
         }
         Method { name: "markAllRead"; type: "bool" }
+    }
+    Component {
+        name: "CommHistory::CallModel"
+        prototype: "CommHistory::EventModel"
+        Enum {
+            name: "Sorting"
+            values: {
+                "SortByContact": 0,
+                "SortByTime": 1,
+                "SortByContactAndType": 2
+            }
+        }
     }
     Component {
         name: "CommHistory::ContactGroup"
@@ -190,6 +194,7 @@ Module {
             }
         }
         Property { name: "manager"; type: "QObject"; isPointer: true }
+        Property { name: "count"; type: "int"; isReadonly: true }
         Property { name: "contactGroups"; type: "QList<QObject*>"; isReadonly: true }
         Signal {
             name: "modelReady"
@@ -244,6 +249,7 @@ Module {
         Property { name: "ready"; type: "bool"; isReadonly: true }
         Property { name: "defaultAccept"; type: "bool" }
         Property { name: "eventCategoryMask"; type: "int" }
+        Property { name: "bufferInsertions"; type: "bool" }
         Signal {
             name: "modelReady"
             Parameter { name: "successful"; type: "bool" }
@@ -299,6 +305,14 @@ Module {
             name: "group"
             type: "CommHistory::GroupObject*"
             Parameter { name: "groupId"; type: "int" }
+        }
+        Method {
+            name: "uidPairsMatch"
+            type: "bool"
+            Parameter { name: "localUid1"; type: "string" }
+            Parameter { name: "remoteUid1"; type: "string" }
+            Parameter { name: "localUid2"; type: "string" }
+            Parameter { name: "remoteUid2"; type: "string" }
         }
         Method {
             name: "findGroup"
@@ -381,6 +395,11 @@ Module {
         Signal { name: "groupDeleted" }
         Method { name: "markAsRead"; type: "bool" }
         Method { name: "deleteGroup"; type: "bool" }
+        Method {
+            name: "matchesAnyOf"
+            type: "bool"
+            Parameter { name: "remoteUids"; type: "QStringList" }
+        }
     }
     Component {
         name: "CommHistory::RecentContactsModel"
@@ -593,41 +612,20 @@ Module {
             Parameter { name: "parts"; type: "QVariantList" }
         }
         Method {
+            name: "sendMessage"
+            type: "bool"
+            Parameter { name: "imsi"; type: "string" }
+            Parameter { name: "to"; type: "QStringList" }
+            Parameter { name: "cc"; type: "QStringList" }
+            Parameter { name: "bcc"; type: "QStringList" }
+            Parameter { name: "subject"; type: "string" }
+            Parameter { name: "parts"; type: "QVariantList" }
+        }
+        Method {
             name: "retrySendMessage"
             type: "bool"
             Parameter { name: "id"; type: "int" }
         }
     }
-    Component {
-        name: "QAbstractProxyModel"
-        prototype: "QAbstractItemModel"
-        Property { name: "sourceModel"; type: "QAbstractItemModel"; isPointer: true }
-    }
     Component { name: "QAbstractTableModel"; prototype: "QAbstractItemModel" }
-    Component {
-        name: "QSortFilterProxyModel"
-        prototype: "QAbstractProxyModel"
-        Property { name: "filterRegExp"; type: "QRegExp" }
-        Property { name: "filterKeyColumn"; type: "int" }
-        Property { name: "dynamicSortFilter"; type: "bool" }
-        Property { name: "filterCaseSensitivity"; type: "Qt::CaseSensitivity" }
-        Property { name: "sortCaseSensitivity"; type: "Qt::CaseSensitivity" }
-        Property { name: "isSortLocaleAware"; type: "bool" }
-        Property { name: "sortRole"; type: "int" }
-        Property { name: "filterRole"; type: "int" }
-        Method {
-            name: "setFilterRegExp"
-            Parameter { name: "pattern"; type: "string" }
-        }
-        Method {
-            name: "setFilterWildcard"
-            Parameter { name: "pattern"; type: "string" }
-        }
-        Method {
-            name: "setFilterFixedString"
-            Parameter { name: "pattern"; type: "string" }
-        }
-        Method { name: "clear" }
-        Method { name: "invalidate" }
-    }
 }

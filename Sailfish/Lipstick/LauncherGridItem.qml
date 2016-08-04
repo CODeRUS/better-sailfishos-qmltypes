@@ -12,6 +12,8 @@ MouseArea {
     property bool down: pressed && containsMouse
     property bool highlighted: down
 
+    objectName: "LauncherGridItem"
+
     LauncherIcon {
         id: appIcon
 

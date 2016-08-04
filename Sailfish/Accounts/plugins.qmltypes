@@ -266,6 +266,7 @@ Module {
         }
         Property { name: "filterType"; type: "FilterType" }
         Property { name: "filter"; type: "string" }
+        Property { name: "count"; type: "int"; isReadonly: true }
         Method {
             name: "setAccountEnabled"
             Parameter { name: "index"; type: "int" }
@@ -275,6 +276,17 @@ Module {
             name: "getByAccount"
             type: "QVariantMap"
             Parameter { name: "accountId"; type: "int" }
+        }
+        Method {
+            name: "get"
+            type: "QVariantMap"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "accountHasServiceOfTypeEnabled"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "serviceTypeName"; type: "string" }
         }
     }
     Component {
@@ -471,6 +483,85 @@ Module {
             Parameter { name: "peakDays"; type: "int" }
         }
         Method { name: "setDefaultPeakSchedule" }
+    }
+    Component {
+        name: "CloudBackupSyncTrigger"
+        prototype: "QObject"
+        exports: ["Sailfish.Accounts/CloudBackupSyncTrigger 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "defaultRemoteBackupsDirectory"; type: "string"; isReadonly: true }
+        Signal {
+            name: "cloudSyncProgress"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "status"; type: "int" }
+            Parameter { name: "errorString"; type: "string" }
+        }
+        Signal {
+            name: "requestedListing"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "listing"; type: "QVariantList" }
+        }
+        Signal {
+            name: "requestListingFailed"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "message"; type: "string" }
+        }
+        Method {
+            name: "downloadFromCloud"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "localDir"; type: "string" }
+            Parameter { name: "remotePath"; type: "string" }
+            Parameter { name: "remoteFile"; type: "string" }
+        }
+        Method {
+            name: "downloadFromCloud"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "localDir"; type: "string" }
+            Parameter { name: "remotePath"; type: "string" }
+        }
+        Method {
+            name: "downloadFromCloud"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "localDir"; type: "string" }
+        }
+        Method {
+            name: "downloadFromCloud"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+        }
+        Method {
+            name: "uploadToCloud"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "localDir"; type: "string" }
+            Parameter { name: "remotePath"; type: "string" }
+        }
+        Method {
+            name: "uploadToCloud"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "localDir"; type: "string" }
+        }
+        Method {
+            name: "uploadToCloud"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+        }
+        Method {
+            name: "requestListing"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "remotePath"; type: "string" }
+        }
+        Method {
+            name: "requestListing"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+        }
+        Method { name: "resetState" }
     }
     Component {
         name: "Provider"

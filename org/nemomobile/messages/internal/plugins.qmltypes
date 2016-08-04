@@ -91,6 +91,7 @@ Module {
         Property { name: "state"; type: "State"; isReadonly: true }
         Property { name: "localUid"; type: "string"; isReadonly: true }
         Property { name: "remoteUid"; type: "string"; isReadonly: true }
+        Property { name: "sequence"; type: "int"; isReadonly: true }
         Signal {
             name: "stateChanged"
             Parameter { name: "newState"; type: "int" }
@@ -104,6 +105,12 @@ Module {
         Signal {
             name: "sendingFailed"
             Parameter { name: "eventId"; type: "int" }
+            Parameter { name: "sender"; type: "ConversationChannel"; isPointer: true }
+        }
+        Signal {
+            name: "sendingSucceeded"
+            Parameter { name: "eventId"; type: "int" }
+            Parameter { name: "sender"; type: "ConversationChannel"; isPointer: true }
         }
         Method {
             name: "sendMessage"
@@ -115,6 +122,11 @@ Module {
             Parameter { name: "text"; type: "string" }
         }
         Method { name: "ensureChannel" }
+        Method {
+            name: "eventIsPending"
+            type: "bool"
+            Parameter { name: "eventId"; type: "int" }
+        }
     }
     Component {
         name: "DeclarativeAccount"
@@ -146,5 +158,25 @@ Module {
         Property { name: "connectionStatus"; type: "ConnectionStatus"; isReadonly: true }
         Property { name: "connectionStatusReason"; type: "ConnectionStatusReason"; isReadonly: true }
         Property { name: "connectionError"; type: "string"; isReadonly: true }
+    }
+    Component {
+        name: "MmsMessageProgress"
+        prototype: "QObject"
+        exports: ["org.nemomobile.messages.internal/MmsMessageProgress 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "path"; type: "string" }
+        Property { name: "inbound"; type: "bool" }
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "running"; type: "bool"; isReadonly: true }
+        Property { name: "progress"; type: "float"; isReadonly: true }
+    }
+    Component {
+        name: "SmsCharacterCounter"
+        prototype: "QObject"
+        exports: ["org.nemomobile.messages.internal/SmsCharacterCounter 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "text"; type: "string" }
+        Property { name: "messageCount"; type: "int"; isReadonly: true }
+        Property { name: "remainingCharacterCount"; type: "int"; isReadonly: true }
     }
 }

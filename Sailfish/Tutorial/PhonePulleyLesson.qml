@@ -4,17 +4,18 @@ import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 import "private"
 
-Item {
+Lesson {
     id: root
 
     readonly property real zoomedOutScale: 0.88
     property bool _demonstrated
 
-    anchors.fill: parent
+    //% "Now you know that the line at the top of the view is the pulley menu and you learned how to call a phone number"
+    recapText: qsTrId("tutorial-la-recap_phone_pulley_menu")
 
     Component.onCompleted: {
         // Make sure the background is at correct position
-        background.currentIndex = 1
+        background.currentItem = background.switcherItem
         applicationGridIndicator.visible = false
         timeline.restart()
     }
@@ -55,12 +56,6 @@ Item {
             property: "opacity"
             to: 0.0
             duration: 100
-        }
-        NumberAnimation {
-            target: background
-            property: "contentY"
-            to: 780
-            duration: 200
         }
         NumberAnimation {
             target: appMainPage
@@ -181,7 +176,6 @@ Item {
             script: {
                 touchBlocker.enabled = true
                 playButton.enabled = false
-                background.returnToBounds()
                 closeAnimation.restart()
                 lessonCompleted()
             }
@@ -199,7 +193,7 @@ Item {
     }
 
     Image {
-        source: "image://theme/graphics-edge-swipe-handle"
+        source: "image://theme/graphic-edge-swipe-handle-bottom"
         opacity: 1 - appMainPage.opacity
         anchors {
             bottom: applicationGrid.top
@@ -461,7 +455,6 @@ Item {
             }
 
             MenuItem {
-                id: dialerOption
                 //: Needs to match with voicecall-me-enter_phone_number
                 //% "Enter phone number"
                 text: qsTrId("tutorial-me-enter_phone_number")
@@ -670,7 +663,7 @@ Item {
         pressRotate: -2
         pressTranslate: 6
         dragRotate: -33
-        dragTranslate: 35
+        dragTranslate: 50
 
         // Reverse the scaling of the app, to maintain the original size
         scale: 1 / __silica_applicationwindow_instance._wallpaperItem.scale

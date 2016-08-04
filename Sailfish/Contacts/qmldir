@@ -7,6 +7,7 @@ ContactItem 1.0 ContactItem.qml
 ContactBrowser 1.0 ContactBrowser.qml
 ContactBrowserItem 1.0 ContactBrowserItem.qml
 ContactSelectPage 1.0 ContactSelectPage.qml
+ContactMultiSelectPage 1.0 ContactMultiSelectPage.qml
 ContactSharePage 1.0 ContactSharePage.qml
 ContactsMultiSelectDialog 1.0 ContactsMultiSelectDialog.qml
 FavoriteContactItem 1.0 FavoriteContactItem.qml

@@ -23,6 +23,7 @@ Module {
         Property { name: "maximumAttempts"; type: "string"; isReadonly: true }
         Property { name: "peekingAllowed"; type: "string"; isReadonly: true }
         Property { name: "sideloadingAllowed"; type: "string"; isReadonly: true }
+        Property { name: "showNotification"; type: "string"; isReadonly: true }
         Property { name: "codeMaxLength"; type: "string"; isReadonly: true }
         Property { name: "codeMinLength"; type: "string"; isReadonly: true }
         Property { name: "codeCurrentLength"; type: "string"; isReadonly: true }
@@ -48,6 +49,12 @@ Module {
         }
         Method {
             name: "setSideloadingAllowed"
+            type: "bool"
+            Parameter { name: "code"; type: "string" }
+            Parameter { name: "value"; type: "string" }
+        }
+        Method {
+            name: "setShowNotification"
             type: "bool"
             Parameter { name: "code"; type: "string" }
             Parameter { name: "value"; type: "string" }
@@ -102,6 +109,39 @@ Module {
         Property { name: "agreementText"; type: "string"; isReadonly: true }
         Property { name: "locationEnabled"; type: "bool" }
         Property { name: "hereState"; type: "HereState" }
+        Property { name: "hereAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "cellIdPositioningEnabled"; type: "bool" }
+        Property { name: "cellIdPositioningAvailable"; type: "bool"; isReadonly: true }
+    }
+    Component {
+        name: "MemoryCardFormatter"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.system/MemoryCardFormatter 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Status"
+            values: {
+                "Idle": 0,
+                "Unmounting": 1,
+                "Formatting": 2,
+                "RemovingFiles": 3,
+                "Mounting": 4,
+                "Probing": 5,
+                "Error": 6
+            }
+        }
+        Property { name: "status"; type: "Status"; isReadonly: true }
+        Property { name: "devicePath"; type: "string" }
+        Property { name: "filesystemType"; type: "string"; isReadonly: true }
+        Property { name: "supportedFormatTypes"; type: "QStringList"; isReadonly: true }
+        Property { name: "busy"; type: "bool"; isReadonly: true }
+        Method {
+            name: "format"
+            Parameter { name: "type"; type: "string" }
+        }
+        Method { name: "removeAllFiles" }
+        Method { name: "mount" }
+        Method { name: "unmount" }
     }
     Component {
         name: "QuickActionsModel"
@@ -109,6 +149,7 @@ Module {
         exports: ["com.jolla.settings.system/QuickActionsModel 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "showPotential"; type: "bool" }
+        Property { name: "count"; type: "int"; isReadonly: true }
         Method {
             name: "enableAction"
             Parameter { name: "path"; type: "string" }
@@ -123,8 +164,26 @@ Module {
             Parameter { name: "newIndex"; type: "int" }
         }
         Method {
+            name: "get"
+            type: "QVariantMap"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
             name: "triggerAction"
             Parameter { name: "index"; type: "int" }
+        }
+    }
+    Component {
+        name: "TextFileReader"
+        prototype: "QObject"
+        exports: ["com.jolla.settings.system/TextFileReader 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "readContent"
+            type: "string"
+            Parameter { name: "filePath"; type: "string" }
         }
     }
     Component {

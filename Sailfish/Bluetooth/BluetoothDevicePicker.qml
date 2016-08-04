@@ -15,12 +15,25 @@ Column {
     property var excludedDevices: []    // addresses expected to be in upper case
     property int preferredProfileHint: -1  // darken devices that don't match this filter
 
+    property alias adapter: adapter
+    property bool startDiscoveryWhenPowered
+
     property bool _prevDiscoveryValue
     property bool _showDiscoveryProgress
     property bool _showPairedDevicesHeader: showPairedDevicesHeader && !_showDiscoveryProgress && pairedDevices.visibleItemCount > 0
     property bool _showOtherDevicesHeader: nearbyDevices.visibleItemCount && pairedDevices.visibleItemCount
 
     signal deviceClicked(string address)
+
+    function discoverDevices() {
+        if (adapter.powered) {
+            adapter.startDiscovery()
+            root.selectedDevice = ""
+        } else {
+            adapter._autoDiscoveryStarted = false
+            adapter.powered = true
+        }
+    }
 
     function startDiscovery() {
         adapter.startDiscovery()
@@ -313,6 +326,15 @@ Column {
     BluetoothAdapter {
         id: adapter
 
+        readonly property bool autoDiscovery: ready && root.startDiscoveryWhenPowered
+        property bool _autoDiscoveryStarted
+
+        onAutoDiscoveryChanged: {
+            if (autoDiscovery) {
+                root.discoverDevices()
+            }
+        }
+
         onDiscoveringChanged: {
             // delay ui update to avoid bluez 4.101 bug where discovery suddenly switches off and on
             updateNearbyDevicesTimer.start()
@@ -320,6 +342,13 @@ Column {
             // avoid bluez 4.101 bug where discovery restarts itself after stopping
             if (!discovering) {
                 stopDiscovery()
+            }
+        }
+
+        onPoweredChanged: {
+            if (root.startDiscoveryWhenPowered && !_autoDiscoveryStarted && powered) {
+                root.discoverDevices()
+                _autoDiscoveryStarted = true
             }
         }
     }

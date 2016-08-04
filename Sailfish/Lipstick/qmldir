@@ -2,7 +2,6 @@ module Sailfish.Lipstick
 plugin sailfishlipstickplugin
 SystemDialog 1.0 SystemDialog.qml
 SystemDialogLayout 1.0 SystemDialogLayout.qml
-SystemDialogButton 1.0 SystemDialogButton.qml
 SystemDialogTextButton 1.0 SystemDialogTextButton.qml
 SystemDialogIconButton 1.0 SystemDialogIconButton.qml
 SystemDialogHeader 1.0 SystemDialogHeader.qml
@@ -18,3 +17,5 @@ NotificationAddAnimation 1.0 NotificationAddAnimation.qml
 NotificationRemoveAnimation 1.0 NotificationRemoveAnimation.qml
 BoundedModel 1.0 BoundedModel.qml
 ShutDownItem 1.0 ShutDownItem.qml
+Pannable 1.0 Pannable.qml
+PannableItem 1.0 PannableItem.qml

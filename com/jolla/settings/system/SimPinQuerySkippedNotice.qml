@@ -46,9 +46,9 @@ Page {
             wrapMode: Text.Wrap
             color: root.textColor
             font.pixelSize: Theme.fontSizeExtraSmall
-            //: SIM activation instructions, displayed when user has chosen to bypass SIM PIN entry.
-            //% "Your SIM card can still be activated later in Settings > System settings > PIN code."
-            text: qsTrId("settings_system-la-SIM_activation_instructions")
+            //: SIM unlocking instructions, displayed when user has chosen to bypass SIM PIN entry.
+            //% "Your SIM card can still be unlocked later in Settings > System settings > PIN code."
+            text: qsTrId("settings_system-la-SIM_unlocking_instructions")
         }
     }
 

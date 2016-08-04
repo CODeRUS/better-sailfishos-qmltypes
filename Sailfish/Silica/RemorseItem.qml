@@ -54,6 +54,9 @@ BackgroundItem {
         _timeout = timeout === undefined ? 5000 : timeout
         _triggered = false
         parent = item.parent
+        if ('__silica_remorse_item' in parent) {
+            parent.__silica_remorse_item = remorseItem
+        }
         _item = item
         _page = Util.findPage(remorseItem)
         state = "active"
@@ -63,6 +66,9 @@ BackgroundItem {
     }
     function cancel() {
         _close()
+        if ('__silica_remorse_item' in parent) {
+            parent.__silica_remorse_item = null
+        }
         canceled()
         RemorseItem.remorseItemCancel(remorseItem)
     }

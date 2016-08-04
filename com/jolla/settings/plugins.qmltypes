@@ -29,6 +29,8 @@ Module {
         Property { name: "showPotential"; type: "bool" }
         Property { name: "path"; type: "QStringList" }
         Property { name: "key"; type: "string" }
+        Property { name: "userModifiedKey"; type: "string" }
+        Property { name: "userModified"; type: "bool"; isReadonly: true }
         Method {
             name: "isFavorite"
             type: "bool"

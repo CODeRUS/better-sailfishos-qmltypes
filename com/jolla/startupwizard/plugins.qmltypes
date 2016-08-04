@@ -27,6 +27,15 @@ Module {
         prototype: "QObject"
         exports: ["com.jolla.startupwizard/StartupWizardManager 1.0"]
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Party"
+            values: {
+                "SailfishOS": 0,
+                "Vendor": 1
+            }
+        }
+        Property { name: "hasVendorTermsOfUse"; type: "bool"; isReadonly: true }
+        Property { name: "shutdownIfVendorTermsRejected"; type: "bool"; isReadonly: true }
         Method { name: "processId"; type: "int" }
         Method { name: "defaultPrimaryColor"; type: "QColor" }
         Method { name: "defaultSecondaryColor"; type: "QColor" }
@@ -49,6 +58,12 @@ Module {
         }
         Method {
             name: "termsOfUse"
+            type: "QStringList"
+            Parameter { name: "localeName"; type: "string" }
+            Parameter { name: "party"; type: "Party" }
+        }
+        Method {
+            name: "vendorTermsSummary"
             type: "QStringList"
             Parameter { name: "localeName"; type: "string" }
         }

@@ -1,18 +1,19 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Lipstick 1.0
 import Sailfish.Tutorial 1.0
 import "private"
 
 Page {
     id: mainPage
 
-    property alias background: flickable
+    property alias background: pannable
     property alias applicationBackground: applicationBackgroundItem
     property alias applicationGridIndicator: swipeHandle
     property alias upgradeMode: recap.upgradeMode
     property alias applicationSwitcher: switcher
     property int lessonCounter: 0
-    property int maxLessons: androidLauncher ? 3 : 5
+    property int maxLessons: lessons.length
     property bool showApplicationOverlay: false
     property bool showStatusBarClock: false
 
@@ -26,90 +27,91 @@ Page {
 
     property bool androidLauncher
 
-    Component.onCompleted: {
-        // force Tutorial singleton construction now
-        Tutorial.deviceType
-    }
+    property var lessons: []
 
-    function lessonCompleted(pauseDuration) {
-        if (lessonCounter === maxLessons)
-            showApplicationOverlay = false
+    Connections {
+        target: Tutorial
+        onDeviceTypeChanged: {
+            if (lessons.length > 0)
+                return
 
-        recap.show(pauseDuration)
-    }
-    function jumpToLesson(lesson) {
-        lessonLoader.source = ""
-        lessonLoader.source = Qt.resolvedUrl(lesson)
-    }
-
-    function showLesson() {
-        // Reset source in order to make sure a new instance is always created
-        lessonLoader.source = ""
-        if (lessonCounter === 1) {
-            lessonLoader.source = Qt.resolvedUrl("HomeLesson.qml")
-        } else if (lessonCounter === 2) {
-            // Launcher lesson is split in two halves. LauncherLesson will direcly load SwipeLesson
-            // after it completes.
-            lessonLoader.source = Qt.resolvedUrl("LauncherLesson.qml")
-        } else if (lessonCounter === 3) {
-            lessonLoader.source = androidLauncher
-                    ? Qt.resolvedUrl("AndroidLauncherPulleyLesson.qml")
-                    : Qt.resolvedUrl("PageStackLesson.qml")
-        } else if (androidLauncher) {
-            Qt.quit()
-        } else if (lessonCounter === 4) {
-            if (Tutorial.deviceType === Tutorial.PhoneDevice)
-                lessonLoader.source = Qt.resolvedUrl("PhonePulleyLesson.qml")
-            else
-                lessonLoader.source = Qt.resolvedUrl("TabletPulleyLesson.qml")
-        } else if (lessonCounter === 5) {
-            if (Tutorial.deviceType === Tutorial.PhoneDevice)
-                lessonLoader.source = Qt.resolvedUrl("PhoneCallLesson.qml")
-            else
-                lessonLoader.source = Qt.resolvedUrl("TabletAlarmLesson.qml")
-        } else {
-            Qt.quit()
+            if (androidLauncher)
+                lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "AndroidLauncherPulleyLesson.qml" ]
+            else if (Tutorial.deviceType === Tutorial.PhoneDevice)
+                lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "PageStackLesson.qml", "PhonePulleyLesson.qml", "PhoneCallLesson.qml" ]
+            else if (Tutorial.deviceType === Tutorial.TabletDevice)
+                lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "PageStackLesson.qml", "TabletPulleyLesson.qml", "TabletAlarmLesson.qml" ]
         }
     }
 
     onStatusChanged: {
         if (status === PageStatus.Active && lessonCounter === 0) {
-            content.opacity = 1
+            pannable.opacity = 1
             recap.show(1)
         }
     }
 
-    SilicaListView {
-        id: flickable
+    function lessonCompleted(pauseDuration) {
+        // Restore homescreen courasel pannable items
+        pannable.pannableItems = [ pannable.switcherItem ]
 
-        anchors.fill: parent
-        snapMode: ListView.SnapOneItem
-        orientation: ListView.Horizontal
-        highlightRangeMode: ListView.StrictlyEnforceRange
-        maximumFlickVelocity: 4000 * xScale
-        highlightMoveDuration: 300
-        pressDelay: 0
-        interactive: false
+        if (lessonCounter === maxLessons)
+            showApplicationOverlay = false
 
-        property real offset: contentX / (contentWidth - width)
-
-        model: 2
-        delegate: Item { width: flickable.width; height: flickable.height }
-
-        Component.onCompleted: positionViewAtIndex(1, ListView.SnapPosition)
+        if (lessonLoader.item && lessonLoader.item.recapText !== "") {
+            recap.show(pauseDuration)
+        } else {
+            lessonCounter++
+            showLesson()
+        }
     }
 
-    Item {
-        id: content
-        parent: __silica_applicationwindow_instance._wallpaperItem
+    function showLesson() {
+        // Reset source in order to make sure a new instance is always created
+        lessonLoader.source = ""
+
+        var index = lessonCounter - 1
+        if (index < lessons.length)
+            lessonLoader.source = Qt.resolvedUrl(lessons[index])
+        else
+            Qt.quit()
+    }
+
+    Pannable {
+        id: pannable
+
+        property bool allowPanLeft: false
+        property bool allowPanRight: false
+
+        property Item switcherItem: PannableItem {
+            width: pannable.width
+            height: pannable.height
+
+            Switcher {
+                id: switcher
+
+                anchors.fill: parent
+
+                visible: opacity > 0
+                opacity: showApplicationOverlay ? 1 : 0
+                Behavior on opacity { FadeAnimation { duration: 400 } }
+            }
+        }
+
+        // Interaction requires parent to be mainPage, but during lessons parent needs to be
+        // homeContainer for correct stacking order.
+        parent: pan ? mainPage : homeContainer
         anchors.fill: parent
-        z: -1
         opacity: 0
+
+        pan: allowPanLeft || allowPanRight
 
         Behavior on opacity { FadeAnimation { duration: 1000 } }
 
         Image {
             anchors.fill: parent
+            z: -1
+
             source: Screen.sizeCategory >= Screen.Large
                     ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-wallpaper.png")
                     : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-wallpaper.png")
@@ -117,41 +119,50 @@ Page {
 
         Rectangle {
             anchors.fill: parent
-            opacity: (1 - flickable.offset) / 2
+            z: -1
+
+            opacity: {
+                var currentItemDim = pannable.currentItem && pannable.currentItem.hasOwnProperty("dimBackground") ? pannable.currentItem.dimBackground : false
+                var alternateItemDim = pannable.alternateItem && pannable.alternateItem.hasOwnProperty("dimBackground") ? pannable.alternateItem.dimBackground : false
+
+                if (!pannable.moving) {
+                    return currentItemDim ? 0.5 : 0
+                } else {
+                    if (!currentItemDim && alternateItemDim)
+                        return pannable.progress / 2
+                    else if (currentItemDim && !alternateItemDim)
+                        return (1 - pannable.progress) / 2
+                    else if (currentItemDim && alternateItemDim)
+                        return 0.5
+                    else
+                        return 0
+                }
+            }
             color: tutorialTheme.highlightDimmerColor
         }
 
-        Row {
-            id: home
+        currentItem: switcherItem
 
-            height: parent.height
-            x: -flickable.contentX
+        pannableItems: [ switcherItem ]
+        onPannableItemsChanged: updatePannableItems()
+        onAllowPanLeftChanged: updatePannableItems()
+        onAllowPanRightChanged: updatePannableItems()
 
-            // Ensure this is not visible during the pulley menu lesson
-            opacity: lessonCounter == 4 ? 0 : 1
-
-            Item {
-                width: flickable.width
-                height: flickable.height
-
-                Image {
-                    visible: home.x > -flickable.width
-                    anchors.fill: parent
-                    source: Screen.sizeCategory >= Screen.Large
-                            ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-events.png")
-                            : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-events.png")
-                }
+        function updatePannableItems() {
+            if (pannableItems.length === 1) {
+                pannableItems[0].leftItem = null
+                pannableItems[0].rightItem = null
+                return
             }
 
-            Switcher {
-                id: switcher
+            for (var i = 0; i < pannableItems.length; ++i) {
+                pannableItems[i].leftItem = (currentItem !== pannableItems[i] || allowPanLeft)
+                                            ? pannableItems[(i - 1 + pannableItems.length) % pannableItems.length]
+                                            : null
 
-                width: flickable.width
-                height: flickable.height
-
-                visible: opacity > 0 && home.x < 0
-                opacity: showApplicationOverlay ? 1 : 0
-                Behavior on opacity { FadeAnimation { duration: 400 } }
+                pannableItems[i].rightItem = (currentItem !== pannableItems[i] || allowPanRight)
+                                             ? pannableItems[(i + 1) % pannableItems.length]
+                                             : null
             }
         }
 
@@ -217,15 +228,60 @@ Page {
 
         parent: __silica_applicationwindow_instance._wallpaperItem
         anchors.fill: parent
+
+        Item {
+            id: homeContainer
+
+            anchors.fill: parent
+        }
     }
 
     Loader {
         id: lessonLoader
+
+        z: 1
         anchors.fill: parent
         onSourceChanged: swipeHandle.visible = true
     }
 
     RecapItem {
         id: recap
+
+        z: 1
+
+        descriptionText: {
+            if (lessonCounter === 0) {
+                if (androidLauncher) {
+                    //: The secondary label shown when the tutorial is started on Android
+                    //% "Simply hold the device in one hand and follow the instructions on screen to learn how to navigate in Jolla Launcher"
+                    return qsTrId("tutorial-la-follow_the_instructions_alternative")
+                } else if (upgradeMode) {
+                    //: The secondary label shown when the tutorial is started after an upgrade
+                    //% "We've made some exciting changes. Start the Tutorial to learn about them!"
+                    return qsTrId("tutorial-la-exciting_changes")
+                } else if (Screen.sizeCategory >= Screen.Large) {
+                    //: The secondary label shown when the tutorial is started (for large screen devices)
+                    //% "Simply hold the device comfortably and follow the instructions on screen to learn how to navigate in Sailfish OS"
+                    return qsTrId("tutorial-la-follow_the_instructions_tablet")
+                } else {
+                    //: The secondary label shown when the tutorial is started (for small screen devices)
+                    //% "Simply hold the device in one hand and follow the instructions on screen to learn how to navigate in Sailfish OS"
+                    return qsTrId("tutorial-la-follow_the_instructions")
+                }
+            } else if (lessonCounter > 0 && lessonCounter < maxLessons) {
+                return lessonLoader.item ? lessonLoader.item.recapText : ""
+            } else {
+                var text = lessonLoader.item ? lessonLoader.item.recapText : ""
+
+                text += "\n\n"
+
+                //: Text shown at the end of the tutorial below tutorial-la-recap_incoming_call
+                //: (or tutorial-la-recap_pulley_menu_alternative in case of Jolla Launcher)
+                //% "This was the last part of the Tutorial. Now jump into the Sailfish experience!"
+                text += qsTrId("tutorial-la-recap_tutorial_completed")
+
+                return text
+            }
+        }
     }
 }

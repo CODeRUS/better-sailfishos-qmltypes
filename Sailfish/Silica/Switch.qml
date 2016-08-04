@@ -63,7 +63,7 @@ MouseArea {
     Column {
         id: column
 
-        spacing: -28
+        spacing: -Theme.paddingLarge
         anchors.centerIn: parent
         GlassItem {
             id: indicator

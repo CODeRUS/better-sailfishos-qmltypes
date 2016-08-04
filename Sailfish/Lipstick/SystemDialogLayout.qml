@@ -25,9 +25,10 @@ Item {
         anchors.fill: content
         anchors.bottomMargin: -bottomPadding
         color: "black"
-        opacity: 0.8
+        opacity: 0.9
 
         MouseArea {
+            objectName: "SystemDialogLayout_blocker"
             // block events passing beneath the layout
             anchors.fill: parent
         }
@@ -43,5 +44,12 @@ Item {
         anchors.top: background.bottom
         anchors.bottom: parent.bottom
         onClicked: layout.dismiss()
+
+        Rectangle {
+            objectName: "CredentialsForm_dismiss"
+            anchors.fill: parent
+            color: Theme.highlightDimmerColor
+            opacity: 0.4
+        }
     }
 }

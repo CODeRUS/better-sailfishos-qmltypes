@@ -82,10 +82,12 @@ ValueButton {
         }
         var needSeparateDialog = false
         var menuChildrenCount = 0
+        var maximumInlineItems = screen.sizeCategory >= Screen.Large ? 6 : 5
+
         for (var i=0; i<menu._contentColumn.children.length; i++) {
             var child = menu._contentColumn.children[i]
             if (child && child.visible && child.hasOwnProperty("__silica_menuitem")) {
-                if (++menuChildrenCount > 6) {
+                if (++menuChildrenCount > maximumInlineItems) {
                     needSeparateDialog = true
                     break
                 }
@@ -203,17 +205,19 @@ ValueButton {
             if (comboBox.currentItem === null && comboBox.currentIndex < 0) {
                 return
             }
-            var menuItems = comboBox.menu._contentColumn.children
-            var foundOldCurrentItem = false
-            for (var i=0; i<menuItems.length; i++) {
-                if (menuItems[i] === comboBox.currentItem) {
-                    foundOldCurrentItem = true
-                    break
+            if (comboBox.currentItem) {
+                var menuItems = comboBox.menu._contentColumn.children
+                var foundOldCurrentItem = false
+                for (var i=0; i<menuItems.length; i++) {
+                    if (menuItems[i] === comboBox.currentItem) {
+                        foundOldCurrentItem = true
+                        break
+                    }
                 }
-            }
-            // ContextMenu has completely changed its items, so reload the combo box
-            if (!foundOldCurrentItem) {
-                comboBox._resetCurrent()
+                // ContextMenu has completely changed its items, so reload the combo box
+                if (!foundOldCurrentItem) {
+                    comboBox._resetCurrent()
+                }
             }
             comboBox._loadCurrent()
         }

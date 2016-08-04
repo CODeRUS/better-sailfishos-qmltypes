@@ -8,7 +8,7 @@ import QtQuick.tooling 1.1
 
 Module {
     Component {
-        name: "ContextKitQml::Property"
+        name: "ContextPropertyDeclarative"
         defaultProperty: "value"
         prototype: "QObject"
         exports: ["org.freedesktop.contextkit/ContextProperty 1.0"]

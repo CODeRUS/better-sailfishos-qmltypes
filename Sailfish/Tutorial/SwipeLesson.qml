@@ -4,14 +4,15 @@ import Sailfish.Lipstick 1.0
 import Sailfish.Tutorial 1.0
 import "private"
 
-Item {
+Lesson {
     id: lesson
 
-    anchors.fill: parent
+    //% "Now you know that swiping from the left or right edge brings you back to Home"
+    recapText: qsTrId("tutorial-la-recap_swipe_to_close")
 
     Component.onCompleted: {
         // Make sure the background is at correct position
-        background.currentIndex = 1
+        background.currentItem = background.switcherItem
         timeline.restart()
     }
 

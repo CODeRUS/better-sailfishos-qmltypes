@@ -8,12 +8,12 @@ CoverArt 1.0 CoverArt.qml
 GriloListView 1.0 GriloListView.qml
 GriloTrackerModel 1.0 GriloTrackerModel.qml
 MediaContainerListDelegate 1.0 MediaContainerListDelegate.qml
+MediaContainerIconDelegate 1.0 MediaContainerIconDelegate.qml
 MediaKeys 1.0 MediaKeys.qml
 MediaListDelegate 1.0 MediaListDelegate.qml
 MediaPlayerDockedPanel 1.0 MediaPlayerDockedPanel.qml
 MediaPlayerListView 1.0 MediaPlayerListView.qml
 MediaPlayerPage 1.0 MediaPlayerPage.qml
-MusicIcon 1.0 MusicIcon.qml
 NewPlaylistDialog 1.0 NewPlaylistDialog.qml
 NowPlayingMenuItem 1.0 NowPlayingMenuItem.qml
 PlayQueuePage 1.0 PlayQueuePage.qml

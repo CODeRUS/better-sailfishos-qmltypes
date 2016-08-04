@@ -11,6 +11,10 @@ Item {
     property bool buttonsEnabled: showAnimation.running || root.opacity === 1.0
     property bool upgradeMode
 
+    property string descriptionText
+
+    property int retryLessonIndex
+
     function show(pauseDuration) {
         showPause.duration = pauseDuration !== undefined ? pauseDuration : 500
         if (lessonCounter === 0) {
@@ -25,7 +29,7 @@ Item {
                     label.text = qsTrId("tutorial-la-thanks_for_updating")
                 } else {
                     //: The primary label shown when the tutorial is started
-                    //% "Learn basics of your Jolla"
+                    //% "Learn basics of Sailfish OS"
                     label.text = qsTrId("tutorial-la-learn_basics")
                 }
             }
@@ -45,85 +49,8 @@ Item {
             completedLessons = lessonCounter
         }
 
-        switch (lessonCounter) {
-        case 0:
-            if (androidLauncher) {
-                //: The secondary label shown when the tutorial is started on Android
-                //% "Simply hold the device in one hand and follow the instructions on screen to learn how to navigate in Jolla Launcher"
-                description.text = qsTrId("tutorial-la-follow_the_instructions_alternative")
-            } else {
-                if (upgradeMode) {
-                    //: The secondary label shown when the tutorial is started after an upgrade
-                    //% "We've made some exciting changes. Start the Tutorial to learn about them!"
-                    description.text = qsTrId("tutorial-la-exciting_changes")
-                } else {
-                    if (Screen.sizeCategory >= Screen.Large) {
-                        //: The secondary label shown when the tutorial is started (for large screen devices)
-                        //% "Simply hold the device comfortably and follow the instructions on screen to learn how to navigate in Sailfish OS"
-                        description.text = qsTrId("tutorial-la-follow_the_instructions_tablet")
-                    } else {
-                        //: The secondary label shown when the tutorial is started (for small screen devices)
-                        //% "Simply hold the device in one hand and follow the instructions on screen to learn how to navigate in Sailfish OS"
-                        description.text = qsTrId("tutorial-la-follow_the_instructions")
-                    }
-                }
-            }
-            break
-        case 1:
-            //% "Now you know how to navigate between Lock screen, Home and Events"
-            description.text = qsTrId("tutorial-la-recap_home")
-            break
-        case 2:
-            //% "Now you know that swiping from the left or right edge brings you back to Home"
-            description.text = qsTrId("tutorial-la-recap_swipe_to_close")
-            break
-        case 3:
-            if (androidLauncher) {
-                //: This text has a full stop at the end unlike the other "recap labels" because
-                //: it's shown together with tutorial-la-recap_tutorial_completed
-                //% "Now you know that the line at the top of the view is the pulley menu and learned how to find more information about Jolla Launcher."
-                description.text = qsTrId("tutorial-la-recap_pulley_menu_alternative")
-                description.text += "\n\n"
-                //: Text shown at the end of the tutorial below tutorial-la-recap_pulley_menu_alternative
-                //% "This was the last part of the Tutorial. Now jump into the Sailfish experience!"
-                description.text += qsTrId("tutorial-la-recap_tutorial_completed_alternative")
-            } else {
-                //% "Now you know that the dot on the top left indicates that you are in a subpage and swipe to right moves you to previous page"
-                description.text = qsTrId("tutorial-la-recap_page_navigation")
-            }
-            break
-        case 4:
-            if (Tutorial.deviceType === Tutorial.PhoneDevice) {
-                //% "Now you know that the line at the top of the view is the pulley menu and you learned how to call a phone number"
-                description.text = qsTrId("tutorial-la-recap_phone_pulley_menu")
-            } else if (Tutorial.deviceType === Tutorial.TabletDevice) {
-                //% "Now you know that the line at the top of the view is the pulley menu"
-                description.text = qsTrId("tutorial-la-recap_tablet_pulley_menu")
-            } else {
-                description.text = ""
-            }
-            break
-        case 5:
-            if (Tutorial.deviceType === Tutorial.PhoneDevice) {
-                //: This text has a full stop at the end unlike the other "recap labels" because
-                //: it's shown together with tutorial-la-recap_tutorial_completed
-                //% "Now you know what to do when you get a call."
-                description.text = qsTrId("tutorial-la-recap_incoming_call")
-            } else if (Tutorial.deviceType === Tutorial.TabletDevice) {
-                //: This text has a full stop at the end unlike the other "recap labels" because
-                //: it's shown together with tutorial-la-recap_tutorial_completed
-                //% "Now you know what to do when an alarm rings."
-                description.text = qsTrId("tutorial-la-recap_alarm")
-            } else {
-                description.text = ""
-            }
+        description.text = descriptionText
 
-            description.text += "\n\n"
-            //: Text shown at the end of the tutorial below tutorial-la-recap_incoming_call
-            //% "This was the last part of the Tutorial. Now jump into the Jolla experience!"
-            description.text += qsTrId("tutorial-la-recap_tutorial_completed")
-            break
-        }
         showAnimation.restart()
     }
 
@@ -186,56 +113,32 @@ Item {
         }
         width: parent.width - 2 * x
         color: tutorialTheme.highlightColor
+        textFormat: Text.PlainText
     }
 
-    MouseArea {
-        property int step
+    CornerTapItem {
+        id: cornerTap
         anchors.fill: parent
-        // Use "visible" for disabling the mouse area because it
-        // will also disable the children.
-        visible: lessonCounter === 0
-
-        function handleClick(number) {
-            if (number === 0) {
-                step = 1
-            } else if (number === step) {
-                if (number === 3) {
-                    Qt.quit()
-                } else {
-                    step++
-                }
-            } else {
-                step = 0
-            }
-        }
-
-        onClicked: step = 0
-
-        MouseArea {
-            anchors { left: parent.left; top: parent.top }
-            width: Theme.itemSizeLarge; height: Theme.itemSizeLarge
-            onClicked: parent.handleClick(0)
-        }
-
-        MouseArea {
-            anchors { right: parent.right; top: parent.top }
-            width: Theme.itemSizeLarge; height: Theme.itemSizeLarge
-            onClicked: parent.handleClick(1)
-        }
-
-        MouseArea {
-            anchors { right: parent.right; bottom: parent.bottom }
-            width: Theme.itemSizeLarge; height: Theme.itemSizeLarge
-            onClicked: parent.handleClick(2)
-        }
-
-        MouseArea {
-            anchors { left: parent.left; bottom: parent.bottom }
-            width: Theme.itemSizeLarge; height: Theme.itemSizeLarge
-            onClicked: parent.handleClick(3)
-        }
+        onTriggered: Qt.quit()
     }
 
+    IconButton {
+        anchors {
+            top: parent.top
+            right: parent.right
+            margins: Theme.paddingLarge
+        }
+
+        visible: allowSystemGesturesBetweenLessons
+        icon.source: "image://theme/icon-m-dismiss"
+
+        onClicked: Qt.quit()
+    }
+
+    Connections {
+        target: mainPage
+        onLessonCounterChanged: cornerTap.reset()
+    }
 
     Button {
         id: againButton
@@ -251,7 +154,10 @@ Item {
         //% "Try again"
         text: qsTrId("tutorial-bt-try_again")
 
-        onClicked: hideAnimation.restart()
+        onClicked: {
+            lessonCounter = retryLessonIndex
+            hideAnimation.restart()
+        }
     }
 
     Button {
@@ -268,6 +174,7 @@ Item {
 
         onClicked: {
             lessonCounter++
+            retryLessonIndex = lessonCounter
             hideAnimation.restart()
         }
     }

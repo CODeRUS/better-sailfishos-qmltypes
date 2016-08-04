@@ -13,6 +13,7 @@ Rectangle {
 
     property alias message: shutDownMessage.text
     property string userName
+    property bool rebooting
 
     color: "black"
     anchors.fill: parent
@@ -34,11 +35,15 @@ Rectangle {
         font.pixelSize: Theme.fontSizeExtraLarge
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.WordWrap
-        text: shutDownItem.userName !== ""
-            //: Shut down message
-            //% "Goodbye %1!"
-            ? qsTrId("sailfish-components-lipstick-la-goodbye-user").arg(shutDownItem.userName)
-            //% "Goodbye!"
-            : qsTrId("sailfish-components-lipstick-la-goodbye")
+        text: rebooting
+              //: Message shown when the device reboots
+              //% "One moment..."
+              ? qsTrId("sailfish-components-lipstick-la-one-moment")
+              : shutDownItem.userName !== ""
+                //: Shut down message
+                //% "Goodbye %1!"
+                ? qsTrId("sailfish-components-lipstick-la-goodbye-user").arg(shutDownItem.userName)
+                //% "Goodbye!"
+                : qsTrId("sailfish-components-lipstick-la-goodbye")
     }
 }

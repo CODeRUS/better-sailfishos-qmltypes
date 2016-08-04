@@ -8,7 +8,7 @@ import QtQuick.tooling 1.1
 
 Module {
     Component {
-        name: "ConnectionAgentPlugin"
+        name: "DeclarativeConnectionAgent"
         prototype: "QObject"
         exports: ["com.jolla.connection/ConnectionAgent 1.0"]
         exportMetaObjectRevisions: [0]

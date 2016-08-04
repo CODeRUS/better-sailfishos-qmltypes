@@ -1,21 +1,3 @@
-/*
- * Copyright (C) 2012-2015 Jolla Ltd.
- *
- * The code in this file is distributed under multiple licenses, and as such,
- * may be used under any one of the following licenses:
- *
- *   - GNU General Public License as published by the Free Software Foundation;
- *     either version 2 of the License (see LICENSE.GPLv2 in the root directory
- *     for full terms), or (at your option) any later version.
- *   - GNU Lesser General Public License as published by the Free Software
- *     Foundation; either version 2.1 of the License (see LICENSE.LGPLv21 in the
- *     root directory for full terms), or (at your option) any later version.
- *   - Alternatively, if you have a commercial license agreement with Jolla Ltd,
- *     you may use the code under the terms of that license instead.
- *
- * You can visit <https://sailfishos.org/legal/> for more information
- */
-
 // -*- qml -*-
 
 pragma Singleton
@@ -26,15 +8,16 @@ import org.nemomobile.mpris 1.0
 Container {
     id: player
 
-    property bool shuffle: false
-    property bool repeat: false
-    property bool rewinding: false
-    property bool forwarding: false
+    property bool shuffle
+    property bool repeat
+    property bool repeatOne
+    property bool rewinding
+    property bool forwarding
 
-    property bool _resume: false
-    property int _seekOffset: 0
-    property bool _seekRepeat: false
-    property var _metadata: {}
+    property bool _resume
+    property int _seekOffset
+    property bool _seekRepeat
+    property var _metadata: ({})
 
     readonly property alias currentItem: audio.currentItem
 
@@ -49,6 +32,8 @@ Container {
     readonly property bool _seeking: player.rewinding || player.forwarding
 
     signal tryingToPlay
+
+    onRepeatChanged: if (!repeat) repeatOne = false
 
     function setPosition(position) {
         audio.position = position
@@ -245,7 +230,13 @@ Container {
         property int playbackState
         property bool changingItem
 
-        onEndOfMedia: audio.playNext()
+        onEndOfMedia: {
+            if (repeatOne) {
+                audio.playCurrent()
+            } else {
+                audio.playNext()
+            }
+        }
         model.currentIndex: audio.model.currentIndex
         model.onShuffledChanged: if (player.shuffle != model.shuffled) player.shuffle = !player.shuffle
 
@@ -293,6 +284,13 @@ Container {
             } else if (playbackState == Audio.Stopped) {
                 player._resume = false
             }
+        }
+
+        function playCurrent() {
+            changingItem = true
+            play()
+            changingItem = false
+            playbackState = state
         }
 
         function playNext() {

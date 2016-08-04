@@ -1,10 +1,14 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Item {
+Lesson {
     id: root
 
-    anchors.fill: parent
+    //: This text has a full stop at the end unlike the other "recap labels" because
+    //: it's shown together with tutorial-la-recap_tutorial_completed
+    //% "Now you know what to do when an alarm rings."
+    recapText: qsTrId("tutorial-la-recap_alarm")
+
     opacity: 0.0
 
     Component.onCompleted: {

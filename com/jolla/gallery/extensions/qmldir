@@ -1,0 +1,13 @@
+module com.jolla.gallery.extensions
+SplitViewPage 1.0 SplitViewPage.qml
+SlideshowIcon 1.0 SlideshowIcon.qml
+GalleryIcon 1.0 GalleryIcon.qml
+AlbumDelegate 1.0 AlbumDelegate.qml
+PhotoGridPage 1.0 PhotoGridPage.qml
+UsersPage 1.0 UsersPage.qml
+UserDelegate 1.0 UserDelegate.qml
+AccessTokensProvider 1.0 AccessTokensProvider.qml
+FullscreenPhotoPage 1.0 FullscreenPhotoPage.qml
+CloudImage 1.0 CloudImage.qml
+FullscreenPhotoHeader 1.0 FullscreenPhotoHeader.qml
+AlbumsPage 1.0 AlbumsPage.qml

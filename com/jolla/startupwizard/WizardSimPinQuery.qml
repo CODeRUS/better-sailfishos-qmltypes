@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Telephony 1.0
 import com.jolla.settings.system 1.0
 
 Page {
@@ -9,9 +10,14 @@ Page {
 
     signal queryDone()
 
+    SimManager {
+        id: simManager
+    }
+
     SimPinQuery {
         modemPath: root.modemPath
         showCancelButton: true
+        multiSimManager: simManager
 
         onDone: {
             clear()

@@ -2,7 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.contacts 1.0
 import org.nemomobile.dbus 1.0
-import MeeGo.QOfono 0.2
+import org.freedesktop.contextkit 1.0
 import "common/common.js" as CommonJs
 import "contactcard/contactcardmodelfactory.js" as ModelFactory
 import "contactcard"
@@ -13,8 +13,8 @@ SilicaFlickable {
     property Person contact
     property string activeDetail
     property bool readOnly
-    property bool hidePhoneActions: ofonoManager.modems.length < 1
-    property bool disablePhoneActions: !ofonoSimManager.present
+    property bool hidePhoneActions: cellular1Status.disabled && cellular2Status.disabled
+    property bool disablePhoneActions: !cellular1Status.registered && !cellular2Status.registered
 
     signal contactModified
 
@@ -42,8 +42,12 @@ SilicaFlickable {
         contactModified()
     }
 
-    function startPhoneCall(number) {
-        voicecall.dial(number)
+    function startPhoneCall(number, modemPath) {
+        if (modemPath !== undefined && modemPath !== "") {
+            voicecall.dialViaModem(modemPath, number)
+        } else {
+            voicecall.dial(number)
+        }
     }
 
     function startSms(number) {
@@ -225,8 +229,8 @@ SilicaFlickable {
                     onContactDetailClicked: root.activate(detailDelegate)
 
                     onCallClicked: {
-                        console.log("Call number: " + number + ", connection: " + connection)
-                        root.startPhoneCall(number)
+                        console.log("Call number: " + number + ", connection: " + connection + ", modem: " + modemPath)
+                        root.startPhoneCall(number, modemPath)
                     }
 
                     onSmsClicked: {
@@ -345,7 +349,7 @@ SilicaFlickable {
                                 onContentHeightChanged: updateHeight()
                                 onReducedChanged: updateHeight()
 
-                                onStartPhoneCall: root.startPhoneCall(number)
+                                onStartPhoneCall: root.startPhoneCall(number, modemPath)
                                 onStartSms: root.startSms(number)
                                 onStartInstantMessage: root.startInstantMessage(localUid, remoteUid)
                             }
@@ -366,8 +370,9 @@ SilicaFlickable {
                                         verticalCenter: parent.verticalCenter
                                     }
 
-                                    //% "Show more activity"
-                                    text: qsTrId("components_contacts-la-show_more_activity")
+                                    //% "Show more"
+                                    //: Should match the translation for sailfish-components-lipstick-la-show-more
+                                    text: qsTrId("components_contacts-la-show_more")
                                     font.pixelSize: Theme.fontSizeExtraSmall
                                     font.italic: true
                                     color: showMore.down ? Theme.highlightColor : Theme.primaryColor
@@ -378,7 +383,7 @@ SilicaFlickable {
                                         leftMargin: Theme.paddingMedium
                                         verticalCenter: parent.verticalCenter
                                     }
-                                    source: "image://theme/icon-lock-more?" + (root.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                                    source: "image://theme/icon-lock-more?" + (showMore.down ? Theme.highlightColor : Theme.primaryColor)
                                     width: Theme.iconSizeMedium * 0.7
                                     height: width
                                     sourceSize.width: width
@@ -429,7 +434,7 @@ SilicaFlickable {
                                     ContactActivityPage {
                                         contact: root.contact
 
-                                        onStartPhoneCall: root.startPhoneCall(number)
+                                        onStartPhoneCall: root.startPhoneCall(number, modemPath)
                                         onStartSms: root.startSms(number)
                                         onStartInstantMessage: root.startInstantMessage(localUid, remoteUid)
                                     }
@@ -483,6 +488,10 @@ SilicaFlickable {
         function dial(number) {
             call('dial', number)
         }
+
+        function dialViaModem(modemPath, number) {
+            call('dialViaModem', [ modemPath, number ])
+        }
     }
     DBusInterface {
         id: mapsInterface
@@ -507,13 +516,17 @@ SilicaFlickable {
         }
     }
 
-    OfonoManager {
-        id: ofonoManager
+    ContextProperty {
+        id: cellular1Status
+        property bool disabled: value == "disabled" || value == undefined
+        property bool registered: value == "registered" || value == "roaming"
+        key: "Cellular.Status"
     }
-
-    OfonoSimManager {
-        id: ofonoSimManager
-        modemPath: ofonoManager.defaultModem
+    ContextProperty {
+        id: cellular2Status
+        property bool disabled: value == "disabled" || value == undefined
+        property bool registered: value == "registered" || value == "roaming"
+        key: "Cellular_1.Status"
     }
 
     VerticalScrollDecorator {}

@@ -15,6 +15,20 @@ Column {
     property AccountManager _accountManager: AccountManager {}
     property bool _hasExistingJollaAccount
 
+    function _isCloudStorageProvider(providerName) {
+        var provider = _accountManager.provider(providerName)
+        if (provider) {
+            var serviceNames = provider.serviceNames
+            for (var i=0; i<serviceNames.length; i++) {
+                var service = _accountManager.service(serviceNames[i])
+                if (service && service.serviceType == "storage") {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
     function _isOtherProvider(providerName) {
         return providerName.indexOf("email") == 0
             || providerName.indexOf("onlinesync") == 0
@@ -49,7 +63,26 @@ Column {
                 width: root.width
                 // don't offer the chance to create multiple jolla accounts through the UI
                 visible: !root._isOtherProvider(model.providerName)
+                         && !root._isCloudStorageProvider(model.providerName)
                          && (model.providerName !== "jolla" || !root._hasExistingJollaAccount)
+            }
+        }
+    }
+
+    SectionHeader {
+        //: List of account providers that offer cloud storage
+        //% "Cloud storage"
+        text: qsTrId("components_accounts-la-service_name_cloud_storage")
+    }
+
+    Column {
+        width: root.width
+
+        Repeater {
+            model: providerModel
+            delegate: AccountProviderPickerDelegate {
+                width: root.width
+                visible: root._isCloudStorageProvider(model.providerName)
             }
         }
     }

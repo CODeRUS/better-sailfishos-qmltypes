@@ -70,7 +70,7 @@ Item {
 
             Label {
                 anchors.centerIn: parent
-                text: model.day
+                text: model.day.toLocaleString()
                 font.bold: model.day === datePicker._today.getDate()
                             && model.month === datePicker._today.getMonth()+1
                             && model.year === datePicker._today.getFullYear()

@@ -4,6 +4,7 @@ AudioTrackerHelpers 1.0 scripts/AudioTrackerHelpers.js
 GStreamerVideoOutput 1.0 GStreamerVideoOutput.qml
 MediaFormatter 1.0 MediaFormatter.qml
 MediaListItem 1.0 MediaListItem.qml
+MediaPlayerControlsPanel 1.0 MediaPlayerControlsPanel.qml
 MprisPlayerControls 1.0 MprisPlayerControls.qml
 PlayerControls 1.0 PlayerControls.qml
 PlaylistTrackerHelpers 1.0 scripts/PlaylistTrackerHelpers.js

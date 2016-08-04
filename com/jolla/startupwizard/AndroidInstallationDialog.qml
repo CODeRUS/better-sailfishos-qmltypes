@@ -145,6 +145,9 @@ Dialog {
                 visible: _androidSupportUninstalled
             }
 
+            /*
+              Hide Android stores until installation issue JB#23623 is fixed
+
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - x*2
@@ -181,6 +184,7 @@ Dialog {
                     }
                 }
             }
+            */
         }
 
         ViewPlaceholder {

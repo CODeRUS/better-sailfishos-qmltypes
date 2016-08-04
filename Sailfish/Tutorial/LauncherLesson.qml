@@ -3,16 +3,14 @@ import Sailfish.Silica 1.0
 import Sailfish.Lipstick 1.0
 import Sailfish.Tutorial 1.0
 
-Item {
+Lesson {
     id: lesson
-
-    anchors.fill: parent
 
     property int timelineCounter
 
     Component.onCompleted: {
         // Make sure the background is at correct position
-        background.currentIndex = 1
+        background.currentItem = background.switcherItem
         applicationGridIndicator.visible = false
         timeline2.restart()
     }
@@ -20,7 +18,7 @@ Item {
     onTimelineCounterChanged: {
         if (timelineCounter === 2) {
             if (!applicationGridEndAnimation.running)
-                jumpToLesson("SwipeLesson.qml")
+                lessonCompleted()
         } else {
             timeline1.restart()
         }
@@ -196,6 +194,6 @@ Item {
         id: timer
 
         interval: 800
-        onTriggered: jumpToLesson("SwipeLesson.qml")
+        onTriggered: lessonCompleted()
     }
 }

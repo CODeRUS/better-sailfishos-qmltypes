@@ -83,6 +83,6 @@ MouseArea {
 
     Timer {
         id: pressTimer
-        interval: 64
+        interval: Theme.minimumPressHighlightTime
     }
 }

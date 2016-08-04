@@ -45,10 +45,10 @@ function findFlickable(item) {
     return null
 }
 
-function findPageStack(item) {
+function findParentWithProperty(item, propertyName) {
     var parentItem = item.parent
     while (parentItem) {
-        if (parentItem.hasOwnProperty('_pageStackIndicator')) {
+        if (parentItem.hasOwnProperty(propertyName)) {
             return parentItem
         }
         parentItem = parentItem.parent
@@ -56,15 +56,12 @@ function findPageStack(item) {
     return null
 }
 
+function findPageStack(item) {
+    return findParentWithProperty(item, '_pageStackIndicator')
+}
+
 function findPage(item) {
-    var parentItem = item.parent
-    while (parentItem) {
-        if (parentItem.hasOwnProperty('__silica_page')) {
-            return parentItem
-        }
-        parentItem = parentItem.parent
-    }
-    return null
+    return findParentWithProperty(item, '__silica_page')
 }
 
 function childAt(parent, x, y) {

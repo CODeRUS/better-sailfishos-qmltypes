@@ -13,7 +13,7 @@ SequentialAnimation {
 
     ScriptAction  {
         script: {
-            hand.palm.opacity = 0
+            hand.opacity = 0
             hand.thumb.rotation = 0
             hand.thumb.yOffset = hand.thumb.initialYOffset
             hand.pressCircle.opacity = 0
@@ -29,7 +29,7 @@ SequentialAnimation {
     }
     SequentialAnimation {
         FadeAnimation {
-            target: hand.palm
+            target: hand
             to: 1
             duration: 350
             easing.type: Easing.OutQuad
@@ -91,6 +91,7 @@ SequentialAnimation {
             }
         }
         PauseAnimation { duration: 200 }
+        ScriptAction { script: { root.released() } }
         ParallelAnimation {
             RotationAnimation {
                 target: hand.thumb
@@ -109,7 +110,6 @@ SequentialAnimation {
             SequentialAnimation {
                 PauseAnimation { duration: 150 }
                 ParallelAnimation {
-                    ScriptAction { script: { root.released() } }
                     NumberAnimation {
                         target: hand.pressCircle
                         property: "scale"
@@ -131,7 +131,7 @@ SequentialAnimation {
         }
     }
     FadeAnimation {
-        target: hand.palm
+        target: hand
         to: 0
         duration: 350
     }

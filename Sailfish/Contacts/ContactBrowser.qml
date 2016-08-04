@@ -314,6 +314,9 @@ SilicaFlickable {
 
                 visible: opacity > 0
                 opacity: root.searchEnabled ? 1 : 0
+                EnterKey.iconSource: "image://theme/icon-m-enter-close"
+                EnterKey.onClicked: _closeVKB()
+
                 Behavior on opacity {
                     FadeAnimation {
                         duration: 150
@@ -407,9 +410,10 @@ SilicaFlickable {
             id: contactList
 
             Column {
+                enabled: !_searchFiltered && recentContactsList.count > 0
+                opacity: enabled ? 1.0 : 0.0
+                height: enabled ? implicitHeight : 0
                 width: contentColumn.width
-                visible: !_searchFiltered && recentContactsList.count > 0
-                height: visible ? implicitHeight : 0
 
                 SectionHeader {
                     //% "Recent"

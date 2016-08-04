@@ -96,6 +96,20 @@ Module {
         Property { name: "applicationWallpaper"; type: "QUrl"; isReadonly: true }
         Property { name: "homeWallpaper"; type: "QUrl"; isReadonly: true }
         Method {
+            name: "setAmbience"
+            Parameter { name: "source"; type: "QUrl" }
+            Parameter { name: "callback"; type: "QJSValue" }
+        }
+        Method {
+            name: "setAmbience"
+            Parameter { name: "source"; type: "QUrl" }
+        }
+        Method {
+            name: "create"
+            Parameter { name: "source"; type: "QUrl" }
+            Parameter { name: "callback"; type: "QJSValue" }
+        }
+        Method {
             name: "create"
             Parameter { name: "source"; type: "QUrl" }
         }

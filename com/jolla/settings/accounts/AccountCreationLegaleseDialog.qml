@@ -74,10 +74,24 @@ Dialog {
         experimental.userAgent: userAgent
         url: root.externalUrlLink
         anchors {
+            topMargin: -Theme.paddingLarge
             top: header.bottom
             bottom: root.bottom
             left: root.left
             right: root.right
+        }
+
+        experimental.customLayoutWidth: {
+            // VK's Terms Of Service page doesn't render the same
+            // way as Facebook/Google/Twitter/OneDrive etc, because
+            // it doesn't respect the deviceWidth setting.
+            var urlStr = "" + url
+            if (urlStr.indexOf("vk.com/terms") > 0) {
+                return root.width * Theme._webviewCustomLayoutWidthScalingFactor
+            }
+
+            // For other services, zoom in a bit to make things more readable
+            return root.width * 0.6
         }
     }
 }

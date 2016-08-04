@@ -9,8 +9,6 @@ import org.nemomobile.contentaction 1.0
 Page {
     id: transfersPage
 
-    property date _today: new Date()
-
     function statusText(transferType, status, fileSize, transferDate) {
         switch(status) {
         case TransferModel.NotStarted:
@@ -53,13 +51,6 @@ Page {
             return qsTrId("transferui-la_transfer_uploading")
         }
         return ""
-    }
-
-    // For some reason date object can't hand ISO8601 standard.
-    // This function makes it compatible
-    function dateFromISO8601(isostr) {
-        var parts = isostr.match(/\d+/g);
-        return new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5]);
     }
 
     function transferIcon(transferType, highlight) {
@@ -215,7 +206,7 @@ Page {
             }
 
             Label {
-                text: statusText(transferType, status, fileSize, dateFromISO8601(timestamp))
+                text: statusText(transferType, status, fileSize, new Date(timestamp))
                 font.pixelSize: Theme.fontSizeSmall
                 color: status == TransferModel.TransferInterrupted
                        ? Theme.highlightColor

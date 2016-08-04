@@ -1,333 +1,398 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Accounts 1.0
 import Sailfish.Vault 1.0
-import org.nemomobile.notifications 1.0
 import NemoMobile.Vault 1.0
+import org.nemomobile.dbus 1.0
 
 Page {
-    id: mainPage
+    id: root
 
-    property Item backupItem: null
-    property variant deferredNotification: null
-
-    backNavigation: !backupItem || !backupItem.busy
-
-    //TODO check maybe Loader should be used
-    MountInfo {
-        id: mounts
-    }
-    property variant deletingSnapshots: null
-
-    property bool isSwitchingInsideBackup: false
-
-    function pushPage(page, context) {
-        isSwitchingInsideBackup = true;
-        try {
-            if (typeof page === "string")
-                page = Qt.resolvedUrl(page);
-            return pageStack.push(page, context);
-        } finally {
-            isSwitchingInsideBackup = false;
-        }
+    function backupToCloudAccount(accountId) {
+        console.log("Trigger cloud backup operation to account", accountId)
+        pageStack.push(newBackupRestoreComponent, {"backupMode": true, "cloudAccountId": accountId})
     }
 
-    property string currAction: ""
-    property Vault vault: Vault {
-
-        onDone: {
-            if (operation == Vault.ExportImportPrepare && currAction !== "") {
-                var page = pushPage("ExportImport.qml", {context: data, vault: vault});
-                page.done.connect(afterExportImport);
-                currAction = "";
-            }
-        }
-        onError: {
-            if (operation == Vault.ExportImportPrepare && currAction !== "") {
-                showError(error);
-                currAction = "";
-            }
-        }
-
+    function restoreFromCloudAccount(accountId, filePath) {
+        console.log("Trigger cloud restore operation from account", accountId, filePath)
+        pageStack.push(newBackupRestoreComponent, {"backupMode": false, "cloudAccountId": accountId, "fileToRestore": filePath})
     }
 
-    function showError(err) {
-        console.log(err,currAction);
-        deferErrorNotification(err, currAction);
-        showDeferredNotification();
+    function backupToDir(path) {
+        console.log("Trigger backup to directory", path)
+        pageStack.push(newBackupRestoreComponent, {"backupMode": true, "backupDir": path})
     }
 
-    function startGc() {
-        // start garbage collection. Possible drawback: if user
-        // activates Back UI back shortly after GC is started and
-        // there is a lot of garbage to gather, backup UI will wait
-        // until GC will be finished
-        console.log("Exiting from backup, start gc");
-        vault.startGc();
+    function restoreFromFile(path) {
+        console.log("Trigger restore from file", path)
+        pageStack.push(newBackupRestoreComponent, {"backupMode": false, "fileToRestore": path})
     }
 
-    onStatusChanged: {
-        switch (status) {
-        case PageStatus.Deactivating:
-            deleteSelectedSnapshots()
-            if (!isSwitchingInsideBackup)
-                startGc();
-            break;
-        case PageStatus.Active:
-            if (backupItem && !backupItem.populated)
-                backupItem.load(!backupItem.populated)
 
-            if (deferredNotification)
-                showDeferredNotification();
-            break;
-        }
-    }
+    property UnitListModel _unitListModel: UnitListModel {}
+    property BackupRestoreStorageListModel _storageListModel: BackupRestoreStorageListModel {}
 
-    Connections {
-        target: Qt.application
-        onActiveChanged: {
-            if (!Qt.application.active)
-                startGc();
-        }
-    }
+    property bool _needsMigration: _vault.hasSnapshots && _storageListModel.count > 0
+    property bool _checkMigrationNeeded: _vault.connected && _storageListModel.ready && status == PageStatus.Active
+    property string _memoryCardVaultDumpFile
 
-    function errorLoading(err) {
-        deferErrorNotification(err, "load", {onlyPreview: true});
-        showDeferredNotification();
-        pageStack.pop();
-   }
-
-    function getActionName(action) {
-        var actions = {
-            //% "Restore from memory card"
-            "import": qsTrId("vault-la-import-sd")
-            //% "Dump to memory card"
-            , "export": qsTrId("vault-la-export-sd")
-            //% "Loading backup information"
-            , "load": qsTrId("vault-la-loading-information")
-            //% "Select snapshots"
-            , "selectSnapshots": qsTrId("vault-me-snapshots-list")
-        };
-        var res = actions[action];
-        if (!res) {
-            console.log("Unknown action", action);
-            //% "Backup/restore"
-            res = qsTrId("vault-la-backup-restore");
-        }
-        return res;
-    }
-
-    function afterExportImport(info) {
-        var action = info.context.action;
-        if (info.error)
-            deferErrorNotification(info.error, action);
-        else
-            deferNotification("info", info.message, getActionName(action));
-        if (info.reload)
-            backupItem.populated = false;
-    }
-
-    function deferErrorNotification(err, action, options) {
-        var reason_msgs = {
-            //% "No SD card found"
-            NoSD: qsTrId("vault-la-notify-insert-sd"),
-            //% "No space on the device"
-            NoSpace: qsTrId("vault-la-notify-no-space-device"),
-            //% "Backup storage is invalid"
-            NoVault: qsTrId("vault-la-notify-vault-invalid"),
-            //% "No backup archive on SD card"
-            NoSource: qsTrId("vault-la-notify-no-backups-sd"),
-            //% "SD card contains bad archive"
-            BadSource: qsTrId("vault-la-notify-archive-error"),
-            //% "Error while copying to SD card"
-            Export: qsTrId("vault-la-notify-export-error"),
-            //% "Unexpected error"
-            Logic: qsTrId("vault-la-notify-unexpected-error"),
-            //% "Backup is failed"
-            Backup: qsTrId("vault-la-backup-failed")
-        };
-        var action_msgs = {
-            //% "Can't import for some reason"
-            "import": qsTrId("vault-la-notify-cant-import")
-            //% "Can't export for some reason"
-            , "export": qsTrId("vault-la-notify-cant-export")
-            //% "Can't load for some reason"
-            , "load": qsTrId("vault-la-notify-error-loading")
-        };
-        var msg = reason_msgs[err.reason]
-            || action_msgs[action]
-            //% "Unknown backup/restore error"
-            || qsTrId("vault-la-notify-unknown-error");
-        deferNotification("error", msg, getActionName(action), options);
-    }
-
-    function vaultExportImport(action) {
-        var drives = mounts.removableDrives();
-
-        if (!drives.length)
-            return showError({reason: "NoSD"
-                              , message: "There are no removable drives"});
-        // temporary solution: if there are several drives/partitions,
-        // use the biggest one (to use the same partition on the same
-        // card). TODO it should be implemented correctly, e.g. ask
-        // user to choose when exporting and check where is the vault
-        // archive when importing
-        drives.sort(function(a, b) { return (b.total - a.total); });
-        var path = drives[0].path;
-        console.log(action, " path:", path);
-        currAction = action;
-        var act = action == "import" ? Vault.Import : Vault.Export;
-        vault.exportImportPrepare(act, path);
-    }
-
-    SnapshotsList {
-        id: snapshotsList
-
-        enabled: !backupItem.busy && backupItem.populated
-        header: Column {
-            width: backupItem.width
-            anchors.horizontalCenter: parent.horizontalCenter
-
-            PageHeader {
-                //% "Backup"
-                title: qsTrId("vault-he-backup")
-                rightMargin: backupItem.contentMargin
-            }
-            Backup {
-                id: backupItem
-
-                onBusyChanged: if (busy) snapshotsList.scrollToTop()
-                onReady: {
-                    console.log("Ready, load snapshots");
-                    snapshotsList.clear()
-                    snapshotsList.load()
-                }
-                onError: {
-                    if (!backupItem.populated) {
-                        errorLoading(err)
-                    } else {
-                        showError(err)
-                    }
-                }
-
-                Component.onCompleted: {
-                    mainPage.backupItem = backupItem;
-                    snapshotsList.restoreItem = backupItem;
-
-                    if (mainPage.status == PageStatus.Active) {
-                        backupItem.load(!backupItem.populated);
-                    }
-                }
-            }
-            SectionHeader {
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    margins: backupItem.contentMargin
-                }
-                //% "Restore"
-                text: qsTrId("vault-la-restore")
-                opacity: snapshotsList.count > 0 && snapshotsList.enabled ? 1.0 : 0.0
-                Behavior on opacity { FadeAnimation {} }
-            }
-
-        }
-
-        contentWidth: backupItem.width
-        contentMargin: backupItem.contentMargin
-        anchors.fill: parent
-        property real scrollMarginVertical: Theme.itemSizeLarge/2
-            + Theme.paddingLarge + Theme.itemSizeSmall
-
-        onError: errorLoading(err)
-
-        PullDownMenu {
-            MenuItem {
-                text: getActionName("import")
-                onClicked: vaultExportImport("import")
-            }
-            MenuItem {
-                text: getActionName("export")
-                onClicked: vaultExportImport("export")
-            }
-            MenuItem {
-                text: getActionName("selectSnapshots")
-                onClicked: openShapshotsPage()
-                visible: !snapshotsList.empty
+    on_CheckMigrationNeededChanged: {
+        if (_checkMigrationNeeded) {
+            if (_needsMigration) {
+                _showMigrationDialog()
+            } else {
+                _checkMigrationNeeded = false
             }
         }
     }
 
-    property RemorsePopup remorsePopup: null
-    Component {
-        id: remorsePopupComponent
-        RemorsePopup {
-            onTriggered: mainPage.deleteSelectedSnapshots()
-            onCanceled: mainPage.deletingSnapshots = null
+    // Migrate Vault dumps on the local drive to simple single-archive backups
+    function _showMigrationDialog() {
+        var props = {
+            "vault": _vault,
+            "unitListModel": _unitListModel
         }
-    }
-
-    function deleteSelectedSnapshots() {
-        if (deletingSnapshots == null)
-            return;
-
-        for (var i = 0; i < deletingSnapshots.length; ++i) {
-            console.log(deletingSnapshots[i])
-            backupItem.rmSnapshot(deletingSnapshots[i])
-        }
-        deletingSnapshots = null
-        snapshotsList.clear()
-        snapshotsList.load()
-    }
-
-    function tryDeleteSelectedSnapshots(items) {
-        pageStack.navigateBack()
-        deletingSnapshots = items
-        if (!remorsePopup)
-            remorsePopup = remorsePopupComponent.createObject(mainPage)
-        //% "Deleting %n snapshots"
-        remorsePopup.execute(qsTrId("vault-me-deleting-snapshots", items.length))
-    }
-
-    function openShapshotsPage() {
-        var page = pushPage("SnapshotsPage.qml", { "model": snapshotsList.model })
-        page.itemsSelected.connect(mainPage.tryDeleteSelectedSnapshots)
-    }
-
-    function deferNotification(category, message, activity, options) {
-        category = (category === "error")
-            ? "x-jolla.vault.error" : "x-jolla.vault.info";
-        var notification = Object.create(options || {});
-        notification.category = category;
-        notification.message = message;
-        notification.activity = activity;
-        deferredNotification = notification;
-    }
-
-    function showDeferredNotification() {
-        if (!deferredNotification)
-            return;
-        var src = deferredNotification;
-        if (!src.onlyPreview) {
-            notification.body = src.activity;
-            notification.summary = src.message;
-            notification.category = "x-jolla.vault.error"
-        } else {
-            notification.category = "x-jolla.vault.transient-error"
-        }
-        notification.previewBody = src.activity;
-        notification.previewSummary = src.message;
-        notification.category = src.category;
-        deferredNotification = null;
-        notification.publish();
-    }
-
-    Notification {
-        id: notification
+        var dlg = pageStack.push(Qt.resolvedUrl("BackupMigrationDialog.qml"), props)
+        dlg.statusChanged.connect(function() {
+            if (dlg.status == PageStatus.Active) {
+                root._checkMigrationNeeded = false
+            }
+        })
+        dlg.operationFinished.connect(function(successful) {
+            if (successful) {
+                contentLoader.item.refreshStoragePickers()
+                _vault.removeAllSnapshots()
+            }
+        })
     }
 
     BusyIndicator {
+        id: pageBusy
         anchors.centerIn: parent
         size: BusyIndicatorSize.Large
-        running: !backupItem.populated
+        running: contentLoader.status !== Loader.Ready || root._checkMigrationNeeded || _vault.removingSnapshots
+    }
+
+    Vault {
+        id: _vault
+        property bool connected
+        property bool importing
+        property bool removingSnapshots
+
+        property bool hasSnapshots
+        property string latestSnapshotName
+        property string snapshotArchiveFile
+
+        property var _allSnapshots: []
+        property int _snapshotRemoveCount
+
+        function removeAllSnapshots() {
+            removingSnapshots = true
+            _snapshotRemoveCount = _allSnapshots.length
+            for (var i in _allSnapshots) {
+                removeSnapshot(_allSnapshots[i])
+            }
+        }
+
+        function startImport(path) {
+            importing = true
+            exportImportPrepare(Vault.Import, path)
+            exportImportExecute()
+        }
+
+        function _resetSnapshots() {
+            _allSnapshots = snapshots()
+            hasSnapshots = _allSnapshots.length > 0
+            latestSnapshotName = _allSnapshots.length > 0 ? _allSnapshots[0] : ""
+        }
+
+        Component.onCompleted: {
+            connectVault(false)
+        }
+        onDone: {
+            console.log("Vault done", operation)
+            if (operation == Vault.Connect) {
+                _resetSnapshots()
+                connected = true
+                _unitListModel.loadVaultUnits(units())
+            } else if (operation == Vault.ExportImportExecute) {
+                // Here we could delete the _memoryCardVaultDumpFile containing the archive of the
+                // old vault dump if we wanted to.
+                _resetSnapshots()
+                importing = false
+                root._showMigrationDialog()
+            } else if (operation == Vault.RemoveSnapshot) {
+                _snapshotRemoveCount--
+                if (_snapshotRemoveCount == 0) {
+                    _resetSnapshots()
+                    removingSnapshots = false
+                }
+            }
+        }
+        onError: {
+            console.log("Vault error", operation, "error", error.rc, error.snapshot, error.dst,
+                        error.stdout, error.stderr)
+            if (operation == Vault.Import) {
+                importing = false
+            } else if (operation == Vault.RemoveSnapshot) {
+                removingSnapshots = false
+            }
+        }
+    }
+
+    BackupUtils {
+        id: backupUtils
+    }
+
+    Component {
+        id: newBackupRestoreComponent
+
+        NewBackupRestoreDialog {
+            unitListModel: root._unitListModel
+
+            onOperationFinished: {
+                if (successful) {                    
+                    // if accounts were restored, the available storages will have changed
+
+                    // If a backup was done, need to update the last created backup info display;
+                    // if a restore was done, the accounts will have changed.
+                    contentLoader.item.refreshStoragePickers()                    
+                    if (!backupMode) {
+                        _storageListModel.refresh()
+                    }
+                }
+            }
+        }
+    }
+
+    SilicaFlickable {
+        anchors.fill: parent
+        contentHeight: header.height + contentLoader.height + Theme.paddingLarge
+
+        VerticalScrollDecorator {}
+
+        PageHeader {
+            id: header
+            //% "Backup"
+            title: qsTrId("vault-he-backup")
+        }
+
+        Loader {
+            id: contentLoader
+            opacity: 1 - pageBusy.opacity
+            anchors.top: header.bottom
+            width: parent.width
+            sourceComponent: _vault.connected
+                             ? (root._storageListModel.count > 0 ? mainContentComponent : placeholderContentComponent)
+                             : null
+        }
+    }
+
+    Component {
+        id: placeholderContentComponent
+
+        Column {
+            width: parent ? parent.width : Screen.width
+            spacing: Theme.paddingLarge
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - x*2
+                font.family: Theme.fontFamilyHeading
+                font.pixelSize: Theme.fontSizeExtraLarge
+                wrapMode: Text.Wrap
+                color: Theme.highlightColor
+
+                //: No memory card or cloud account available for doing system backup
+                //% "There's no memory card or cloud storage account"
+                text: qsTrId("vault-la-no_memory_card_or_cloud")
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - x*2
+                height: implicitHeight + Theme.paddingLarge
+                wrapMode: Text.Wrap
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.highlightColor
+                textFormat: Text.StyledText // for <br>
+
+                //% "Please insert a micro SD card and try again. Always use a dedicated card for storing your backups and keep it in a safe place.<br><br>Alternatively, create a storage account with a third party service to safely store your backed up data."
+                text: qsTrId("vault-la-insert_micro_sd_and_try_again")
+            }
+
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                //% "Add account"
+                text: qsTrId("vault-bt-add_account")
+
+                onClicked: {
+                    settingsUi.call("showAccounts", [])
+                }
+            }
+
+            DBusInterface {
+                id: settingsUi
+                destination: "com.jolla.settings"
+                path: "/com/jolla/settings/ui"
+                iface: "com.jolla.settings.ui"
+            }
+        }
+    }
+
+    Component {
+        id: mainContentComponent
+
+        Column {
+            id: mainContent
+
+            function refreshStoragePickers() {
+                backupStoragePicker.refresh()
+                restoreStoragePicker.refresh()
+            }
+
+            width: parent ? parent.width : Screen.width
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - x*2
+                wrapMode: Text.Wrap
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.highlightColor
+                height: implicitHeight + Theme.paddingLarge
+
+                //% "Create a backup to protect your personal data. Use it later to restore your device just the way it was."
+                text: qsTrId("vault-la-create_backup_info")
+            }
+
+            BackupRestoreStoragePicker {
+                id: backupStoragePicker
+                backupMode: true
+                storageListModel: root._storageListModel
+                height: implicitHeight + Theme.paddingLarge
+            }
+
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                enabled: backupStoragePicker.selectionValid
+
+                //: Start process of backing up data
+                //% "Backup"
+                text: qsTrId("vault-bt-backup")
+
+                onClicked: {
+                    if (backupStoragePicker.cloudAccountId > 0) {
+                        root.backupToCloudAccount(backupStoragePicker.cloudAccountId)
+                    } else if (backupStoragePicker.memoryCardPath.length > 0) {
+                        root.backupToDir(backupStoragePicker.memoryCardPath)
+                    } else {
+                        console.log("Internal error, invalid storage type!")
+                    }
+                }
+            }
+
+            Item {
+                width: 1
+                height: Theme.paddingLarge * 2
+            }
+
+            SectionHeader {
+                //: Header for data restore section
+                //% "Restore device"
+                text: qsTrId("vault-la-restore_device")
+            }
+
+            Loader {
+                id: snapshotUpdatePromptLoader
+
+                width: parent.width
+                visible: root._needsMigration
+                sourceComponent: root._needsMigration ? snapshotUpdateComponent : null
+
+                Component {
+                    id: snapshotUpdateComponent
+
+                    SnapshotUpdatePrompt {
+                        lastBackupDateTime: backupUtils.dateTimeFromIsoString(_vault.latestSnapshotName)
+                        onTriggerUpdate: root._showMigrationDialog()
+                    }
+                }
+            }
+
+            BackupRestoreStoragePicker {
+                id: restoreStoragePicker
+
+                backupMode: false
+                storageListModel: root._storageListModel
+                height: implicitHeight + Theme.paddingLarge
+
+                visible: !snapshotUpdatePromptLoader.sourceComponent && !_vault.importing
+                showStorageInfo: !memoryCardVaultUpdateButton.visible
+
+                onMemoryCardPathChanged: {
+                    root._memoryCardVaultDumpFile = ""
+                    if (memoryCardPath.length > 0) {
+                        var vaultDumpBackup = backupUtils.vaultDumpFileInfo(memoryCardPath)
+                        if (vaultDumpBackup.fileName && vaultDumpBackup.created) {
+                            root._memoryCardVaultDumpFile = vaultDumpBackup.fileName
+                        }
+                    }
+                }
+            }
+
+            BusyIndicator {
+                height: running ? implicitHeight : 0
+                anchors.horizontalCenter: parent.horizontalCenter
+                running: _vault.importing
+            }
+
+            Item {
+                width: 1
+                height: Theme.paddingLarge
+                visible: _vault.importing
+            }
+
+            // If the memory card contains a Vault snapshot dump, it must be imported to the local
+            // disk and then migrated to a single-archive backup.
+            Button {
+                id: memoryCardVaultUpdateButton
+
+                property string vaultDumpFileName
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                preferredWidth: Theme.buttonWidthLarge
+                visible: root._memoryCardVaultDumpFile.length > 0 && !snapshotUpdatePromptLoader.sourceComponent
+
+                // (reuse this translation to avoid adding a new one)
+                //: Major heading on the page which lets the user select which backup they wish to migrate to the new format.
+                //% "Update your backup"
+                text: qsTrId("vault-he-update_your_backup")
+
+                onClicked: {
+                    _vault.startImport(restoreStoragePicker.memoryCardPath)
+                    enabled = false
+                }
+            }
+
+            Button {
+                visible: !snapshotUpdatePromptLoader.sourceComponent && !memoryCardVaultUpdateButton.visible
+                anchors.horizontalCenter: parent.horizontalCenter
+                enabled: restoreStoragePicker.selectionValid && restoreStoragePicker.fileToRestore.length > 0
+
+                //: Start process of restoring data from backup
+                //% "Restore"
+                text: qsTrId("vault-bt-restore")
+
+                onClicked: {
+                    if (restoreStoragePicker.cloudAccountId > 0) {
+                        root.restoreFromCloudAccount(restoreStoragePicker.cloudAccountId, restoreStoragePicker.fileToRestore)
+                    } else if (restoreStoragePicker.fileToRestore.length > 0) {
+                        root.restoreFromFile(restoreStoragePicker.fileToRestore)
+                    } else {
+                        console.log("Internal error, invalid storage type!")
+                    }
+                }
+            }
+        }
     }
 }

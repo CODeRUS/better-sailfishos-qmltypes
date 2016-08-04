@@ -31,4 +31,27 @@ Module {
             Parameter { name: "url"; type: "QUrl" }
         }
     }
+    Component {
+        name: "MediaPlayerControls"
+        prototype: "QObject"
+        exports: ["Sailfish.Media/MediaPlayerControls 1.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "RepeatType"
+            values: {
+                "NoRepeat": 0,
+                "RepeatTrack": 1,
+                "RepeatPlaylist": 2
+            }
+        }
+        Enum {
+            name: "ShuffleType"
+            values: {
+                "NoShuffle": 0,
+                "ShuffleTracks": 1,
+                "ShufflePlaylists": 2
+            }
+        }
+    }
 }

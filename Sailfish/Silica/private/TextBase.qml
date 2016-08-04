@@ -321,7 +321,9 @@ TextBaseItem {
         property int touchOffset
 
         function positionAt(mouseX, mouseY) {
-            var translatedPos = mapToItem(_editor, mouseX, mouseY)
+            var clippedX = Math.min(Math.max(parent.anchors.leftMargin, mouseX), parent.width + parent.anchors.leftMargin)
+            var clippedY = Math.min(Math.max(parent.anchors.topMargin, mouseY), parent.height + parent.anchors.topMargin)
+            var translatedPos = mapToItem(_editor, clippedX, clippedY)
             translatedPos.x = Math.max(0, Math.min(_editor.width - 1, translatedPos.x))
             translatedPos.y = Math.max(0, Math.min(_editor.height - 1 , translatedPos.y))
             return _editor.positionAt(translatedPos.x, translatedPos.y)
@@ -389,10 +391,10 @@ TextBaseItem {
         }
 
         parent: flickable
-        anchors.fill: parent
-
         width: textBase.width
         height: textBase.height
+        x: -parent.anchors.leftMargin
+        y: -parent.anchors.topMargin
         enabled: textBase.enabled
 
         onPressed: {
@@ -461,20 +463,29 @@ TextBaseItem {
                 Qt.inputMethod.commit()
                 var translatedPos = mouseArea.mapToItem(_editor, mouseX, mouseY)
                 var cursorRect = _editor.positionToRectangle(_editor.cursorPosition)
-                var cursorPosition
+                var cursorPosition = _editor.cursorPosition
+
+                // TODO: RTL text should mirror these. at RTL/LTR text block borders should avoid jumping cursor visually far away
                 if (translatedPos.x < cursorRect.x && translatedPos.x > cursorRect.x - cursorStepThreshold &&
                     translatedPos.y > cursorRect.y && translatedPos.y < cursorRect.y + cursorRect.height) {
-                    // step one character backward
-                    cursorPosition = _editor.cursorPosition - 1
+                    // step one character backward (unless at line start)
+                    if (cursorPosition > 0 && (_editor.positionToRectangle(cursorPosition - 1).x < cursorRect.x)) {
+                        cursorPosition = _editor.cursorPosition - 1
+                    }
                 } else if (translatedPos.x > cursorRect.x + cursorRect.width &&
                            translatedPos.x < cursorRect.x + cursorRect.width + cursorStepThreshold &&
                            translatedPos.y > cursorRect.y && translatedPos.y < cursorRect.y + cursorRect.height) {
                     // step one character forward
-                    cursorPosition = _editor.cursorPosition + 1
-                } else {
-                    // reselect position
-                    cursorPosition = _editor.positionAt(translatedPos.x, translatedPos.y)
+                    if (_editor.positionToRectangle(cursorPosition + 1).x > cursorRect.x) {
+                        cursorPosition = _editor.cursorPosition + 1
+                    }
+                }
+
+                if (cursorPosition === _editor.cursorPosition) {
+                    cursorPosition = mouseArea.positionAt(mouseX, mouseY)
+                    // NOTE: check for line change might fail, but currently don't care for such minor case
                     if (cursorPosition > 1 &&
+                        _editor.positionToRectangle(cursorPosition - 1).y === _editor.positionToRectangle(cursorPosition).y &&
                         _editor.text.charAt(cursorPosition - 1) == ' ' &&
                         _editor.text.charAt(cursorPosition - 2) != ' ' &&
                         cursorPosition !== _editor.text.length) {
@@ -556,7 +567,7 @@ TextBaseItem {
                     }
                 }
 
-                _editor.cursorPosition = _editor.positionAt(translatedPos.x, translatedPos.y)
+                _editor.cursorPosition = mouseArea.positionAt(mouseArea.initialMouseX, mouseArea.initialMouseY)
                 _editor.selectWord()
                 if (origSelectionStart != _editor.selectionStart || origSelectionEnd != _editor.selectionEnd) {
                     if (mouseArea.selectionStartHandle !== null)
@@ -566,8 +577,8 @@ TextBaseItem {
                 }
                 interval = 600
             } else if (counter == 1) {
-                 _editor.select(_editor.positionAt(0, translatedPos.y),
-                                _editor.positionAt(_editor.width, translatedPos.y))
+                 _editor.select(mouseArea.positionAt(0, translatedPos.y),
+                                mouseArea.positionAt(_editor.width, translatedPos.y))
             } else {
                 _editor.cursorPosition = _editor.text.length
                 _editor.selectAll()
