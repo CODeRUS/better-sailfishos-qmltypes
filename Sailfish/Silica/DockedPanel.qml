@@ -38,9 +38,9 @@ import Sailfish.Silica 1.0
 SilicaFlickable {
     id: panel
 
-    property bool expanded: open || horizontalAnimation.running || verticalAnimation.running
+    readonly property bool expanded: open || horizontalAnimation.running || verticalAnimation.running
     property bool open
-    property bool moving: horizontalAnimation.running || verticalAnimation.running || mouseArea.drag.active
+    readonly property bool moving: horizontalAnimation.running || verticalAnimation.running || mouseArea.drag.active
     property int dock: Dock.Bottom
     property bool modal
     property int animationDuration: 500
@@ -60,7 +60,7 @@ SilicaFlickable {
         }
     }
 
-    property real visibleSize: _visibleSize()
+    readonly property real visibleSize: _visibleSize()
 
     property real _lastPos
     property real _direction
@@ -68,8 +68,14 @@ SilicaFlickable {
 
     property int _managedDock: dock
     property bool _isVertical: _managedDock == Dock.Top || _managedDock == Dock.Bottom
-    property real _threshold: Math.min(_isVertical ? height / 3 : width / 3, 90)
+    property real _threshold: Math.min((_isVertical ? height / 3 : width / 3), Theme.pixelRatio*90)
     property bool _initialized
+
+    property Component background: PanelBackground {
+        position: dock
+    }
+
+    visible: expanded
 
     onOpenChanged: _initialized = true
     function show(immediate) {
@@ -175,6 +181,11 @@ SilicaFlickable {
         }
     }
 
+    Loader {
+        sourceComponent: background
+        anchors.fill: mouseArea
+    }
+
     MouseArea {
         id: mouseArea
 
@@ -207,29 +218,6 @@ SilicaFlickable {
             var pos = panel._isVertical ? panel.y : panel.x
             panel._direction = (_direction + pos - _lastPos) / 2
             panel._lastPos = panel.y
-        }
-        PanelBackground {
-            z: -1
-
-            property bool isPortrait: panel.dock === Dock.Top || panel.dock === Dock.Bottom
-
-            anchors.centerIn: parent
-            transformOrigin: Item.Center
-            width: isPortrait ? parent.width : parent.height
-            height: isPortrait ? parent.height : parent.width
-
-            rotation: {
-                switch (panel.dock) {
-                case Dock.Top:
-                    return 180
-                case Dock.Bottom:
-                    return 0
-                case Dock.Left:
-                    return 90
-                case Dock.Right:
-                    return -90
-                }
-            }
         }
     }
 }

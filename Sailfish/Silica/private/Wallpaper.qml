@@ -107,7 +107,7 @@ Item {
                                                    -1.0/(glassTextureImage.sourceSize.height))
 
         property Image wallpaperTexture: wallpaperTextureImage
-        property variant glassTexture: ShaderEffectSource {
+        property var glassTexture: ShaderEffectSource {
             hideSource: true
             sourceItem: glassTextureItem
             wrapMode: ShaderEffectSource.Repeat

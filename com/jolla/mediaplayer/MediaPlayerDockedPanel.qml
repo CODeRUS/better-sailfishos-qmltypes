@@ -10,6 +10,8 @@ MediaPlayerControlsPanel {
 
     property int state
     property Page addToPlaylistPage
+    property alias author: authorLabel.text
+    property alias title: titleLabel.text
 
     visible: root.applicationActive
     playing: state == Audio.Playing
@@ -42,5 +44,30 @@ MediaPlayerControlsPanel {
     Connections {
         target: AudioPlayer
         onTryingToPlay: showControls()
+    }
+
+    Column {
+        parent: extraContentItem
+        width: panel.width
+
+        Label {
+            id: titleLabel
+
+            width: Math.min(parent.width - 2*Theme.paddingMedium, implicitWidth)
+            anchors.horizontalCenter: parent.horizontalCenter
+            color: Theme.primaryColor
+            truncationMode: TruncationMode.Fade
+            visible: text.length > 0
+        }
+        Label {
+            id: authorLabel
+
+            width: Math.min(parent.width - 2*Theme.paddingMedium, implicitWidth)
+            anchors.horizontalCenter: parent.horizontalCenter
+            color: Theme.secondaryColor
+            font.pixelSize: Theme.fontSizeExtraSmall
+            truncationMode: TruncationMode.Fade
+            visible: text.length > 0
+        }
     }
 }

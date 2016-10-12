@@ -8,12 +8,16 @@ import QtQuick.tooling 1.1
 
 Module {
     Component {
-        name: "ApplicationsModel"
+        name: "ApplicationsSettingsModel"
         prototype: "QAbstractListModel"
-        exports: ["com.jolla.settings/ApplicationsModel 1.0"]
+        exports: [
+            "com.jolla.settings/ApplicationSettingsModel 1.0",
+            "com.jolla.settings/ApplicationsModel 1.0"
+        ]
         isCreatable: false
         isSingleton: true
-        exportMetaObjectRevisions: [0]
+        exportMetaObjectRevisions: [0, 0]
+        Property { name: "applications"; type: "QObject"; isPointer: true }
         Method {
             name: "iconOf"
             type: "string"

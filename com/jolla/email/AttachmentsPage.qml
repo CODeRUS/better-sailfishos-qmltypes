@@ -62,45 +62,49 @@ Page {
         delegate: ListItem {
             id: item
             width: parent.width
-            contentHeight: icon.height
+            contentHeight: Theme.itemSizeMedium
             menu: menuComponent
 
             ListView.onRemove: animateRemoval()
 
-            Thumbnail {
-                id: icon
-                z: -1
-                x: Theme.horizontalPageMargin - Theme.paddingLarge
-                visible: url != "" && status != Thumbnail.Null && status != Thumbnail.Error
-                height: Theme.itemSizeLarge
+            Rectangle {
+                id: iconContainer
                 width: height
-                anchors.verticalCenter: parent.verticalCenter
-                sourceSize.width: width
-                sourceSize.height: height
-                source: url
-                mimeType: mimeType
-            }
+                height: parent.height
 
-            Image {
-                id: defaultIcon
-                x: Theme.horizontalPageMargin - Theme.paddingLarge
-                visible: !icon.visible
-                height: Theme.itemSizeLarge
-                width: height
-                anchors.verticalCenter: parent.verticalCenter
-                sourceSize.width: width
-                sourceSize.height: height
-                source: "image://theme/icon-l-other?" + (highlighted ? Theme.highlightColor : Theme.primaryColor)
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Theme.rgba(Theme.primaryColor, 0.1) }
+                    GradientStop { position: 1.0; color: "transparent" }
+                }
+
+                Thumbnail {
+                    id: icon
+                    visible: url != "" && status != Thumbnail.Null && status != Thumbnail.Error
+                    height: defaultIcon.height
+                    width: height
+                    anchors.centerIn: parent
+                    sourceSize.width: width
+                    sourceSize.height: height
+                    source: url
+                    mimeType: mimeType
+                }
+
+                Image {
+                    id: defaultIcon
+                    visible: !icon.visible
+                    anchors.centerIn: parent
+                    source: Theme.iconForMimeType(mimeType) + (highlighted ? "?" + Theme.highlightColor : "")
+                }
             }
 
             Label {
                 id: titleLabel
                 anchors {
-                    left: icon.visible ? icon.right : defaultIcon.right
+                    left: iconContainer.right
                     leftMargin: Theme.paddingLarge
                     right: parent.right
                     rightMargin: Theme.horizontalPageMargin
-                    verticalCenter: icon.visible ? icon.verticalCenter : defaultIcon.verticalCenter
+                    verticalCenter: iconContainer.verticalCenter
                 }
                 text: title
                 truncationMode: TruncationMode.Fade

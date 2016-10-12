@@ -28,6 +28,8 @@ Item {
     property int orientation
     property alias previewRotation: zoomableImage.rotation
     property alias previewRotationAnimEnabled: prevRotationBehavior.enabled
+    property alias previewBrightness: zoomableImage.brightness
+    property alias previewContrast: zoomableImage.contrast
     readonly property alias status: zoomableImage.status
 
     function crop()
@@ -42,6 +44,12 @@ Item {
     {
         editInProgress = true
         editor.rotate(preview.previewRotation)
+    }
+
+    function adjustLevels()
+    {
+        editInProgress = true
+        editor.adjustLevels(preview.previewBrightness, preview.previewContrast)
     }
 
     function resetScale()
@@ -77,6 +85,9 @@ Item {
             case ImageEditor.Rotate:
                 //% "Rotate"
                 return qsTrId("components_gallery-he-rotate")
+            case ImageEditor.AdjustLevels:
+                //% "Adjust levels"
+                return qsTrId("components_gallery-he-adjust_levels")
             default:
                 return ""
             }
@@ -120,6 +131,7 @@ Item {
         maximumHeight: imageHeight
         minimumWidth: editor.width
         minimumHeight: editor.height
+        image.visible: editOperation != ImageEditor.AdjustLevels
         imageWidth: metadata.width
         imageHeight: metadata.height
         interactive: active && editOperation == ImageEditor.Crop
@@ -196,6 +208,18 @@ Item {
             }
 
             preview.previewRotation = 0
+        }
+
+        onLevelsAdjusted: {
+            editInProgress = false
+            if (success) {
+                preview.source = editor.target
+            } else {
+                console.log("Failed to adjust image levels!")
+            }
+
+            preview.previewBrightness = 0.0
+            preview.previewContrast = 0.0
         }
     }
 

@@ -131,7 +131,7 @@ TextBaseItem {
     property bool _suppressPressAndHoldOnText
     property Item _backgroundItem
     property QtObject _feedbackEffect
-    property variant _appWindow: __silica_applicationwindow_instance
+    property var _appWindow: __silica_applicationwindow_instance
 
     property alias _flickableDirection: flickable.flickableDirection
 
@@ -144,6 +144,7 @@ TextBaseItem {
     property alias _labelItem: labelItem
     property alias _placeholderTextLabel: placeholderTextLabel
     property bool focusOnClick: !readOnly
+    property bool _singleLine
 
     function forceActiveFocus() { _editor.forceActiveFocus() }
     function cut() { _editor.cut() }
@@ -576,6 +577,10 @@ TextBaseItem {
                         mouseArea.selectionEndHandle.showAnimation.restart()
                 }
                 interval = 600
+                // single line editor to skip choosing visible area
+                if (textBase._singleLine) {
+                    counter++
+                }
             } else if (counter == 1) {
                  _editor.select(mouseArea.positionAt(0, translatedPos.y),
                                 mouseArea.positionAt(_editor.width, translatedPos.y))
@@ -668,7 +673,7 @@ TextBaseItem {
         Rectangle {
             id: handleId
             property bool start
-            property variant cursorRect: {
+            property var cursorRect: {
                 _editor.width // creates a binding. we want to refresh the cursor rect e.g. on orientation change
                 _editor.positionToRectangle(start ? _editor.selectionStart : _editor.selectionEnd)
             }

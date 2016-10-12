@@ -1,9 +1,9 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Matt Vogt <matthew.vogt@jollamobile.com>
+** Copyright (C) 2016 Jolla Ltd.
+** Contact: Andrew den Exter <andrew.den.exter@jollamobile.com>
 ** All rights reserved.
-** 
+**
 ** This file is part of Sailfish Silica UI component package.
 **
 ** You may use this file under the terms of BSD license as follows:
@@ -18,7 +18,7 @@
 **     * Neither the name of the Jolla Ltd nor the
 **       names of its contributors may be used to endorse or promote products
 **       derived from this software without specific prior written permission.
-** 
+**
 ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,37 +32,51 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
-import Sailfish.Silica 1.0
+pragma Singleton
+import QtQuick 2.2
+import Sailfish.Silica.private 1.0
 
-GlassItem {
-    id: indicator
-    property bool busy
-    height: 2*Theme.paddingLarge
-    width: parent.width
-    radius: 0.7
-    anchors.horizontalCenter: parent.horizontalCenter
-    color: highlighted ? Theme.highlightColor : Theme.primaryColor
-    falloffRadius: 0.2
-    Behavior on falloffRadius {
-        NumberAnimation { duration: busy ? 450 : 50; easing.type: Easing.InOutQuad }
-    }
-    brightness: 1.0
-    Behavior on brightness {
-        NumberAnimation { duration: busy ? 450 : 50; easing.type: Easing.InOutQuad }
-    }
-    Timer {
-        id: busyTimer
-        running: busy && Qt.application.active
-        interval: 500
-        repeat: true
-        onRunningChanged: {
-            indicator.brightness = 1.0
-            indicator.falloffRadius = 0.2
+QtObject {
+    property Component _itemComponent
+    property Component _popupComponent
+
+    function _create(component, parent) {
+        if (!parent.RemorseCache.item) {
+            parent.RemorseCache.item = component.createObject(parent)
         }
-        onTriggered: {
-            indicator.falloffRadius = indicator.falloffRadius < 0.09 ? 0.3 : 0.075
-            indicator.brightness = indicator.brightness < 0.5 ? 1.0 : 0.4
+
+        return parent.RemorseCache.item
+    }
+
+    function itemAction(item, text, action, timeout) {
+        if (!_itemComponent) {  // Including the components inline silently breaks all of Silica.  True story.
+            _itemComponent = Qt.createComponent(Qt.resolvedUrl("RemorseItem.qml"))
         }
+
+        var remorseItem = _create(_itemComponent, item)
+
+        if (remorseItem) {
+            remorseItem.execute(item, text, action, timeout)
+        } else if (_itemComponent) {
+            console.warn("Failed to create RemorseItem", _itemComponent.errorString())
+        }
+
+        return remorseItem
+    }
+
+    function popupAction(page, text, action, timeout) {
+        if (!_popupComponent) {
+            _popupComponent = Qt.createComponent(Qt.resolvedUrl("RemorsePopup.qml"))
+        }
+
+        var remorsePopup = _create(_popupComponent, page)
+
+        if (remorsePopup) {
+            remorsePopup.execute(text, action, timeout)
+        } else if (_popupComponent) {
+            console.warn("Failed to create RemorsePopup", _popupComponent.errorString())
+        }
+
+        return remorsePopup
     }
 }

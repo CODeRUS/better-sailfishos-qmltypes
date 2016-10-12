@@ -16,33 +16,152 @@ Module {
             name: "Type"
             values: {
                 "Field": 0,
-                "Operation": 1
+                "Operation": 1,
+                "Function": 2
+            }
+        }
+        Enum {
+            name: "SymbolType"
+            values: {
+                "Operand": 1,
+                "Add": 2,
+                "Subtract": 3,
+                "Multiply": 4,
+                "Divide": 5,
+                "Power": 6,
+                "OpenBracket": 7,
+                "CloseBracket": 8
+            }
+        }
+        Enum {
+            name: "ConstantType"
+            values: {
+                "Pi": 1,
+                "E": 2,
+                "Euler": 3
+            }
+        }
+        Enum {
+            name: "FunctionType"
+            values: {
+                "Absolute": 1,
+                "Negate": 2,
+                "Inverse": 3,
+                "SquareRoot": 4,
+                "CubeRoot": 5,
+                "Factorial": 6,
+                "Logarithm": 7,
+                "LogarithmBase2": 8,
+                "LogarithmBase10": 9,
+                "Exponential": 10,
+                "ExponentialBase2": 11,
+                "ExponentialBase10": 12,
+                "Sine": 13,
+                "Cosine": 14,
+                "Tangent": 15,
+                "Secant": 16,
+                "Cosecant": 17,
+                "Cotangent": 18,
+                "ArcSine": 19,
+                "ArcCosine": 20,
+                "ArcTangent": 21,
+                "HyperbolicSine": 22,
+                "HyperbolicCosine": 23,
+                "HyperbolicTangent": 24,
+                "HyperbolicSecant": 25,
+                "HyperbolicCosecant": 26,
+                "HyperbolicCotangent": 27,
+                "HyperbolicArcSine": 28,
+                "HyperbolicArcCosine": 29,
+                "HyperbolicArcTangent": 30
             }
         }
         Property { name: "result"; type: "DeclarativeResult"; isReadonly: true; isPointer: true }
         Property { name: "focusField"; type: "DeclarativeField"; isReadonly: true; isPointer: true }
         Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "currentIndex"; type: "int" }
         Signal { name: "completed" }
         Signal { name: "emptyChanged" }
         Signal { name: "operationMadeToEmptyCalculation" }
         Method {
             name: "get"
-            type: "QObject*"
+            type: "QVariant"
             Parameter { name: "index"; type: "int" }
         }
         Method {
             name: "insert"
             Parameter { name: "character"; type: "string" }
         }
+        Method { name: "paste" }
+        Method { name: "backspace" }
+        Method { name: "clear" }
         Method { name: "changeSign" }
         Method { name: "add" }
-        Method { name: "substract" }
+        Method { name: "subtract" }
         Method { name: "multiply" }
         Method { name: "divide" }
-        Method { name: "backspace" }
+        Method { name: "power" }
+        Method { name: "openBracket" }
+        Method { name: "closeBracket" }
+        Method {
+            name: "setConstant"
+            Parameter { name: "constant"; type: "ConstantType" }
+        }
+        Method { name: "absolute" }
+        Method { name: "negate" }
+        Method { name: "inverse" }
+        Method { name: "squareRoot" }
+        Method { name: "cubeRoot" }
+        Method { name: "factorial" }
+        Method { name: "logarithm" }
+        Method { name: "logarithmBase2" }
+        Method { name: "logarithmBase10" }
+        Method { name: "exponential" }
+        Method { name: "exponentialBase2" }
+        Method { name: "exponentialBase10" }
+        Method { name: "sine" }
+        Method { name: "cosine" }
+        Method { name: "tangent" }
+        Method { name: "secant" }
+        Method { name: "cosecant" }
+        Method { name: "cotangent" }
+        Method { name: "arcSine" }
+        Method { name: "arcCosine" }
+        Method { name: "arcTangent" }
+        Method { name: "hyperbolicSine" }
+        Method { name: "hyperbolicCosine" }
+        Method { name: "hyperbolicTangent" }
+        Method { name: "hyperbolicSecant" }
+        Method { name: "hyperbolicCosecant" }
+        Method { name: "hyperbolicCotangent" }
+        Method { name: "hyperbolicArcSine" }
+        Method { name: "hyperbolicArcCosine" }
+        Method { name: "hyperbolicArcTangent" }
         Method { name: "calculate" }
-        Method { name: "clear" }
-        Method { name: "paste" }
+        Method {
+            name: "symbolText"
+            type: "string"
+            Parameter { name: "type"; type: "SymbolType" }
+        }
+        Method {
+            name: "functionText"
+            type: "string"
+            Parameter { name: "type"; type: "FunctionType" }
+        }
+        Method {
+            name: "constantText"
+            type: "string"
+            Parameter { name: "type"; type: "ConstantType" }
+        }
+    }
+    Component {
+        name: "DeclarativeCalculator"
+        prototype: "QObject"
+        exports: ["Sailfish.Calculator/Calculator 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Method { name: "reset" }
     }
     Component {
         name: "DeclarativeField"
@@ -61,32 +180,16 @@ Module {
         Property { name: "value"; type: "double"; isReadonly: true }
         Property { name: "numerator"; type: "string"; isReadonly: true }
         Property { name: "denominator"; type: "string"; isReadonly: true }
-        Property { name: "focus"; type: "bool" }
         Property { name: "fraction"; type: "bool"; isReadonly: true }
-        Property { name: "parentCalculation"; type: "QObject"; isReadonly: true; isPointer: true }
+        Property { name: "incomplete"; type: "bool"; isReadonly: true }
         Property { name: "linkText"; type: "string"; isReadonly: true }
         Method { name: "isValid"; type: "bool" }
+        Method { name: "isEmpty"; type: "bool" }
         Method {
             name: "link"
             Parameter { name: "result"; type: "DeclarativeResult"; isPointer: true }
         }
         Method { name: "removeLink" }
-    }
-    Component {
-        name: "DeclarativeOperation"
-        prototype: "QObject"
-        exports: ["Sailfish.Calculator/Operation 1.0"]
-        isCreatable: false
-        exportMetaObjectRevisions: [0]
-        Enum {
-            name: "Type"
-            values: {
-                "Add": 0,
-                "Substract": 1,
-                "Multiply": 2
-            }
-        }
-        Property { name: "type"; type: "Type"; isReadonly: true }
     }
     Component {
         name: "DeclarativeResult"
@@ -96,6 +199,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "value"; type: "double"; isReadonly: true }
         Property { name: "valueText"; type: "string"; isReadonly: true }
+        Property { name: "preciseValueText"; type: "string"; isReadonly: true }
         Property { name: "valid"; type: "bool"; isReadonly: true }
         Property { name: "linked"; type: "bool"; isReadonly: true }
         Property { name: "linkText"; type: "string"; isReadonly: true }

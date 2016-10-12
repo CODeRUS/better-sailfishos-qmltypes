@@ -44,6 +44,24 @@ Module {
         }
     }
     Component {
+        name: "CertificateModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.systemsettings/CertificateModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "BundleType"
+            values: {
+                "NoBundle": 0,
+                "TLSBundle": 1,
+                "EmailBundle": 2,
+                "ObjectSigningBundle": 3,
+                "UserSpecifiedBundle": 4
+            }
+        }
+        Property { name: "bundleType"; type: "BundleType" }
+        Property { name: "bundlePath"; type: "string" }
+    }
+    Component {
         name: "DateTimeSettings"
         prototype: "QObject"
         exports: ["org.nemomobile.systemsettings/DateTimeSettings 1.0"]
@@ -113,49 +131,6 @@ Module {
             Parameter { name: "usbIpAddress"; type: "string" }
         }
         Method { name: "refresh" }
-    }
-    Component {
-        name: "DeviceLockInterface"
-        prototype: "QObject"
-        exports: ["org.nemomobile.systemsettings/DeviceLockInterface 1.0"]
-        exportMetaObjectRevisions: [0]
-        Enum {
-            name: "ResetMode"
-            values: {
-                "Shutdown": 0,
-                "Reboot": 1
-            }
-        }
-        Property { name: "isSet"; type: "bool"; isReadonly: true }
-        Method {
-            name: "checkCode"
-            type: "bool"
-            Parameter { name: "code"; type: "string" }
-        }
-        Method {
-            name: "setCode"
-            type: "bool"
-            Parameter { name: "oldCode"; type: "string" }
-            Parameter { name: "newCode"; type: "string" }
-        }
-        Method {
-            name: "clearCode"
-            type: "bool"
-            Parameter { name: "currentCode"; type: "string" }
-        }
-        Method { name: "isSet"; type: "bool" }
-        Method { name: "refresh" }
-        Method {
-            name: "clearDevice"
-            type: "bool"
-            Parameter { name: "code"; type: "string" }
-            Parameter { name: "mode"; type: "ResetMode" }
-        }
-        Method {
-            name: "clearDevice"
-            type: "bool"
-            Parameter { name: "code"; type: "string" }
-        }
     }
     Component {
         name: "DiskUsage"
@@ -240,6 +215,54 @@ Module {
             name: "setSystemLocale"
             Parameter { name: "localeCode"; type: "string" }
             Parameter { name: "updateMode"; type: "LocaleUpdateMode" }
+        }
+    }
+    Component {
+        name: "PartitionModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.systemsettings/PartitionModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Status"
+            values: {
+                "Unmounted": 0,
+                "Mounting": 1,
+                "Mounted": 2,
+                "Unmounting": 3
+            }
+        }
+        Enum {
+            name: "StorageType"
+            values: {
+                "Invalid": 0,
+                "System": 1,
+                "User": 2,
+                "Mass": 4,
+                "External": 8,
+                "ExcludeParents": 4096,
+                "Internal": 7,
+                "Any": 15
+            }
+        }
+        Enum {
+            name: "StorageTypes"
+            values: {
+                "Invalid": 0,
+                "System": 1,
+                "User": 2,
+                "Mass": 4,
+                "External": 8,
+                "ExcludeParents": 4096,
+                "Internal": 7,
+                "Any": 15
+            }
+        }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "storageTypes"; type: "StorageTypes" }
+        Method { name: "refresh" }
+        Method {
+            name: "refresh"
+            Parameter { name: "index"; type: "int" }
         }
     }
     Component {

@@ -5,20 +5,25 @@ import Sailfish.Silica 1.0
 import Sailfish.Media 1.0
 import com.jolla.mediaplayer 1.0
 
-MediaPlayerPage {
+Page {
     id: page
 
-    property variant media
+    property var media
 
-    GriloListView {
+    MediaPlayerListView {
         id: view
 
-        model: playlists.addModel
-        query: PlaylistTrackerHelpers.getPlaylistsQuery(playlistsHeader.searchText,
-            {"locations": [{"negated": false, "location": playlistsLocation}],
-             "editablePlaylistsOnly": true})
+        model: GriloTrackerModel {
+            id: playlistModel
+            query: PlaylistTrackerHelpers.getPlaylistsQuery(playlistsHeader.searchText,
+                                                            {"locations": [{"negated": false, "location": playlistsLocation}],
+                                                             "editablePlaylistsOnly": true})
+        }
 
-        Component.onDestruction: playlists.addModel.setDefaultQuery("")
+        Connections {
+            target: playlists
+            onUpdated: playlistModel.refresh()
+        }
 
         PullDownMenu {
 
@@ -54,14 +59,12 @@ MediaPlayerPage {
             placeholderText: qsTrId("mediaplayer-tf-playlists-search")
         }
 
-        delegate: MediaContainerListDelegate {
+        delegate: MediaContainerPlaylistDelegate {
             formatFilter: playlistsHeader.searchText
             title: media.title
-
-            //: This is for the playlists page. Shows the number of songs in a playlist.
-            //% "%n songs"
-            subtitle: qsTrId("mediaplayer-le-number-of-songs", media.childCount)
-
+            songCount: media.childCount
+            color: model.title != "" ? PlaylistColors.nameToColor(model.title)
+                                     : "transparent"
             onClicked: {
                 // TODO: Notify user?
                 if (playlists.appendToPlaylist(media, page.media)) {

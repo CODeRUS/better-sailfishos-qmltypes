@@ -867,6 +867,7 @@ Module {
             name: "foldersAdded"
             Parameter { name: "folderIds"; type: "QMailFolderIdList" }
         }
+        Method { name: "notifyDateChanged" }
     }
     Component {
         name: "FolderListModel"

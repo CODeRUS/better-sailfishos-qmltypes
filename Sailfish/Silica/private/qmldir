@@ -4,3 +4,4 @@ GlassBackground 1.0 GlassBackground.qml
 PageOrientationTransition 1.0 PageOrientationTransition.qml
 VirtualKeyboardObserver 1.0 VirtualKeyboardObserver.qml
 Wallpaper 1.0 Wallpaper.qml
+WindowGestureOverride 1.0 WindowGestureOverride.qml

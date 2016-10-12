@@ -72,6 +72,7 @@ TextBase {
 
     _editor: textInput
     _flickableDirection: Flickable.HorizontalFlick
+    _singleLine: true
     errorHighlight: !textInput.acceptableInput
 
     implicitWidth: textInput.implicitWidth + Theme.paddingSmall + textLeftMargin + textRightMargin

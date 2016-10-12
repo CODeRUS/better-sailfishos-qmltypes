@@ -20,3 +20,5 @@ SoundDialog 1.0 SoundDialog.qml
 ToneItem 1.0 ToneItem.qml
 Tones 1.0 Tones.qml
 Use24HourClockSettingDisplay 1.0 Use24HourClockSettingDisplay.qml
+FingerEnrollmentDialog 1.0 FingerEnrollmentDialog.qml
+FingerEnrollmentWelcomeDialog 1.0 FingerEnrollmentWelcomeDialog.qml

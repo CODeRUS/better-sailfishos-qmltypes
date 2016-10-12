@@ -18,15 +18,17 @@ Module {
             name: "Error"
             values: {
                 "NoError": 0,
-                "ErrorOperationInProgress": 1,
-                "ErrorCopyFailed": 2,
-                "ErrorDeleteFailed": 3,
-                "ErrorMoveFailed": 4,
-                "ErrorRenameFailed": 5,
-                "ErrorCannotCopyIntoItself": 6,
-                "ErrorFolderCopyFailed": 7,
-                "ErrorFolderCreationFailed": 8,
-                "ErrorChmodFailed": 9
+                "ErrorInvalidRequest": 1,
+                "ErrorOperationCancelled": 2,
+                "ErrorOperationInProgress": 3,
+                "ErrorCopyFailed": 4,
+                "ErrorDeleteFailed": 5,
+                "ErrorMoveFailed": 6,
+                "ErrorRenameFailed": 7,
+                "ErrorCannotCopyIntoItself": 8,
+                "ErrorFolderCopyFailed": 9,
+                "ErrorFolderCreationFailed": 10,
+                "ErrorChmodFailed": 11
             }
         }
         Enum {
@@ -56,6 +58,11 @@ Module {
         Method {
             name: "deleteFiles"
             Parameter { name: "fileNames"; type: "QStringList" }
+            Parameter { name: "nonprivileged"; type: "bool" }
+        }
+        Method {
+            name: "deleteFiles"
+            Parameter { name: "fileNames"; type: "QStringList" }
         }
         Method {
             name: "cutFiles"
@@ -64,6 +71,11 @@ Module {
         Method {
             name: "copyFiles"
             Parameter { name: "fileNames"; type: "QStringList" }
+        }
+        Method {
+            name: "pasteFiles"
+            Parameter { name: "destDirectory"; type: "string" }
+            Parameter { name: "nonprivileged"; type: "bool" }
         }
         Method {
             name: "pasteFiles"
@@ -80,12 +92,41 @@ Module {
             type: "bool"
             Parameter { name: "path"; type: "string" }
             Parameter { name: "name"; type: "string" }
+            Parameter { name: "nonprivileged"; type: "bool" }
+        }
+        Method {
+            name: "mkdir"
+            type: "bool"
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "name"; type: "string" }
         }
         Method {
             name: "rename"
             type: "bool"
             Parameter { name: "fullOldFileName"; type: "string" }
             Parameter { name: "newName"; type: "string" }
+            Parameter { name: "nonprivileged"; type: "bool" }
+        }
+        Method {
+            name: "rename"
+            type: "bool"
+            Parameter { name: "fullOldFileName"; type: "string" }
+            Parameter { name: "newName"; type: "string" }
+        }
+        Method {
+            name: "chmod"
+            type: "bool"
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "ownerRead"; type: "bool" }
+            Parameter { name: "ownerWrite"; type: "bool" }
+            Parameter { name: "ownerExecute"; type: "bool" }
+            Parameter { name: "groupRead"; type: "bool" }
+            Parameter { name: "groupWrite"; type: "bool" }
+            Parameter { name: "groupExecute"; type: "bool" }
+            Parameter { name: "othersRead"; type: "bool" }
+            Parameter { name: "othersWrite"; type: "bool" }
+            Parameter { name: "othersExecute"; type: "bool" }
+            Parameter { name: "nonprivileged"; type: "bool" }
         }
         Method {
             name: "chmod"

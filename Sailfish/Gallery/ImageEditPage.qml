@@ -123,15 +123,17 @@ SplitViewPage {
             }
 
             onClicked: {
+                var component
                 if (model.type === ImageEditor.Crop) {
-                    imageEditPreview.splitView = pageStack.push(aspectRatioDialogComponent,
-                                                               { splitOpen: false })
-                    imageEditPreview.editOperation = model.type
-                    imageEditPreview.resetParent(imageEditPreview.splitView.foregroundItem)
-                } else
-                if (model.type === ImageEditor.Rotate) {
-                    imageEditPreview.splitView = pageStack.push(rotateDialogComponent,
-                                                                { splitOpen: true })
+                    component = aspectRatioDialogComponent
+                } else if (model.type === ImageEditor.Rotate) {
+                    component = rotateDialogComponent
+                } else if (model.type === ImageEditor.AdjustLevels) {
+                    component = levelsDialogComponent
+                }
+
+                if (component) {
+                    imageEditPreview.splitView = pageStack.push(component, { splitOpen: false })
                     imageEditPreview.editOperation = model.type
                     imageEditPreview.resetParent(imageEditPreview.splitView.foregroundItem)
                 }
@@ -232,6 +234,29 @@ SplitViewPage {
 
             onRotateCanceled: {
                 imageEditPreview.previewRotation = 0
+            }
+        }
+    }
+
+    Component {
+        id: levelsDialogComponent
+        LevelsDialog {
+            id: levelsDialog
+            foreground: imageEditPreview
+
+            onLevels: {
+                imageEditPreview.previewBrightness = brightness
+                imageEditPreview.previewContrast = contrast
+            }
+
+            onLevelsRequested: {
+                imageEditPreview.target = ""
+                imageEditPreview.adjustLevels()
+            }
+
+            onLevelsCanceled: {
+                imageEditPreview.previewBrightness = 0.0
+                imageEditPreview.previewContrast = 0.0
             }
         }
     }

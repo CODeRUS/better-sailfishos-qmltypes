@@ -80,6 +80,7 @@ Image {
     property bool _stopped: true
     property bool _testMode
     property bool _interrupted
+    readonly property real _durationScale: Screen.sizeCategory >= Screen.Large ? 1.5 : 1
 
     anchors {
         horizontalCenter: direction === TouchInteraction.Up || direction === TouchInteraction.Down
@@ -197,7 +198,7 @@ Image {
                 to: 1
             }
             SequentialAnimation {
-                PauseAnimation { duration: _testMode ? 10 : (800 * Theme.pixelRatio - 300) }
+                PauseAnimation { duration: _testMode ? 10 : (800 * root._durationScale - 300) }
                 OpacityAnimator {
                     target: root
                     from: 1
@@ -236,7 +237,7 @@ Image {
                     }
                 }
                 easing.type: interactionMode === TouchInteraction.Pull ? Easing.Linear : Easing.InQuad
-                duration: _testMode ? 20 : (800 * Theme.pixelRatio)
+                duration: _testMode ? 20 : (800 * root._durationScale)
             }
             YAnimator {
                 target: root
@@ -269,7 +270,7 @@ Image {
                     }
                 }
                 easing.type: interactionMode === TouchInteraction.Pull ? Easing.Linear : Easing.InQuad
-                duration: _testMode ? 20 : (800 * Theme.pixelRatio)
+                duration: _testMode ? 20 : (800 * root._durationScale)
             }
         }
 

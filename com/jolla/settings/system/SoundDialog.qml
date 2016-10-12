@@ -147,6 +147,10 @@ Dialog {
         delegate: AudioItem {
             id: alarmDelegate
             title: {
+                if (displayName.length > 0) {
+                    return displayName
+                }
+
                 var suffixPos = fileName.lastIndexOf('.')
                 var baseName = suffixPos > 0 ? fileName.substring(0, suffixPos) : fileName
                 return baseName.replace(/_/g, ' ')

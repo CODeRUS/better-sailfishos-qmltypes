@@ -4,3 +4,4 @@ CropDialog 1.0 CropDialog.qml
 ImageEditPreview 1.0 ImageEditPreview.qml
 ZoomableImage 1.0 ZoomableImage.qml
 RotateDialog 1.0 RotateDialog.qml
+LevelsDialog 1.0 LevelsDialog.qml

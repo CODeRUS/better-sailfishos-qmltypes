@@ -140,8 +140,7 @@ function getSongsQuery(aSearchText, opts) {
     var albumId = "albumId" in opts ? parseInt(opts["albumId"]) : -1
 
     if (artistId == -1 && albumId == -1 && aSearchText == "") {
-        searchSongsQuery = songsSimpleSelect +
-            songsWhere
+        searchSongsQuery = songsSimpleSelect + songsWhere
     } else {
         searchSongsQuery = songsSearchSelect
 
@@ -160,33 +159,31 @@ function getSongsQuery(aSearchText, opts) {
             TrackerHelpers.endWhere
     }
 
+    var tmpComparison
     if (albumId < 1 && artistId >= 0) {
-	var tmpComparison = songsFromArtistFilter.arg(TrackerHelpers.escapeSparql(artistId.toString()))
+        tmpComparison = songsFromArtistFilter.arg(TrackerHelpers.escapeSparql(artistId.toString()))
         searchSongsQuery += TrackerHelpers.getFilterStatement(false, tmpComparison)
     }
 
     if (aSearchText != "") {
-	var tmpComparison
-
         // Emacs search style: only be case sensitive
         // if there are capitals.
         if (aSearchText == aSearchText.toLowerCase()) {
-            tmpComparison = TrackerHelpers.titleSearchFilter.arg(TrackerHelpers.escapeSparql(RegExpHelpers.escapeRegExp(aSearchText)))
+            tmpComparison = TrackerHelpers.titleSearchFilter(aSearchText)
         } else {
-            tmpComparison = TrackerHelpers.titleCaseSensitiveSearchFilter.arg(TrackerHelpers.escapeSparql(RegExpHelpers.escapeRegExp(aSearchText)))
+            tmpComparison = TrackerHelpers.titleCaseSensitiveSearchFilter(aSearchText)
         }
 
         searchSongsQuery += TrackerHelpers.getFilterStatement(false, tmpComparison)
     }
 
     if (albumId >= 0) {
-	var tmpComparison = songsFromAlbumFilter.arg(TrackerHelpers.escapeSparql(albumId.toString()))
+        tmpComparison = songsFromAlbumFilter.arg(TrackerHelpers.escapeSparql(albumId.toString()))
         searchSongsQuery += TrackerHelpers.getFilterStatement(false, tmpComparison) +
             TrackerHelpers.endWhere +
             songsFromAlbumOrderBy
     } else {
-        searchSongsQuery += TrackerHelpers.endWhere +
-            songsOrderBy
+        searchSongsQuery += TrackerHelpers.endWhere + songsOrderBy
     }
 
     return searchSongsQuery.arg(TrackerHelpers.escapeSparql(unknownArtistText)).arg(TrackerHelpers.escapeSparql(unknownAlbumText))
@@ -200,8 +197,7 @@ function getAlbumsQuery(aSearchText, opts) {
     var artistId = "authorId" in opts ? parseInt(opts["authorId"]) : -1
 
     if (artistId == -1 && aSearchText == "") {
-        searchAlbumsQuery = albumsSimpleSelect +
-            albumsWhere
+        searchAlbumsQuery = albumsSimpleSelect + albumsWhere
     } else {
         searchAlbumsQuery = albumsSearchSelect
     }
@@ -214,30 +210,29 @@ function getAlbumsQuery(aSearchText, opts) {
         searchAlbumsQuery += albumsWhere
     }
 
-    searchAlbumsQuery += TrackerHelpers.endWhere +
-        TrackerHelpers.idGroupBy
+    searchAlbumsQuery += TrackerHelpers.endWhere + TrackerHelpers.idGroupBy
 
     if (artistId >= 0 || aSearchText != "") {
         searchAlbumsQuery += TrackerHelpers.endWhere
     }
 
-    if (aSearchText != "") {
-	var tmpComparison
+    var tmpComparison
 
+    if (aSearchText != "") {
         // Emacs search style: only be case sensitive
         // if there are capitals.
         if (aSearchText == aSearchText.toLowerCase()) {
-            tmpComparison = TrackerHelpers.titleSearchFilter.arg(TrackerHelpers.escapeSparql(RegExpHelpers.escapeRegExp(aSearchText)))
+            tmpComparison = TrackerHelpers.titleSearchFilter(aSearchText)
         } else {
-            tmpComparison = TrackerHelpers.titleCaseSensitiveSearchFilter.arg(TrackerHelpers.escapeSparql(RegExpHelpers.escapeRegExp(aSearchText)))
+            tmpComparison = TrackerHelpers.titleCaseSensitiveSearchFilter(aSearchText)
         }
 
 	searchAlbumsQuery += TrackerHelpers.getFilterStatement(false, tmpComparison)
     }
 
     if (artistId >= 0) {
-        var tmpComparison = albumsFromArtistFilter
-	searchAlbumsQuery += TrackerHelpers.getFilterStatement(false, tmpComparison)
+        tmpComparison = albumsFromArtistFilter
+        searchAlbumsQuery += TrackerHelpers.getFilterStatement(false, tmpComparison)
     }
 
     if (artistId >= 0 || aSearchText != "") {
@@ -258,10 +253,9 @@ function getArtistsQuery(aSearchText, opts) {
     var unknownArtistText = "unknownArtist" in opts ? opts["unknownArtist"] : "Unknown artist"
 
     if (aSearchText == "") {
-        searchArtistsQuery = artistsSimpleSelect +
-            artistsWhere
+        searchArtistsQuery = artistsSimpleSelect + artistsWhere
     } else {
-	var tmpComparison
+        var tmpComparison
 
         searchArtistsQuery = artistsSearchSelect +
             artistsWhere +
@@ -271,12 +265,12 @@ function getArtistsQuery(aSearchText, opts) {
         // Emacs search style: only be case sensitive
         // if there are capitals.
         if (aSearchText == aSearchText.toLowerCase()) {
-            tmpComparison = TrackerHelpers.titleSearchFilter.arg(TrackerHelpers.escapeSparql(RegExpHelpers.escapeRegExp(aSearchText)))
+            tmpComparison = TrackerHelpers.titleSearchFilter(aSearchText)
         } else {
-            tmpComparison = TrackerHelpers.titleCaseSensitiveSearchFilter.arg(TrackerHelpers.escapeSparql(RegExpHelpers.escapeRegExp(aSearchText)))
+            tmpComparison = TrackerHelpers.titleCaseSensitiveSearchFilter(aSearchText)
         }
 
-	searchArtistsQuery += TrackerHelpers.getFilterStatement(false, tmpComparison)
+        searchArtistsQuery += TrackerHelpers.getFilterStatement(false, tmpComparison)
     }
 
     searchArtistsQuery += TrackerHelpers.endWhere +

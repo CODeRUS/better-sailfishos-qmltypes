@@ -18,6 +18,7 @@ Module {
         Property { name: "mimeType"; type: "string"; isReadonly: true }
         Property { name: "fileName"; type: "string"; isReadonly: true }
         Property { name: "size"; type: "qlonglong"; isReadonly: true }
+        Property { name: "editableImage"; type: "bool"; isReadonly: true }
     }
     Component {
         name: "FitNamespace"

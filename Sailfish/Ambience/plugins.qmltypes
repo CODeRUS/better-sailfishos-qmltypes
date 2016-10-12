@@ -41,6 +41,12 @@ Module {
             name: "remove"
             Parameter { name: "index"; type: "int" }
         }
+        Method {
+            name: "indexOf"
+            type: "int"
+            Parameter { name: "property"; type: "string" }
+            Parameter { name: "value"; type: "QVariant" }
+        }
     }
     Component {
         name: "AmbienceModel"

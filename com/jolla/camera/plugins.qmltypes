@@ -48,8 +48,19 @@ Module {
         isCreatable: false
         isSingleton: true
         exportMetaObjectRevisions: [0, 0]
+        Enum {
+            name: "StoragePathStatus"
+            values: {
+                "NotSet": 0,
+                "Unavailable": 1,
+                "Mounting": 2,
+                "Available": 3
+            }
+        }
         Property { name: "photoDirectory"; type: "string"; isReadonly: true }
         Property { name: "videoDirectory"; type: "string"; isReadonly: true }
+        Property { name: "storagePath"; type: "string" }
+        Property { name: "storagePathStatus"; type: "StoragePathStatus"; isReadonly: true }
         Property { name: "locationEnabled"; type: "bool"; isReadonly: true }
         Method { name: "updateLocation" }
         Method {

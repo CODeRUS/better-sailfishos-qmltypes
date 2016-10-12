@@ -37,13 +37,14 @@ GriloModel {
 
         function safeRefresh() {
             if (!canRefresh) {
-                if (!shouldRefresh) shouldRefresh = true
+                shouldRefresh = true
                 return
             }
 
-            if (shouldRefresh) shouldRefresh = false
+            shouldRefresh = false
 
-            if (query && query != "" && available) refresh()
+            if (query && query != "" && available)
+                refresh()
         }
 
         onQueryChanged: safeRefresh()

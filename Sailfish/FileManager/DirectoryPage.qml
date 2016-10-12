@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 import Nemo.FileManager 1.0
 import Sailfish.FileManager 1.0
 import org.nemomobile.notifications 1.0
@@ -13,8 +14,18 @@ Page {
     property string title
     property bool showFormat
     property Notification errorNotification
+    property bool mounting
+
+    property alias sortBy: fileModel.sortBy
+    property alias sortOrder: fileModel.sortOrder
+    property alias caseSensitivity: fileModel.caseSensitivity
+    property alias directorySort: fileModel.directorySort
 
     signal formatClicked
+
+    function refresh() {
+        fileModel.refresh()
+    }
 
     backNavigation: !FileEngine.busy
 
@@ -26,6 +37,8 @@ Page {
 
     FileModel {
         id: fileModel
+
+        directorySort: FileModel.SortDirectoriesBeforeFiles
 
         path: homePath
         active: page.status === PageStatus.Active
@@ -40,7 +53,15 @@ Page {
     SilicaListView {
         id: fileList
 
-        opacity: FileEngine.busy ? 0.6 : 1.0
+        opacity: {
+            if (FileEngine.busy) {
+                return 0.6
+            } else if (page.mounting) {
+                return 0.0
+            } else {
+                return 1.0
+            }
+        }
         Behavior on opacity { FadeAnimator {} }
 
         anchors.fill: parent
@@ -64,10 +85,40 @@ Page {
             }
 
             MenuItem {
+                //% "Sort"
+                text: qsTrId("filemanager-me-sort")
+                visible: fileModel.count > 0
+                onClicked: {
+                    var dialog = pageStack.push(Qt.resolvedUrl("SortingPage.qml"))
+                    dialog.selected.connect(
+                        function(sortBy, sortOrder, directorySort) {
+                            if (sortBy !== fileModel.sortBy || sortOrder !== fileModel.sortOrder) {
+                                fileModel.sortBy = sortBy
+                                fileModel.sortOrder = sortOrder
+                                fileModel.directorySort = directorySort
+
+                                // Wait for the changes to take effect
+                                // before popping the sorting page
+                                fileModel.sortByChanged.connect(pop)
+                                fileModel.sortOrderChanged.connect(pop)
+                            } else {
+                                PageStack.pop()
+                            }
+                        }
+                    )
+                }
+                function pop() {
+                    pageStack.pop()
+                    fileModel.sortByChanged.disconnect(pop)
+                    fileModel.sortOrderChanged.disconnect(pop)
+                }
+            }
+
+            MenuItem {
                 //% "Paste"
                 text: qsTrId("filemanager-me-paste")
                 visible: FileEngine.clipboardCount > 0
-                onClicked: FileEngine.pasteFiles(page.path)
+                onClicked: FileEngine.pasteFiles(page.path, true)
             }
         }
 
@@ -81,7 +132,7 @@ Page {
 
             function remove() {
                 //% "Deleting"
-                remorseAction(qsTrId("filemanager-la-deleting"), function() { FileEngine.deleteFiles(fileModel.fileNameAt(model.index)) })
+                remorseAction(qsTrId("filemanager-la-deleting"), function() { FileEngine.deleteFiles(fileModel.fileNameAt(model.index), true) })
             }
 
             width: ListView.view.width
@@ -100,66 +151,8 @@ Page {
                     Image {
                         anchors.centerIn: parent
                         source: {
-                            var iconSource
-                            if (model.isDir) {
-                                iconSource = "image://theme/icon-m-file-folder"
-                            } else {
-                                var iconType = "other"
-                                switch (model.mimeType) {
-                                case "application/vnd.android.package-archive":
-                                    iconType = "apk"
-                                    break
-                                case "application/x-rpm":
-                                    iconType = "rpm"
-                                    break
-                                case "text/vcard":
-                                    iconType = "vcard"
-                                    break
-                                case "text/plain":
-                                case "text/x-vnote":
-                                    iconType = "note"
-                                    break
-                                case "application/pdf":
-                                    iconType = "pdf"
-                                    break
-                                case "application/vnd.oasis.opendocument.spreadsheet":
-                                case "application/x-kspread":
-                                case "application/vnd.ms-excel":
-                                case "text/csv":
-                                case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                                case "application/vnd.openxmlformats-officedocument.spreadsheetml.template":
-                                    iconType = "spreadsheet"
-                                    break
-                                case "application/vnd.oasis.opendocument.presentation":
-                                case "application/vnd.oasis.opendocument.presentation-template":
-                                case "application/x-kpresenter":
-                                case "application/vnd.ms-powerpoint":
-                                case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
-                                case "application/vnd.openxmlformats-officedocument.presentationml.template":
-                                    iconType = "presentation"
-                                    break
-                                case "application/vnd.oasis.opendocument.text-master":
-                                case "application/vnd.oasis.opendocument.text":
-                                case "application/vnd.oasis.opendocument.text-template":
-                                case "application/msword":
-                                case "application/rtf":
-                                case "application/x-mswrite":
-                                case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                                case "application/vnd.openxmlformats-officedocument.wordprocessingml.template":
-                                case "application/vnd.ms-works":
-                                    iconType = "formatted"
-                                    break
-                                default:
-                                    if (mimeType.indexOf("audio/") == 0) {
-                                        iconType = "audio"
-                                    } else if (mimeType.indexOf("image/") == 0) {
-                                        iconType = "image"
-                                    } else if (mimeType.indexOf("video/") == 0) {
-                                        iconType = "video"
-                                    }
-                                }
-                                iconSource = "image://theme/icon-m-file-" + iconType
-                            }
+                            var iconSource = model.isDir ? "image://theme/icon-m-file-folder"
+                                                         : Theme.iconForMimeType(model.mimeType)
                             return iconSource + (highlighted ? "?" + Theme.highlightColor : "")
                         }
                     }
@@ -167,11 +160,9 @@ Page {
                 Column {
                     width: parent.width - parent.height - parent.spacing - Theme.horizontalPageMargin
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: -Theme.paddingSmall
                     Label {
                         text: model.fileName
                         width: parent.width
-                        font.pixelSize: Theme.fontSizeLarge
                         truncationMode: TruncationMode.Fade
                         color: highlighted ? Theme.highlightColor : Theme.primaryColor
                     }
@@ -183,18 +174,25 @@ Page {
                                           : qsTrId("filemanager-la-file_details").arg(Format.formatFileSize(model.size)).arg(dateString)
                         width: parent.width
                         truncationMode: TruncationMode.Fade
-                        font.pixelSize: Theme.fontSizeSmall
+                        font.pixelSize: Theme.fontSizeExtraSmall
                         color: highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
                     }
                 }
             }
             menu: contextMenu
 
-            ListView.onRemove: animateRemoval(fileItem)
+            ListView.onRemove: if (page.status === PageStatus.Active) animateRemoval(fileItem)
             onClicked: {
                 if (model.isDir) {
-                    pageStack.push(Qt.resolvedUrl("DirectoryPage.qml"),
-                                   { path: fileModel.appendPath(model.fileName), homePath: page.homePath, errorNotification: page.errorNotification })
+                    pageStack.push(Qt.resolvedUrl("DirectoryPage.qml"), {
+                        path: fileModel.appendPath(model.fileName),
+                        homePath: page.homePath,
+                        errorNotification: page.errorNotification,
+                        sortBy: page.sortBy,
+                        sortOrder: page.sortOrder,
+                        caseSensitivity: page.caseSensitivity,
+                        directorySort: page.directorySort
+                    })
                 } else {
                     var filePath = Qt.resolvedUrl(fileModel.path + "/" + model.fileName)
                     var ok = ContentAction.trigger(filePath)
@@ -227,6 +225,19 @@ Page {
                         text: qsTrId("filemanager-me-copy")
                         onClicked: FileEngine.copyFiles([ fileModel.fileNameAt(model.index) ])
                     }
+
+                    MenuItem {
+                        visible: !model.isDir && !model.isLink
+                        //% "Share"
+                        text: qsTrId("filemanager-me-share")
+                        onClicked: {
+                            pageStack.push(Qt.resolvedUrl("SharePage.qml"), {
+                                               url: Qt.resolvedUrl(model.absolutePath),
+                                               mimeType: model.mimeType
+                                           })
+                        }
+                    }
+
                     MenuItem {
                         //% "Delete"
                         text: qsTrId("filemanager-me-delete")
@@ -245,10 +256,18 @@ Page {
     Component {
         id: errorNotificationComponent
         Notification {
+            property bool alreadyPublished
             category: "x-jolla.storage.error"
             function show(errorText) {
                 previewSummary = errorText
+                if (alreadyPublished) {
+                    // Make sure new banner is shown, call close() to avoid server treating
+                    // subsequent publish() calls as updates to the existing notification
+                    close()
+                }
+
                 publish()
+                alreadyPublished = true
             }
             property var connections: Connections {
                 target: FileEngine
@@ -270,6 +289,10 @@ Page {
                         //% "Moving failed"
                         show(qsTrId("filemanager-la-moving_failed"))
                         break
+                    case FileEngine.ErrorRenameFailed:
+                        //% "Renaming failed"
+                        show(qsTrId("filemanager-la-renaming_failed"))
+                        break
                     case FileEngine.ErrorCannotCopyIntoItself:
                         //% "You cannot copy a folder into itself"
                         show(qsTrId("filemanager-la-cannot_copy_folder_into_itself"))
@@ -282,40 +305,57 @@ Page {
                         //% "Could not create folder"
                         show(qsTrId("filemanager-la-folder_creation_failed"))
                         break
+                    case FileEngine.ErrorChmodFailed:
+                        //% "Could not set permission"
+                        show(qsTrId("filemanager-la-set_permissions_failed"))
+                        break
                     }
                 }
             }
             property var busyView: Loader {
                 parent: __silica_applicationwindow_instance
-                active: FileEngine.busy
+                active: FileEngine.busy || page.mounting
                 onActiveChanged: active = true // remove binding
                 anchors.fill: parent
 
-                sourceComponent: Rectangle {
+                sourceComponent: Item {
                     id: busyView
 
-                    enabled: FileEngine.busy
+                    enabled: FileEngine.busy || page.mounting
                     opacity: enabled ? 1.0 : 0.0
-                    Behavior on opacity { FadeAnimator { duration: 400 } }
-                    color: Theme.rgba("black",  0.9)
-                    anchors.fill: parent
+                    Behavior on opacity { FadeAnimator { duration: 400 } }                    anchors.fill: parent
 
-                    TouchBlocker {
-                        anchors.fill: parent
+                    onEnabledChanged: {
+                        if (enabled) {
+                            busyRectangle.visible = FileEngine.busy
+                        }
                     }
+
+                    Rectangle {
+                        id: busyRectangle
+
+                        color: Theme.rgba("black",  0.9)
+
+                        anchors.fill: parent
+
+                        TouchBlocker {
+                            anchors.fill: parent
+                        }
+                    }
+
                     Column {
                         id: busyIndicator
                         anchors.centerIn: parent
                         spacing: Theme.paddingLarge
                         InfoLabel {
                             text: {
-                                switch (FileEngine.mode) {
- /*
-                                // JB#34729: Uncomment after branching 2.0.2
+                                if (page.mounting) {
+                                    //% "Mounting SD card"
+                                    return qsTrId("filemanager-la-mounting")
+                                } else switch (FileEngine.mode) {
                                 case FileEngine.DeleteMode:
                                     //% "Deleting"
                                   return qsTrId("filemanager-la-deleting")
- */
                                 case FileEngine.CopyMode:
                                     //% "Copying"
                                     return qsTrId("filemanager-la-copying")
@@ -336,8 +376,7 @@ Page {
         }
     }
 
-    WindowOverride {
-        id: windowOverride
+    Private.WindowGestureOverride {
         active: FileEngine.busy
     }
 }

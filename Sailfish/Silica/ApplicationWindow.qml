@@ -46,9 +46,9 @@ Window {
     // Provides a globally available identifier for use by components.
     property alias __silica_applicationwindow_instance: window
 
-    property variant initialPage
+    property var initialPage
     property alias pageStack: stack
-    property variant cover: "private/DefaultCover.qml"
+    property var cover: "private/DefaultCover.qml"
     property real bottomMargin
     property bool applicationActive: Qt.application.active
 

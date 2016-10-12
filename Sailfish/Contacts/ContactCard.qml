@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.contacts 1.0
-import org.nemomobile.dbus 1.0
+import org.nemomobile.dbus 2.0
 import org.freedesktop.contextkit 1.0
 import "common/common.js" as CommonJs
 import "contactcard/contactcardmodelfactory.js" as ModelFactory
@@ -481,7 +481,7 @@ SilicaFlickable {
     DBusInterface {
         id: voicecall
 
-        destination: "com.jolla.voicecall.ui"
+        service: "com.jolla.voicecall.ui"
         path: "/"
         iface: "com.jolla.voicecall.ui"
 
@@ -496,7 +496,7 @@ SilicaFlickable {
     DBusInterface {
         id: mapsInterface
 
-        destination: "org.sailfishos.maps"
+        service: "org.sailfishos.maps"
         path: "/"
         iface: "org.sailfishos.maps"
 
@@ -507,7 +507,7 @@ SilicaFlickable {
     DBusInterface {
         id: calendarInterface
 
-        destination: "com.jolla.calendar.ui"
+        service: "com.jolla.calendar.ui"
         path: "/com/jolla/calendar/ui"
         iface: "com.jolla.calendar.ui"
 

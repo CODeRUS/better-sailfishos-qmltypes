@@ -20,11 +20,6 @@ Module {
             }
         }
         Method {
-            name: "setSystemGesturesEnabled"
-            Parameter { name: "item"; type: "QQuickItem"; isPointer: true }
-            Parameter { name: "enabled"; type: "bool" }
-        }
-        Method {
             name: "newBackupFileName"
             type: "string"
             Parameter { name: "archiveType"; type: "ArchiveType" }
@@ -41,25 +36,35 @@ Module {
             Parameter { name: "dirOrFileList"; type: "QVariant" }
         }
         Method {
-            name: "vaultDumpFileInfo"
-            type: "QVariantMap"
+            name: "vaultDumpFileId"
+            type: "string"
             Parameter { name: "dirPath"; type: "string" }
         }
+        Method { name: "cleanVaultSnapshotDirectory"; type: "string" }
         Method { name: "backupDeviceName"; type: "string" }
         Method {
             name: "removeFile"
-            type: "bool"
             Parameter { name: "filePath"; type: "string" }
         }
         Method {
-            name: "createTemporaryDirectory"
+            name: "createDirectory"
             type: "string"
-            Parameter { name: "suffix"; type: "string" }
+            Parameter { name: "subDir"; type: "string" }
+            Parameter { name: "baseDir"; type: "string" }
         }
         Method {
-            name: "removeTemporaryDirectory"
-            type: "bool"
+            name: "createDirectory"
+            type: "string"
+            Parameter { name: "subDir"; type: "string" }
+        }
+        Method {
+            name: "removeDirectory"
             Parameter { name: "dirPath"; type: "string" }
+        }
+        Method {
+            name: "privilegedBackupDirectory"
+            type: "string"
+            Parameter { name: "subDir"; type: "string" }
         }
         Method {
             name: "dateTimeFromIsoString"
@@ -89,7 +94,7 @@ Module {
                 "UnitScriptStarted": 2,
                 "UnitScriptFinished": 3,
                 "Compressing": 4,
-                "Decompressing": 5,
+                "LoadingArchive": 5,
                 "Finalizing": 6,
                 "Canceling": 7,
                 "Finished": 100

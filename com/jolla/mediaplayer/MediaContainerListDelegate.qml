@@ -2,7 +2,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Media 1.0
+import com.jolla.mediaplayer 1.0
 
 ListItem {
     id: item
@@ -40,6 +40,7 @@ ListItem {
 
         Label {
             id: subtitleLabel
+            visible: text != ""
             width: parent.width
             font.family: Theme.fontFamilyHeading
             font.pixelSize: Theme.fontSizeExtraSmall

@@ -1,15 +1,9 @@
 module Sailfish.Media
 plugin sailfishmediaplugin
-AudioTrackerHelpers 1.0 scripts/AudioTrackerHelpers.js
 GStreamerVideoOutput 1.0 GStreamerVideoOutput.qml
-MediaFormatter 1.0 MediaFormatter.qml
 MediaListItem 1.0 MediaListItem.qml
 MediaPlayerControlsPanel 1.0 MediaPlayerControlsPanel.qml
 MprisPlayerControls 1.0 MprisPlayerControls.qml
-PlayerControls 1.0 PlayerControls.qml
-PlaylistTrackerHelpers 1.0 scripts/PlaylistTrackerHelpers.js
-RegExpHelpers 1.0 scripts/RegExpHelpers.js
+MediaPlayerPanelBackground 1.0 MediaPlayerPanelBackground.qml
 ScreenBlank 1.0 ScreenBlank.qml
-TrackerHelpers 1.0 scripts/TrackerHelpers.js
 VideoPlayer 1.0 VideoPlayer.qml
-VideoTrackerHelpers 1.0 scripts/VideoTrackerHelpers.js

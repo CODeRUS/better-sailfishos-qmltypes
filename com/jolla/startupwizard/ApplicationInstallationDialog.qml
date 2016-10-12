@@ -21,6 +21,10 @@ Dialog {
         applicationList.installSelectedApps()
     }
 
+    property bool skipDialog: status == PageStatus.Active && root.applicationModel.populated
+                              && applicationModel.count === 0
+    onSkipDialogChanged: if (skipDialog) accept()
+
     ApplicationList {
         id: applicationList
     }

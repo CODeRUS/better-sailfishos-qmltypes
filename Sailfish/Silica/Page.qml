@@ -119,8 +119,8 @@ MouseArea {
     property int _horizontalDimension: (pageContainer && _exposed && parent) ? parent.width : Screen.width
     property int _verticalDimension: (pageContainer && _exposed && parent) ? parent.height : Screen.height
 
-    property variant _forwardDestination
-    property variant _forwardDestinationProperties
+    property var _forwardDestination
+    property var _forwardDestinationProperties
     property int _forwardDestinationAction: PageStackAction.Push
     property Item _forwardDestinationInstance
     property var _forwardDestinationReplaceTarget

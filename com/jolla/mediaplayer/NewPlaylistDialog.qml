@@ -7,7 +7,7 @@ import com.jolla.mediaplayer 1.0
 Dialog {
     id: dialog
 
-    property variant media
+    property var media
     property Item pageToPop
     property bool hasTitle: playlistName.text.trim().length > 0
 

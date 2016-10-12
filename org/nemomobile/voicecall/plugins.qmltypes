@@ -83,6 +83,8 @@ Module {
         Property { name: "isForwarded"; type: "bool"; isReadonly: true }
         Property { name: "isReady"; type: "bool"; isReadonly: true }
         Property { name: "isRemoteHeld"; type: "bool"; isReadonly: true }
+        Property { name: "childCalls"; type: "VoiceCallModel"; isReadonly: true; isPointer: true }
+        Property { name: "parentCall"; type: "VoiceCallHandler"; isReadonly: true; isPointer: true }
         Signal {
             name: "error"
             Parameter { name: "error"; type: "string" }
@@ -91,6 +93,7 @@ Module {
         Signal { name: "multipartyChanged" }
         Signal { name: "forwardedChanged" }
         Signal { name: "remoteHeldChanged" }
+        Signal { name: "childCallsListChanged" }
         Method { name: "answer" }
         Method { name: "hangup" }
         Method {
@@ -105,6 +108,11 @@ Module {
             name: "sendDtmf"
             Parameter { name: "tones"; type: "string" }
         }
+        Method {
+            name: "merge"
+            Parameter { name: "callHandle"; type: "string" }
+        }
+        Method { name: "split" }
     }
     Component {
         name: "VoiceCallManager"

@@ -25,7 +25,7 @@ Item {
         height: 3 * Theme.itemSizeLarge
         anchors {
             verticalCenter: atBottom ? label.top : label.bottom
-            verticalCenterOffset: atBottom ? -height / 2 : height / 2
+            verticalCenterOffset: Math.round(atBottom ? -height / 2 : height / 2)
         }
         gradient: Gradient {
             GradientStop {

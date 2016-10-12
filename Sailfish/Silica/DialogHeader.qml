@@ -169,7 +169,7 @@ BackgroundItem {
 
         PanelBackground {
             anchors.fill: parent
-            rotation: 180
+            position: Dock.Top
             visible: dialogHeader._backgroundVisible
         }
 

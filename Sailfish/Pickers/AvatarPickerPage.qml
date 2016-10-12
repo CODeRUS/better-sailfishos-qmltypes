@@ -17,14 +17,14 @@ ImagePickerPage {
         // Hardcoded path will be removed once get JB5266 fixed
         var target = "/home/nemo/.local/share/data/avatars/" + selectedContentProperties.fileName
         _cropDialog = imageEditPage.createObject(root, {
-                                                        acceptDestination: pageStack.previousPage(root),
-                                                        acceptDestinationAction: PageStackAction.Pop,
-                                                        source: selectedContentProperties.url,
-                                                        target: target,
-                                                        selectedContentProperties: selectedContentProperties,
-                                                        orientation: selectedContentProperties.orientation
-                                                    })
-        pageStack.push(_cropDialog)
+           acceptDestination: pageStack.previousPage(root),
+           acceptDestinationAction: PageStackAction.Pop,
+           source: selectedContentProperties.url,
+           target: target,
+           selectedContentProperties: selectedContentProperties,
+           imageOrientation: selectedContentProperties.orientation
+       })
+       pageStack.push(_cropDialog)
     }
 
     //: Title for avatar picker for selecting avatar
@@ -41,7 +41,7 @@ ImagePickerPage {
             property alias target: imageEditPreview.target
             property alias cropping: imageEditPreview.editInProgress
             property variant selectedContentProperties
-            property alias orientation: imageEditPreview.orientation
+            property alias imageOrientation: imageEditPreview.orientation
 
             allowedOrientations: root.allowedOrientations
             splitOpen: false

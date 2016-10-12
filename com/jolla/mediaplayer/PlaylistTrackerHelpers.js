@@ -33,59 +33,54 @@ var anyPlaylistSearchFilter = "(nfo:entryCounter(?urn) >= 0 || !bound(nfo:entryC
 
 var plsPlaylistSearchFilter = "(nfo:entryCounter(?urn) >= 0 || !bound(nfo:entryCounter(?urn))) && fn:ends-with(?url, \".pls\")"
 
-var playlistsOrderBy = TrackerHelpers.titleOrderBy
+var playlistsOrderByTitle = TrackerHelpers.titleOrderBy
 
+var playlistOrderByUsage = "ORDER BY DESC(nie:contentAccessed(?urn))"
 
 function getPlaylistsQuery(aSearchText, opts) {
     var searchPlaylistsQuery
     var locations = "locations" in opts ? opts["locations"] : ""
     var editablePlaylistsOnly = "editablePlaylistsOnly" in opts ? opts["editablePlaylistsOnly"] : false
+    var sortByUsage = "sortByUsage" in opts ? opts["sortByUsage"] : false
+    var tmpComparison
+    var i
 
     if (aSearchText == "") {
-        searchPlaylistsQuery = playlistsSimpleSelect +
-            playlistsWhere
-
+        searchPlaylistsQuery = playlistsSimpleSelect + playlistsWhere
         searchPlaylistsQuery += TrackerHelpers.getFilterStatement(false , editablePlaylistsOnly ? plsPlaylistSearchFilter: anyPlaylistSearchFilter)
 
         if (locations != "") {
-	    var tmpComparison
 
-	    for (var i = 0; i < locations.length; i++) {
-		tmpComparison = TrackerHelpers.pathSearchFilter.arg(TrackerHelpers.escapeSparql(locations[i].location))
-		searchPlaylistsQuery += TrackerHelpers.getFilterStatement(locations[i].negated, tmpComparison)
-	    }
+            for (i = 0; i < locations.length; i++) {
+                tmpComparison = TrackerHelpers.pathSearchFilter(locations[i].location)
+                searchPlaylistsQuery += TrackerHelpers.getFilterStatement(locations[i].negated, tmpComparison)
+            }
         }
     } else {
-	var tmpComparison
-
-        searchPlaylistsQuery = playlistsSearchSelect +
-            playlistsWhere
-
+        searchPlaylistsQuery = playlistsSearchSelect + playlistsWhere
         searchPlaylistsQuery += TrackerHelpers.getFilterStatement(false , editablePlaylistsOnly ? plsPlaylistSearchFilter: anyPlaylistSearchFilter)
 
         if (locations != "") {
-	    for (var i = 0; i < locations.length; i++) {
-		tmpComparison = TrackerHelpers.pathSearchFilter.arg(TrackerHelpers.escapeSparql(locations[i].location))
-		searchPlaylistsQuery += TrackerHelpers.getFilterStatement(locations[i].negated, tmpComparison)
-	    }
+            for (i = 0; i < locations.length; i++) {
+                tmpComparison = TrackerHelpers.pathSearchFilter(locations[i].location)
+                searchPlaylistsQuery += TrackerHelpers.getFilterStatement(locations[i].negated, tmpComparison)
+            }
         }
 
-        searchPlaylistsQuery += TrackerHelpers.endWhere +
-            TrackerHelpers.endWhere
+        searchPlaylistsQuery += TrackerHelpers.endWhere + TrackerHelpers.endWhere
 
         // Emacs search style: only be case sensitive
         // if there are capitals.
         if (aSearchText == aSearchText.toLowerCase()) {
-            tmpComparison = TrackerHelpers.titleSearchFilter.arg(TrackerHelpers.escapeSparql(RegExpHelpers.escapeRegExp(aSearchText)))
+            tmpComparison = TrackerHelpers.titleSearchFilter(aSearchText)
         } else {
-            tmpComparison = TrackerHelpers.titleCaseSensitiveSearchFilter.arg(TrackerHelpers.escapeSparql(RegExpHelpers.escapeRegExp(aSearchText)))
+            tmpComparison = TrackerHelpers.titleCaseSensitiveSearchFilter(aSearchText)
         }
 
-	searchPlaylistsQuery += TrackerHelpers.getFilterStatement(false, tmpComparison)
+        searchPlaylistsQuery += TrackerHelpers.getFilterStatement(false, tmpComparison)
     }
 
-    searchPlaylistsQuery += TrackerHelpers.endWhere +
-        playlistsOrderBy
+    searchPlaylistsQuery += TrackerHelpers.endWhere + (sortByUsage ? playlistOrderByUsage : playlistsOrderByTitle)
 
     return searchPlaylistsQuery
 }

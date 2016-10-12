@@ -3,7 +3,6 @@ import Sailfish.Silica 1.0
 import Sailfish.Media 1.0
 import QtMultimedia 5.0
 import org.nemomobile.thumbnailer 1.0
-import "scripts/Locale.js" as Locale
 
 Item {
     id: player
@@ -108,7 +107,7 @@ Item {
     Component {
         id: videoComponent
 
-        GStreamerVideoOutput {
+        VideoOutput {
             id: _videoItem
 
             property alias playbackState: _mediaPlayer.playbackState
@@ -132,10 +131,9 @@ Item {
 
             MediaPlayer {
                 id: _mediaPlayer
+
                 source: player.source
-
                 playbackRate: player.playbackRate
-
 
                 onPlaybackStateChanged: {
                     if (playbackState != MediaPlayer.PlayingState) {

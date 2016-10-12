@@ -6,6 +6,7 @@ import "common/common.js" as ContactsUtils
 
 Item {
     id: root
+    property alias actionType: namesList.actionType
     property alias placeholderText: namesList.placeholderText
     property string summaryPlaceholderText: placeholderText
     property alias summary: namesList.summary

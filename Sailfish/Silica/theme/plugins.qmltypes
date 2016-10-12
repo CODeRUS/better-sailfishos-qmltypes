@@ -45,6 +45,7 @@ Module {
         Property { name: "iconSizeLarge"; type: "float"; isReadonly: true }
         Property { name: "iconSizeExtraLarge"; type: "float"; isReadonly: true }
         Property { name: "iconSizeLauncher"; type: "float"; isReadonly: true }
+        Property { name: "launcherIconDirectories"; type: "QStringList"; isReadonly: true }
         Property { name: "buttonWidthSmall"; type: "float"; isReadonly: true }
         Property { name: "buttonWidthMedium"; type: "float"; isReadonly: true }
         Property { name: "buttonWidthLarge"; type: "float"; isReadonly: true }
@@ -86,6 +87,11 @@ Module {
             name: "presenceColor"
             type: "QColor"
             Parameter { name: "presenceMode"; type: "PresenceMode" }
+        }
+        Method {
+            name: "iconForMimeType"
+            type: "string"
+            Parameter { name: "mimeType"; type: "string" }
         }
     }
 }

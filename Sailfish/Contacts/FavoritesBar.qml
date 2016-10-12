@@ -165,7 +165,6 @@ Item {
                 }
 
                 y: parent.height - height
-                x: -parent.x
                 width: favoriteBar.width
                 height: Theme.itemSizeSmall
 

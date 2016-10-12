@@ -37,7 +37,8 @@ Module {
             values: {
                 "None": 0,
                 "Crop": 1,
-                "Rotate": 2
+                "Rotate": 2,
+                "AdjustLevels": 3
             }
         }
         Property { name: "source"; type: "QUrl" }
@@ -50,6 +51,10 @@ Module {
             name: "rotated"
             Parameter { name: "success"; type: "bool" }
         }
+        Signal {
+            name: "levelsAdjusted"
+            Parameter { name: "success"; type: "bool" }
+        }
         Method {
             name: "crop"
             Parameter { name: "cropSize"; type: "QSizeF" }
@@ -59,6 +64,11 @@ Module {
         Method {
             name: "rotate"
             Parameter { name: "rotation"; type: "int" }
+        }
+        Method {
+            name: "adjustLevels"
+            Parameter { name: "brightness"; type: "double" }
+            Parameter { name: "contrast"; type: "double" }
         }
     }
     Component {

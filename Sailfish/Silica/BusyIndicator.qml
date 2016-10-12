@@ -35,42 +35,49 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
 
-Image {
-    id: busyIndicator
+Item {
+    id: root
 
     property bool running
     property int size: BusyIndicatorSize.Medium
     property color color: Theme.highlightColor
 
-    function _updateSize() {
-        var prefix = "image://theme/graphic-busyindicator-"
-        var indicatorSize
-        if (size == BusyIndicatorSize.ExtraSmall) {
-            indicatorSize = "extra-small"
-        } else if (size == BusyIndicatorSize.Small) {
-            indicatorSize = "small"
-        } else if (size == BusyIndicatorSize.Medium) {
-            indicatorSize = "medium"
-        } else if (size == BusyIndicatorSize.Large) {
-            indicatorSize = "large"
-        } else {
-            console.log("BusyIndicator: invalid size specified")
-            return ""
+    implicitWidth: busyIndicator.implicitWidth
+    implicitHeight: busyIndicator.implicitHeight
+    opacity: running ? 1.0 : 0.0
+    Behavior on opacity { FadeAnimation { id: fadeAnimation }}
+
+    Image {
+        id: busyIndicator
+
+        function _updateSize() {
+            var prefix = "image://theme/graphic-busyindicator-"
+            var indicatorSize
+            if (root.size == BusyIndicatorSize.ExtraSmall) {
+                indicatorSize = "extra-small"
+            } else if (root.size == BusyIndicatorSize.Small) {
+                indicatorSize = "small"
+            } else if (root.size == BusyIndicatorSize.Medium) {
+                indicatorSize = "medium"
+            } else if (root.size == BusyIndicatorSize.Large) {
+                indicatorSize = "large"
+            } else {
+                console.log("BusyIndicator: invalid size specified")
+                return ""
+            }
+
+            return prefix + indicatorSize + "?" + root.color
         }
 
-        return prefix + indicatorSize + "?" + color;
-    }
+        smooth: true
+        source: _updateSize()
+        transformOrigin: Item.Center
 
-    smooth: true
-    source: _updateSize()
-    transformOrigin: Item.Center
-    opacity: running ? 1.0 : 0.0
-
-    Behavior on opacity { FadeAnimation { id: fadeAnimation }}
-    RotationAnimator on rotation {
-        from: 0; to: 360
-        duration: 2000
-        running: (busyIndicator.running || fadeAnimation.running) && busyIndicator.visible && Qt.application.active
-        loops: Animation.Infinite
+        RotationAnimator on rotation {
+            from: 0; to: 360
+            duration: 2000
+            running: (root.running || fadeAnimation.running) && root.visible && Qt.application.active
+            loops: Animation.Infinite
+        }
     }
 }

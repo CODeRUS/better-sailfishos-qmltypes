@@ -46,37 +46,6 @@ Module {
         }
     }
     Component {
-        name: "DeclarativeDBusAdaptor"
-        prototype: "QDBusVirtualObject"
-        exports: ["Sailfish.Silica.private/DBusAdaptor 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "service"; type: "string" }
-        Property { name: "path"; type: "string" }
-        Property { name: "iface"; type: "string" }
-        Property { name: "xml"; type: "string" }
-        Signal { name: "interfaceChanged" }
-    }
-    Component {
-        name: "DeclarativeDBusInterface"
-        prototype: "QObject"
-        exports: ["Sailfish.Silica.private/DBusInterface 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "destination"; type: "string" }
-        Property { name: "path"; type: "string" }
-        Property { name: "iface"; type: "string" }
-        Signal { name: "interfaceChanged" }
-        Method {
-            name: "call"
-            Parameter { name: "method"; type: "string" }
-            Parameter { name: "arguments"; type: "QJSValue" }
-        }
-        Method {
-            name: "typedCall"
-            Parameter { name: "method"; type: "string" }
-            Parameter { name: "arguments"; type: "QJSValue" }
-        }
-    }
-    Component {
         name: "DeclarativeDragFilter"
         prototype: "QObject"
         exports: ["Sailfish.Silica.private/DragFilter 1.0"]
@@ -249,7 +218,6 @@ Module {
         Method { name: "outOfBounds"; type: "bool" }
         Method { name: "monitorFlick" }
     }
-    Component { name: "QDBusVirtualObject"; prototype: "QObject" }
     Component {
         name: "QQuickRootItem"
         defaultProperty: "data"
@@ -450,6 +418,14 @@ Module {
             Parameter { name: "msec"; type: "int" }
         }
         Method { name: "requestUpdate"; revision: 3 }
+    }
+    Component {
+        name: "RemorseCache"
+        prototype: "QObject"
+        exports: ["Sailfish.Silica.private/RemorseCache 1.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Property { name: "item"; type: "QQuickItem"; isPointer: true }
     }
     Component {
         name: "TextLayoutModel"

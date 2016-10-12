@@ -40,7 +40,7 @@ Column {
     id: dialer
 
     property alias voiceMailIconSource: voiceMailIcon.source
-    property variant vanityDialNumbers: ["", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz", "+", "", ""]
+    property var vanityDialNumbers: ["", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz", "+", "", ""]
     property bool vanityDialNumbersVisible: true
     property bool symbolsVisible: true
     property color textColor: Theme.primaryColor

@@ -51,5 +51,9 @@ Module {
             Parameter { name: "index"; type: "int" }
         }
         Method { name: "clearTransfers" }
+        Method {
+            name: "clearTransfer"
+            Parameter { name: "transferId"; type: "int" }
+        }
     }
 }

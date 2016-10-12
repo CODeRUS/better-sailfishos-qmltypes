@@ -12,6 +12,18 @@ AmbienceAction {
     readonly property string enabledProperty: property + "Enabled"
     readonly property string fileProperty: property + "File"
     readonly property QtObject tone: ambience.resources[action.fileProperty]
+    property string title: {
+        if (ambience[enabledProperty]) {
+            var displayName = ambience.resources[fileProperty].displayName
+            if (displayName.length > 0) {
+                return displayName
+            }
+            return metadataReader.getTitle(tone.url)
+        } else {
+            //% "No sound"
+            return qsTrId("jolla-gallery-ambience-sound-la-no-alarm-sound")
+        }
+    }
 
     function hasValue(ambience) {
         return !ambience[enabledProperty] || ambience.resources[fileProperty].url != ""
@@ -30,16 +42,8 @@ AmbienceAction {
     editor: ValueButton {
         id: toneEditor
 
-
         label: action.label
-        value: {
-            if (ambience[enabledProperty]) {
-                return metadataReader.getTitle(tone.url)
-           } else {
-               //% "No sound"
-               return qsTrId("jolla-gallery-ambience-sound-la-no-alarm-sound")
-           }
-        }
+        value: action.title
 
         rightMargin: Theme.horizontalPageMargin + Theme.itemSizeSmall + Theme.paddingMedium
 
@@ -51,7 +55,7 @@ AmbienceAction {
 
         SoundDialog {
             activeFilename: tone.url
-            activeSoundTitle: metadataReader.getTitle(tone.url)
+            activeSoundTitle: action.title
             activeSoundSubtitle: action.currentText
             noSound: !ambience[action.enabledProperty]
 

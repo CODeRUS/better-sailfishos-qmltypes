@@ -19,6 +19,7 @@ Item {
     property int inputMethodHints
     property bool showLabel: true
     property bool multipleAllowed: true
+    property int actionType
     property int requiredProperty
     property int recentContactsCategoryMask: CommHistory.AnyCategory
 
@@ -216,7 +217,8 @@ Item {
 
                 var page = comp.createObject(root, {
                     "requiredProperty": requiredProperty,
-                    "recentContactsCategoryMask": recentContactsCategoryMask
+                    "recentContactsCategoryMask": recentContactsCategoryMask,
+                    "actionType": root.actionType
                 })
                 page.selectedRecipients.connect(addContacts)
                 page.statusChanged.connect(function() {

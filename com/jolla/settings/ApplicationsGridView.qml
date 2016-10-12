@@ -8,7 +8,8 @@ SilicaGridView {
     id: gridView
 
     property real minimumDelegateSize: Theme.iconSizeLauncher
-    property real pageHeight: parent.height
+    // assuming pushed page doesn't force different orientation
+    property real pageHeight: pageStack.currentPage.isPortrait ? Screen.height : Screen.width
     // The multipliers below for Large screens are magic. They look good on Jolla tablet.
     property real minimumCellWidth: Screen.sizeCategory >= Screen.Large ? Theme.itemSizeExtraLarge * 1.6 : Theme.itemSizeExtraLarge
     // phone reference row height: 960 / 6

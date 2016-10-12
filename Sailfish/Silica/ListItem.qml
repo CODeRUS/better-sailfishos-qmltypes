@@ -37,7 +37,7 @@ import Sailfish.Silica 1.0
 
 BackgroundItem {
     id: listItem
-    property variant menu
+    property var menu
     property bool menuOpen: _menuItem != null && _menuItem._open
     property bool showMenuOnPressAndHold: true
 
@@ -63,11 +63,7 @@ BackgroundItem {
     }
 
     function remorseAction(text, action, timeout) {
-        // null parent because a reference is held by RemorseItem until
-        // it either triggers or is cancelled.
-        var remorse = remorseComponent.createObject(null)
-        remorse.execute(contentItem, text, action, timeout)
-        return remorse
+        return Remorse.itemAction(contentItem, text, action, timeout)
     }
 
     function animateRemoval(delegate) {
@@ -145,11 +141,6 @@ BackgroundItem {
             // delete the previously created context menu instance
             _menuItem.destroy()
         }
-    }
-
-    Component {
-        id: remorseComponent
-        RemorseItem { }
     }
 
     Component {
