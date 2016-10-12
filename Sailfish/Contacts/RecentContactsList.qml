@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Contacts 1.0
+import Sailfish.Telephony 1.0
 import org.nemomobile.contacts 1.0
 import org.nemomobile.commhistory 1.0
 import "common/common.js" as ContactsUtils
@@ -10,6 +11,7 @@ ListView {
 
     property PeopleModel contactsModel
     property var selectionModel
+    property int actionType: Telephony.Call
     property int requiredProperty: PeopleModel.NoPropertyRequired
     property int eventCategoryMask: CommHistory.AnyCategory
     property Component contextMenuComponent
@@ -63,6 +65,7 @@ ListView {
         width: root.width
         menu: root.contextMenuComponent
 
+        actionType: root.actionType
         contactId: eventPerson.id
         peopleModel: contactsModel
 

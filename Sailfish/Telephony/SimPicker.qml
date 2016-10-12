@@ -42,6 +42,7 @@ Item {
         id: simSelector
         y: Theme.itemSizeSmall
         updateSelectedSim: false
+        restrictToActive: actionType === Telephony.Call
 
         onSimSelected: simPicker.simSelected(sim, modemPath)
     }

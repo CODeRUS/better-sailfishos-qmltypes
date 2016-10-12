@@ -104,13 +104,13 @@ MouseArea {
     Component {
         id: removeOpacityEffect
         Item {
-            property variant source
+            property var source
             ShaderEffect {
                 x: Math.min(0, contextMenu.x)
                 width: Math.max(parent.width, contextMenu.width)
                 // Try to avoid resizing the layer due to expansion animation
                 height: Math.max(parent.height, _targetHeight)
-                property variant source: parent.source
+                property var source: parent.source
                 fragmentShader: "
                     uniform sampler2D source;
                     varying highp vec2 qt_TexCoord0;

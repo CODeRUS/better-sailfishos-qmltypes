@@ -8,7 +8,7 @@ Dialog {
     property string path
     canAccept: folderName.text.length > 0
     onAccepted: {
-        if (FileEngine.mkdir(path, folderName.text).lenght > 0) {
+        if (!FileEngine.mkdir(path, folderName.text, true)) {
             //% "Cannot create folder %1"
             errorNotification.show(qsTrId("filemanager-la-cannot_create_folder").arg(folderName.text))
         }

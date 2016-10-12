@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import org.nemomobile.dbus 1.0
+import org.nemomobile.dbus 2.0
 
 Timer {
     id: timer
@@ -20,10 +20,10 @@ Timer {
     property DBusInterface _dbus: DBusInterface {
         id: dbus
 
-        destination: "com.nokia.mce"
+        service: "com.nokia.mce"
         path: "/com/nokia/mce/request"
         iface: "com.nokia.mce.request"
 
-        busType: DBusInterface.SystemBus
+        bus: DBus.SystemBus
     }
 }

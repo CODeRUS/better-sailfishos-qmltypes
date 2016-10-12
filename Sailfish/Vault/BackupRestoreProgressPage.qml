@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Vault 1.0
 
 FullScreenInfoPage {
@@ -77,10 +78,9 @@ FullScreenInfoPage {
         }
     ]
 
-    onStatusChanged: {
-        backupUtils.setSystemGesturesEnabled(root, status != PageStatus.Activating && status != PageStatus.Active)
+    Private.WindowGestureOverride {
+        active: status == PageStatus.Activating || status == PageStatus.Active
     }
-
     onButton1Clicked: {
         if (canCancel) {
             cancelRequested()

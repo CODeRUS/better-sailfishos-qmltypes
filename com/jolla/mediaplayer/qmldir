@@ -5,21 +5,23 @@ AlbumArt 1.0 AlbumArt.qml
 singleton AudioPlayer 1.0 AudioPlayer.qml
 Container 1.0 Container.qml
 CoverArt 1.0 CoverArt.qml
-GriloListView 1.0 GriloListView.qml
 GriloTrackerModel 1.0 GriloTrackerModel.qml
 MediaContainerListDelegate 1.0 MediaContainerListDelegate.qml
 MediaContainerIconDelegate 1.0 MediaContainerIconDelegate.qml
+MediaContainerPlaylistDelegate 1.0 MediaContainerPlaylistDelegate.qml
 MediaKeys 1.0 MediaKeys.qml
 MediaListDelegate 1.0 MediaListDelegate.qml
 MediaPlayerDockedPanel 1.0 MediaPlayerDockedPanel.qml
 MediaPlayerListView 1.0 MediaPlayerListView.qml
-MediaPlayerPage 1.0 MediaPlayerPage.qml
 NewPlaylistDialog 1.0 NewPlaylistDialog.qml
 NowPlayingMenuItem 1.0 NowPlayingMenuItem.qml
 PlayQueuePage 1.0 PlayQueuePage.qml
+PlaylistColors 1.0 PlaylistColors.js
 PlaylistManager 1.0 PlaylistManager.qml
 SearchPageHeader 1.0 SearchPageHeader.qml
-VideoListDelegate 1.0 VideoListDelegate.qml
-VideoPlayer 1.0 VideoPlayer.qml
 VisualAudioAppModel 1.0 VisualAudioAppModel.qml
 VisualAudioModel 1.0 VisualAudioModel.qml
+TrackerHelpers 1.0 TrackerHelpers.js
+RegExpHelpers 1.0 RegExpHelpers.js
+PlaylistTrackerHelpers 1.0 PlaylistTrackerHelpers.js
+AudioTrackerHelpers 1.0 AudioTrackerHelpers.js

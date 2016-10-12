@@ -9,6 +9,9 @@ ContactItem {
 
     // Use getPerson() to access the person object so one isn't instantiated unnecessarily
     property int contactId
+
+    // Telephony.Call or Telephony.Message
+    property int actionType: Telephony.Call
     property var peopleModel: ListView.view.model
 
     property var selectionModel
@@ -112,6 +115,7 @@ ContactItem {
             SimPickerMenuItem {
                 id: simPicker
                 menu: contextMenu
+                actionType: contactItem.actionType
                 fadeAnimationEnabled: addressesModel.count > 1
                 onSimSelected: {
                     property['modemPath'] = modemPath

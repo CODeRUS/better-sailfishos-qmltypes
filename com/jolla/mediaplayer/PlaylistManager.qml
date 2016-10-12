@@ -7,16 +7,11 @@ import com.jolla.mediaplayer 1.0
 Item {
     id: root
 
-    property alias addModel: addModel
-    property alias viewModel: viewModel
-    property alias trackerStore: store
-
     property int count
 
-    function refresh() {
-        addModel.refresh()
-        viewModel.refresh()
-    }
+    signal updated()
+
+    onUpdated: playlistListModel.refresh()
 
     function isEditable(uri) {
         return saver.isEditable(uri, playlistsLocation)
@@ -33,7 +28,7 @@ Item {
         if (success) {
             store.updateEntryCounter(playlist.url, playlistModel.count)
 
-            refresh()
+            root.updated()
         }
 
         return success
@@ -44,7 +39,7 @@ Item {
         if (url != "") {
             store.addPlaylist(url, title, media ? 1 : 0)
 
-            refresh()
+            root.updated()
 
             return true
         }
@@ -64,7 +59,7 @@ Item {
         if (success) {
             store.updateEntryCounter(media.url, model.count)
 
-            refresh()
+            root.updated()
         }
 
         return success
@@ -75,7 +70,7 @@ Item {
         if (success) {
             store.updateEntryCounter(media.url, 0)
 
-            refresh()
+            root.updated()
         }
 
         return success
@@ -88,7 +83,7 @@ Item {
             // Because it would take tracker ~2 seconds to index
             store.updateEntryCounter(media.url, -1)
 
-            refresh()
+            root.updated()
         }
 
         return success
@@ -101,9 +96,9 @@ Item {
         var plModels = new Array
         var refreshModels = false
 
-        for (var i=0; i < viewModel.count; ++i) {
+        for (var i = 0; i < playlistListModel.count; ++i) {
             // First iterate through top level playlist items
-            var playlist = viewModel.get(i);
+            var playlist = playlistListModel.get(i)
             var playlistModel = plComponent.createObject(null)
 
             // Check if the pl is editable
@@ -112,9 +107,8 @@ Item {
             }
             // Remove song instances from all the playlists. Note that the same
             // song can be multiple times in the same playlist and that's why
-            // it's removedy by URL not by index.
+            // it's removed by URL not by index.
             if (playlistModel) {
-                playlistModel.store = store
                 playlistModel.url = playlist.url
                 playlistModel.populate()
 
@@ -137,21 +131,27 @@ Item {
 
         // Update models at once. Otherwise there seem to be weird behavior
         if (refreshModels) {
-            refresh()
+            root.updated()
         }
+    }
+
+    function updateAccessTime(url)
+    {
+        store.updateAccessTime(url)
+        root.updated()
     }
 
     Timer {
         id: timer
         interval: 50
-        onTriggered: root.count = viewModel.count
+        onTriggered: root.count = playlistListModel.count
     }
 
     Connections {
         // Due to JB#21453, we are using a timer to change the count
         // property in a delayed/lazy way so we won't update the UI so
         // often with a lot of count changes instead of a big one.
-        target: viewModel
+        target: playlistListModel
         onCountChanged: timer.restart()
     }
 
@@ -161,7 +161,6 @@ Item {
 
     PlaylistModel {
         id: playlistModel
-        store: store
     }
 
     Component {
@@ -174,18 +173,7 @@ Item {
     }
 
     GriloTrackerModel {
-        id: viewModel
-
-        function setDefaultQuery(searchText) {
-            query = PlaylistTrackerHelpers.getPlaylistsQuery(searchText, {})
-        }
-    }
-
-    GriloTrackerModel {
-        id: addModel
-
-        function setDefaultQuery(searchText) {
-            query = PlaylistTrackerHelpers.getPlaylistsQuery(searchText, {"playlistsLocation": playlistsLocation, "editablePlaylistsOnly": true})
-        }
+        id: playlistListModel
+        query: PlaylistTrackerHelpers.getPlaylistsQuery("", {})
     }
 }

@@ -2,7 +2,6 @@ import QtQuick 2.0
 import org.nemomobile.mpris 1.0
 
 MprisControls {
-
     property MprisManager mprisManager
 
     opacity: enabled ? 1.0 : 0.0

@@ -12,11 +12,7 @@ import Sailfish.Pickers 1.0
 
 ContentModel {
     contentType: ContentType.Document
-    contentFilter: GalleryStartsWithFilter {
-        property: "filePath"
-        value: StandardPaths.documents
-    }
-    rootType: DocumentGallery.File
+    rootType: DocumentGallery.Document
     sortProperties: ["-lastAccessed"]
     properties: [ 'url', 'title', 'lastAccessed', 'filePath', 'fileName', 'fileSize',
         'mimeType', 'selected', 'contentType' ]

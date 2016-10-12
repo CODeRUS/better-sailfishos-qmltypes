@@ -5,7 +5,7 @@ import Sailfish.Silica 1.0
 import Sailfish.Media 1.0
 import com.jolla.mediaplayer 1.0
 
-MediaPlayerPage {
+Page {
     id: playQueue
 
     objectName: "PlayQueuePage"

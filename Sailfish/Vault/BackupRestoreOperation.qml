@@ -28,7 +28,7 @@ QtObject {
         var fileName = _backupUtils.newBackupFileName(BackupUtils.TarGzipArchive)
         _reset(SimpleBackupRestore.Backup, units || _findUnits(true), fileName)
         _cloudAccountId = accountId
-        _cloudLocalSyncDir = backupUtils.createTemporaryDirectory("jolla-vault-cloud")
+        _cloudLocalSyncDir = backupUtils.privilegedBackupDirectory("cloud")
         _initProgress()
 
         backupRestore.backup(_units, _cloudLocalSyncDir + '/' + fileName)
@@ -67,7 +67,7 @@ QtObject {
 
         _reset(SimpleBackupRestore.Restore, units || _findUnits(true), fileName)
         _cloudAccountId = accountId
-        _cloudLocalSyncDir = backupUtils.createTemporaryDirectory("jolla-vault-cloud")
+        _cloudLocalSyncDir = backupUtils.privilegedBackupDirectory("cloud")
         _downloadedFilePath = _cloudLocalSyncDir + '/' + fileName
         _initProgress()
 
@@ -106,7 +106,7 @@ QtObject {
         var fileName = _backupUtils.newBackupFileName(BackupUtils.TarGzipArchive, presetDateTime)
         _reset(SimpleBackupRestore.Compress, [], fileName)
         _cloudAccountId = accountId
-        _cloudLocalSyncDir = backupUtils.createTemporaryDirectory("jolla-vault-cloud")
+        _cloudLocalSyncDir = backupUtils.privilegedBackupDirectory("cloud")
         _initProgress()
 
         backupRestore.compress(srcDirPath, _cloudLocalSyncDir + '/' + fileName)
@@ -138,17 +138,11 @@ QtObject {
 
     function deleteOldBackups(dirPath) {
         // keep the two latest backups
-        var fileInfos = backupUtils.sortedBackupFileInfo(dirPath)
+        var fileInfos = _backupUtils.sortedBackupFileInfo(dirPath)
         for (var i=2; i<fileInfos.length; i++) {
-            if (backupUtils.removeFile(fileInfos[i].fileName)) {
-                _logText("Deleted old backup file " + fileInfos[i].fileName)
-
-                // delete associated log files
-                backupUtils.removeFile(backupRestore.defaultLogFilePath(fileInfos[i].fileName, SimpleBackupRestore.Backup))
-                backupUtils.removeFile(backupRestore.defaultLogFilePath(fileInfos[i].fileName, SimpleBackupRestore.Restore))
-            } else {
-                _logText("Unable to delete old backup file " + fileInfos[i].fileName)
-            }
+            _logText("Deleting old backup file " + fileInfos[i].fileName)
+            _backupUtils.removeFile(dirPath + '/' + fileInfos[i].fileName)
+            _backupUtils.removeFile(backupRestore.defaultLogFilePath(fileInfos[i].fileName, _mode))
         }
     }
 
@@ -186,7 +180,7 @@ QtObject {
     function _cleanUp() {
         if (root._cloudLocalSyncDir.length > 0) {
             // delete any files uploaded to or downloaded from the cloud
-            backupUtils.removeTemporaryDirectory(root._cloudLocalSyncDir)
+            backupUtils.removeDirectory(root._cloudLocalSyncDir)
         }
     }
 
@@ -254,7 +248,7 @@ QtObject {
                 _maxSteps++
             }
         } else if (_mode == SimpleBackupRestore.Restore) {
-            // Restore: [download-if-cloud]/Preparing/Decompressing/[units]/Finalizing/Finished
+            // Restore: [download-if-cloud]/Preparing/LoadingArchive/[units]/Finalizing/Finished
             _maxSteps = 6 + _units.length
             if (_cloudAccountId) {
                 _maxSteps++
@@ -398,7 +392,7 @@ QtObject {
                 //% "Compressing data to backup file"
                 root._updateStatus(qsTrId("vault-la-compressing_data_to_backup"))
                 break
-            case SimpleBackupRestore.Decompressing:
+            case SimpleBackupRestore.LoadingArchive:
                 root._incrementProgress()
                 //: Currently in the process of extracting the user data from a backup file
                 //% "Extracting data from backup file"

@@ -498,7 +498,11 @@ PageStackBase {
             snapBackAnimation.setTarget(_currentContainer, peekContainer)
 
             // Is the peek container able to slide in when the current container is dragged?
-            peekContainer.testSlideTransition(push)
+            if (peekContainer.testSlideTransition(push)) {
+                peekContainer.opacity = 1.0
+            } else {
+                peekContainer.opacity = 0.0
+            }
         }
     }
 
@@ -871,6 +875,7 @@ PageStackBase {
                         lateralOffset = transitionPartner.lateralOffset - _currentWidth
                     }
                     slideAnimation.duration = _calculateDuration(0, lateralOffset)
+                    opacity = 1.0
                     animation = slideAnimation
                 } else {
                     lateralOffset = 0

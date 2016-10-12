@@ -79,25 +79,25 @@ SettingsBase {
             property string videoResolution: "1280x720"
             property string viewfinderResolution: "1280x720"
 
-            property variant isoValues: [ 0, 100, 200, 400 ]
-            property variant whiteBalanceValues: [
+            property var isoValues: [ 0, 100, 200, 400 ]
+            property var whiteBalanceValues: [
                 CameraImageProcessing.WhiteBalanceAuto,
                 CameraImageProcessing.WhiteBalanceCloudy,
                 CameraImageProcessing.WhiteBalanceSunlight,
                 CameraImageProcessing.WhiteBalanceFluorescent,
                 CameraImageProcessing.WhiteBalanceTungsten
             ]
-            property variant focusDistanceValues: [ Camera.FocusInfinity ]
-            property variant flashValues: [ Camera.FlashOff ]
-            property variant exposureCompensationValues: [ -4, -2, 0, 2, 4 ]
-            property variant exposureModeValues: [ Camera.ExposureAuto ]
-            property variant meteringModeValues: [
+            property var focusDistanceValues: [ Camera.FocusInfinity ]
+            property var flashValues: [ Camera.FlashOff ]
+            property var exposureCompensationValues: [ -4, -2, 0, 2, 4 ]
+            property var exposureModeValues: [ Camera.ExposureAuto ]
+            property var meteringModeValues: [
                 Camera.MeteringMatrix,
                 Camera.MeteringAverage,
                 Camera.MeteringSpot
             ]
-            property variant timerValues: [ 0, 3, 5, 10, 15 ]
-            property variant viewfinderGridValues: [ "none", "thirds", "ambience" ]
+            property var timerValues: [ 0, 3, 5, 10, 15 ]
+            property var viewfinderGridValues: [ "none", "thirds", "ambience" ]
         }
     }
 

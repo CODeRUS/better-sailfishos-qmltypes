@@ -37,7 +37,12 @@ BackupRestoreProgressPage {
     onStatusChanged: {
         if (!_started && status == PageStatus.Active) {
             _started = true
-            _snapshotExportDir = backupUtils.createTemporaryDirectory('vault_snapshot_' + snapshotName)
+            var destDir = backupUtils.cleanVaultSnapshotDirectory()
+            if (destDir.length == 0) {
+                root.state = "error"
+                return
+            }
+            _snapshotExportDir = backupUtils.createDirectory('vault_snapshot_' + snapshotName, destDir)
             vault.exportSnapshot(snapshotName, _snapshotExportDir)
         }
     }
@@ -64,7 +69,7 @@ BackupRestoreProgressPage {
     }
 
     function _cleanUp() {
-        backupUtils.removeTemporaryDirectory(_snapshotExportDir)
+        backupUtils.removeDirectory(_snapshotExportDir)
     }
 
     BackupUtils {

@@ -26,6 +26,13 @@ ListModel {
                             text: qsTrId("components_gallery-li-crop"),
                             type: ImageEditor.Crop,
                             icon: "image://theme/icon-m-crop"
+                        },
+                        {
+                            //: Adjust the light and contrast
+                            //% "Light and Contrast"
+                            text: qsTrId("components_gallery-li-light_and_contrast"),
+                            type: ImageEditor.AdjustLevels,
+                            icon: "image://theme/icon-m-light-contrast"
                         }
                     ]
         }
@@ -34,7 +41,7 @@ ListModel {
 
     Component.onCompleted: {
         var index = 0
-        for (; index < 2; ++index) {
+        for (; index < 3; ++index) {
             append(_operation(index))
         }
     }

@@ -35,9 +35,31 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Rectangle {
-    gradient: Gradient {
-        GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.15) }
-        GradientStop { position: 1.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.3) }
+Item {
+    id: root
+
+    property int position: Dock.Bottom
+
+    Rectangle {
+        rotation: {
+            switch (root.position) {
+            case Dock.Top:
+                return 180
+            case Dock.Bottom:
+                return 0
+            case Dock.Left:
+                return 90
+            case Dock.Right:
+                return -90
+            }
+        }
+
+        width: (rotation % 180 == 0) ? root.width : root.height
+        height: (rotation % 180 == 0) ? root.height : root.width
+
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.15) }
+            GradientStop { position: 1.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.3) }
+        }
     }
 }

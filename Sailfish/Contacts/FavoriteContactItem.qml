@@ -35,7 +35,7 @@ Item {
         if (!_contextMenu) {
             _contextMenu = contextMenuComponent.createObject(favoriteItem, {"person": person})
         }
-        _contextMenu.x = -favoriteItem.x
+        _contextMenu.x = Qt.binding(function () { return -x - parent.x })
         _contextMenu.show(favoriteItem)
     }
 
@@ -44,7 +44,7 @@ Item {
             _propertyMenu = propertyMenuComponent.createObject(favoriteItem)
         }
         _propertyMenu.addressesModel.setAddresses(addresses)
-        _propertyMenu.x = -favoriteItem.x
+        _propertyMenu.x = Qt.binding(function () { return -x - parent.x })
         _propertyMenu.show(favoriteItem)
     }
 
@@ -55,6 +55,8 @@ Item {
         }
 
         _remorseItem = removalComponent.createObject(favoriteItem)
+        _remorseItem.x = Qt.binding(function () { return -x - parent.x })
+
         //: Deleting image in 5 seconds
         //% "Deleting"
         _remorseItem.remorse.execute(_remorseItem, qsTrId("components_contacts-me-deleting"),

@@ -31,7 +31,7 @@ Page {
         //% "Pattern"
         qsTrId("gallery-value-metering-mode-pattern"),
         'http://www.tracker-project.org/temp/nmm#metering-mode-multispot':
-        //% "Multispot
+        //% "Multispot"
         qsTrId("gallery-value-metering-mode-multispot"),
         'http://www.tracker-project.org/temp/nmm#metering-mode-spot':
         //% "Spot"

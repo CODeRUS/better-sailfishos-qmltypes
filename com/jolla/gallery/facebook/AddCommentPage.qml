@@ -74,7 +74,7 @@ Page {
             Image {
                 id: avatar
                 // Fetch the avatar from the constructed url
-                source: _showDelegate ? "http://graph.facebook.com/"+ model.contentItem.from.objectIdentifier + "/picture" : ""
+                source: _showDelegate ? "http://graph.facebook.com/v2.6/"+ model.contentItem.from.objectIdentifier + "/picture" : ""
                 clip: true
                 anchors.fill: avatarPlaceholder
                 fillMode: Image.PreserveAspectCrop

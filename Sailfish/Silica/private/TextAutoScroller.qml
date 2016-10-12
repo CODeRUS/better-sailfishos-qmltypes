@@ -36,9 +36,9 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 Item {
-    property variant innerFlickable
-    property variant outerFlickable
-    property variant editor
+    property var innerFlickable
+    property var outerFlickable
+    property var editor
 
     onEditorChanged: updateFlickables()
 

@@ -8,6 +8,8 @@ Page {
     id: root
     allowedOrientations: Orientation.All
 
+    // Telephony.Call or Telephony.Message
+    property alias actionType: contactBrowser.actionType
     property string searchPlaceholderText: contactBrowser.searchPlaceholderText
     property bool showSearchPatternAsNewContact: false
     property alias allContactsModel: contactBrowser.allContactsModel

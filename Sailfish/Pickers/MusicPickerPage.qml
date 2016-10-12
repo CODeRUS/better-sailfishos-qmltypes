@@ -5,6 +5,7 @@ import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Pickers 1.0
 import Sailfish.Media 1.0
 import Sailfish.Gallery 1.0
+import "mediaformatter.js" as MediaFormatter
 
 PickerPage {
     id: musicPicker
@@ -12,10 +13,6 @@ PickerPage {
     orientationTransitions: Private.PageOrientationTransition {
         fadeTarget: _background ? listView : __silica_applicationwindow_instance.contentItem
         targetPage: musicPicker
-    }
-
-    MediaFormatter {
-        id: formatter
     }
 
     SilicaListView {
@@ -61,9 +58,9 @@ PickerPage {
             id: mediaListItem
             highlighted: down || model.selected
             duration: model.duration
-            title: Theme.highlightText(formatter.formatSong(model.title), musicModel.filter, Theme.highlightColor)
-            subtitle: Theme.highlightText(formatter.formatArtist(model.artist) + " | " +
-                                          formatter.formatAlbum(model.albumTitle), musicModel.filter, Theme.highlightColor)
+            title: Theme.highlightText(MediaFormatter.formatSong(model.title), musicModel.filter, Theme.highlightColor)
+            subtitle: Theme.highlightText(MediaFormatter.formatArtist(model.artist) + " | " +
+                                          MediaFormatter.formatAlbum(model.albumTitle), musicModel.filter, Theme.highlightColor)
             textFormat: Text.StyledText
             ListView.onAdd: AddAnimation { target: mediaListItem; duration: _animationDuration }
             ListView.onRemove: RemoveAnimation { target: mediaListItem; duration: _animationDuration }

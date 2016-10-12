@@ -74,3 +74,4 @@ NestedGridView 1.0 NestedGridView.qml
 PasswordField 1.0 PasswordField.qml
 ExpandingSection 1.0 ExpandingSection.qml
 ExpandingSectionGroup 1.0 ExpandingSectionGroup.qml
+singleton Remorse 1.0 Remorse.qml

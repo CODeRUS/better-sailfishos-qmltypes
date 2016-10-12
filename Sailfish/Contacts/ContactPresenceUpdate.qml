@@ -1,8 +1,8 @@
-import Sailfish.Silica.private 1.0
+import org.nemomobile.dbus 2.0
 
 DBusInterface {
     // Request an update from the service implemented by commhistoryd
-    destination: "org.nemomobile.AccountPresence"
+    service: "org.nemomobile.AccountPresence"
     path: "/org/nemomobile/AccountPresence"
     iface: "org.nemomobile.AccountPresenceIf"
 

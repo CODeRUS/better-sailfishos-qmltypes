@@ -56,7 +56,7 @@ ShaderEffect {
     property int direction: 0 // default = LeftToRight-OpaqueToTranslucent
 
     // impl. ---------------------
-    property variant source;
+    property var source
 
     vertexShader: "
         attribute highp vec4 qt_Vertex;

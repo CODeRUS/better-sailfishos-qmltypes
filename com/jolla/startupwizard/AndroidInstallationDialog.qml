@@ -18,7 +18,7 @@ Dialog {
     property int selectedAppCount: applicationList.selectionCount
 
     property string _trademark: "&#8482;"
-    property bool _androidSupportUninstalled
+    property bool _androidSupportPackageAvailable
 
     function _isAndroidSupportPackage(packageName) {
         return packageName == "aliendalvik"
@@ -27,6 +27,12 @@ Dialog {
     onAccepted: {
         applicationList.installSelectedApps()
     }
+
+    // Android stores have momentarily been hidden JB#23623, skip the dialog
+    // to avoid empty page if Android support package is not available
+    property bool skipDialog: status == PageStatus.Active && root.applicationModel.populated
+                              && !_androidSupportPackageAvailable
+    onSkipDialogChanged: if (skipDialog) accept()
 
     DelegateModel {
         model: root.applicationModel
@@ -39,7 +45,7 @@ Dialog {
                     break
                 }
             }
-            root._androidSupportUninstalled = androidSupportPackageAvailable
+            root._androidSupportPackageAvailable = androidSupportPackageAvailable
         }
     }
 
@@ -113,7 +119,7 @@ Dialog {
                 color: Theme.highlightColor
                 font.pixelSize: Theme.fontSizeExtraSmall
                 textFormat: Text.RichText // to render "TM" symbol
-                visible: _androidSupportUninstalled
+                visible: _androidSupportPackageAvailable
 
                 //: Hint to user to install Android support. "%1" = the "TM" trademark symbol.
                 //% "If you want to use Android%1 apps in Jolla, select this to install Android%1 support."
@@ -121,8 +127,8 @@ Dialog {
             }
 
             Repeater {
-                visible: _androidSupportUninstalled
-                model: _androidSupportUninstalled ? root.applicationModel : undefined
+                visible: _androidSupportPackageAvailable
+                model: _androidSupportPackageAvailable ? root.applicationModel : undefined
                 delegate: AndroidApplicationDelegate {
                     visible: _isAndroidSupportPackage(model.packageName)
                     onSelectedChanged: {
@@ -142,7 +148,7 @@ Dialog {
             Item {
                 width: 1
                 height: Theme.paddingLarge * 2
-                visible: _androidSupportUninstalled
+                visible: _androidSupportPackageAvailable
             }
 
             /*

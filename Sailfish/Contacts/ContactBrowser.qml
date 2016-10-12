@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Telephony 1.0
 import org.nemomobile.commhistory 1.0
 import org.nemomobile.configuration 1.0
 import org.nemomobile.contacts 1.0
@@ -8,6 +9,9 @@ import "common/common.js" as ContactsUtils
 
 SilicaFlickable {
     id: root
+
+    // Telephony.Call or Telephony.Message
+    property int actionType: Telephony.Call
 
     property bool searchEnabled
     property string searchPattern: contactSearchField.text
@@ -345,6 +349,7 @@ SilicaFlickable {
                 menu: contactContextMenuComponent
                 leftMarginOffset: root._leftMarginOffset
 
+                actionType: root.actionType
                 contactId: model.contactId
                 selectionModel: root.selectionModel
 
@@ -427,6 +432,8 @@ SilicaFlickable {
 
                     RecentContactsList {
                         id: recentContactsList
+
+                        actionType: root.actionType
                         contactsModel: allContactsModel
                         selectionModel: root.selectionModel
                         requiredProperty: root._filterProperty
@@ -476,6 +483,7 @@ SilicaFlickable {
                 width: root.width
                 menu: contactContextMenuComponent
 
+                actionType: root.actionType
                 contactId: model.contactId
                 selectionModel: root.selectionModel
 

@@ -41,7 +41,7 @@ Rectangle {
 
     property bool audioEnabled
     property Item highlightedItem
-    property int opacityAnimationDuration: 200
+    property int opacityAnimationDuration: Theme.minimumPressHighlightTime
     property alias yAnimationDuration: yAnimation.duration
     property alias animateY: yBehavior.enabled
     property alias animateOpacity: opacityBehavior.enabled

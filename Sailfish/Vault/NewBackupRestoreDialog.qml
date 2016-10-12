@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Vault 1.0
+import NemoMobile.Vault 1.0
 
 Dialog {
     id: root
@@ -9,7 +10,26 @@ Dialog {
     property int cloudAccountId
     property string backupDir
     property string fileToRestore
-    property UnitListModel unitListModel
+
+    property UnitListModel unitListModel: UnitListModel {
+        // if unitListModel hasn't been set to a pre-filled list model, set it up here
+        property Vault _vault: Vault {
+            Component.onCompleted: {
+                root.canAccept = false
+                connectVault(false)
+            }
+            onDone: {
+                if (operation == Vault.Connect) {
+                    unitListModel.loadVaultUnits(units())
+                    root.canAccept = true
+                }
+            }
+            onError: {
+                console.log("Vault error", operation, "error", error.rc, error.snapshot, error.dst,
+                            error.stdout, error.stderr)
+            }
+        }
+    }
 
     signal operationFinished(var successful)
 
@@ -22,6 +42,12 @@ Dialog {
         contentHeight: contentColumn.height
 
         VerticalScrollDecorator {}
+
+        BusyIndicator {
+            id: unitListModelBusy
+            anchors.centerIn: parent
+            size: BusyIndicatorSize.Large
+        }
 
         Column {
             id: contentColumn
@@ -45,6 +71,7 @@ Dialog {
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.highlightColor
                 textFormat: Text.StyledText
+                visible: !unitListModelBusy.running
 
                 text: {
                     if (cloudAccountId > 0) {

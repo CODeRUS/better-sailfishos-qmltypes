@@ -156,9 +156,9 @@ MouseArea {
     layer.sourceRect: Qt.rect(0, _isPullDownMenu ? 0 : -_shadowHeight,
                               pulleyBase.width, pulleyBase.height + _shadowHeight)
     layer.effect: Item {
-        property variant source
+        property var source
         ShaderEffect {
-            property variant source: parent.source
+            property var source: parent.source
             property real flickOpacity: flickable ? flickable.contentItem.opacity : 1.0
             y: _isPullDownMenu ? 0 : -_shadowHeight
             width: pulleyBase.width
@@ -429,7 +429,7 @@ MouseArea {
         yAnimationDuration: 120
         color: pulleyBase.highlightColor
         audioEnabled: flickable.dragging || quickSelect
-        opacityAnimationDuration: _atInitialPosition || _bounceBackRunning ? 400 : 120
+        opacityAnimationDuration: _atInitialPosition || _bounceBackRunning ? 400 : Theme.minimumPressHighlightTime
         opacity: Theme.highlightBackgroundOpacity * _opacity
 
         property real _opacity: {

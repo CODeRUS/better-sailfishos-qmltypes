@@ -7,6 +7,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Ambience 1.0
 
 ValueButton {
     id: toneItem
@@ -19,7 +20,8 @@ ValueButton {
     property bool toneEnabled
 
     label: defaultText
-    title: metadataReader.getTitle(toneSettings[fileProperty])
+    title: info.displayName != "" ? info.displayName : metadataReader.getTitle(toneSettings[fileProperty])
+
     toneEnabled: toneSettings[enabledProperty]
     value: (title != "" && toneEnabled)
            ? title
@@ -42,4 +44,10 @@ ValueButton {
                 toneSettings[enabledProperty] = !dialog.noSound
             })
      }
+    ContentInfo {
+        id: info
+
+        property string displayName
+        url: "file://" + toneSettings[fileProperty]
+    }
 }

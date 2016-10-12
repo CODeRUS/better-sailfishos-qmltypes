@@ -7,6 +7,8 @@ Dialog {
     id: root
     allowedOrientations: Orientation.All
 
+    // Telephony.Call or Telephony.Message
+    property alias actionType: contactBrowser.actionType
     property ListModel selectedContacts: contactBrowser.selectedContacts
     property string searchPlaceholderText: contactBrowser.searchPlaceholderText
     property bool showSearchPatternAsNewContact: false

@@ -29,9 +29,11 @@ BackgroundItem {
 
     Label {
         anchors.centerIn: parent
+        width: Math.min(implicitWidth, parent.width - 2*Theme.paddingSmall)
         text: root.text
         font.pixelSize: Theme.fontSizeMedium
         font.bold: root.emergency
+        fontSizeMode: Text.HorizontalFit
 
         color: {
             if (root.emergency) {

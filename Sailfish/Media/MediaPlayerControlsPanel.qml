@@ -14,21 +14,6 @@ DockedPanel {
 
     property alias extraContentItem: extraContent
 
-    property string label: {
-        if (author.length > 0) {
-            if (title.length > 0) {
-                return "%0 - %1".arg(author).arg(title)
-            } else {
-                return author
-            }
-        } else if (title.length > 0) {
-            return title
-        }
-        return ""
-    }
-
-    property string author
-    property string title
     property int duration
     property int position
     property int durationScalar: 1
@@ -72,29 +57,42 @@ DockedPanel {
     onActiveChanged: if (!active) hideControls()
     onPositionChanged: if (!slider.pressed) slider.value = position
 
+    background: MediaPlayerPanelBackground { }
+
     Column {
         id: column
 
         width: parent.width
         y: panel._isLandscape ? Theme.paddingSmall : Theme.paddingMedium
-        spacing: panel._isLandscape ? Theme.paddingSmall : Theme.paddingLarge
 
-        Slider {
-            id: slider
-
+        Item {
+            // workaround slider having too much padding
             width: parent.width
-            handleVisible: false
-            valueText: Format.formatDuration(value / durationScalar, value >= (3600 * durationScalar) ? Format.DurationLong : Format.DurationShort)
-            label: panel.label
-            minimumValue: 0
-            maximumValue: panel.duration > 0 ? panel.duration : 1
-            onReleased: panel.sliderReleased(value)
+            height: Theme.itemSizeMedium
+
+            Slider {
+                id: slider
+
+                width: parent.width
+                handleVisible: false
+                valueText: Format.formatDuration(value / durationScalar, value >= (3600 * durationScalar) ? Format.DurationLong : Format.DurationShort)
+                minimumValue: 0
+                maximumValue: panel.duration > 0 ? panel.duration : 1
+                onReleased: panel.sliderReleased(value)
+            }
         }
+
         Item {
             id: extraContent
             width: column.width
             height: childrenRect.height
         }
+
+        Item {
+            width: 1
+            height: Theme.paddingMedium
+        }
+
         Row {
             id: navigation
             width: parent.width

@@ -6,9 +6,8 @@ import org.nemomobile.dbus 2.0
 SimSelectorBase {
     id: root
 
-    // TODO : Should the SimPicker enabled modem directly or load Settings -> SIM
-    property alias canActivateSimSettingsPage: dbusInterfaceLoader.active
     property bool updateSelectedSim: true
+    property bool restrictToActive
 
     signal simSelected(int sim, string modemPath)
 
@@ -41,18 +40,16 @@ SimSelectorBase {
                 highlightedColor: canHighlight ? Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
                                                : "transparent"
 
-                opacity: !modemEnabled || errorState.errorState == "noSimInserted" ? 0.4 : 1.0
+                // This assumes we have a DSDS modem, which is the only type supported at the moment.
+                enabled: !restrictToActive || modemManager.activeVoiceCallModems.length === 0 || modemManager.activeVoiceCallModems[0] === modem
+                opacity: !modemEnabled || errorState.errorState == "noSimInserted" || !enabled ? 0.4 : 1.0
                 Behavior on opacity {
                     FadeAnimation {}
                 }
 
                 onClicked: {
                     if (errorState.errorState === "modemDisabled") {
-                        if (canActivateSimSettingsPage) {
-                            dbusInterfaceLoader.item.showSimCardsSettings()
-                        } else {
-                            modemManager.enableModem(modem, true)
-                        }
+                        settings.showSimCards()
                     } else if (index != root.activeSim && updateSelectedSim) {
                         setActiveSimIndex(index)
                     } else if (errorState.errorState === "simActivationRequired") {
@@ -82,18 +79,15 @@ SimSelectorBase {
         }
     }
 
-    Loader {
-        id: dbusInterfaceLoader
-        sourceComponent: DBusInterface {
-            id: settingsDbus
+    DBusInterface {
+        id: settings
 
-            service: "com.jolla.settings"
-            path: "/com/jolla/settings/ui"
-            iface: "com.jolla.settings.ui"
+        service: "com.jolla.settings"
+        path: "/com/jolla/settings/ui"
+        iface: "com.jolla.settings.ui"
 
-            function showSimCardsSettings() {
-                settingsDbus.call("showPage", "system_settings/connectivity/multisim")
-            }
+        function showSimCards() {
+            settings.call("showPage", "system_settings/connectivity/multisim")
         }
     }
 

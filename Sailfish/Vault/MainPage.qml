@@ -4,6 +4,7 @@ import Sailfish.Accounts 1.0
 import Sailfish.Vault 1.0
 import NemoMobile.Vault 1.0
 import org.nemomobile.dbus 1.0
+import org.nemomobile.configuration 1.0
 
 Page {
     id: root
@@ -34,7 +35,7 @@ Page {
 
     property bool _needsMigration: _vault.hasSnapshots && _storageListModel.count > 0
     property bool _checkMigrationNeeded: _vault.connected && _storageListModel.ready && status == PageStatus.Active
-    property string _memoryCardVaultDumpFile
+    property string _memoryCardLegacyImportId
 
     on_CheckMigrationNeededChanged: {
         if (_checkMigrationNeeded) {
@@ -66,11 +67,28 @@ Page {
         })
     }
 
+    function _addImportedBackup(fileId) {
+        var prevImportedBackups = importedBackups.value
+        prevImportedBackups.push(fileId)
+        importedBackups.value = prevImportedBackups
+        importedBackups.sync()
+    }
+
+    function _backupAlreadyImported(fileId) {
+        return importedBackups.value.indexOf(fileId) >= 0
+    }
+
     BusyIndicator {
         id: pageBusy
         anchors.centerIn: parent
         size: BusyIndicatorSize.Large
         running: contentLoader.status !== Loader.Ready || root._checkMigrationNeeded || _vault.removingSnapshots
+    }
+
+    ConfigurationValue {
+        id: importedBackups
+        key: "/sailfish/vault/imported_backups"
+        defaultValue: []
     }
 
     Vault {
@@ -116,10 +134,11 @@ Page {
                 connected = true
                 _unitListModel.loadVaultUnits(units())
             } else if (operation == Vault.ExportImportExecute) {
-                // Here we could delete the _memoryCardVaultDumpFile containing the archive of the
-                // old vault dump if we wanted to.
+                // the legacy backup dump on the memory card was successfully imported
                 _resetSnapshots()
                 importing = false
+                root._addImportedBackup(root._memoryCardLegacyImportId)
+                root._memoryCardLegacyImportId = ""
                 root._showMigrationDialog()
             } else if (operation == Vault.RemoveSnapshot) {
                 _snapshotRemoveCount--
@@ -330,12 +349,9 @@ Page {
                 showStorageInfo: !memoryCardVaultUpdateButton.visible
 
                 onMemoryCardPathChanged: {
-                    root._memoryCardVaultDumpFile = ""
+                    root._memoryCardLegacyImportId = ""
                     if (memoryCardPath.length > 0) {
-                        var vaultDumpBackup = backupUtils.vaultDumpFileInfo(memoryCardPath)
-                        if (vaultDumpBackup.fileName && vaultDumpBackup.created) {
-                            root._memoryCardVaultDumpFile = vaultDumpBackup.fileName
-                        }
+                        root._memoryCardLegacyImportId = backupUtils.vaultDumpFileId(memoryCardPath)
                     }
                 }
             }
@@ -357,11 +373,11 @@ Page {
             Button {
                 id: memoryCardVaultUpdateButton
 
-                property string vaultDumpFileName
-
                 anchors.horizontalCenter: parent.horizontalCenter
                 preferredWidth: Theme.buttonWidthLarge
-                visible: root._memoryCardVaultDumpFile.length > 0 && !snapshotUpdatePromptLoader.sourceComponent
+                visible: root._memoryCardLegacyImportId.length > 0
+                         && !root._backupAlreadyImported(root._memoryCardLegacyImportId)
+                         && !snapshotUpdatePromptLoader.sourceComponent
 
                 // (reuse this translation to avoid adding a new one)
                 //: Major heading on the page which lets the user select which backup they wish to migrate to the new format.
