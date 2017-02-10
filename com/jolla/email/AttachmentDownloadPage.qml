@@ -53,39 +53,36 @@ Page {
         }
     }
 
-    Button {
-        id: downloadAttachButton
-        visible: !busyIndicator.running
-        //: Download attachments button
-        //% "Download"
-        text: qsTrId("jolla-email-la-download_attachments_forward")
+    ButtonLayout {
         anchors {
-            horizontalCenter: parent.horizontalCenter
-            bottom: discardButton.top
-            bottomMargin: Theme.paddingLarge
-        }
-        onClicked: {
-            busyIndicator.running = true
-            downloadInProgress = true
-            email.downloadMessage()
-        }
-    }
-
-    Button {
-        id: discardButton
-        visible: !busyIndicator.running
-        //: Discard not downloaded attachments button
-        //% "Discard"
-        text: qsTrId("jolla-email-la-discard_not_downloaded_attachments")
-        anchors {
-            horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
-            bottomMargin: Theme.paddingLarge *2
+            bottomMargin: Theme.itemSizeMedium
         }
-        onClicked: {
-            composerItem.removeUndownloadedAttachments()
-            composerItem.discardUndownloadedAttachments = true
-            pageStack.pop()
+        preferredWidth: Theme.buttonWidthMedium
+
+        Button {
+            id: downloadAttachButton
+            visible: !busyIndicator.running
+            //: Download attachments button
+            //% "Download"
+            text: qsTrId("jolla-email-la-download_attachments_forward")
+            onClicked: {
+                busyIndicator.running = true
+                downloadInProgress = true
+                email.downloadMessage()
+            }
+        }
+        Button {
+            id: discardButton
+            visible: !busyIndicator.running
+            //: Discard not downloaded attachments button
+            //% "Discard"
+            text: qsTrId("jolla-email-la-discard_not_downloaded_attachments")
+            onClicked: {
+                composerItem.removeUndownloadedAttachments()
+                composerItem.discardUndownloadedAttachments = true
+                pageStack.pop()
+            }
         }
     }
 

@@ -46,6 +46,7 @@ MouseArea {
     property color highlightColor: Theme.highlightColor
     property color highlightBackgroundColor: Theme.highlightBackgroundColor
     property real preferredWidth: Theme.buttonWidthSmall
+    property bool __silica_button
 
     onPressedChanged: {
         if (pressed) {
@@ -60,7 +61,7 @@ MouseArea {
     onPreventStealingChanged: if (preventStealing) button.DragFilter.end()
 
     height: Theme.itemSizeExtraSmall
-    implicitWidth: Math.max(preferredWidth, buttonText.width+Theme.paddingMedium)
+    implicitWidth: Math.max(preferredWidth, buttonText.width+Theme.paddingLarge)
 
     Rectangle {
         anchors {

@@ -128,6 +128,8 @@ TextBaseItem {
     // TODO: Remove this wrongly-formulated property name once users have been migrated, and version incremented
     property alias enableSoftwareInputPanel: textBase.softwareInputPanelEnabled
 
+    property bool highlighted: _editor.activeFocus
+
     property bool _suppressPressAndHoldOnText
     property Item _backgroundItem
     property QtObject _feedbackEffect
@@ -255,11 +257,11 @@ TextBaseItem {
 
         color: textBase.errorHighlight
                ? "#ff4d4d"
-               : (_editor.activeFocus ? Theme.secondaryHighlightColor : Theme.secondaryColor)
+               : (textBase.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor)
 
         opacity: (textBase.text.length === 0 && !_editor.inputMethodComposing) ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation {} }
-        elide: Text.ElideRight
+        truncationMode: TruncationMode.Fade
         anchors {
             left: parent.left; top: parent.top; right: parent.right
             leftMargin: textLeftMargin; topMargin: textTopMargin; rightMargin: textRightMargin
@@ -278,9 +280,9 @@ TextBaseItem {
         visible: labelVisible
         color: textBase.errorHighlight
                ? "#ff4d4d"
-               : (_editor.activeFocus ? Theme.highlightColor : Theme.primaryColor)
-        opacity: (textBase.errorHighlight || _editor.activeFocus ? 1.0 : 0.6) * (1 - placeholderTextLabel.opacity)
-        elide: Text.ElideRight
+               : (textBase.highlighted ? Theme.highlightColor : Theme.primaryColor)
+        opacity: (textBase.errorHighlight || textBase.highlighted ? 1.0 : 0.6) * (1 - placeholderTextLabel.opacity)
+        truncationMode: TruncationMode.Fade
         font.pixelSize: Theme.fontSizeSmall
     }
 

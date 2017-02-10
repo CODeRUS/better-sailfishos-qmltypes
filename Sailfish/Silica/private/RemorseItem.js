@@ -73,9 +73,6 @@ function _executeRemorseAction(item, callback, closeAfterExecute)
         }
     }
 
-    if ('__silica_item_removed' in item) {
-        item.__silica_item_removed = true
-    }
     if (closeAfterExecute) {
         item._close()
     } else {

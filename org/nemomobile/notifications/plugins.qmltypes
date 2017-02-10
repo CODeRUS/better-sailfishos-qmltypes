@@ -1,4 +1,4 @@
-import QtQuick.tooling 1.1
+import QtQuick.tooling 1.2
 
 // This file describes the plugin-supplied types contained in the library.
 // It is used for QML tooling purposes only.
@@ -7,6 +7,7 @@ import QtQuick.tooling 1.1
 // 'qmlplugindump -nonrelocatable -noinstantiate org.nemomobile.notifications 1.0'
 
 Module {
+    dependencies: ["QtQuick 2.0"]
     Component {
         name: "Notification"
         prototype: "QObject"
@@ -31,6 +32,7 @@ Module {
         Property { name: "category"; type: "string" }
         Property { name: "appName"; type: "string" }
         Property { name: "replacesId"; type: "uint" }
+        Property { name: "icon"; type: "string" }
         Property { name: "appIcon"; type: "string" }
         Property { name: "summary"; type: "string" }
         Property { name: "body"; type: "string" }
@@ -61,6 +63,11 @@ Module {
             name: "notifications"
             type: "QList<QObject*>"
             Parameter { name: "owner"; type: "string" }
+        }
+        Method {
+            name: "notificationsByCategory"
+            type: "QList<QObject*>"
+            Parameter { name: "category"; type: "string" }
         }
         Method {
             name: "remoteAction"

@@ -6,7 +6,6 @@ import com.jolla.settings.sync 1.0
 Page {
     id: root
 
-    property QtObject _bluetoothPicker
     property int _baseStackDepth: -1
     property var _objectsToDestroy: []
 
@@ -42,11 +41,11 @@ Page {
         if (status == PageStatus.Active) {
             if (_baseStackDepth < 1) {
                 _baseStackDepth = pageStack.depth
-                btAdapter.holdSession()
+                btSession.holdSession()
             }
         } else if (status == PageStatus.Inactive) {
             if (_baseStackDepth >= 0 && pageStack.depth < _baseStackDepth) {
-                btAdapter.releaseSession()
+                btSession.releaseSession()
                 _baseStackDepth = -1
             }
         }
@@ -56,9 +55,9 @@ Page {
         target: Qt.application
         onActiveChanged: {
             if (Qt.application.active) {
-                btAdapter.holdSession()
+                btSession.holdSession()
             } else {
-                btAdapter.releaseSession()
+                btSession.releaseSession()
             }
         }
     }
@@ -71,8 +70,8 @@ Page {
         id: endpointManager
     }
 
-    BluetoothAdapter {
-        id: btAdapter
+    BluetoothSession {
+        id: btSession
     }
 
     Component {
@@ -93,12 +92,12 @@ Page {
             }
 
             Component.onCompleted: {
-                btAdapter.startSession()
+                btSession.startSession()
                 endpointManager.triggerSync(identifier)
                 _syncStarted = true
             }
             Component.onDestruction: {
-                btAdapter.endSession()
+                btSession.endSession()
             }
         }
     }
@@ -119,10 +118,7 @@ Page {
                 //% "Add new device"
                 text: qsTrId("settings_sync-me-add_device")
                 onClicked: {
-                    if (_bluetoothPicker == null) {
-                        _bluetoothPicker = bluetoothPickerComponent.createObject(root)
-                    }
-                    _bluetoothPicker.start()
+                    pageStack.push(bluetoothPickerComponent)
                 }
             }
         }
@@ -156,10 +152,13 @@ Page {
 
     Component {
         id: bluetoothPickerComponent
-        SyncBluetoothPicker {
-            syncEndpointManager: endpointManager
-            onSucceeded: {
-                var identifier = endpointManager.createBluetoothEndpoint(deviceAddress)
+        BluetoothDevicePickerDialog {
+            requirePairing: true
+            excludedDevices: endpointManager.bluetoothEndpointAddresses()
+            preferredProfileHint: BluetoothProfiles.SyncMLServer
+
+            onAccepted: {
+                var identifier = endpointManager.createBluetoothEndpoint(selectedDevice)
                 endpointManager.updateSyncEndpoint(identifier,
                                                    SyncEndpoint.DownloadSync,
                                                    SyncEndpoint.SyncContacts,

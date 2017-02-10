@@ -36,7 +36,6 @@ import QtQuick 2.1
 import QtQuick.Window 2.1 as QtQuick
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
-import org.nemomobile.thumbnailer 1.0
 import "CoverLoader.js" as CoverLoader
 import "private"
 
@@ -99,29 +98,44 @@ Window {
     // }
 
     property QtObject __quickWindow
-    onWindowChanged: __quickWindow = window ? window : null
+    onWindowChanged: {
+        __quickWindow = window ? window : null
+
+        // Use black background when running Silica on desktop without ambiences
+        if (window && Config.desktop) {
+            window.color = "black"
+        }
+    }
     property var _coverIncubator: null
     function _loadCover() {
         if (cover && !_coverWindow) {
             if (_incubatingCoverWindow) {
                 return
             }
-            _coverIncubator = coverWindowComponent.incubateObject(window)
-            if (_coverIncubator.status != Component.Ready) {
-                _incubatingCoverWindow = true
-                _coverIncubator.onStatusChanged = function(status) {
-                    if (status == Component.Ready) {
-                        _coverWindow = _coverIncubator.object
-                        _coverIncubator = null
-                        _incubatingCoverWindow = false
-                        _loadCover()
-                    } else if (status == Component.Error) {
-                        _incubatingCoverWindow = false
-                    }
+            if (!Config.desktop) {
+                var component = Qt.createComponent("private/CoverWindow.qml")
+                if (component.status === Component.Ready) {
+                    _coverIncubator = component.incubateObject(window)
+                } else {
+                    console.log("ApplicationWindow.qml failed create cover window component", component.errorString())
                 }
-                return
+
+                if (_coverIncubator.status != Component.Ready) {
+                    _incubatingCoverWindow = true
+                    _coverIncubator.onStatusChanged = function(status) {
+                        if (status == Component.Ready) {
+                            _coverWindow = _coverIncubator.object
+                            _coverIncubator = null
+                            _incubatingCoverWindow = false
+                            _loadCover()
+                        } else if (status == Component.Error) {
+                            _incubatingCoverWindow = false
+                        }
+                    }
+                    return
+                }
+                _coverWindow = _coverIncubator.object
             }
-            _coverWindow = _coverIncubator.object
         }
         CoverLoader.load(cover, _coverWindow ? _coverWindow.contentItem : null,
             function(obj) {
@@ -163,26 +177,6 @@ Window {
         }
     }
 
-    Component {
-        id: coverWindowComponent
-        CoverWindow {
-            id: coverWindow
-            title: "_CoverWindow"
-            width: (window._transpose && !Config.wayland) ? Theme.coverSizeLarge.height : Theme.coverSizeLarge.width
-            height: (window._transpose && !Config.wayland) ? Theme.coverSizeLarge.width : Theme.coverSizeLarge.height
-
-            Thumbnail.maxCost: Theme.coverSizeLarge.width * Theme.coverSizeLarge.height * 3
-
-            mainWindow: window
-
-            Component.onCompleted: {
-                contentItem.width = coverWindow.width
-                contentItem.height = coverWindow.height
-                window._setCover(coverWindow)
-            }
-        }
-    }
-
     // background image
     Item {
         id: wallpaper
@@ -190,7 +184,7 @@ Window {
         height: Screen.height
         anchors.centerIn: parent
 
-        rotation: window.QtQuick.Screen.angleBetween(Qt.PortraitOrientation, window.QtQuick.Screen.primaryOrientation)
+        rotation: Config.desktop ? 0 : window.QtQuick.Screen.angleBetween(Qt.PortraitOrientation, window.QtQuick.Screen.primaryOrientation)
 
         Item {
             id: rotatingItem

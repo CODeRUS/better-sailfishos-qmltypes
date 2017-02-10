@@ -47,6 +47,7 @@ BackgroundItem {
     property alias pending: countdown.running
     property real leftMargin: Theme.horizontalPageMargin
     property real rightMargin: Theme.horizontalPageMargin
+    property alias font: titleLabel.font
 
     function execute(item, title, callback, timeout) {
         remorseItem.text = title

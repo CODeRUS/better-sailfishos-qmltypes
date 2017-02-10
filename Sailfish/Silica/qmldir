@@ -28,6 +28,7 @@ SilicaGridView 1.0 SilicaGridView.qml
 SilicaFlickable 1.0 SilicaFlickable.qml
 SilicaWebView 1.0 SilicaWebView.qml
 Label 1.0 Label.qml
+LinkedLabel 1.0 LinkedLabel.qml
 MenuItem 1.0 MenuItem.qml
 MenuLabel 1.0 MenuLabel.qml
 PullDownMenu 1.0 PullDownMenu.qml

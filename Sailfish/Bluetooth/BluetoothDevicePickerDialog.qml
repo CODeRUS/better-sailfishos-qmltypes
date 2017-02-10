@@ -5,21 +5,25 @@ import Sailfish.Bluetooth 1.0
 Dialog {
     id: root
 
-    property string selectedDevice: picker.selectedDevice
-    property bool selectedDevicePaired: picker.selectedDevicePaired
+    property string selectedDevice
+    property alias requirePairing: picker.requirePairing
     property alias excludedDevices: picker.excludedDevices
     property alias preferredProfileHint: picker.preferredProfileHint
 
-    canAccept: selectedDevice != ""
-    forwardNavigation: canAccept
+    canAccept: selectedDevice.length > 0
+
+    BluetoothSession {
+        id: session
+    }
 
     onOpened: {
-        picker.adapter.startSession()
+        session.startSession()
+        picker.selectedDevice = ""
     }
 
     onDone: {
-        picker.adapter.stopDiscovery()
-        picker.adapter.endSession()
+        picker.stopDiscovery()
+        session.endSession()
     }
 
     BluetoothViewPlaceholder {
@@ -52,8 +56,22 @@ Dialog {
             anchors.top: header.bottom
             visible: discovering || !empty
             width: parent.width
-            startDiscoveryWhenPowered: true
-            onDeviceClicked: root.accept()
+            autoStartDiscovery: true
+
+            onDeviceClicked: {
+                if (selectedDevicePaired || !requirePairing) {
+                    root.selectedDevice = selectedDevice
+                    root.accept()
+                    selectedDevice = ""
+                }
+            }
+            onDevicePaired: {
+                if (requirePairing) {
+                    root.selectedDevice = address
+                    root.accept()
+                    selectedDevice = ""
+                }
+            }
         }
 
         PullDownMenu {
@@ -62,7 +80,7 @@ Dialog {
                 text: qsTrId("components_bluetooth-me-start_discovery")
                 enabled: !picker.discovering
 
-                onClicked: picker.discoverDevices()
+                onClicked: picker.startDiscovery()
             }
         }
     }

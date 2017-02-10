@@ -16,7 +16,7 @@ PinInput {
     minimumLength: authenticator ? authenticator.minimumCodeLength : 0
     maximumLength: authenticator ? authenticator.maximumCodeLength : 64
     showDigitPad: !authenticator || !authenticator.codeInputIsKeyboard
-
+    warningTextColor: emergency ? Theme.primaryColor : Theme.highlightColor
 
     //: Devicelock UI's header-text which indicates Locked state.
     //% "Enter current lock code"

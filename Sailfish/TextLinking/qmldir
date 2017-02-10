@@ -1,4 +1,3 @@
 module Sailfish.TextLinking
-plugin sailfishtextlinkingplugin
 LinkHandler 1.0 LinkHandler.qml
 LinkedText 1.0 LinkedText.qml

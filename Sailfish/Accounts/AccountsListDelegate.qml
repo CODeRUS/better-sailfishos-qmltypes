@@ -10,7 +10,7 @@ ListItem {
     signal accountSyncRequested(int accountId)
     signal accountClicked(int accountId, string providerName)
 
-    contentHeight: visible ? Theme.itemSizeMedium : 0
+    contentHeight: visible ? Math.max(Theme.itemSizeMedium, column.height + 2*Theme.paddingSmall) : 0
     menu: entriesInteractive ? menuComponent : null
 
     Component {
@@ -78,62 +78,60 @@ ListItem {
     BusyIndicator {
         id: syncIndicator
         anchors.centerIn: icon
-        size: BusyIndicatorSize.Medium
-        width: sourceSize.width * .75
+        size: BusyIndicatorSize.Small
         height: width
         running: model.performingInitialSync && model.accountError === AccountModel.NoAccountError
     }
-    Label {
-        id: accountName
+    Column {
+        id: column
         anchors {
             left: icon.right
             leftMargin: Theme.paddingLarge
             right: parent.right
             rightMargin: Theme.horizontalPageMargin
             verticalCenter: parent.verticalCenter
-            verticalCenterOffset: accountUserName.text === "" ? 0 : -implicitHeight/2
         }
-        truncationMode: TruncationMode.Fade
-        text: model.accountDisplayName
-        color: {
-            if (highlighted || model.accountError !== AccountModel.NoAccountError) {
-                return Theme.highlightColor
+        Label {
+            id: accountName
+
+            width: parent.width
+            truncationMode: TruncationMode.Fade
+            text: model.accountDisplayName
+            color: {
+                if (highlighted || model.accountError !== AccountModel.NoAccountError) {
+                    return Theme.highlightColor
+                }
+                return model.accountEnabled
+                        ? Theme.primaryColor
+                        : Theme.rgba(Theme.primaryColor, 0.55)
             }
-            return model.accountEnabled
-                    ? Theme.primaryColor
-                    : Theme.rgba(Theme.primaryColor, 0.55)
         }
-    }
-    Label {
-        id: accountUserName
-        anchors {
-            left: icon.right
-            leftMargin: Theme.paddingLarge
-            top: accountName.bottom
-            right: parent.right
-            rightMargin: Theme.horizontalPageMargin
-        }
-        truncationMode: TruncationMode.Fade
-        text: {
-            if (model.accountError === AccountModel.AccountNotSignedInError) {
-                //: The user has not logged into this account and needs to do so
-                //% "Not signed in"
-                return qsTrId("component_accounts-la-not_signed_in")
+        Label {
+            id: accountUserName
+            width: parent.width
+            visible: text.length > 0
+            truncationMode: TruncationMode.Fade
+            text: {
+                if (model.accountError === AccountModel.AccountNotSignedInError) {
+                    //: The user has not logged into this account and needs to do so
+                    //% "Not signed in"
+                    return qsTrId("component_accounts-la-not_signed_in")
+                }
+                if (model.performingInitialSync) {
+                    //: In the process of setting up this account
+                    //% "Setting up account..."
+                    return qsTrId("component_accounts-la-setting_up_account")
+                }
+                return model.accountUserName
             }
-            if (model.performingInitialSync) {
-                //: In the process of setting up this account
-                //% "Setting up account..."
-                return qsTrId("component_accounts-la-setting_up_account")
+            color: {
+                if (highlighted || model.accountError !== AccountModel.NoAccountError) {
+                    return Theme.secondaryHighlightColor
+                }
+                return model.accountEnabled
+                        ? Theme.secondaryColor
+                        : Theme.rgba(Theme.secondaryColor, 0.3)
             }
-            return model.accountUserName
-        }
-        color: {
-            if (highlighted || model.accountError !== AccountModel.NoAccountError) {
-                return Theme.secondaryHighlightColor
-            }
-            return model.accountEnabled
-                    ? Theme.secondaryColor
-                    : Theme.rgba(Theme.secondaryColor, 0.3)
         }
     }
 

@@ -1,0 +1,6 @@
+module Sailfish.WebView
+plugin sailfishwebviewplugin
+WebView 1.0 WebView.qml
+WebViewFlickable 1.0 WebViewFlickable.qml
+WebViewPage 1.0 WebViewPage.qml
+OrientationFader 1.0 OrientationFader.qml

@@ -1,6 +1,5 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Contacts 1.0
 import Sailfish.Bluetooth 1.0
 import com.jolla.settings.sync 1.0
 
@@ -19,8 +18,7 @@ QtObject {
             _picker = _pickerComponent.createObject(root)
         }
         _cleanUp()
-        _importPage.autoDismiss = false
-        _picker.start()
+        pageStack.push(_picker)
     }
 
     function _cleanUp() {
@@ -31,26 +29,25 @@ QtObject {
     }
 
     property QtObject _pickerComponent: Component {
-        SyncBluetoothPicker {
-            endDestination: _importPage
-            pairingAgentName: "/com/jolla/bluetooth_contact_import"
+        BluetoothDevicePickerDialog {
+            requirePairing: true
+            preferredProfileHint: BluetoothProfiles.SyncMLServer
+            acceptDestination: _importPage
+            acceptDestinationAction: PageStackAction.Replace
 
-            onSucceeded: {
-                if (!_importPage) {
-                    return
-                }
-                var identifier = _endpointManager.findBluetoothEndpoint(deviceAddress)
+            onAccepted: {
+                var identifier = _endpointManager.findBluetoothEndpoint(selectedDevice)
                 if (identifier === "") {
-                    identifier = _endpointManager.createBluetoothEndpoint(deviceAddress)
+                    identifier = _endpointManager.createBluetoothEndpoint(selectedDevice)
                     if (identifier === "") {
                         console.log("Contacts import error: unable to create Bluetooth sync endpoint!")
-                        _importPage.autoDismiss = true
+                        _importPage.endpointIdError = true
                         return
                     } else {
                         root._endpointToCleanUp = identifier
                     }
                 }
-                _btAdapter.startSession()
+                _btSession.startSession()
                 _importPage.endpointId = identifier
                 _endpointManager.updateSyncEndpoint(identifier,
                                                    SyncEndpoint.DownloadSync,
@@ -59,31 +56,21 @@ QtObject {
                 _endpointManager.triggerSync(identifier)
             }
 
-            onFailed: {
-                if (_importPage) {
-                    _importPage.autoDismiss = true
-                }
-
+            onRejected: {
+                _btSession.endSession()
             }
         }
     }
 
     property QtObject _importComponent: Component {
         Page {
-            property bool autoDismiss
             property alias endpointId: endpoint.identifier
+            property int endpointStatus: endpoint.status
+            property bool endpointIdError
 
             onStatusChanged: {
-                if (status == PageStatus.Active && autoDismiss) {
-                    pageStack.pop()
-                } else if (status == PageStatus.Deactivating) {
-                    _btAdapter.endSession()
-                }
-            }
-
-            onAutoDismissChanged: {
-                if (status == PageStatus.Active && autoDismiss) {
-                    pageStack.pop()
+                if (status == PageStatus.Deactivating) {
+                    _btSession.endSession()
                 }
             }
 
@@ -119,6 +106,11 @@ QtObject {
                     textFormat: Text.AutoText
                     font.pixelSize: Theme.fontSizeSmall
                     text: {
+                        if (endpointIdError) {
+                            //: Shown when settings could not be loaded to begin importing contacts
+                            //% "Unable to load import settings for the device."
+                            return qsTrId("components_contacts-la-import_load_error")
+                        }
                         switch (endpoint.status) {
                         case SyncEndpoint.UnknownStatus:
                         case SyncEndpoint.Queued:
@@ -165,9 +157,10 @@ QtObject {
                 id: busyIndicator
                 anchors.centerIn: parent
                 size: BusyIndicatorSize.Large
-                running: endpoint.status == SyncEndpoint.UnknownStatus
-                         || endpoint.status == SyncEndpoint.Queued
-                         || endpoint.status == SyncEndpoint.Syncing
+                running: (endpoint.status == SyncEndpoint.UnknownStatus
+                          || endpoint.status == SyncEndpoint.Queued
+                          || endpoint.status == SyncEndpoint.Syncing)
+                         && !endpointIdError
             }
 
             Button {
@@ -191,5 +184,5 @@ QtObject {
 
     property QtObject _endpointManager: SyncEndpointManager {}
 
-    property QtObject _btAdapter: BluetoothAdapter {}
+    property QtObject _btSession: BluetoothSession {}
 }

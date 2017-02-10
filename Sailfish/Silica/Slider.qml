@@ -32,7 +32,7 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.4
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 
@@ -53,6 +53,7 @@ MouseArea {
     property real rightMargin: Math.round(Screen.width/8)
 
     property bool _hasValueLabel: false
+    property Item _valueLabel
     property real _oldValue
     property real _precFactor: 1.0
 
@@ -61,6 +62,7 @@ MouseArea {
     property bool _cancel
 
     property bool _componentComplete
+    property int _extraPadding: Math.max(height - implicitHeight, 0) / 2
 
     DragFilter.orientations: Qt.Vertical
     onPreventStealingChanged: if (preventStealing) slider.DragFilter.end()
@@ -78,7 +80,8 @@ MouseArea {
         }
     }
 
-    implicitHeight: valueText !== "" ? Theme.itemSizeExtraLarge : label !== "" ? Theme.itemSizeMedium : Theme.itemSizeSmall
+    implicitHeight: labelText.visible ? (background.topPadding + background.height / 2 + 2 * Theme.paddingMedium + labelText.height)
+                                      : (background.topPadding + background.height + background.bottomPadding)
 
     onWidthChanged: updateWidth()
     onLeftMarginChanged: updateWidth()
@@ -153,32 +156,37 @@ MouseArea {
             _hasValueLabel = true
             var valueIndicatorComponent = Qt.createComponent("private/SliderValueLabel.qml")
             if (valueIndicatorComponent.status === Component.Ready) {
-                valueIndicatorComponent.createObject(slider)
+                _valueLabel = valueIndicatorComponent.createObject(slider)
             } else {
                 console.log(valueIndicatorComponent.errorString())
             }
         }
     }
 
+    FontMetrics {
+        id: fontMetrics
+        font.pixelSize: Theme.fontSizeHuge
+    }
+
     GlassItem {
         id: background
         // extra painting margins (Theme.paddingMedium on both sides) are needed,
         // because glass item doesn't visibly paint across the full width of the item
+        property int bottomPadding: (Theme.itemSizeSmall - height) / 2
+        // ascent enough to keep text in slider area
+        property int topPadding: (slider._valueLabel != null && slider._valueLabel.visible) ? fontMetrics.ascent
+                                                                                            : bottomPadding
+
         x: slider.leftMargin-Theme.paddingMedium
         width: slider._grooveWidth + 2*Theme.paddingMedium
+        y: slider._extraPadding + topPadding
         height: Theme.itemSizeExtraSmall/2
 
-        anchors.verticalCenter: parent.verticalCenter
         dimmed: true
         radius: 0.06
         falloffRadius: 0.09
         ratio: 0.0
         color: slider.highlighted ? Theme.highlightColor : Theme.secondaryColor
-        states: State {
-            name: "hasText"; when: slider.valueText !== "" || text !== ""
-            AnchorChanges { target: background; anchors.verticalCenter: undefined; anchors.bottom: slider.bottom }
-            PropertyChanges { target: background; anchors.bottomMargin: Theme.fontSizeSmall + Theme.paddingSmall + 1 }
-        }
     }
 
     GlassItem {

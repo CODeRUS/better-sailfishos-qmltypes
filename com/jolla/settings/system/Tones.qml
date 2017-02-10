@@ -14,10 +14,6 @@ Item {
     height: toneItems.height
     width: parent.width
 
-    ToneModel {
-        id: alarmToneModel
-    }
-
     MetadataReader {
         id: metadataReader
     }
@@ -85,21 +81,21 @@ Item {
         }
 
         ToneItem {
-            //% "Calendar"
-            defaultText: qsTrId("settings_sound-la-calendar")
-            //% "Current calendar alarm tone"
-            currentText: qsTrId("settings_sound-la-current_calendar_tone")
-            enabledProperty: "calendarToneEnabled"
-            fileProperty: "calendarToneFile"
-        }
-
-        ToneItem {
             //% "Clock alarm"
             defaultText: qsTrId("settings_sound-la-clock")
             //% "Current clock alarm tone"
             currentText: qsTrId("settings_sound-la-current_clock_tone")
             enabledProperty: "clockAlarmToneEnabled"
             fileProperty: "clockAlarmToneFile"
+        }
+
+        ToneItem {
+            //% "Calendar"
+            defaultText: qsTrId("settings_sound-la-calendar")
+            //% "Current calendar alarm tone"
+            currentText: qsTrId("settings_sound-la-current_calendar_tone")
+            enabledProperty: "calendarToneEnabled"
+            fileProperty: "calendarToneFile"
         }
     }
 
@@ -108,7 +104,7 @@ Item {
         id: dialogComponent
 
         SoundDialog {
-            alarmModel: alarmToneModel
+            alarmModel: ToneModel {}
         }
     }
 }

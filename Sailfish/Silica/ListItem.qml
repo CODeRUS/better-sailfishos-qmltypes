@@ -45,14 +45,6 @@ BackgroundItem {
     property bool _menuItemCreated
     property bool _connectPressAndHold: showMenuOnPressAndHold && menu !== null && menu !== undefined
 
-    // If this item is removed by a RemorseItem, do not restore visibility
-    // This binding should be removed when JB#8682 is addressed
-    property bool __silica_item_removed
-    Binding on opacity {
-        when: __silica_item_removed
-        value: 0.0
-    }
-
     property Item __silica_remorse_item
 
     onMenuOpenChanged: {
@@ -155,8 +147,5 @@ BackgroundItem {
             _menuItem.hide()
             _menuItem._parentDestroyed()
         }
-
-        // This item must not be removed if reused in an ItemPool
-        __silica_item_removed = false
     }
 }

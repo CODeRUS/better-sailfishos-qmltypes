@@ -267,6 +267,11 @@ Page {
                 }
             }
 
+            onPressAndHold: {
+                if (down) {
+                    showTransferContextMenu()
+                }
+            }
 
             onClicked: {
                 // Properly finished transfers with local filename should open that file
@@ -315,12 +320,18 @@ Page {
                     return;
                 }
 
-                // There must be cancel or restart enabled in order to show context menu
+                showTransferContextMenu()
+            }
+
+            function showTransferContextMenu() {
+                // There must be something enabled in order to show context menu
+                var canRemove = status != TransferModel.TransferStarted
                 var canCancel = model.cancelEnabled && status == TransferModel.TransferStarted
                 var canRestart = model.restartEnabled
                         && (status == TransferModel.TransferInterrupted || status == TransferModel.TransferCanceled)
-                if (canCancel || canRestart) {
+                if (canRemove || canCancel || canRestart) {
                     showMenu({"transferId": transferId,
+                              "removeEnabled": canRemove,
                               "cancelEnabled": canCancel,
                               "restartEnabled": canRestart})
                 }
@@ -388,11 +399,14 @@ Page {
         id: contextMenuComponent
 
         ContextMenu {
+            id: contextMenu
             property int transferId
+            property bool removeEnabled
             property bool cancelEnabled
             property bool restartEnabled
 
             MenuItem {
+                visible: cancelEnabled || restartEnabled
                 text: {
                     if (cancelEnabled) {
                         //% "Stop"
@@ -412,6 +426,27 @@ Page {
                     }
                 }
             }
+
+            MenuItem {
+                visible: removeEnabled
+                //% "Remove"
+                text: qsTrId("transferui-la_remove-transfer")
+                onClicked: {
+                    // null parent because a reference is held by RemorseItem until
+                    // it either triggers or is cancelled.
+                    remorseComponent.createObject(null, {'transferId': transferId}).execute(contextMenu.parent,
+                        //% "Removing"
+                        qsTrId("transferui-remorse_remove"))
+                }
+            }
+        }
+    }
+
+    Component {
+        id: remorseComponent
+        RemorseItem {
+            property int transferId
+            onTriggered: transferInterface.clearTransfer(transferId)
         }
     }
 }

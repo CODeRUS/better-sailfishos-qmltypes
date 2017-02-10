@@ -140,42 +140,39 @@ Item {
         onLessonCounterChanged: cornerTap.reset()
     }
 
-    Button {
-        id: againButton
-        anchors {
-            bottom: continueButton.top
-            bottomMargin: 2 * Theme.paddingLarge
-            horizontalCenter: parent.horizontalCenter
-        }
-        color: tutorialTheme.primaryColor
-        highlightColor: tutorialTheme.highlightColor
-        highlightBackgroundColor: tutorialTheme.highlightBackgroundColor
-        enabled: buttonsEnabled
-        //% "Try again"
-        text: qsTrId("tutorial-bt-try_again")
-
-        onClicked: {
-            lessonCounter = retryLessonIndex
-            hideAnimation.restart()
-        }
-    }
-
-    Button {
-        id: continueButton
+    ButtonLayout {
         anchors {
             bottom: progress.top
             bottomMargin: 4*Theme.paddingLarge
-            horizontalCenter: parent.horizontalCenter
         }
-        color: tutorialTheme.primaryColor
-        highlightColor: tutorialTheme.highlightColor
-        highlightBackgroundColor: tutorialTheme.highlightBackgroundColor
-        enabled: buttonsEnabled
+        preferredWidth: Theme.buttonWidthMedium
+        Button {
+            id: againButton
+            color: tutorialTheme.primaryColor
+            highlightColor: tutorialTheme.highlightColor
+            highlightBackgroundColor: tutorialTheme.highlightBackgroundColor
+            enabled: buttonsEnabled
+            //% "Try again"
+            text: qsTrId("tutorial-bt-try_again")
 
-        onClicked: {
-            lessonCounter++
-            retryLessonIndex = lessonCounter
-            hideAnimation.restart()
+            onClicked: {
+                lessonCounter = retryLessonIndex
+                hideAnimation.restart()
+            }
+        }
+        Button {
+            id: continueButton
+            ButtonLayout.newLine: true
+            color: tutorialTheme.primaryColor
+            highlightColor: tutorialTheme.highlightColor
+            highlightBackgroundColor: tutorialTheme.highlightBackgroundColor
+            enabled: buttonsEnabled
+
+            onClicked: {
+                lessonCounter++
+                retryLessonIndex = lessonCounter
+                hideAnimation.restart()
+            }
         }
     }
 

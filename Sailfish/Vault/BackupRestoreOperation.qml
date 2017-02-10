@@ -28,7 +28,7 @@ QtObject {
         var fileName = _backupUtils.newBackupFileName(BackupUtils.TarGzipArchive)
         _reset(SimpleBackupRestore.Backup, units || _findUnits(true), fileName)
         _cloudAccountId = accountId
-        _cloudLocalSyncDir = backupUtils.privilegedBackupDirectory("cloud")
+        _cloudLocalSyncDir = _backupUtils.privilegedBackupDirectory("cloud")
         _initProgress()
 
         backupRestore.backup(_units, _cloudLocalSyncDir + '/' + fileName)
@@ -67,7 +67,7 @@ QtObject {
 
         _reset(SimpleBackupRestore.Restore, units || _findUnits(true), fileName)
         _cloudAccountId = accountId
-        _cloudLocalSyncDir = backupUtils.privilegedBackupDirectory("cloud")
+        _cloudLocalSyncDir = _backupUtils.privilegedBackupDirectory("cloud")
         _downloadedFilePath = _cloudLocalSyncDir + '/' + fileName
         _initProgress()
 
@@ -106,7 +106,7 @@ QtObject {
         var fileName = _backupUtils.newBackupFileName(BackupUtils.TarGzipArchive, presetDateTime)
         _reset(SimpleBackupRestore.Compress, [], fileName)
         _cloudAccountId = accountId
-        _cloudLocalSyncDir = backupUtils.privilegedBackupDirectory("cloud")
+        _cloudLocalSyncDir = _backupUtils.privilegedBackupDirectory("cloud")
         _initProgress()
 
         backupRestore.compress(srcDirPath, _cloudLocalSyncDir + '/' + fileName)
@@ -180,7 +180,7 @@ QtObject {
     function _cleanUp() {
         if (root._cloudLocalSyncDir.length > 0) {
             // delete any files uploaded to or downloaded from the cloud
-            backupUtils.removeDirectory(root._cloudLocalSyncDir)
+            _backupUtils.removeDirectory(root._cloudLocalSyncDir)
         }
     }
 
@@ -295,11 +295,11 @@ QtObject {
         } else if (backupRestore.error == SimpleBackupRestore.ProcessError && backupRestore.currentUnit.length > 0) {
             if (backupRestore.mode == SimpleBackupRestore.Backup) {
                 //: Shown when data backup fails for a specific data set. %1 = name of data set, e.g. "Gallery", "Messages", "Browser"
-                //% "Data backup failed. Unable to load %1 data."
+                //% "An error occurred while backing up %1 data."
                 _error(qsTrId("vault-la-unit_backup_failed").arg(backupRestore.currentUnit), _logInfoText())
             } else {
                 //: Shown when data restore fails for a specific data set. %1 = name of data set, e.g. "Gallery", "Messages", "Browser"
-                //% "Data restoration failed. Unable to load %1 data."
+                //% "An error occurred while restoring %1 data."
                 _error(qsTrId("vault-la-unit_restore_failed").arg(backupRestore.currentUnit), _logInfoText())
             }
         } else {

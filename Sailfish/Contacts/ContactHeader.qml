@@ -17,7 +17,7 @@ Item {
     property string _coverPath
 
     property Item _contextMenu
-    property real _headerHeight: Theme.itemSizeLarge * 3 + Theme.paddingMedium
+    property real _headerHeight: avatar.y + avatar.height + Theme.paddingLarge
 
     height: _headerHeight + (_contextMenu ? _contextMenu.height : 0)
     width: parent ? parent.width : 0
@@ -324,8 +324,8 @@ Item {
         anchors {
             left: parent.left
             leftMargin: Theme.horizontalPageMargin
-            top: parent.top
-            topMargin: _headerHeight - height - Theme.paddingLarge
+            top: nameLabel.bottom
+            topMargin: Theme.paddingSmall
         }
         height: screen.width / 3
         width: height
@@ -523,7 +523,6 @@ Item {
     }
 
     Label {
-        y: nameLabel.y + nameLabel.height + Theme.paddingMedium
         anchors {
             top: nameLabel.bottom
             topMargin: Theme.paddingSmall

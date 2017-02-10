@@ -1,27 +1,13 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Bluetooth 1.0
+import org.kde.bluezqt 1.0 as BluezQt
 
-Label {
-    enabled: !bluezMonitor.available
+ViewPlaceholder {
+    property QtObject _bluetoothManager : BluezQt.Manager
 
-    anchors.centerIn: parent
-    visible: enabled
-    width: parent.width - Theme.horizontalPageMargin*2
-    horizontalAlignment: Text.AlignHCenter
-    wrapMode: Text.Wrap
-    font {
-        pixelSize: Theme.fontSizeExtraLarge
-        family: Theme.fontFamilyHeading
-    }
-    color: Theme.highlightColor
-    opacity: 0.6
+    enabled: _bluetoothManager.adapters.length == 0
 
     //: Shown when system Bluetooth functionality is not available
     //% "Bluetooth not available"
     text: qsTrId("components_bluetooth-la-bluetooth_not_available")
-
-    BluezMonitor {
-        id: bluezMonitor
-    }
 }

@@ -248,7 +248,7 @@ Item {
 
     function replyPrecursor() {
         var precursor = '\n\n'
-        var timestamp = originalMessage.date
+        var timestamp = Format.formatDate(originalMessage.date, Formatter.DateFull)
 
         //: Indicator of reply message origin (%1:timestamp %2:mailSender)
         //% "On %1, %2 wrote:"

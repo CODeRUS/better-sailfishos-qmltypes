@@ -1,101 +1,119 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Vault 1.0
 
-FullScreenInfoPage {
+FullScreenOperationPage {
     id: root
 
-    property bool canCancel
+    property bool backupMode
+    property int cloudAccountId
+    property string backupDir
+    property string fileToRestore
+    property UnitListModel unitListModel
 
-    property string busyHeadingText
-    property string busyBodyText
+    property bool canCancel: backupMode && !backupRestore.syncing
+               && (state == "" || (backupRestore.running && !backupRestore.canceling))
+    readonly property bool busy: backupRestore.running
 
-    property string successHeadingText
-    property string errorHeadingText
-    property string errorDetailText
-    property string statusText
+    property BackupRestoreOperation backupRestore: defaultBackupRestore
 
-    signal done()
-    signal cancelRequested()
-
-    topText: busyHeadingText
-    bottomLargeText: busyBodyText
-    button1Text: root.canCancel
-                   //: Cancel the current operation
-                   //% "Cancel"
-                 ? qsTrId("vault-bt-cancel")
-                 : ""
-
-    showProgress: true
-    animateLabelOpacity: true
-    bottomSmallText: root.statusText
-
-    states: [
-        State {
-            name: "running"
-            PropertyChanges {
-                target: root
+    function _start() {
+        if (backupMode) {
+            if (root.cloudAccountId > 0) {
+                backupRestore.backupToCloud(root.cloudAccountId)
+            } else {
+                backupRestore.backupToDir(root.backupDir)
             }
-        },
-        State {
-            name: "done"
-            PropertyChanges {
-                target: root
-                showProgress: false
-                progressImageSource: ""
-                progressCaption: ""
-                animateLabelOpacity: false
-                bottomLargeText: ""
-                //% "OK"
-                button1Text: qsTrId("vault-bt-ok")
-            }
-        },
-        State {
-            name: "success"
-            extend: "done"
-            PropertyChanges {
-                target: root
-                topText: root.successHeadingText
-            }
-            PropertyChanges {
-                target: yourFace
-                source: "image://theme/graphic-waiting-page-happy"
-            }
-        },
-        State {
-            name: "error"
-            extend: "done"
-            PropertyChanges {
-                target: root
-                topText: root.errorHeadingText
-                bottomSmallText: root.errorDetailText
-            }
-            PropertyChanges {
-                target: yourFace
-                source: "image://theme/graphic-waiting-page-sad"
-            }
-        }
-    ]
-
-    Private.WindowGestureOverride {
-        active: status == PageStatus.Activating || status == PageStatus.Active
-    }
-    onButton1Clicked: {
-        if (canCancel) {
-            cancelRequested()
         } else {
-            done()
+            if (root.cloudAccountId > 0) {
+                backupRestore.restoreFromCloud(root.cloudAccountId, root.fileToRestore)
+            } else {
+                backupRestore.restoreFromFile(root.fileToRestore)
+            }
         }
     }
 
-    BackupUtils {
-        id: backupUtils
+    progressValue: backupRestore.progress
+    statusText: " " // reserve space so button position doesn't animate
+
+    busyHeadingText: root.backupMode
+                   //% "Please wait while your content is backed up"
+                 ? qsTrId("vault-la-please_wait_backing_up")
+                   //% "Please wait while your content is restored"
+                 : qsTrId("vault-la-please_wait_restoring")
+
+    busyBodyText: !root.backupMode
+                    //: Do not turn off the device during the data backup or restore process
+                    //% "Do not turn off your device!"
+                  ? qsTrId("vault-la-do_not_turn_off")
+                  : ""
+
+    successHeadingText: {
+        if (root.backupMode) {
+            return root.cloudAccountId > 0
+                       //% "Done. Your backup was uploaded successfully."
+                     ? qsTrId("vault-la-done_backup_uploaded_successfully")
+                       //% "Done. Your backup has been copied to the memory card."
+                     : qsTrId("vault-la-done_backup_copied_to_memory_card")
+        } else {
+            //% "Done. Your data was restored successfully."
+            return qsTrId("vault-la-done_backup_restored_successfully")
+        }
     }
 
-    Image {
-        id: yourFace
-        parent: root.centerSection
-        anchors.centerIn: parent
+    progressImageSource: {
+        if (backupRestore.running) {
+            if (backupRestore.currentUnit.length > 0) {
+                return unitListModel.getUnitValue(backupRestore.currentUnit, "iconSource", "")
+            } else if (backupRestore.syncing) {
+                return "image://theme/icon-l-transfer"
+            }
+            return "image://theme/icon-l-backup"
+        }
+        return ""
+    }
+    progressCaption: {
+        if (backupRestore.running && backupRestore.currentUnit.length > 0) {
+            return unitListModel.getUnitValue(backupRestore.currentUnit, "displayName", "")
+        }
+        return ""
+    }
+
+    onStatusChanged: {
+        if (status == PageStatus.Active && state == "") {
+            // starting immediately makes the UI seem jerky, so delay a bit
+            delayedStart.start()
+        }
+    }
+
+    Timer {
+        id: delayedStart
+        interval: 500
+        onTriggered: {
+            state = "running"
+            _start()
+        }
+    }
+
+    BackupRestoreOperation {
+        id: defaultBackupRestore
+
+        unitListModel: root.unitListModel
+
+        onStatusUpdate: {
+            root.statusText = statusText
+        }
+        onDone: {
+            if (root.backupMode && root.cloudAccountId <= 0) {
+                deleteOldBackups(root.backupDir)
+            }
+            root.state = "success"
+            root.statusText = ""
+        }
+        onError: {
+            root.state = "error"
+            root.errorHeadingText = errorMainText
+            root.errorDetailText = errorDetailText
+        }
     }
 }

@@ -143,6 +143,9 @@ ListView {
                                 top: monthNumberLabel.bottom
                                 horizontalCenter: parent.horizontalCenter
                             }
+                            width: parent.width - Theme.paddingSmall
+                            horizontalAlignment: Text.AlignHCenter
+                            fontSizeMode: Text.HorizontalFit
                             font.pixelSize: Theme.fontSizeMedium
                             text: model.name
                             color: Theme.rgba(Theme.highlightColor, 0.6)

@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Vault 1.0
 import com.jolla.settings.accounts 1.0
 
 Column {
@@ -63,8 +64,14 @@ Column {
         root.memoryCardPath = ""
         var data = storageListModel.get(storageCombo.currentIndex)
         if (data.type === storageListModel.storageTypeMemoryCard) {
-            root.memoryCardPath = data.path
-            _errorText = ""
+            if (root.backupMode && !backupUtils.verifyWritable(data.path)) {
+                root.memoryCardPath = ""
+                //% "The selected storage is not writable."
+                _errorText = qsTrId("vault-la-cloud-la-storage_unwritable")
+            } else {
+                root.memoryCardPath = data.path
+                _errorText = ""
+            }
         } else if (data.type === storageListModel.storageTypeCloud) {
             root.cloudAccountId = data.accountId
             _errorText = _accountErrorText(root.cloudAccountId)
@@ -108,6 +115,10 @@ Column {
         }
     }
 
+    BackupUtils {
+        id: backupUtils
+    }
+
     AccountFactory {
         id: accountFactory
     }
@@ -139,12 +150,59 @@ Column {
         currentIndex: -1
         Component.onCompleted: root._update()
         onCurrentIndexChanged: root._update()
+
+        descriptionColor: root._errorText.length > 0 || (latestBackupInfoLoader.status == Loader.Ready && latestBackupInfoLoader.item.error)
+               ? "#ff4d4d" // as per TextBase errorHighlight
+               : (highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor)
+
+        description: {
+            if (root._errorText.length > 0) {
+                return root._errorText
+            }
+            if (root.backupMode) {
+                if (root.memoryCardPath.length > 0) {
+                    //: Explains how data will be backed up to the memory card
+                    //% "Your data will be copied to the memory card. Please do not remove the memory card before the backup is completed."
+                    return qsTrId("vault-la-memory_card_backup_explain")
+                } else if (root.cloudAccountId > 0) {
+                    //: Explains how data will be backed up to cloud storage
+                    //% "Your data will be uploaded using your currently active internet connection. Note that Gallery images and videos are not included in the cloud backup."
+                    return qsTrId("vault-la-cloud_backup_explain")
+                } else {
+                    return ""
+                }
+            } else {
+                if (latestBackupInfoLoader.status != Loader.Ready
+                        || latestBackupInfoLoader.item.loading) {
+                    return ""
+                }
+                if (latestBackupInfoLoader.item.error) {
+                    return root._connectionErrorText
+                }
+                if (root.fileToRestore.length === 0) {
+                    //: No previous backups were found on the cloud or memory card storage
+                    //% "No previous backups found"
+                    return qsTrId("vault-la-no_previous_backups_found")
+                }
+                if (root.memoryCardPath.length > 0) {
+                    //: Explains how data will be restored from the memory card
+                    //% "Copying may take some time. Please wait without turning off your device and do not remove the memory card before the data is restored."
+                    return qsTrId("vault-la-memory_card_restore_explain")
+                } else if (root.cloudAccountId > 0) {
+                    //: Explains how data will be restored from the cloud
+                    //% "Downloading your backup might take some time. Use of Wi-Fi is recommended. Please wait without turning off your device."
+                    return qsTrId("vault-la-cloud_restore_explain")
+                } else {
+                    return ""
+                }
+            }
+        }
     }
 
     Item {
         x: root.leftMargin
         width: parent.width - root.leftMargin - root.rightMargin
-        height: latestBackupInfoLoader.height + processInfoLabel.height
+        height: latestBackupInfoLoader.height
         visible: root.showStorageInfo
 
         Behavior on height {
@@ -161,66 +219,6 @@ Column {
                 id: latestBackupComponent
 
                 LatestBackupInfo { }
-            }
-        }
-
-        Label {
-            id: processInfoLabel
-            y: latestBackupInfoLoader.height
-            width: parent.width
-            height: text.length > 0 ? implicitHeight : 0
-            wrapMode: Text.Wrap
-            font.pixelSize: Theme.fontSizeSmall
-            color: root._errorText.length > 0 || (latestBackupInfoLoader.status == Loader.Ready && latestBackupInfoLoader.item.error)
-                   ? "#ff4d4d" // as per TextBase errorHighlight
-                   : Theme.highlightColor
-            text: {
-                if (root._errorText.length > 0) {
-                    return root._errorText
-                }
-                if (root.backupMode) {
-                    if (root.memoryCardPath.length > 0) {
-                        //: Explains how data will be backed up to the memory card
-                        //% "Your data will be copied to the memory card. Please do not remove the memory card before the backup is completed."
-                        return qsTrId("vault-la-memory_card_backup_explain")
-                    } else if (root.cloudAccountId > 0) {
-                        //: Explains how data will be backed up to cloud storage
-                        //% "Your data will be uploaded using your currently active internet connection. Note that Gallery images and videos are not included in the cloud backup."
-                        return qsTrId("vault-la-cloud_backup_explain")
-                    } else {
-                        return ""
-                    }
-                } else {
-                    if (latestBackupInfoLoader.status != Loader.Ready
-                            || latestBackupInfoLoader.item.loading) {
-                        return ""
-                    }
-                    if (latestBackupInfoLoader.item.error) {
-                        return root._connectionErrorText
-                    }
-                    if (root.fileToRestore.length === 0) {
-                        //: No previous backups were found on the cloud or memory card storage
-                        //% "No previous backups found"
-                        return qsTrId("vault-la-no_previous_backups_found")
-                    }
-                    if (root.memoryCardPath.length > 0) {
-                        //: Explains how data will be restored from the memory card
-                        //% "Copying may take some time. Please wait without turning off your device and do not remove the memory card before the data is restored."
-                        return qsTrId("vault-la-memory_card_restore_explain")
-                    } else if (root.cloudAccountId > 0) {
-                        //: Explains how data will be restored from the cloud
-                        //% "Downloading your backup might take some time. Use of Wi-Fi is recommended. Please wait without turning off your device."
-                        return qsTrId("vault-la-cloud_restore_explain")
-                    } else {
-                        return ""
-                    }
-                }
-            }
-
-            opacity: text.length > 0 ? 1 : 0
-            Behavior on opacity {
-                enabled: !root.backupMode
-                FadeAnimation {}
             }
         }
     }

@@ -27,9 +27,10 @@ Column {
         model: serviceModel
 
         IconTextSwitch {
-            // this is a workaround for future-proofing, we want to keep facebook-im service
-            // around but make sure it is never enabled
-            visible: model.serviceName !== "facebook-im"
+            // this is a workaround for future-proofing, we want to keep some facebook services
+            // around but make sure they are never enabled (or visible to the user)
+            // until they can be removed altogether in a future update
+            visible: model.serviceName !== "facebook-im" && model.serviceName !== "facebook-contacts" && model.serviceName !== "facebook-microblog"
             icon.source: model.iconName
             text: model.displayName
             description: model.description

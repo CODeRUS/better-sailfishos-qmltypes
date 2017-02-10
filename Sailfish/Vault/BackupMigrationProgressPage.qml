@@ -3,7 +3,7 @@ import Sailfish.Silica 1.0
 import Sailfish.Vault 1.0
 import NemoMobile.Vault 1.0
 
-BackupRestoreProgressPage {
+FullScreenOperationPage {
     id: root
 
     property Vault vault
@@ -17,6 +17,8 @@ BackupRestoreProgressPage {
 
     property bool _started
     property string _snapshotExportDir
+
+    button1Text: (state == "success" || state == "error") ? defaultOKText : ""
 
     progressValue: backupRestore.progress
 

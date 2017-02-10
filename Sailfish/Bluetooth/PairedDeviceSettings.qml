@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import "btutil.js" as BtUtil
+import Sailfish.Bluetooth 1.0
+import org.kde.bluezqt 1.0 as BluezQt
 
 Page {
     id: root
@@ -14,13 +15,10 @@ Page {
     }
 
     function profilesList() {
-        if (bluetoothDevice === null) {
-            return
-        }
         var ret = []
         var hasUnrecognizedProfiles = false
-        for (var i=0; i<bluetoothDevice.profiles.length; i++) {
-            var s = BtUtil.knownServiceUuids[bluetoothDevice.profiles[i].toUpperCase()]
+        for (var i=0; i<bluetoothDevice.uuids.length; i++) {
+            var s = BluetoothProfiles.profileNameFromUuid(bluetoothDevice.uuids[i].toUpperCase())
             if (s === undefined) {
                 hasUnrecognizedProfiles = true
             } else if (ret.indexOf(s) < 0) {
@@ -58,11 +56,11 @@ Page {
                 //% "Nickname"
                 placeholderText: qsTrId("components_bluetooth-la-device_nickname")
 
-                text: root.bluetoothDevice !== null ? root.bluetoothDevice.alias : ""
+                text: root.bluetoothDevice.name
 
-                onTextChanged: {
-                    if (root.bluetoothDevice !== null) {
-                        root.bluetoothDevice.alias = text
+                onActiveFocusChanged: {
+                    if (!activeFocus) {
+                        root.bluetoothDevice.name = text
                     }
                 }
 
@@ -75,16 +73,14 @@ Page {
             BluetoothDeviceTypeComboBox {
                 width: root.width
                 deviceAddress: root.bluetoothDevice.address
-                deviceClass: root.bluetoothDevice.classOfDevice
+                deviceClass: root.bluetoothDevice.deviceClass
             }
 
             TrustBluetoothDeviceSwitch {
-                checked: root.bluetoothDevice !== null && root.bluetoothDevice.trusted
+                checked: root.bluetoothDevice.trusted
 
                 onCheckedChanged: {
-                    if (root.bluetoothDevice !== null) {
-                        root.bluetoothDevice.trusted = checked
-                    }
+                    root.bluetoothDevice.trusted = checked
                 }
             }
 

@@ -1,4 +1,4 @@
-import QtQuick.tooling 1.1
+import QtQuick.tooling 1.2
 
 // This file describes the plugin-supplied types contained in the library.
 // It is used for QML tooling purposes only.
@@ -7,6 +7,19 @@ import QtQuick.tooling 1.1
 // 'qmlplugindump -nonrelocatable -noinstantiate Sailfish.Media 1.0'
 
 Module {
+    dependencies: [
+        "QtMultimedia 5.6",
+        "QtQuick 2.5",
+        "QtQuick.Window 2.1",
+        "QtWebKit 3.0",
+        "QtWebKit.experimental 1.0",
+        "Sailfish.Silica 1.0",
+        "Sailfish.Silica.private 1.0",
+        "org.nemomobile.configuration 1.0",
+        "org.nemomobile.dbus 2.0",
+        "org.nemomobile.mpris 1.0",
+        "org.nemomobile.thumbnailer 1.0"
+    ]
     Component {
         name: "DeclarativeMediaKey"
         defaultProperty: "data"
@@ -52,6 +65,39 @@ Module {
                 "ShuffleTracks": 1,
                 "ShufflePlaylists": 2
             }
+        }
+    }
+    Component {
+        prototype: "QObject"
+        name: "Remorse 1.0"
+        exports: ["Remorse 1.0"]
+        exportMetaObjectRevisions: [0]
+        isComposite: true
+        isCreatable: false
+        isSingleton: true
+        Property { name: "_itemComponent"; type: "QQmlComponent"; isPointer: true }
+        Property { name: "_popupComponent"; type: "QQmlComponent"; isPointer: true }
+        Method {
+            name: "_create"
+            type: "QVariant"
+            Parameter { name: "component"; type: "QVariant" }
+            Parameter { name: "parent"; type: "QVariant" }
+        }
+        Method {
+            name: "itemAction"
+            type: "QVariant"
+            Parameter { name: "item"; type: "QVariant" }
+            Parameter { name: "text"; type: "QVariant" }
+            Parameter { name: "action"; type: "QVariant" }
+            Parameter { name: "timeout"; type: "QVariant" }
+        }
+        Method {
+            name: "popupAction"
+            type: "QVariant"
+            Parameter { name: "page"; type: "QVariant" }
+            Parameter { name: "text"; type: "QVariant" }
+            Parameter { name: "action"; type: "QVariant" }
+            Parameter { name: "timeout"; type: "QVariant" }
         }
     }
 }

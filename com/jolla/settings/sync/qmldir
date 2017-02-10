@@ -3,4 +3,3 @@ plugin syncsettingsplugin
 SyncSettingsPage 1.0 SyncSettingsPage.qml
 SyncEndpointList 1.0 SyncEndpointList.qml
 SyncEndpointSettingsPage 1.0 SyncEndpointSettingsPage.qml
-SyncBluetoothPicker 1.0 SyncBluetoothPicker.qml

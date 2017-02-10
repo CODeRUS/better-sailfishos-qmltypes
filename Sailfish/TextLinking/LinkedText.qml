@@ -34,31 +34,14 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.TextLinking 1.0
 
-Text {
-    id: root
-
-    property alias plainText: parser.text
-    property alias shortenUrl: parser.shortenUrl
-
-    color: Theme.primaryColor
-    linkColor: Theme.highlightColor
-    font.pixelSize: Theme.fontSizeMedium
-    text: parser.linkedText.replace(/\n/g, '<br>');
-    textFormat: Text.StyledText
-    wrapMode: Text.Wrap
-
+LinkedLabel {
+    defaultLinkActions: false
     onLinkActivated: {
         handler.handleLink(link)
     }
 
     LinkHandler {
         id: handler
-    }
-
-    LinkParser {
-        id: parser
-        text: root.text
     }
 }

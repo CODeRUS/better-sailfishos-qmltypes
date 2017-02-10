@@ -104,6 +104,8 @@ SilicaListView {
         }
 
         Thumbnail {
+            id: thumbnail
+
             anchors.fill: parent
             sourceSize { width: width; height: height }
 

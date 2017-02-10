@@ -2,9 +2,12 @@ module Sailfish.Pickers
 plugin sailfishcomponentspickersplugin
 AvatarPickerPage 1.0 AvatarPickerPage.qml
 ContentPickerPage 1.0 ContentPickerPage.qml
+DirectoryPage 1.0 DirectoryPage.qml
 DocumentItem 1.0 DocumentItem.qml
 DocumentPickerPage 1.0 DocumentPickerPage.qml
 DocumentModel 1.0 DocumentModel.qml
+FileItem 1.0 FileItem.qml
+FilePickerPage 1.0 FilePickerPage.qml
 ImageModel 1.0 ImageModel.qml
 ImagePickerPage 1.0 ImagePickerPage.qml
 MultiDocumentPickerDialog 1.0 MultiDocumentPickerDialog.qml

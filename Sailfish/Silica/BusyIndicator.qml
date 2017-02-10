@@ -76,7 +76,7 @@ Item {
         RotationAnimator on rotation {
             from: 0; to: 360
             duration: 2000
-            running: (root.running || fadeAnimation.running) && root.visible && Qt.application.active
+            running: (root.running || opacity > 0) && root.visible && Qt.application.active
             loops: Animation.Infinite
         }
     }

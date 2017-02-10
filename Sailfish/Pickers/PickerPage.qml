@@ -5,6 +5,7 @@ Page {
     property string title
     property url selectedContent
     property variant selectedContentProperties
+    property bool popOnSelection: true
 
     // The last page from application
     property Item _lastAppPage
@@ -18,13 +19,20 @@ Page {
 
     function _handleSelection(model, index, selected) {
         model.updateSelected(index, selected)
-        selectedContentProperties = model.get(index)
-        selectedContent = selectedContentProperties.url
-        _navigation = PageNavigation.Forward
-        if (_lastAppPage) {
-            pageStack.pop(_lastAppPage)
-        } else {
-            pageStack.pop()
+        _handleSelectionProperties(model.get(index))
+    }
+
+    function _handleSelectionProperties(properties) {
+        selectedContentProperties = properties
+        selectedContent = properties.url
+
+        if (popOnSelection) {
+            _navigation = PageNavigation.Forward
+            if (_lastAppPage) {
+                pageStack.pop(_lastAppPage)
+            } else {
+                pageStack.pop()
+            }
         }
     }
 

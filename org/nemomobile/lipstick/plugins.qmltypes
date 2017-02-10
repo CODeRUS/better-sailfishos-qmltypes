@@ -1,4 +1,4 @@
-import QtQuick.tooling 1.1
+import QtQuick.tooling 1.2
 
 // This file describes the plugin-supplied types contained in the library.
 // It is used for QML tooling purposes only.
@@ -7,6 +7,7 @@ import QtQuick.tooling 1.1
 // 'qmlplugindump -nonrelocatable -noinstantiate org.nemomobile.lipstick 0.1'
 
 Module {
+    dependencies: ["QtQuick 2.0"]
     Component {
         name: "HwcImage"
         defaultProperty: "data"
@@ -382,6 +383,12 @@ Module {
         name: "QQuickWindow"
         defaultProperty: "data"
         prototype: "QWindow"
+        Enum {
+            name: "SceneGraphError"
+            values: {
+                "ContextNotAvailable": 1
+            }
+        }
         Property { name: "data"; type: "QObject"; isList: true; isReadonly: true }
         Property { name: "color"; type: "QColor" }
         Property { name: "contentItem"; type: "QQuickItem"; isReadonly: true; isPointer: true }
@@ -393,12 +400,19 @@ Module {
             isPointer: true
         }
         Signal { name: "frameSwapped" }
+        Signal {
+            name: "openglContextCreated"
+            revision: 2
+            Parameter { name: "context"; type: "QOpenGLContext"; isPointer: true }
+        }
         Signal { name: "sceneGraphInitialized" }
         Signal { name: "sceneGraphInvalidated" }
         Signal { name: "beforeSynchronizing" }
+        Signal { name: "afterSynchronizing"; revision: 2 }
         Signal { name: "beforeRendering" }
         Signal { name: "afterRendering" }
-        Signal { name: "sceneGraphAboutToStop" }
+        Signal { name: "afterAnimating"; revision: 2 }
+        Signal { name: "sceneGraphAboutToStop"; revision: 2 }
         Signal {
             name: "closing"
             revision: 1
@@ -409,6 +423,12 @@ Module {
             Parameter { type: "QColor" }
         }
         Signal { name: "activeFocusItemChanged"; revision: 1 }
+        Signal {
+            name: "sceneGraphError"
+            revision: 2
+            Parameter { name: "error"; type: "QQuickWindow::SceneGraphError" }
+            Parameter { name: "message"; type: "string" }
+        }
         Method { name: "update" }
         Method { name: "releaseResources" }
     }
@@ -560,6 +580,11 @@ Module {
         Signal {
             name: "windowStateChanged"
             Parameter { name: "windowState"; type: "Qt::WindowState" }
+        }
+        Signal {
+            name: "windowTitleChanged"
+            revision: 2
+            Parameter { name: "title"; type: "string" }
         }
         Signal {
             name: "xChanged"

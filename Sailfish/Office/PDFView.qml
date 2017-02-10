@@ -30,13 +30,26 @@ SilicaFlickable {
     property alias itemWidth: pdfCanvas.width
     property alias itemHeight: pdfCanvas.height
     property alias document: pdfCanvas.document
-    property alias currentPage: pdfCanvas.currentPage
+    property int currentPage: !quickScrollAnimation.running
+                              ? pdfCanvas.currentPage : quickScrollAnimation.pageTo
+    property alias selection: pdfSelection
+    property alias selectionDraggable: selectionView.draggable
+    property bool canMoveBack: (_contentYAtGotoLink >= 0)
 
     property bool scaled: pdfCanvas.width != width
     property QtObject _feedbackEffect
 
+    property int _pageAtLinkTarget
+    property int _pageAtGotoLink
+    property real _contentXAtGotoLink: -1.
+    property real _contentYAtGotoLink: -1.
+
     signal clicked()
-    signal linkClicked(string linkTarget)
+    signal linkClicked(string linkTarget, Item hook)
+    signal selectionClicked(variant selection, Item hook)
+    signal annotationClicked(variant annotation, Item hook)
+    signal annotationLongPress(variant annotation, Item hook)
+    signal longPress(point pressAt, Item hook)
     signal pageSizesReady()
     signal updateSize(real newWidth, real newHeight)
 
@@ -57,6 +70,9 @@ SilicaFlickable {
            to adjust to new height, so we use saved values. */
         contentX = oldContentX + (center.x * pdfCanvas.width / oldWidth) - center.x
         contentY = oldContentY + (center.y * pdfCanvas.height / oldHeight) - center.y
+
+        _contentXAtGotoLink = -1.
+        _contentYAtGotoLink = -1.
     }
 
     function adjust() {
@@ -68,7 +84,9 @@ SilicaFlickable {
         pdfCanvas.width = scaled ? clamp(pdfCanvas.width) : width
 
         contentX = oldContentX * pdfCanvas.width / oldWidth
-        contentY = oldContentY * pdfCanvas.height / oldHeight
+        if (!contextHook.active) {
+            contentY = oldContentY * pdfCanvas.height / oldHeight
+        }
     }
 
     function moveToSearchMatch(index) {
@@ -104,6 +122,41 @@ SilicaFlickable {
         }
     }
 
+    function scrollTo(pt, pageId) {
+        if ((pt.y < base.contentY + base.height && pt.y > base.contentY - base.height)
+            && (pt.x < base.contentX + base.width && pt.x > base.contentX - base.width)) {
+            scrollX.to = pt.x
+            scrollY.to = pt.y
+            scrollAnimation.start()
+        } else {
+            var deltaY = pt.y - base.contentY
+            if (deltaY < 0) {
+                deltaY = Math.max(deltaY / 2., -base.height / 2.)
+            } else {
+                deltaY = Math.min(deltaY / 2., base.height / 2.)
+            }
+            leaveX.to = (base.contentX + pt.x) / 2
+            leaveY.to = base.contentY + deltaY
+            returnX.to = pt.x
+            returnY.from = pt.y - deltaY
+            returnY.to = pt.y
+            quickScrollAnimation.pageTo = pageId
+            quickScrollAnimation.start()
+        }
+    }
+
+    function moveBack() {
+        if (!canMoveBack) {
+            return
+        }
+
+        scrollTo(Qt.point(_contentXAtGotoLink, _contentYAtGotoLink), _pageAtGotoLink)
+
+        _pageAtLinkTarget = 0
+        _contentXAtGotoLink = -1.
+        _contentYAtGotoLink = -1.
+    }
+
     SequentialAnimation {
         id: focusSearchMatch
         ParallelAnimation {
@@ -113,6 +166,26 @@ SilicaFlickable {
         SequentialAnimation {
             NumberAnimation { id: scaleIn; property: "scale"; duration: 200; to: 3.; easing.type: Easing.InOutCubic }
             NumberAnimation { id: scaleOut; property: "scale"; duration: 200; to: 1.; easing.type: Easing.InOutCubic }
+        }
+    }
+    ParallelAnimation {
+        id: scrollAnimation
+        NumberAnimation { id: scrollX; target: base; property: "contentX"; duration: 300; easing.type: Easing.InOutQuad }
+        NumberAnimation { id: scrollY; target: base; property: "contentY"; duration: 300; easing.type: Easing.InOutQuad }
+    }
+    SequentialAnimation {
+        id: quickScrollAnimation
+        property int pageTo
+        ParallelAnimation {
+            NumberAnimation { id: leaveX; target: base; property: "contentX"; duration: 300; easing.type: Easing.InQuad }
+            NumberAnimation { id: leaveY; target: base; property: "contentY"; duration: 300; easing.type: Easing.InQuad }
+            NumberAnimation { target: base; property: "opacity"; duration: 300; to: 0.; easing.type: Easing.InQuad }
+        }
+        PauseAnimation { duration: 100 }
+        ParallelAnimation {
+            NumberAnimation { id: returnX; target: base; property: "contentX"; duration: 300; easing.type: Easing.OutQuad }
+            NumberAnimation { id: returnY; target: base; property: "contentY"; duration: 300; easing.type: Easing.OutQuad }
+            NumberAnimation { target: base; property: "opacity"; duration: 300; to: 1.; easing.type: Easing.OutQuad }
         }
     }
     NumberAnimation {
@@ -136,7 +209,7 @@ SilicaFlickable {
     }
 
     PDF.Selection {
-        id: selection
+        id: pdfSelection
         
         property bool dragging: drag1.pressed || drag2.pressed
         property bool selected: count > 0
@@ -192,6 +265,20 @@ SilicaFlickable {
             }
         }
 
+        onCurrentPageChanged: {
+            // If the document is moved than more than one page
+            // the back move is cancelled.
+            if (_pageAtLinkTarget > 0
+                && !scrollAnimation.running
+                && !quickScrollAnimation.running
+                && (currentPage > _pageAtLinkTarget + 1
+                    || currentPage < _pageAtLinkTarget - 1)) {
+                _pageAtLinkTarget = 0
+                _contentXAtGotoLink = -1.
+                _contentYAtGotoLink = -1.
+            }
+        }
+
         PinchArea {
             anchors.fill: parent
             onPinchUpdated: {
@@ -201,21 +288,49 @@ SilicaFlickable {
             onPinchFinished: base.returnToBounds()
 
             PDF.LinkArea {
+                id: linkArea
                 anchors.fill: parent
 
-                canvas: pdfCanvas
-                onLinkClicked: base.linkClicked(linkTarget)
-                onGotoClicked: base.goToPage(page - 1, top, left,
-                                             Theme.paddingLarge, Theme.paddingLarge)
-                onClicked: {
-                    if (selection.text.length > 0) {
-                        selection.unselect()
-                    } else {
-                        base.clicked()
+                onClickedBoxChanged: {
+                    if (clickedBox.width > 0) {
+                        contextHook.setTarget(clickedBox.y, clickedBox.height)
                     }
                 }
-                onLongPress: selection.selectAt(pressAt)
+
+                canvas: pdfCanvas
+                selection: pdfSelection
+
+                onLinkClicked: base.linkClicked(linkTarget, contextHook)
+                onGotoClicked: {
+                    var pt = base.contentAt(page - 1, top, left,
+                                            Theme.paddingLarge, Theme.paddingLarge)
+                    _pageAtLinkTarget = page
+                    _pageAtGotoLink = pdfCanvas.currentPage
+                    _contentXAtGotoLink = base.contentX
+                    _contentYAtGotoLink = base.contentY
+                    scrollTo(pt, page)
+                }
+                onSelectionClicked: base.selectionClicked(selection, contextHook)
+                onAnnotationClicked: base.annotationClicked(annotation, contextHook)
+                onClicked: base.clicked()
+                onAnnotationLongPress: base.annotationLongPress(annotation, contextHook)
+                onLongPress: {
+                    contextHook.setTarget(pressAt.y, Theme.itemSizeSmall / 2)
+                    base.longPress(pressAt, contextHook)
+                }
             }
+        }
+
+        Rectangle {
+            x: linkArea.clickedBox.x
+            y: linkArea.clickedBox.y
+            width: linkArea.clickedBox.width
+            height: linkArea.clickedBox.height
+            radius: Theme.paddingSmall
+            color: Theme.highlightColor
+            opacity: linkArea.pressed ? 0.75 : 0.
+            visible: opacity > 0.
+            Behavior on opacity { FadeAnimation { duration: 100 } }
         }
 
         Repeater {
@@ -245,7 +360,8 @@ SilicaFlickable {
         }
 
         PDFSelectionView {
-            model: selection
+            id: selectionView
+            model: pdfSelection
             flickable: base
             dragHandle1: drag1.pressed
             dragHandle2: drag2.pressed
@@ -253,17 +369,28 @@ SilicaFlickable {
         }
         PDFSelectionDrag {
             id: drag1
-            visible: selection.selected
+            visible: pdfSelection.selected && selectionView.draggable
             flickable: base
-            handle: selection.handle1
-            onDragged: selection.handle1 = at
+            handle: pdfSelection.handle1
+            onDragged: pdfSelection.handle1 = at
         }
         PDFSelectionDrag {
             id: drag2
-            visible: selection.selected
+            visible: pdfSelection.selected && selectionView.draggable
             flickable: base
-            handle: selection.handle2
-            onDragged: selection.handle2 = at
+            handle: pdfSelection.handle2
+            onDragged: pdfSelection.handle2 = at
+        }
+        ContextMenuHook {
+            id: contextHook
+            Connections {
+                target: linkArea
+                onPositionChanged: if (contextHook.active) {
+                    var local = linkArea.mapToItem(contextHook, at.x, at.y)
+                    contextHook.positionChanged(Qt.point(local.x, local.y))
+                }
+                onReleased: if (contextHook.active) contextHook.released(true)
+            }
         }
     }
 
@@ -279,7 +406,7 @@ SilicaFlickable {
         defaultValue: 10.
     }
 
-    function goToPage(pageNumber, top, left, topSpacing, leftSpacing) {
+    function contentAt(pageNumber, top, left, topSpacing, leftSpacing) {
         var rect = pdfCanvas.pageRectangle( pageNumber )
         var scrollX, scrollY
         // Adjust horizontal position if required.
@@ -295,8 +422,12 @@ SilicaFlickable {
         if (scrollY > contentHeight - height) {
             scrollY = contentHeight - height
         }
-        contentX = Math.max(0, scrollX)
-        contentY = Math.max(0, scrollY)
+        return Qt.point(Math.max(0, scrollX), Math.max(0, scrollY))
+    }
+    function goToPage(pageNumber, top, left, topSpacing, leftSpacing) {
+        var pt = contentAt(pageNumber, top, left, topSpacing, leftSpacing)
+        contentX = pt.x
+        contentY = pt.y
     }
     // This function is the inverse of goToPage(), returning (pageNumber, top, left).
     function getPagePosition() {
@@ -308,6 +439,18 @@ SilicaFlickable {
         }
         var top  = (contentY - rect.y) / rect.height
         var left = (contentX - rect.x) / rect.width
+        return [i, top, left]
+    }
+    function getPositionAt(at) {
+        // Find the page that contains at
+        var i = Math.max(0, currentPage - 2)
+        var rect = pdfCanvas.pageRectangle( i )
+        while ((rect.y + rect.height) < at.y
+               && i < pdfCanvas.document.pageCount) {
+            rect = pdfCanvas.pageRectangle( ++i )
+        }
+        var top  = Math.max(0, at.y - rect.y) / rect.height
+        var left = (at.x - rect.x) / rect.width
         return [i, top, left]
     }
 }

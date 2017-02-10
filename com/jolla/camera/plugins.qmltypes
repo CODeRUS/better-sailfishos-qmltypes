@@ -1,4 +1,4 @@
-import QtQuick.tooling 1.1
+import QtQuick.tooling 1.2
 
 // This file describes the plugin-supplied types contained in the library.
 // It is used for QML tooling purposes only.
@@ -7,6 +7,11 @@ import QtQuick.tooling 1.1
 // 'qmlplugindump -nonrelocatable -noinstantiate com.jolla.camera 1.0'
 
 Module {
+    dependencies: [
+        "QtMultimedia 5.6",
+        "QtQuick 2.0",
+        "org.nemomobile.configuration 1.0"
+    ]
     Component {
         name: "CaptureModel"
         prototype: "QAbstractListModel"

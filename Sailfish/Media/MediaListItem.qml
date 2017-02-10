@@ -13,6 +13,8 @@ ListItem {
     property alias subtitleTextFormat: subtitleLabel.textFormat
     property bool playing
 
+    contentHeight: Math.max(Theme.itemSizeSmall, column.height + column.y*2)
+
     Label {
         id: durationLabel
         x: Theme.horizontalPageMargin
@@ -39,6 +41,8 @@ ListItem {
     }
 
     Column {
+        id: column
+
         anchors {
             left: durationLabel.right; leftMargin: Theme.paddingMedium
             top: parent.top; topMargin: Theme.paddingSmall

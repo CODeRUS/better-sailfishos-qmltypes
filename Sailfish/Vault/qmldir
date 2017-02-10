@@ -1,5 +1,6 @@
 module Sailfish.Vault
 plugin sailfishvaultplugin
 BackupPage 1.0 BackupPage.qml
-NewBackupDialog 1.0 NewBackupDialog.qml
+NewBackupRestoreDialog 1.0 NewBackupRestoreDialog.qml
+BackupRestoreProgressPage 1.0 BackupRestoreProgressPage.qml
 BackupRestoreStoragePicker 1.0 BackupRestoreStoragePicker.qml

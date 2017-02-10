@@ -16,6 +16,8 @@ Page {
     property QtObject attachmentFiles
     property Component contentPicker
 
+    allowedOrientations: Orientation.All
+
     function modifyAttachments() {
         var picker = pageStack.push(contentPicker, { selectedContent: attachmentFiles })
         picker.selectedContentChanged.connect(function() {

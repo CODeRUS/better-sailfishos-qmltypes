@@ -43,6 +43,7 @@ BackgroundItem {
 
     property alias labelColor: titleText.color
     property alias valueColor: valueText.color
+    property color descriptionColor: root.down ? Theme.secondaryHighlightColor : Theme.secondaryColor
 
     property alias labelMargin: root.leftMargin
     property real leftMargin: Theme.horizontalPageMargin
@@ -96,7 +97,7 @@ BackgroundItem {
             opacity: root.enabled ? 1.0 : 0.4
             width: parent.width
             font.pixelSize: Theme.fontSizeExtraSmall
-            color: root.down ? Theme.secondaryHighlightColor : Theme.secondaryColor
+            color: descriptionColor
             wrapMode: Text.Wrap
         }
     }

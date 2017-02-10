@@ -78,8 +78,8 @@ function _getStartDateForMonthView(year, month, weekstart) {
 // weekCount=6 this returns [1,2,3,4,5,6] or possibly [52,1,2,3,4,5] if Jan 1st
 // falls after Thursday for this year.
 // Given month should be 1-12.
-function _loadWeekNumbers(model, year, month, weekCount) {
-    var dt = new Date(Date.UTC(year, month-1, 1))
+function _loadWeekNumbers(model, year, month, day, weekCount) {
+    var dt = new Date(Date.UTC(year, month-1, day))
     var num = SilicaPrivate.Util.weekNumber(dt)
     for (var i=0; i<weekCount; i++) {
         if (model.count <= i) {
@@ -90,7 +90,7 @@ function _loadWeekNumbers(model, year, month, weekCount) {
 
         // get next week number
         dt.setDate(dt.getDate() + 7)
-        if ((month === 1 && num !== 1) || month === 12) {
+        if ((month === 1 && num !== 1) || month >= 11) {
             // may display week 52 in Jan calendar or week 1 in Dec
             num = SilicaPrivate.Util.weekNumber(dt)
         } else {

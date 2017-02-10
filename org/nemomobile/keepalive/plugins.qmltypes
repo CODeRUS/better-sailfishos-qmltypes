@@ -1,4 +1,4 @@
-import QtQuick.tooling 1.1
+import QtQuick.tooling 1.2
 
 // This file describes the plugin-supplied types contained in the library.
 // It is used for QML tooling purposes only.
@@ -7,6 +7,7 @@ import QtQuick.tooling 1.1
 // 'qmlplugindump -nonrelocatable -noinstantiate org.nemomobile.keepalive 1.0'
 
 Module {
+    dependencies: ["QtQuick 2.0"]
     Component {
         name: "DeclarativeBackgroundJob"
         prototype: "QObject"
@@ -35,6 +36,7 @@ Module {
                 "MaximumFrequency": 2147483647
             }
         }
+        Property { name: "triggeredOnEnable"; type: "bool" }
         Property { name: "enabled"; type: "bool" }
         Property { name: "running"; type: "bool"; isReadonly: true }
         Property { name: "frequency"; type: "Frequency" }

@@ -49,7 +49,8 @@ TextField {
     }
 
     textLeftMargin: Theme.itemSizeSmall + Theme.paddingMedium + Theme.horizontalPageMargin - Theme.paddingLarge
-    textRightMargin: Theme.itemSizeSmall + Theme.paddingMedium + Theme.horizontalPageMargin - Theme.paddingLarge
+    textRightMargin: text.length == 0 ? Theme.horizontalPageMargin
+                                      : Theme.itemSizeSmall + Theme.paddingMedium + Theme.horizontalPageMargin - Theme.paddingLarge
     textTopMargin: height/2 - _editor.implicitHeight/2
     labelVisible: false
 

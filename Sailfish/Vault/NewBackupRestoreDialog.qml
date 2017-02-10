@@ -102,115 +102,36 @@ Dialog {
         BackupRestoreProgressPage {
             id: progressPage
 
-            function _start() {
-                if (backupMode) {
-                    if (root.cloudAccountId > 0) {
-                        backupRestore.backupToCloud(root.cloudAccountId)
-                    } else {
-                        backupRestore.backupToDir(root.backupDir)
-                    }
+            backupMode: root.backupMode
+            cloudAccountId: root.cloudAccountId
+            backupDir: root.backupDir
+            fileToRestore: root.fileToRestore
+            unitListModel: root.unitListModel
+
+            button1Text: {
+                if (!backupMode) {
+                    // Restore operations cannot be canceled, so set an empty string so that
+                    // the button will be hidden.
+                    return state == "" || busy ? "" : defaultOKText
+                }
+                return canCancel ? defaultCancelText : defaultOKText
+            }
+
+            onButton1Clicked: {
+                if (canCancel) {
+                    progressPage.backupRestore.cancel()
+                    pageStack.pop(pageStack.previousPage(root))
                 } else {
-                    if (root.cloudAccountId > 0) {
-                        backupRestore.restoreFromCloud(root.cloudAccountId, root.fileToRestore)
-                    } else {
-                        backupRestore.restoreFromFile(root.fileToRestore)
-                    }
+                    pageStack.pop(pageStack.previousPage(root))
                 }
             }
 
-            canCancel: backupMode && !backupRestore.syncing
-                       && (state == "" || (backupRestore.running && !backupRestore.canceling))
-            progressValue: backupRestore.progress
-            statusText: " " // reserve space so button position doesn't animate
-
-            busyHeadingText: root.backupMode
-                           //% "Please wait while your content is backed up"
-                         ? qsTrId("vault-la-please_wait_backing_up")
-                           //% "Please wait while your content is restored"
-                         : qsTrId("vault-la-please_wait_restoring")
-
-            busyBodyText: !root.backupMode
-                            //: Do not turn off the device during the data backup or restore process
-                            //% "Do not turn off your device!"
-                          ? qsTrId("vault-la-do_not_turn_off")
-                          : ""
-
-            successHeadingText: {
-                if (root.backupMode) {
-                    return root.cloudAccountId > 0
-                               //% "Done. Your backup was uploaded successfully."
-                             ? qsTrId("vault-la-done_backup_uploaded_successfully")
-                               //% "Done. Your backup has been copied to the memory card."
-                             : qsTrId("vault-la-done_backup_copied_to_memory_card")
-                } else {
-                    //% "Done. Your data was restored successfully."
-                    return qsTrId("vault-la-done_backup_restored_successfully")
-                }
-            }
-
-            progressImageSource: {
-                if (backupRestore.running) {
-                    if (backupRestore.currentUnit.length > 0) {
-                        return unitListModel.getUnitValue(backupRestore.currentUnit, "iconSource", "")
-                    } else if (backupRestore.syncing) {
-                        return "image://theme/icon-l-transfer"
-                    }
-                    return "image://theme/icon-l-backup"
-                }
-                return ""
-            }
-            progressCaption: {
-                if (backupRestore.running && backupRestore.currentUnit.length > 0) {
-                    return unitListModel.getUnitValue(backupRestore.currentUnit, "displayName", "")
-                }
-                return ""
-            }
-
-            onStatusChanged: {
-                if (status == PageStatus.Active && state == "") {
-                    // starting immediately makes the UI seem jerky, so delay a bit
-                    delayedStart.start()
-                }
-            }
-
-            Timer {
-                id: delayedStart
-                interval: 500
-                onTriggered: {
-                    state = "running"
-                    _start()
-                }
-            }
-
-            onDone: {
-                pageStack.pop(pageStack.previousPage(root))
-            }
-
-            onCancelRequested: {
-                backupRestore.cancel()
-                pageStack.pop(pageStack.previousPage(root))
-            }
-
-            BackupRestoreOperation {
-                id: backupRestore
-
-                unitListModel: root.unitListModel
-
-                onStatusUpdate: {
-                    progressPage.statusText = statusText
-                }
+            Connections {
+                target: progressPage.backupRestore
                 onDone: {
-                    if (root.cloudAccountId <= 0) {
-                        deleteOldBackups(root.backupDir)
-                    }
-                    progressPage.state = "success"
-                    progressPage.statusText = ""
                     root.operationFinished(true)
                 }
                 onError: {
-                    progressPage.state = "error"
-                    progressPage.errorHeadingText = errorMainText
-                    progressPage.errorDetailText = errorDetailText
                     root.operationFinished(false)
                 }
             }

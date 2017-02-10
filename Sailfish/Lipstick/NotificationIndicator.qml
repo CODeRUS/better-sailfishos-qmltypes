@@ -26,7 +26,8 @@ Item {
     property Item _busyIndicator
 
     height: icon.height
-    width: _iconSize + 2*Theme.paddingLarge
+    width: Math.max(countLabel.width + countLabel.anchors.leftMargin + _iconSize + Theme.paddingSmall,
+                    _iconSize + 2*Theme.paddingLarge)
 
     onBusyChanged: {
         if (!_busyIndicator) {
@@ -66,6 +67,8 @@ Item {
     }
 
     Label {
+        id: countLabel
+
         anchors {
             left: icon.right
             leftMargin: Theme.paddingSmall

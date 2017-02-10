@@ -47,8 +47,6 @@ Label {
     property bool _invertColors
     on_InvertColorsChanged: _duration = 200
 
-    truncationMode: TruncationMode.Fade
-
     x: Theme.horizontalPageMargin
     width: parent ? parent.width-2*Theme.horizontalPageMargin : Screen.width
     // Reduce height if inside pulley menu content item on smaller screens
@@ -57,6 +55,13 @@ Label {
     verticalAlignment: Text.AlignVCenter
     color: enabled ? ((down || highlighted) ^ _invertColors ? Theme.highlightColor : Theme.primaryColor)
                    : Theme.rgba(Theme.secondaryColor, 0.4)
+
+    // Descriptive labels like a label defining a menu item action should not truncate.
+    // If there absolutely is no space left to fit the translation just limit the font size.
+    fontSizeMode: Text.HorizontalFit
+    minimumPixelSize: Theme.fontSizeExtraSmall
+    truncationMode: TruncationMode.Fade
+
     Behavior on color {
         SequentialAnimation {
             ColorAnimation { duration: _duration }

@@ -1,4 +1,4 @@
-import QtQuick.tooling 1.1
+import QtQuick.tooling 1.2
 
 // This file describes the plugin-supplied types contained in the library.
 // It is used for QML tooling purposes only.
@@ -7,6 +7,7 @@ import QtQuick.tooling 1.1
 // 'qmlplugindump -nonrelocatable -noinstantiate Sailfish.Silica.theme 1.0'
 
 Module {
+    dependencies: ["QtQuick 2.0"]
     Component {
         name: "Silica::Theme"
         prototype: "QObject"
@@ -32,6 +33,13 @@ Module {
         Property { name: "fontSizeLarge"; type: "int"; isReadonly: true }
         Property { name: "fontSizeExtraLarge"; type: "int"; isReadonly: true }
         Property { name: "fontSizeHuge"; type: "int"; isReadonly: true }
+        Property { name: "fontSizeTinyBase"; type: "int"; isReadonly: true }
+        Property { name: "fontSizeExtraSmallBase"; type: "int"; isReadonly: true }
+        Property { name: "fontSizeSmallBase"; type: "int"; isReadonly: true }
+        Property { name: "fontSizeMediumBase"; type: "int"; isReadonly: true }
+        Property { name: "fontSizeLargeBase"; type: "int"; isReadonly: true }
+        Property { name: "fontSizeExtraLargeBase"; type: "int"; isReadonly: true }
+        Property { name: "fontSizeHugeBase"; type: "int"; isReadonly: true }
         Property { name: "itemSizeExtraSmall"; type: "float"; isReadonly: true }
         Property { name: "itemSizeSmall"; type: "float"; isReadonly: true }
         Property { name: "itemSizeMedium"; type: "float"; isReadonly: true }

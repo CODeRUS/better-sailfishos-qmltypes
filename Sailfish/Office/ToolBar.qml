@@ -30,10 +30,35 @@ PanelBackground {
     property bool _active
     property int _previousContentY
 
+    function show() {
+        if (forceHidden) {
+            return
+        }
+        autoHideTimer.stop()
+        _active = true
+        if (autoShowHide) autoHideTimer.restart()
+    }
+    function hide() {
+        _active = false
+        autoHideTimer.stop()
+    }
+
     onAutoShowHideChanged: {
-        if (autoShowHide && _active) {
-            autoHideTimer.start()
+        if (autoShowHide) {
+            if (_active) {
+                autoHideTimer.start()
+            }
         } else {
+            autoHideTimer.stop()
+            // Keep a transiting (and a not transited yet) toolbar visible.
+            _active = _active || (offset > 0)
+        }
+    }
+
+    onForceHiddenChanged: {
+        // Avoid showing back the toolbar when forceHidden becomes false again.
+        if (forceHidden && autoShowHide) {
+            _active = false
             autoHideTimer.stop()
         }
     }

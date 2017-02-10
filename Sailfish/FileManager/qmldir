@@ -1,3 +1,4 @@
 module Sailfish.FileManager
 plugin sailfishfilemanagerplugin
 DirectoryPage 1.0 DirectoryPage.qml
+SortingPage 1.0 SortingPage.qml

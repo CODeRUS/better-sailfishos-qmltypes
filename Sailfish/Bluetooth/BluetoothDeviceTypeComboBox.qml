@@ -8,55 +8,36 @@ ComboBox {
 
     property string deviceAddress
     property int deviceClass
-
-    property int _saveTypeToConf
+    property url deviceValueIconSource
 
     visible: deviceTypesModel.count > 0
     value: ""
 
-    function _loadIndex(index, saveToConf) {
+    function _loadIndex(index) {
         if (index >= 0 && index < deviceTypesModel.count) {
             var data = deviceTypesModel.get(index)
-            deviceValueIcon.source = "image://theme/" + data.icon
+            deviceValueIconSource = "image://theme/" + data.icon
             deviceValueLabel.text = data.displayName
-            if (saveToConf) {
-                deviceTypeConf.value = data.type
-            }
+            deviceInfo.deviceType = data.type
         }
     }
 
-    // ConfigurationValue won't load until after the defaultIndex, so make sure setting
-    // the defaultIndex doesn't overwrite the config value
-    Timer {
-        id: waitForConfLoadTimer
-        interval: 500
-        onTriggered: {
-            var data = deviceTypesModel.get(deviceTypesModel.defaultIndex)
-            if (data.type !== undefined) {
-                deviceTypeConf.value = data.type
+    BluetoothDeviceInfo {
+        id: deviceInfo
+        address: deviceAddress
+        deviceClass: root.deviceClass
+        onDeviceTypeChanged: {
+            if (deviceType >= 0) {
+                root._loadIndex(deviceType == BluetoothDeviceTypesModel.UncategorizedIconType
+                                ? deviceTypesModel.defaultIndex
+                                : deviceTypesModel.indexOfType(deviceType))
             }
-        }
-    }
-
-    ConfigurationValue {
-        id: deviceTypeConf
-        key: deviceTypesModel.deviceTypeConfigurationKey(root.deviceAddress)
-
-        onValueChanged: {
-            waitForConfLoadTimer.stop()
-            var type = parseInt(deviceTypeConf.value)
-            root._loadIndex(deviceTypesModel.indexOfType(type), false)
         }
     }
 
     BluetoothDeviceTypesModel {
         id: deviceTypesModel
         classFilter: root.deviceClass
-
-        onDefaultIndexChanged: {
-            root._loadIndex(defaultIndex, false)
-            waitForConfLoadTimer.start()
-        }
     }
 
     // Use our own labels for 'type' and 'value' instead of using ComboBox's so that we can position
@@ -82,6 +63,7 @@ ComboBox {
             leftMargin: Theme.paddingMedium
             verticalCenter: parent.verticalCenter
         }
+        source: deviceValueIconSource + "?" + (highlighted ? Theme.highlightColor : Theme.primaryColor)
     }
 
     Label {
@@ -105,7 +87,7 @@ ComboBox {
                 x: deviceValueLabel.x
 
                 onClicked: {
-                    root._loadIndex(model.index, true)
+                    root._loadIndex(model.index)
                 }
 
                 Image {

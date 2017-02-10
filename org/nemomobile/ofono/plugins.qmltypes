@@ -1,4 +1,4 @@
-import QtQuick.tooling 1.1
+import QtQuick.tooling 1.2
 
 // This file describes the plugin-supplied types contained in the library.
 // It is used for QML tooling purposes only.
@@ -7,6 +7,7 @@ import QtQuick.tooling 1.1
 // 'qmlplugindump -nonrelocatable -noinstantiate org.nemomobile.ofono 1.0'
 
 Module {
+    dependencies: ["QtQuick 2.0"]
     Component {
         name: "QOfonoExtCell"
         prototype: "QObject"
@@ -86,6 +87,7 @@ Module {
         exports: ["org.nemomobile.ofono/OfonoModemManager 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "interfaceVersion"; type: "int"; isReadonly: true }
         Property { name: "availableModems"; type: "QStringList"; isReadonly: true }
         Property { name: "enabledModems"; type: "QStringList" }
         Property { name: "defaultDataModem"; type: "string"; isReadonly: true }
@@ -102,6 +104,10 @@ Module {
         Signal {
             name: "validChanged"
             Parameter { name: "value"; type: "bool" }
+        }
+        Signal {
+            name: "interfaceVersionChanged"
+            Parameter { name: "value"; type: "int" }
         }
         Signal {
             name: "availableModemsChanged"

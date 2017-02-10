@@ -1,4 +1,4 @@
-import QtQuick.tooling 1.1
+import QtQuick.tooling 1.2
 
 // This file describes the plugin-supplied types contained in the library.
 // It is used for QML tooling purposes only.
@@ -7,6 +7,7 @@ import QtQuick.tooling 1.1
 // 'qmlplugindump -nonrelocatable -noinstantiate org.nemomobile.systemsettings 1.0'
 
 Module {
+    dependencies: ["QtQuick 2.0"]
     Component {
         name: "AboutSettings"
         prototype: "QObject"
@@ -218,6 +219,49 @@ Module {
         }
     }
     Component {
+        name: "ObjectListModel"
+        prototype: "QAbstractListModel"
+        Property { name: "automaticRoles"; type: "bool" }
+        Property { name: "populated"; type: "bool" }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Signal {
+            name: "itemAdded"
+            Parameter { name: "item"; type: "QObject"; isPointer: true }
+        }
+        Signal {
+            name: "itemRemoved"
+            Parameter { name: "item"; type: "QObject"; isPointer: true }
+        }
+        Method {
+            name: "insertItem"
+            Parameter { name: "index"; type: "int" }
+            Parameter { name: "item"; type: "QObject"; isPointer: true }
+        }
+        Method {
+            name: "appendItem"
+            Parameter { name: "item"; type: "QObject"; isPointer: true }
+        }
+        Method {
+            name: "removeItem"
+            Parameter { name: "item"; type: "QObject"; isPointer: true }
+        }
+        Method {
+            name: "removeItemAt"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method { name: "clear" }
+        Method {
+            name: "get"
+            type: "QObject*"
+            Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "indexOf"
+            type: "int"
+            Parameter { name: "item"; type: "QObject"; isPointer: true }
+        }
+    }
+    Component {
         name: "PartitionModel"
         prototype: "QAbstractListModel"
         exports: ["org.nemomobile.systemsettings/PartitionModel 1.0"]
@@ -356,6 +400,96 @@ Module {
             name: "unhideMode"
             type: "bool"
             Parameter { name: "mode"; type: "string" }
+        }
+    }
+    Component {
+        name: "VpnModel"
+        prototype: "ObjectListModel"
+        exports: ["org.nemomobile.systemsettings/VpnModel 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "ConnectionState"
+            values: {
+                "Idle": 0,
+                "Failure": 1,
+                "Configuration": 2,
+                "Ready": 3,
+                "Disconnect": 4
+            }
+        }
+        Enum {
+            name: "ConnectionType"
+            values: {
+                "OpenVPN": 0,
+                "OpenConnect": 1,
+                "VPNC": 2,
+                "L2TP": 3,
+                "PPTP": 4
+            }
+        }
+        Property { name: "bestState"; type: "int"; isReadonly: true }
+        Signal {
+            name: "connectionStateChanged"
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "state"; type: "int" }
+        }
+        Method {
+            name: "createConnection"
+            Parameter { name: "properties"; type: "QVariantMap" }
+        }
+        Method {
+            name: "modifyConnection"
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "properties"; type: "QVariantMap" }
+        }
+        Method {
+            name: "deleteConnection"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "activateConnection"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "deactivateConnection"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "setAutomaticConnection"
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "enabled"; type: "bool" }
+        }
+        Method {
+            name: "connectionCredentials"
+            type: "QVariantMap"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "setConnectionCredentials"
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "credentials"; type: "QVariantMap" }
+        }
+        Method {
+            name: "connectionCredentialsEnabled"
+            type: "bool"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "disableConnectionCredentials"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "connectionSettings"
+            type: "QVariantMap"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "processProvisioningFile"
+            type: "QVariantMap"
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "type"; type: "ConnectionType" }
         }
     }
 }

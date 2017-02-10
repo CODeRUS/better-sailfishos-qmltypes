@@ -11,7 +11,7 @@ Dialog {
 
     property alias instruction: instructionLabel.text
     property alias explanation: explanationLabel.text
-    property alias feedback: feedbackLabel.text
+    property string feedback
 
     property alias header: header
     property alias contentItem: contentItem
@@ -83,6 +83,12 @@ Dialog {
 
     Label {
         id: feedbackLabel
+
+        readonly property bool active: feedback.length > 0
+        onActiveChanged: if (active) text = feedback
+
+        opacity: active ? 1.0 : 0.0
+        Behavior on opacity { FadeAnimation {}}
 
         x: Theme.horizontalPageMargin
         y: page.height - feedbackLabel.height - Theme.paddingLarge

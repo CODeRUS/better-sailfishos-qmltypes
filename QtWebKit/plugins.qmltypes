@@ -1,4 +1,4 @@
-import QtQuick.tooling 1.1
+import QtQuick.tooling 1.2
 
 // This file describes the plugin-supplied types contained in the library.
 // It is used for QML tooling purposes only.
@@ -7,6 +7,7 @@ import QtQuick.tooling 1.1
 // 'qmlplugindump -nonrelocatable -noinstantiate QtWebKit 3.0'
 
 Module {
+    dependencies: ["QtQuick 2.0"]
     Component {
         name: "QIODevice"
         prototype: "QObject"
@@ -37,6 +38,8 @@ Module {
                 "TemporaryNetworkFailureError": 7,
                 "NetworkSessionFailedError": 8,
                 "BackgroundRequestNotAllowedError": 9,
+                "TooManyRedirectsError": 10,
+                "InsecureRedirectError": 11,
                 "UnknownNetworkError": 99,
                 "ProxyConnectionRefusedError": 101,
                 "ProxyConnectionClosedError": 102,
@@ -49,10 +52,16 @@ Module {
                 "ContentNotFoundError": 203,
                 "AuthenticationRequiredError": 204,
                 "ContentReSendError": 205,
+                "ContentConflictError": 206,
+                "ContentGoneError": 207,
                 "UnknownContentError": 299,
                 "ProtocolUnknownError": 301,
                 "ProtocolInvalidOperationError": 302,
-                "ProtocolFailure": 399
+                "ProtocolFailure": 399,
+                "InternalServerError": 401,
+                "OperationNotImplementedError": 402,
+                "ServiceUnavailableError": 403,
+                "UnknownServerError": 499
             }
         }
         Signal { name: "metaDataChanged" }
@@ -65,6 +74,14 @@ Module {
         Signal {
             name: "sslErrors"
             Parameter { name: "errors"; type: "QList<QSslError>" }
+        }
+        Signal {
+            name: "preSharedKeyAuthenticationRequired"
+            Parameter { name: "authenticator"; type: "QSslPreSharedKeyAuthenticator"; isPointer: true }
+        }
+        Signal {
+            name: "redirected"
+            Parameter { name: "url"; type: "QUrl" }
         }
         Signal {
             name: "uploadProgress"

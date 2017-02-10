@@ -66,9 +66,9 @@ DockedPanel {
         y: panel._isLandscape ? Theme.paddingSmall : Theme.paddingMedium
 
         Item {
-            // workaround slider having too much padding
+            // slider has some internal padding, use a bit overlapping so extraContent is more attached to it
             width: parent.width
-            height: Theme.itemSizeMedium
+            height: slider.height - Theme.paddingMedium - Theme.paddingSmall
 
             Slider {
                 id: slider

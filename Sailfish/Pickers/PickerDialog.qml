@@ -20,6 +20,7 @@ Dialog {
         _selectedModel = model
     }
 
+    allowedOrientations: Orientation.All
     canAccept: _selectedModel && _selectedModel.count > 0 ? true : false
     onDone: {
         if (result == DialogResult.Accepted) {

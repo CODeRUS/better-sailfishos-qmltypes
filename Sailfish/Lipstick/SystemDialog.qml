@@ -18,9 +18,12 @@ SystemDialogWindow {
     property alias bottomPadding: layout.bottomPadding
     property alias allowedOrientations: window.allowedOrientations
     readonly property alias orientation: window.orientation
+    property bool autoDismiss: true
 
     property bool _closing
     default property alias _data: layout._data
+
+    signal dismissed()
 
     width: Screen.width
     height: Screen.height
@@ -56,8 +59,11 @@ SystemDialogWindow {
         parent: window.pageStack.currentPage ? window.pageStack.currentPage : window.contentItem
 
         onDismiss: {
-            dialog._closing = true
-            dialog.lower()
+            if (dialog.autoDismiss) {
+                dialog._closing = true
+                dialog.lower()
+                dialog.dismissed()
+            }
         }
     }
 }

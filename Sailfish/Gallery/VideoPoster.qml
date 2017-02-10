@@ -97,7 +97,7 @@ MouseArea {
             anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
 
             enabled: !videoItem.playing
-            height: Theme.itemSizeExtraLarge
+            height: Math.max(implicitHeight, Theme.itemSizeExtraLarge)
             handleVisible: false
             minimumValue: 0
             maximumValue: videoItem._loaded ? videoItem.player.duration / 1000 : videoItem.duration

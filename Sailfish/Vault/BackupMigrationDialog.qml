@@ -28,13 +28,14 @@ Dialog {
         var data = snapshotModel.get(modelIndex)
         var retainedSnapshotDisplayIndex = 1
         if (_retainedSnapshotPrevDisplayIndex < 0) {
+            retainedSnapshotName = data.name
+            retainedSnapshotDateTime = data.timestamp
+            _retainedSnapshotPrevDisplayIndex = data.snapshotIndex + 2
+
             // this is the first time this has been called, insert the dummy header entries
             snapshotModel.insert(0, {"header": "keep", "name": "", "timestamp": null, "notes": "", "snapshotIndex": -1})
             snapshotModel.insert(1, {"header": "delete", "name": "", "timestamp": null, "notes": "", "snapshotIndex": -1})
 
-            retainedSnapshotName = data.name
-            retainedSnapshotDateTime = data.timestamp
-            _retainedSnapshotPrevDisplayIndex = data.snapshotIndex + 2
             snapshotModel.move(modelIndex + 2, 1, 1)
         } else if (modelIndex > 2) {        // not a header or the currently retained snapshot
             var returnIndex = _retainedSnapshotPrevDisplayIndex
@@ -65,7 +66,7 @@ Dialog {
             toCloudAccountId: root.cloudAccountId
             toBackupDir: root.memoryCardPath
 
-            onDone: {
+            onButton1Clicked: {
                 root.operationFinished(state == "success")
                 if (state == "success") {
                     pageStack.pop(pageStack.previousPage(root))

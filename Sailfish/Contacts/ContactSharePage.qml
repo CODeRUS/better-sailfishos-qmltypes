@@ -19,7 +19,7 @@ Page {
         }
 
         ViewPlaceholder {
-            enabled: methodList.count == 0
+            enabled: methodList.count == 0 && methodList.model.ready
             //: Empty state for share method selection page
             //% "No sharing accounts available. You can add accounts in settings"
             text: qsTrId("components_contacts-la-no-share-methods")

@@ -12,7 +12,6 @@ ContactSharePage 1.0 ContactSharePage.qml
 ContactsMultiSelectDialog 1.0 ContactsMultiSelectDialog.qml
 FavoriteContactItem 1.0 FavoriteContactItem.qml
 FavoritesBar 1.0 FavoritesBar.qml
-ContactsItemPoolItem 1.0 ContactsItemPoolItem.qml
 ContactPresenceIndicator 1.0 ContactPresenceIndicator.qml
 ContactPresenceUpdate 1.0 ContactPresenceUpdate.qml
 TemporaryContactCardPage 1.0 TemporaryContactCardPage.qml

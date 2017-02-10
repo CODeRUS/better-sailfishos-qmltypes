@@ -1,4 +1,4 @@
-import QtQuick.tooling 1.1
+import QtQuick.tooling 1.2
 
 // This file describes the plugin-supplied types contained in the library.
 // It is used for QML tooling purposes only.
@@ -7,6 +7,7 @@ import QtQuick.tooling 1.1
 // 'qmlplugindump -nonrelocatable -noinstantiate QtWebKit.experimental 1.0'
 
 Module {
+    dependencies: ["QtQuick 2.0"]
     Component {
         name: "QQuickNetworkReply"
         prototype: "QObject"
@@ -183,10 +184,12 @@ Module {
         }
         Property { name: "userAgent"; type: "string" }
         Property { name: "userScripts"; type: "QList<QUrl>" }
-        Property { name: "userStyleSheet"; type: "QUrl" }
         Property { name: "remoteInspectorUrl"; type: "QUrl"; isReadonly: true }
         Property { name: "enableInputFieldAnimation"; type: "bool" }
         Property { name: "enableResizeContent"; type: "bool" }
+        Property { name: "userStyleSheet"; type: "QUrl" }
+        Property { name: "userStyleSheets"; type: "QList<QUrl>" }
+        Property { name: "remoteInspectorUrl"; type: "QUrl"; isReadonly: true }
         Signal { name: "loadVisuallyCommitted" }
         Signal {
             name: "downloadRequested"
@@ -430,6 +433,8 @@ Module {
         Property { name: "cookiesEnabled"; type: "bool" }
         Property { name: "universalAccessFromFileURLsAllowed"; type: "bool" }
         Property { name: "fileAccessFromFileURLsAllowed"; type: "bool" }
+        Property { name: "spatialNavigationEnabled"; type: "bool" }
+        Property { name: "linksIncludedInFocusChain"; type: "bool" }
         Property { name: "standardFontFamily"; type: "string" }
         Property { name: "fixedFontFamily"; type: "string" }
         Property { name: "serifFontFamily"; type: "string" }

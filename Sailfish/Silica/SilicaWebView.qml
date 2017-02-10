@@ -135,20 +135,11 @@ WebView {
     }
 
     Rectangle {
-        id: headerBackground
         x: webView.contentX
-        width: webView.contentWidth
-        height: _headerItem ? _headerItem.height : 0
-
-        color: Theme.rgba(Theme.highlightColor, 0.3)
-    }
-
-    Rectangle {
-        x: webView.contentX
-        anchors.top: headerBackground.bottom
+        y: _headerItem ? _headerItem.height : 0
 
         width: webView.contentWidth
-        height: Math.max(webView.contentHeight, _page.height) - headerBackground.height
+        height: Math.max(webView.contentHeight, _page.height) - y
         color: webView.experimental.transparentBackground ? "transparent" : "white"
     }
 

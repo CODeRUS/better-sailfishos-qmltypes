@@ -47,6 +47,7 @@ QtObject {
                 var authenticated = query._authenticated
                 query._authenticated = undefined
                 query._canceled = undefined
+                query._authorization = null
 
                 authenticated(authenticationToken)
             }

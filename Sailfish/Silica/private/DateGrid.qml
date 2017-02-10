@@ -105,9 +105,17 @@ Item {
         }
 
         // set the week numbers
-        var theMonth = new Date(Date.UTC(year, month-1, 1))
-        DatePickerScript._loadWeekNumbers(weekNumberModel, year, month, 6)
+        // find first monday on first row and get week numbers from that on. Note: iso-8601 week number also for en_US.
+        // for locales starting week from sunday or saturday, this will mean first one or two items on a row will be
+        // with wrong number.
+        var firstMonday = DatePickerScript._getStartDateForMonthView(year, month, root.weekStart)
+        while (firstMonday.getDay() != 1) {
+            firstMonday.setDate(firstMonday.getDate() + 1)
+        }
 
+        DatePickerScript._loadWeekNumbers(weekNumberModel, firstMonday.getFullYear(), firstMonday.getMonth() + 1, firstMonday.getDate(), 6)
+
+        var theMonth = new Date(Date.UTC(year, month-1, 1))
         monthName.text = Format.formatDate(theMonth, Format.MonthNameStandaloneShort)
         monthYear.text = Qt.formatDateTime(theMonth, "yyyy")
     }

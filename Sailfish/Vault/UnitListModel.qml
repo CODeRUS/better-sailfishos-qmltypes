@@ -7,6 +7,9 @@ ListModel {
 
     function loadVaultUnits(units) {
         for (var name in units) {
+            if (findUnit(name) >= 0) {
+                continue
+            }
             var info = units[name]
             var translation = info.translation;
             var props = {
@@ -28,5 +31,14 @@ ListModel {
             }
         }
         return defaultValue
+    }
+
+    function findUnit(unitName) {
+        for (var i=0; i<count; i++) {
+            if (get(i).name == unitName) {
+                return i
+            }
+        }
+        return -1
     }
 }

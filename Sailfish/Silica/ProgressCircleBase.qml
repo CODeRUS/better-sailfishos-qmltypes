@@ -33,6 +33,7 @@
 ****************************************************************************************/
 
 import QtQuick 2.0
+import Sailfish.Silica 1.0
 
 Item {
     id: root;
@@ -41,10 +42,10 @@ Item {
     property color backgroundColor: "darkgray"
     property real value: 0;
     property real progressValue: value >= 0 ? (value <= 1 ? value : 1) : 0;
-    property real borderWidth: 5
+    property real borderWidth: Theme.paddingSmall
 
-    width: 80
-    height: 80
+    width: Theme.itemSizeSmall
+    height: Theme.itemSizeSmall
 
     ShaderEffect {
         id: shader

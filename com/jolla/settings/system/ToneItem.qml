@@ -20,7 +20,8 @@ ValueButton {
     property bool toneEnabled
 
     label: defaultText
-    title: info.displayName != "" ? info.displayName : metadataReader.getTitle(toneSettings[fileProperty])
+    title: (info.contentId != 0 && info.displayName != "") ? info.displayName
+                                                           : metadataReader.getTitle(toneSettings[fileProperty])
 
     toneEnabled: toneSettings[enabledProperty]
     value: (title != "" && toneEnabled)

@@ -55,10 +55,15 @@ ListModel {
         for (var devicePath in externalStorage) {
             var storageData = externalStorage[devicePath]
             if (storageData.path) {
+                var name = storageData.available > 0
+                        //: the parameter is the capacity of the memory card, e.g. "4.2 GB"
+                        //% "Memory card %1"
+                        ? qsTrId("vault-la-memory_card_with_size").arg(Format.formatFileSize(storageData.available))
+                          //% "Memory card"
+                        : qsTrId("vault-la-memory_card")
                 var props = {
                     "type": storageTypeMemoryCard,
-                    //% "Memory card"
-                    "name": qsTrId("vault-la-memory_card"),
+                    "name": name,
                     "accountId": 0,
                     "path": storageData.path
                 }
