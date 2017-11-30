@@ -59,6 +59,16 @@ Item {
     property int cellHeight
     property int _displayedMonthStartIndex: -1
 
+    // for week column highlight cannot use week number of date because numbering is ISO-8601.
+    // -> if locale uses saturaday or sunday to start week, the first items will belong to
+    // previous week but highlighting number from above column would be strange.
+    // done by having grid start as midnight and selected date as noon. should work even with DST changes.
+    property date _properSelectedDate: {
+        return new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 12, 0)
+    }
+    property date _gridStartDate
+    readonly property int _selectedDateRow: (_properSelectedDate - _gridStartDate) / (7*24*60*60*1000)
+
     signal updateModel(variant modelObject, variant fromDate, variant toDate, int primaryMonth)
 
     onNeedsUpdateChanged: {
@@ -115,12 +125,13 @@ Item {
 
         DatePickerScript._loadWeekNumbers(weekNumberModel, firstMonday.getFullYear(), firstMonday.getMonth() + 1, firstMonday.getDate(), 6)
 
-        var theMonth = new Date(Date.UTC(year, month-1, 1))
+        var theMonth = new Date(year, month-1, 1, 12)
         monthName.text = Format.formatDate(theMonth, Format.MonthNameStandaloneShort)
         monthYear.text = Qt.formatDateTime(theMonth, "yyyy")
     }
 
     function _loadDateGrid(fromDate, totalDays) {
+        _gridStartDate = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate())
         if (modelComponent !== null && customModel === null) {
             customModel = modelComponent.createObject(root)
         }
@@ -130,8 +141,9 @@ Item {
             root.updateModel(customModel, fromDate, toDate, root.displayedMonth)
         } else {
             var dt = new Date(fromDate)
+            var i
             if (dateModel.count == 0) {
-                for (var i=0; i<totalDays; i++) {
+                for (i = 0; i < totalDays; i++) {
                     dateModel.append({'year': dt.getFullYear(),
                                       'month': dt.getMonth()+1,
                                       'day': dt.getDate(),
@@ -139,7 +151,7 @@ Item {
                     dt.setDate(dt.getDate() + 1)
                 }
             } else {
-                for (var i=0; i<totalDays; i++) {
+                for (i = 0; i < totalDays; i++) {
                     dateModel.set(i, {'year': dt.getFullYear(),
                                       'month': dt.getMonth()+1,
                                       'day': dt.getDate(),
@@ -200,7 +212,7 @@ Item {
                     color: Theme.highlightColor
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
-                    opacity: Util.weekNumber(selectedDate) === model.weekNumber ? 1.0 : 0.5
+                    opacity: model.index === _selectedDateRow ? 1.0 : 0.5
                 }
             }
         }

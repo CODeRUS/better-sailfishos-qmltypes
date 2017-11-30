@@ -15,6 +15,7 @@ Page {
     property bool showFormat
     property Notification errorNotification
     property bool mounting
+    property bool showNewFolder: true
 
     property alias sortBy: fileModel.sortBy
     property alias sortOrder: fileModel.sortOrder
@@ -79,6 +80,7 @@ Page {
             MenuItem {
                 //% "New folder"
                 text: qsTrId("filemanager-me-new_folder")
+                visible: page.showNewFolder
                 onClicked: {
                     var dialog = pageStack.push(Qt.resolvedUrl("NewFolderDialog.qml"), { path: page.path })
                 }

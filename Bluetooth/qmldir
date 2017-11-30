@@ -1,2 +1,0 @@
-module Bluetooth
-plugin Bluez-qt

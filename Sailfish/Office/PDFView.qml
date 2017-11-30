@@ -44,6 +44,8 @@ SilicaFlickable {
     property real _contentXAtGotoLink: -1.
     property real _contentYAtGotoLink: -1.
 
+    property int _searchIndex
+
     signal clicked()
     signal linkClicked(string linkTarget, Item hook)
     signal selectionClicked(variant selection, Item hook)
@@ -92,41 +94,39 @@ SilicaFlickable {
     function moveToSearchMatch(index) {
         if (index < 0 || index >= searchDisplay.count) return
 
-        searchDisplay.currentIndex = index
+        _searchIndex = index
         
         var match = searchDisplay.itemAt(index)
         var cX = match.x + match.width / 2. - width / 2.
-        transX.to = (cX < 0) ? 0 : (cX > pdfCanvas.width - width) ? pdfCanvas.width - width : cX
+        cX = Math.max(0, Math.min(cX, pdfCanvas.width - width))
         var cY = match.y + match.height / 2. - height / 2.
-        transY.to = (cY < 0) ? 0 : (cY > pdfCanvas.height - height) ? pdfCanvas.height - height : cY
+        cY = Math.max(0, Math.min(cY, pdfCanvas.height - height))
 
-        scaleIn.target = match
-        scaleOut.target = match
-
-        focusSearchMatch.start()
+        scrollTo(Qt.point(cX, cY), match.page, match)
     }
 
     function nextSearchMatch() {
-        if (searchDisplay.currentIndex + 1 >= searchDisplay.count) {
+        if (_searchIndex + 1 >= searchDisplay.count) {
             moveToSearchMatch(0)
         } else {
-            moveToSearchMatch(searchDisplay.currentIndex + 1)
+            moveToSearchMatch(_searchIndex + 1)
         }
     }
 
     function prevSearchMatch() {
-        if (searchDisplay.currentIndex < 1) {
+        if (_searchIndex < 1) {
             moveToSearchMatch(searchDisplay.count - 1)
         } else {
-            moveToSearchMatch(searchDisplay.currentIndex - 1)
+            moveToSearchMatch(_searchIndex - 1)
         }
     }
 
-    function scrollTo(pt, pageId) {
+    function scrollTo(pt, pageId, focusItem) {
         if ((pt.y < base.contentY + base.height && pt.y > base.contentY - base.height)
             && (pt.x < base.contentX + base.width && pt.x > base.contentX - base.width)) {
             scrollX.to = pt.x
             scrollY.to = pt.y
+            scrollAnimation.focusItem = (focusItem !== undefined) ? focusItem : null
             scrollAnimation.start()
         } else {
             var deltaY = pt.y - base.contentY
@@ -141,6 +141,7 @@ SilicaFlickable {
             returnY.from = pt.y - deltaY
             returnY.to = pt.y
             quickScrollAnimation.pageTo = pageId
+            quickScrollAnimation.focusItem = (focusItem !== undefined) ? focusItem : null
             quickScrollAnimation.start()
         }
     }
@@ -158,24 +159,29 @@ SilicaFlickable {
     }
 
     SequentialAnimation {
-        id: focusSearchMatch
-        ParallelAnimation {
-            NumberAnimation { id: transX; target: base; property: "contentX"; duration: 400; easing.type: Easing.InOutCubic }
-            NumberAnimation { id: transY; target: base; property: "contentY"; duration: 400; easing.type: Easing.InOutCubic }
-        }
-        SequentialAnimation {
-            NumberAnimation { id: scaleIn; property: "scale"; duration: 200; to: 3.; easing.type: Easing.InOutCubic }
-            NumberAnimation { id: scaleOut; property: "scale"; duration: 200; to: 1.; easing.type: Easing.InOutCubic }
-        }
+        id: focusAnimation
+        property Item targetItem
+        NumberAnimation { target: focusAnimation.targetItem; property: "scale"; duration: 200; to: 3.; easing.type: Easing.InOutCubic }
+        NumberAnimation { target: focusAnimation.targetItem; property: "scale"; duration: 200; to: 1.; easing.type: Easing.InOutCubic }
     }
-    ParallelAnimation {
+    SequentialAnimation {
         id: scrollAnimation
-        NumberAnimation { id: scrollX; target: base; property: "contentX"; duration: 300; easing.type: Easing.InOutQuad }
-        NumberAnimation { id: scrollY; target: base; property: "contentY"; duration: 300; easing.type: Easing.InOutQuad }
+        property Item focusItem
+        ParallelAnimation {
+            NumberAnimation { id: scrollX; target: base; property: "contentX"; duration: 300; easing.type: Easing.InOutQuad }
+            NumberAnimation { id: scrollY; target: base; property: "contentY"; duration: 300; easing.type: Easing.InOutQuad }
+        }
+        ScriptAction {
+            script: if (scrollAnimation.focusItem) {
+                focusAnimation.targetItem = scrollAnimation.focusItem
+                focusAnimation.start()
+            }
+        }
     }
     SequentialAnimation {
         id: quickScrollAnimation
         property int pageTo
+        property Item focusItem
         ParallelAnimation {
             NumberAnimation { id: leaveX; target: base; property: "contentX"; duration: 300; easing.type: Easing.InQuad }
             NumberAnimation { id: leaveY; target: base; property: "contentY"; duration: 300; easing.type: Easing.InQuad }
@@ -186,6 +192,12 @@ SilicaFlickable {
             NumberAnimation { id: returnX; target: base; property: "contentX"; duration: 300; easing.type: Easing.OutQuad }
             NumberAnimation { id: returnY; target: base; property: "contentY"; duration: 300; easing.type: Easing.OutQuad }
             NumberAnimation { target: base; property: "opacity"; duration: 300; to: 1.; easing.type: Easing.OutQuad }
+        }
+        ScriptAction {
+            script: if (quickScrollAnimation.focusItem) {
+                focusAnimation.targetItem = quickScrollAnimation.focusItem
+                focusAnimation.start()
+            }
         }
     }
     NumberAnimation {
@@ -205,6 +217,22 @@ SilicaFlickable {
                                              base, 'ThemeEffect')
         if (_feedbackEffect && !_feedbackEffect.supported) {
             _feedbackEffect = null
+        }
+    }
+
+    Connections {
+        target: document
+        onSearchModelChanged: moveToFirstMatch.done = false
+    }
+    Connections {
+        id: moveToFirstMatch
+        property bool done
+        target: document.searchModel
+        onCountChanged: {
+            if (done) return
+            
+            moveToSearchMatch(0)
+            done = true
         }
     }
 
@@ -336,10 +364,7 @@ SilicaFlickable {
         Repeater {
             id: searchDisplay
 
-            property int currentIndex
-
             model: pdfCanvas.document.searchModel
-            onModelChanged: moveToSearchMatch(0)
 
             delegate: Rectangle {
                 property int page: model.page

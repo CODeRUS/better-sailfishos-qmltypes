@@ -65,6 +65,11 @@ ListView {
     cacheBuffer: Theme.itemSizeMedium * 8
     boundsBehavior: (pullDownMenu && pullDownMenu._activationPermitted) || (pushUpMenu && pushUpMenu._activationPermitted) ? Flickable.DragOverBounds : Flickable.StopAtBounds
 
+    // On touch devices highlightMoveDuration is not in use, but with strict highlight range mode
+    // the highlight move transition may be triggered by ListView, so better to have sane
+    // value here to avoid super slow default transition velocity
+    highlightMoveDuration: 300
+
     BoundsBehavior { flickable: listView }
     QuickScroll {
         id: quickScrollItem

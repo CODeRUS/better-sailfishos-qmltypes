@@ -1,5 +1,4 @@
 module Sailfish.Silica
-plugin sailfishsilicaplugin
 AddAnimation 1.0 AddAnimation.qml
 RemoveAnimation 1.0 RemoveAnimation.qml
 ApplicationWindow 1.0 ApplicationWindow.qml

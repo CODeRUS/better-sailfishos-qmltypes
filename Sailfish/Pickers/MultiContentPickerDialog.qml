@@ -1,9 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2013-2016 Jolla Ltd.
+** Contact: Raine Mäkeläinen <raine.makelainen@jollamobile.com>
+**
+****************************************************************************/
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as Private
+import "private"
 
 PickerDialog {
     id: contentPickerDialog
+
+    property string title
 
     // We are single selection, so don't show the forward navigation indicator
     forwardNavigation: false
@@ -24,7 +34,7 @@ PickerDialog {
 
         model: categoryModel
 
-        delegate: ListItem {
+        delegate: BackgroundItem {
             Label {
                 id: categoryName
 
@@ -37,7 +47,6 @@ PickerDialog {
 
             onClicked: {
                 var subview = pageStack.push(Qt.resolvedUrl(model.subview), {
-                    title: contentPickerDialog.title,
                     acceptDestination: pageStack.previousPage(contentPickerDialog),
                     acceptDestinationAction: PageStackAction.Pop,
                     _selectedModel: contentPickerDialog._selectedModel,

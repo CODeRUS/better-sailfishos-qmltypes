@@ -9,27 +9,35 @@ SettingsBase {
     // mode change goes here, CaptureView updates to global.cameraDevice
     property string cameraDevice: global.cameraDevice
 
+    readonly property var globalDefaults: ({
+                                               "iso": 0
+                                           })
+
     readonly property var settingsDefaults: ({
-                                                 "iso": 0,
                                                  "timer": 0,
                                                  "viewfinderGrid": "none",
-                                                 "whiteBalance": CameraImageProcessing.WhiteBalanceAuto,
                                                  "flash": ((modeSettings.captureMode == Camera.CaptureStillImage) &&
                                                            (globalSettings.cameraDevice === "primary") ?
                                                                Camera.FlashAuto : Camera.FlashOff)
                                              })
 
-    readonly property bool defaultSettings: modeSettings.iso === settingsDefaults["iso"] &&
+    readonly property bool defaultSettings: globalSettings.iso === settingsDefaults["iso"] &&
                                             modeSettings.timer === settingsDefaults["timer"] &&
                                             modeSettings.viewfinderGrid === settingsDefaults["viewfinderGrid"] &&
-                                            modeSettings.whiteBalance == settingsDefaults["whiteBalance"] &&
                                             modeSettings.flash == settingsDefaults["flash"]
 
     function reset() {
         var basePath = globalSettings.path + "/" + modeSettings.path
-        for (var i in settingsDefaults) {
+        var i
+        for (i in settingsDefaults) {
             _singleValue.key = basePath + "/" + i
             _singleValue.value = settingsDefaults[i]
+        }
+
+        basePath = globalSettings.path
+        for (i in globalDefaults) {
+            _singleValue.key = basePath + "/" + i
+            _singleValue.value = globalDefaults[i]
         }
     }
 
@@ -40,11 +48,12 @@ SettingsBase {
 
         path: "/apps/jolla-camera"
 
+        // Note! don't touch this for changing between cameras, see cameraDevice on root
         property string cameraDevice: "primary"
         property string captureMode: "image"
 
         property int portraitCaptureButtonLocation: 3
-        property int landscapeCaptureButtonLocation: 4
+        property int landscapeCaptureButtonLocation: 5
 
         property string audioCodec: "audio/mpeg, mpegversion=(int)4"
         property int audioSampleRate: 48000
@@ -56,16 +65,27 @@ SettingsBase {
 
         property bool saveLocationInfo
 
+        property int iso: 0
+        property int exposureCompensation: 0
+        property int whiteBalance: CameraImageProcessing.WhiteBalanceAuto
+
+        property var isoValues: [ 0, 100, 200, 400 ]
+        property var exposureCompensationValues: [ 4, 3, 2, 1, 0, -1, -2, -3, -4 ]
+        property var whiteBalanceValues: [
+            CameraImageProcessing.WhiteBalanceAuto,
+            CameraImageProcessing.WhiteBalanceCloudy,
+            CameraImageProcessing.WhiteBalanceSunlight,
+            CameraImageProcessing.WhiteBalanceFluorescent,
+            CameraImageProcessing.WhiteBalanceTungsten
+        ]
+
         ConfigurationGroup {
             id: modeSettings
             path: globalSettings.cameraDevice + "/" + globalSettings.captureMode
 
             property int captureMode: Camera.CaptureStillImage
 
-            property int iso: 0
-            property int whiteBalance: CameraImageProcessing.WhiteBalanceAuto
             property int flash: Camera.FlashOff
-            property int exposureCompensation: 0
             property int exposureMode: 0
             property int meteringMode: Camera.MeteringMatrix
             property int timer: 0
@@ -75,24 +95,14 @@ SettingsBase {
             property string videoResolution: "1280x720"
             property string viewfinderResolution: "1280x720"
 
-            property var isoValues: [ 0, 100, 200, 400 ]
-            property var whiteBalanceValues: [
-                CameraImageProcessing.WhiteBalanceAuto,
-                CameraImageProcessing.WhiteBalanceCloudy,
-                CameraImageProcessing.WhiteBalanceSunlight,
-                CameraImageProcessing.WhiteBalanceFluorescent,
-                CameraImageProcessing.WhiteBalanceTungsten
-            ]
             property var focusDistanceValues: [ Camera.FocusInfinity ]
             property var flashValues: [ Camera.FlashOff ]
-            property var exposureCompensationValues: [ -4, -2, 0, 2, 4 ]
             property var exposureModeValues: [ Camera.ExposureAuto ]
             property var meteringModeValues: [
                 Camera.MeteringMatrix,
                 Camera.MeteringAverage,
                 Camera.MeteringSpot
             ]
-            property var timerValues: [ 0, 3, 5, 10, 15 ]
             property var viewfinderGridValues: [ "none", "thirds", "ambience" ]
         }
     }
@@ -105,30 +115,17 @@ SettingsBase {
         }
     }
 
-    function captureModeText(mode) {
-        switch (mode) {
-        //: "Still image capture mode"
-        //% "Camera mode"
-        case "image": return qsTrId("camera_settings-la-camera-mode")
-        //: "Video recording mode"
-        //% "Video mode"
-        case "video":      return qsTrId("camera_settings-la-video-mode")
-        default:  return ""
-        }
-    }
-
-    function exposureIcon(exposure) {
-        // Exposure is value * 2 so it can be stored as an integer
+    function exposureText(exposure) {
         switch (exposure) {
-        case -4: return "image://theme/icon-camera-ec-minus2"
-        case -3: return "image://theme/icon-camera-ec-minus15"
-        case -2: return "image://theme/icon-camera-ec-minus1"
-        case -1: return "image://theme/icon-camera-ec-minus05"
-        case 0:  return "image://theme/icon-camera-exposure-compensation"
-        case 1:  return "image://theme/icon-camera-ec-plus05"
-        case 2:  return "image://theme/icon-camera-ec-plus1"
-        case 3:  return "image://theme/icon-camera-ec-plus15"
-        case 4:  return "image://theme/icon-camera-ec-plus2"
+        case -4: return "-2"
+        case -3: return "-1.5"
+        case -2: return "-1"
+        case -1: return "-0.5"
+        case 0:  return ""
+        case 1:  return "+0.5"
+        case 2:  return "+1"
+        case 3:  return "+1.5"
+        case 4:  return "+2"
         }
     }
 
@@ -256,24 +253,16 @@ SettingsBase {
 
     function viewfinderGridText(grid) {
         switch (grid) {
-        case "none": return qsTrId("No grid")
-        case "thirds": return qsTrId("Thirds grid")
-        case "ambience": return qsTrId("Ambience grid")
+        case "none":
+            //% "No grid"
+            return qsTrId("camera_settings-la-no_grid")
+        case "thirds":
+            //% "Thirds grid"
+            return qsTrId("camera_settings-la-thirds_grid")
+        case "ambience":
+            //% "Ambience grid"
+            return qsTrId("camera_settings-la-ambience_grid")
         default: return ""
         }
-    }
-
-    function cameraIcon(device) {
-        return device == "primary"
-                ? "image://theme/icon-camera-backcamera"
-                : "image://theme/icon-camera-front-camera"
-    }
-
-    function cameraText(device) {
-        return device == "primary"
-                //% "Main camera"
-                ? qsTrId("camera-la-main-camera")
-                //% "Front camera"
-                : qsTrId("camera-la-front-camera")
     }
 }

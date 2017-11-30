@@ -1,6 +1,5 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Ambience 1.0
 import Sailfish.Media 1.0
 import com.jolla.settings 1.0
 import com.jolla.settings.system 1.0
@@ -43,6 +42,8 @@ Item {
             fileProperty: "ringerToneFile"
         }
 
+/*
+  Re-enable once we have VOIP support JB#4599
         ToneItem {
             //% "Internet call"
             defaultText: qsTrId("settings_sound-la-internet_call")
@@ -51,6 +52,7 @@ Item {
             enabledProperty: "internetCallToneEnabled"
             fileProperty: "internetCallToneFile"
         }
+*/
 
         ToneItem {
             visible: capabilityDataContextProperty.value || capabilityDataContextProperty.value === undefined
@@ -96,15 +98,6 @@ Item {
             currentText: qsTrId("settings_sound-la-current_calendar_tone")
             enabledProperty: "calendarToneEnabled"
             fileProperty: "calendarToneFile"
-        }
-    }
-
-
-    Component {
-        id: dialogComponent
-
-        SoundDialog {
-            alarmModel: ToneModel {}
         }
     }
 }

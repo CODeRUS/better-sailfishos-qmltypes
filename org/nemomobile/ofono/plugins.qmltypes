@@ -16,10 +16,17 @@ Module {
         Enum {
             name: "Type"
             values: {
-                "UNKNOWN": 0,
+                "Unknown": 0,
                 "GSM": 1,
                 "WCDMA": 2,
-                "LTE": 3
+                "LTE": 3,
+                "UNKNOWN": 0
+            }
+        }
+        Enum {
+            name: "Constants"
+            values: {
+                "InvalidValue": 2147483647
             }
         }
         Property { name: "path"; type: "string" }
@@ -31,11 +38,15 @@ Module {
         Property { name: "signalStrength"; type: "int"; isReadonly: true }
         Property { name: "lac"; type: "int"; isReadonly: true }
         Property { name: "cid"; type: "int"; isReadonly: true }
+        Property { name: "arfcn"; type: "int"; isReadonly: true }
+        Property { name: "bsic"; type: "int"; isReadonly: true }
         Property { name: "bitErrorRate"; type: "int"; isReadonly: true }
         Property { name: "psc"; type: "int"; isReadonly: true }
+        Property { name: "uarfcn"; type: "int"; isReadonly: true }
         Property { name: "ci"; type: "int"; isReadonly: true }
         Property { name: "pci"; type: "int"; isReadonly: true }
         Property { name: "tac"; type: "int"; isReadonly: true }
+        Property { name: "earfcn"; type: "int"; isReadonly: true }
         Property { name: "rsrp"; type: "int"; isReadonly: true }
         Property { name: "rsrq"; type: "int"; isReadonly: true }
         Property { name: "rssnr"; type: "int"; isReadonly: true }
@@ -96,11 +107,13 @@ Module {
         Property { name: "defaultVoiceSim"; type: "string" }
         Property { name: "presentSims"; type: "QList<bool>"; isReadonly: true }
         Property { name: "imeiCodes"; type: "QStringList"; isReadonly: true }
+        Property { name: "imeisvCodes"; type: "QStringList"; isReadonly: true }
         Property { name: "mmsSim"; type: "string"; isReadonly: true }
         Property { name: "mmsModem"; type: "string"; isReadonly: true }
         Property { name: "ready"; type: "bool"; isReadonly: true }
         Property { name: "presentSimCount"; type: "int"; isReadonly: true }
         Property { name: "activeSimCount"; type: "int"; isReadonly: true }
+        Property { name: "errorCount"; type: "int"; isReadonly: true }
         Signal {
             name: "validChanged"
             Parameter { name: "value"; type: "bool" }
@@ -155,6 +168,10 @@ Module {
             Parameter { name: "value"; type: "QStringList" }
         }
         Signal {
+            name: "imeisvCodesChanged"
+            Parameter { name: "value"; type: "QStringList" }
+        }
+        Signal {
             name: "mmsSimChanged"
             Parameter { name: "value"; type: "string" }
         }
@@ -166,8 +183,23 @@ Module {
             name: "readyChanged"
             Parameter { name: "value"; type: "bool" }
         }
+        Signal {
+            name: "errorCountChanged"
+            Parameter { name: "value"; type: "int" }
+        }
+        Signal {
+            name: "modemError"
+            Parameter { name: "modemPath"; type: "string" }
+            Parameter { name: "errorId"; type: "string" }
+            Parameter { name: "errorMessage"; type: "string" }
+        }
         Method {
             name: "imeiAt"
+            type: "string"
+            Parameter { name: "aIndex"; type: "int" }
+        }
+        Method {
+            name: "imeisvAt"
             type: "string"
             Parameter { name: "aIndex"; type: "int" }
         }

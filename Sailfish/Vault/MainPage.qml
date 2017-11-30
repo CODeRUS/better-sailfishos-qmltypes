@@ -3,7 +3,7 @@ import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
 import Sailfish.Vault 1.0
 import NemoMobile.Vault 1.0
-import org.nemomobile.dbus 1.0
+import Nemo.DBus 2.0
 import org.nemomobile.configuration 1.0
 
 Page {
@@ -11,28 +11,45 @@ Page {
 
     function backupToCloudAccount(accountId) {
         console.log("Trigger cloud backup operation to account", accountId)
-        pageStack.push(newBackupRestoreComponent, {"backupMode": true, "cloudAccountId": accountId})
+        showDialog({"backupMode": true, "cloudAccountId": accountId})
     }
 
     function restoreFromCloudAccount(accountId, filePath) {
         console.log("Trigger cloud restore operation from account", accountId, filePath)
-        pageStack.push(newBackupRestoreComponent, {"backupMode": false, "cloudAccountId": accountId, "fileToRestore": filePath})
+        showDialog({"backupMode": false, "cloudAccountId": accountId, "fileToRestore": filePath})
     }
 
     function backupToDir(path) {
         console.log("Trigger backup to directory", path)
-        pageStack.push(newBackupRestoreComponent, {"backupMode": true, "backupDir": path})
+        showDialog({"backupMode": true, "backupDir": path})
     }
 
     function restoreFromFile(path) {
         console.log("Trigger restore from file", path)
-        pageStack.push(newBackupRestoreComponent, {"backupMode": false, "fileToRestore": path})
+        showDialog({"backupMode": false, "fileToRestore": path})
     }
 
+    function showDialog(parameters) {
+        parameters.unitListModel = root._unitListModel
+        var dialog = pageStack.push(Qt.resolvedUrl("NewBackupRestoreDialog.qml"), parameters)
+        dialog.operationFinished.connect(function(successful) {
+            if (successful) {
+                // if accounts were restored, the available storages will have changed
+
+                // If a backup was done, need to update the last created backup info display;
+                // if a restore was done, the accounts will have changed.
+                contentLoader.item.refreshStoragePickers()
+                if (!dialog.backupMode) {
+                    _storageListModel.refresh()
+                }
+            }
+        })
+    }
 
     property UnitListModel _unitListModel: UnitListModel {}
     property BackupRestoreStorageListModel _storageListModel: BackupRestoreStorageListModel {}
 
+    property bool _cloudStorageAccountServiceAvailable: backupUtils.checkCloudAccountServiceAvailable()
     property bool _needsMigration: _vault.hasSnapshots && _storageListModel.count > 0
     property bool _checkMigrationNeeded: _vault.connected && _storageListModel.ready && status == PageStatus.Active
     property string _memoryCardLegacyImportId
@@ -163,27 +180,6 @@ Page {
         id: backupUtils
     }
 
-    Component {
-        id: newBackupRestoreComponent
-
-        NewBackupRestoreDialog {
-            unitListModel: root._unitListModel
-
-            onOperationFinished: {
-                if (successful) {                    
-                    // if accounts were restored, the available storages will have changed
-
-                    // If a backup was done, need to update the last created backup info display;
-                    // if a restore was done, the accounts will have changed.
-                    contentLoader.item.refreshStoragePickers()                    
-                    if (!backupMode) {
-                        _storageListModel.refresh()
-                    }
-                }
-            }
-        }
-    }
-
     SilicaFlickable {
         anchors.fill: parent
         contentHeight: header.height + contentLoader.height + Theme.paddingLarge
@@ -234,25 +230,38 @@ Page {
                 wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.highlightColor
-                textFormat: Text.StyledText // for <br>
+                textFormat: Text.PlainText
 
-                //% "Please insert a micro SD card and try again. Always use a dedicated card for storing your backups and keep it in a safe place.<br><br>Alternatively, create a storage account with a third party service to safely store your backed up data."
+                //% "Please insert a micro SD card and try again. Always use a dedicated card for storing your backups and keep it in a safe place."
                 text: qsTrId("vault-la-insert_micro_sd_and_try_again")
             }
 
+            Label {
+                visible: root._cloudStorageAccountServiceAvailable
+                x: Theme.horizontalPageMargin
+                width: parent.width - x*2
+                height: implicitHeight + Theme.paddingLarge
+                wrapMode: Text.Wrap
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.highlightColor
+                textFormat: Text.PlainText
+
+                //% "Alternatively, create a storage account with a third party service to safely store your backed up data."
+                text: qsTrId("vault-la-add_cloud_storage_account")
+            }
+
             Button {
+                visible: root._cloudStorageAccountServiceAvailable
                 anchors.horizontalCenter: parent.horizontalCenter
+                onClicked: settingsUi.call("showAccounts", [])
+
                 //% "Add account"
                 text: qsTrId("vault-bt-add_account")
-
-                onClicked: {
-                    settingsUi.call("showAccounts", [])
-                }
             }
 
             DBusInterface {
                 id: settingsUi
-                destination: "com.jolla.settings"
+                service: "com.jolla.settings"
                 path: "/com/jolla/settings/ui"
                 iface: "com.jolla.settings.ui"
             }

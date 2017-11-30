@@ -3,14 +3,12 @@ import Sailfish.Silica 1.0
 import com.jolla.settings.system 1.0
 import org.nemomobile.devicelock 1.0
 
-Page {
+MandatoryDeviceLockInputPage {
     id: page
 
-    property FingerprintSettings settings
+    property FingerprintSensor settings
     property variant authenticationToken
     property Component destination
-
-    property string _enteredPin
 
     function goTo(target) {
         pageStack.replace(target, {
@@ -21,85 +19,37 @@ Page {
     }
 
     backNavigation: false
+    authorization: settings ? settings.authorization : null
+
+    onAuthenticated: {
+        // OK, open change code UI query
+        page.authenticationToken = authenticationToken
+        page.goTo(Qt.resolvedUrl("FingerEnrollmentProgressPage.qml"))
+    }
+
+    onCanceled: {
+        pageStack.pop()
+    }
 
     onStatusChanged: {
-        if (status == PageStatus.Active && !pinInput.enteringNewPin) {
-            switch (page.settings.authorization.status) {
+        if (status === PageStatus.Active) {
+            switch (authorization.status) {
             case Authorization.ChallengeIssued:
-                deviceLock.authenticate(
-                            page.settings.authorization.challengeCode,
-                            page.settings.authorization.allowedMethods)
+                page.authenticate()
                 break
             case Authorization.NoChallenge:
-                page.settings.authorization.requestChallenge()
+                authorization.requestChallenge()
                 break
             default:
                 break
             }
-        } else if (deviceLock.authenticating) {
-            deviceLock.cancel()
-        }
-    }
-
-    LockCodeSettings {
-        id: lockCode
-    }
-
-    DeviceLockInput {
-        id: pinInput
-
-        showOkButton: pinInput.enteringNewPin
-                    || page.settings.authorization.status == Authorization.ChallengeIssued
-        showEmergencyButton: false
-
-        authenticator: Authenticator {
-            id: deviceLock
-
-            onAuthenticated: {
-                // OK, open change code UI query
-                pinInput._badPinWarning = ""
-
-                page.authenticationToken = authenticationToken
-                page.goTo(Qt.resolvedUrl("FingerEnrollmentProgressPage.qml"))
-            }
-        }
-
-        Component.onCompleted: {
-            if (!lockCode.set) {
-                //: Inital setup of lock code
-                //% "Set your lock code"
-                _overridingWarningText = qsTrId("settings_devicelock-la-devicelock_set_lock_code.")
-                requestAndConfirmNewPin()
-            }
-        }
-
-        onPinConfirmed: {
-            if (enteringNewPin) {
-                lockCode.change("", enteredPin)
-                page._enteredPin = enteredPin
-                page.settings.authorization.requestChallenge()
-            } else {
-                deviceLock.enterLockCode(enteredPin)
-            }
-        }
-
-        onPinEntryCanceled: {
-            clear()
-            pageStack.pop()
         }
     }
 
     Connections {
         target: page.settings.authorization
 
-        onChallengeIssued: {
-            deviceLock.authenticate(page.settings.authorization.challengeCode, Authenticator.LockCode)
-
-            if (pinInput.enteringNewPin) {
-                deviceLock.enterLockCode(page._enteredPin)
-            }
-        }
-
+        onChallengeIssued: page.authenticate()
         onChallengeDeclined: {
             pageStack.replace(Qt.resolvedUrl("FingerEnrollmentProgressPage.qml"), {
                 "settings": settings,

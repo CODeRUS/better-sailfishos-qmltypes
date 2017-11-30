@@ -68,6 +68,8 @@ Item {
     OfonoSimManager {
         id: ofonoSimManager
 
+        property bool trustPukCount: false
+
         onEnterPinComplete: _finishedPinAction(error, errorString)
         onResetPinComplete: _finishedPinAction(error, errorString)
 
@@ -75,13 +77,27 @@ Item {
             // reset the title text when changing from PIN -> PUK auth
             if (pinRequired === OfonoSimManager.SimPuk) {
                 pinInput.retrying = false
+            } else if (pinRequired === OfonoSimManager.NoPin) {
+                trustPukCount = false
             }
         }
 
         onPinRetriesChanged: {
             for (var pinType in pinRetries) {
-                if (pinType === OfonoSimManager.SimPuk.toString() && pinRetries[pinType] === 0) {
-                    root.simPermanentlyLocked()
+                if (pinType === OfonoSimManager.SimPuk.toString()) {
+                    // ofono can send incorrect puk retry count so we cannot
+                    // trust that the sim is blocked based on puk retry count
+                    // alone. So let's check if we can trust the puk retry count.
+                    if (pinRetries[pinType] > 0) {
+                        trustPukCount = true
+                    } else {
+                        if (trustPukCount) {
+                            console.log("JPO pintype: ", pinType, "OfonoSimManager type: ", OfonoSimManager.SimPuk.toString(), "retries: ", pinRetries[pinType])
+                            root.simPermanentlyLocked()
+                        } else {
+                            trustPukCount = true
+                        }
+                    }
                 }
             }
         }

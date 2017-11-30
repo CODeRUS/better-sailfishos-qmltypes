@@ -1,12 +1,23 @@
+/****************************************************************************
+**
+** Copyright (C) 2013-2016 Jolla Ltd.
+** Contact: Raine Mäkeläinen <raine.makelainen@jollamobile.com>
+**
+****************************************************************************/
+
 import QtQuick 2.0
 import QtDocGallery 5.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Gallery 1.0
 import Sailfish.Pickers 1.0
+import "private"
 
 PickerPage {
     id: imagePicker
+
+    //% "Select image"
+    title: qsTrId("components_pickers-he-select_image")
 
     orientationTransitions: Private.PageOrientationTransition {
         fadeTarget: _background ? gridView : __silica_applicationwindow_instance.contentItem
@@ -23,7 +34,6 @@ PickerPage {
             id: searchHeader
             title: imagePicker.title
             width: gridView.width
-
             //: Images search field placeholder text
             //% "Search images"
             placeholderText: qsTrId("components_pickers-ph-search_images")

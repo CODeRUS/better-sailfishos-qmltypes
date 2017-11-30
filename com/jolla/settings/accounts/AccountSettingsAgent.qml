@@ -18,6 +18,8 @@ import com.jolla.settings.accounts 1.0
     The accountId property will automatically be set to the ID of the account to be displayed.
 */
 Item {
+    id: accountSettingsAgent
+
     // Provided for convenience; these will be set to valid values on construction
     property int accountId
     property Provider accountProvider
@@ -28,10 +30,15 @@ Item {
     // from the page stack.
     property bool delayDeletion
 
+    // This will be set to true if the account should be read only (not editable) in the UI.
+    property bool accountIsReadOnly
+
+    // This will be set to true if the account is a provisioned (MDM) account.
+    property bool accountIsProvisioned
+
     property Page initialPage
 
     signal accountDeletionRequested()
-
 
     function _serviceTranslations() {
         //% "Calendar"

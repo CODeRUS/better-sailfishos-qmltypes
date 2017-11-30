@@ -6,7 +6,7 @@ Dialog {
 
     property alias statusText: statusLabel.text
     property alias busyIndicatorRunning: busyIndicator.running
-    property alias headingText : headingLabel.text
+    property alias headingText: headingLabel.text
     property alias informationLabel: informationLabel.text
 
     acceptDestinationAction: PageStackAction.Replace
@@ -39,7 +39,6 @@ Dialog {
     }
 
     Column {
-        id: infoColumn
         visible: !busyIndicatorRunning
         anchors.top: header.bottom
         x: Theme.horizontalPageMargin

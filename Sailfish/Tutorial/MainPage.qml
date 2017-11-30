@@ -31,17 +31,7 @@ Page {
 
     Connections {
         target: Tutorial
-        onDeviceTypeChanged: {
-            if (lessons.length > 0)
-                return
-
-            if (androidLauncher)
-                lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "AndroidLauncherPulleyLesson.qml" ]
-            else if (Tutorial.deviceType === Tutorial.PhoneDevice)
-                lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "PageStackLesson.qml", "PhonePulleyLesson.qml", "PhoneCallLesson.qml" ]
-            else if (Tutorial.deviceType === Tutorial.TabletDevice)
-                lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "PageStackLesson.qml", "TabletPulleyLesson.qml", "TabletAlarmLesson.qml" ]
-        }
+        onDeviceTypeChanged: buildLessons()
     }
 
     onStatusChanged: {
@@ -49,6 +39,18 @@ Page {
             pannable.opacity = 1
             recap.show(1)
         }
+    }
+
+    function buildLessons() {
+        if (lessons.length > 0)
+            return
+
+        if (androidLauncher)
+            lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "AndroidLauncherPulleyLesson.qml" ]
+        else if (Tutorial.deviceType === Tutorial.PhoneDevice)
+            lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "PageStackLesson.qml", "PhonePulleyLesson.qml", "PhoneCallLesson.qml" ]
+        else if (Tutorial.deviceType === Tutorial.TabletDevice)
+            lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "PageStackLesson.qml", "TabletPulleyLesson.qml", "TabletAlarmLesson.qml" ]
     }
 
     function lessonCompleted(pauseDuration) {
@@ -284,4 +286,6 @@ Page {
             }
         }
     }
+
+    Component.onCompleted: buildLessons()
 }

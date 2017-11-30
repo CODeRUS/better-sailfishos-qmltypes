@@ -10,7 +10,8 @@ Column {
     property string entryPath
     property int depth: 1
     property string iconSource
-    property real itemWidth: Screen.sizeCategory >= Screen.Large ? width/2 : width
+    property int columns: Screen.sizeCategory >= Screen.Large ? 2 : 1
+    property real itemWidth: width / columns
 
     SectionHeader {
         text: name
@@ -18,24 +19,18 @@ Column {
 
     Flow {
         width: parent.width
+
         Repeater {
             id: repeater
-
-            width: parent.width
 
             model: SettingsModel {
                 path: root.entryPath.split("/")
                 depth: root.depth
             }
 
-            delegate: Item {
-                id: wrapper
-                height: loaderObj.height
+            delegate: SettingComponentLoader {
                 width: itemWidth
-                SettingComponentLoader {
-                    id: loaderObj
-                    settingsObject: model.object
-                }
+                settingsObject: model.object
             }
         }
     }

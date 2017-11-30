@@ -81,6 +81,7 @@ Image {
     property bool _testMode
     property bool _interrupted
     readonly property real _durationScale: Screen.sizeCategory >= Screen.Large ? 1.5 : 1
+    property color color: Theme.primaryColor
 
     anchors {
         horizontalCenter: direction === TouchInteraction.Up || direction === TouchInteraction.Down
@@ -121,11 +122,11 @@ Image {
     source: {
         switch (interactionMode) {
         case TouchInteraction.EdgeSwipe:
-            return "image://theme/graphics-edge-swipe-arrow"
+            return "image://theme/graphics-edge-swipe-arrow?" + color
         case TouchInteraction.Swipe:
         case TouchInteraction.Pull:
         default:
-            return "image://theme/graphic-gesture-hint"
+            return "image://theme/graphic-gesture-hint?" + color
         }
     }
 

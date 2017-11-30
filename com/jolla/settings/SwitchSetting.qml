@@ -9,13 +9,13 @@ SettingItem {
     property alias saveKey: configValue.key
     property alias defaultSaveValue: configValue.defaultValue
 
-    property alias iconSource: sw.iconSource
+    property alias iconSource: switchItem.iconSource
 
-    width: sw.width
-    height: sw.height
+    width: switchItem.width
+    height: switchItem.height
 
     Switch {
-        id: sw
+        id: switchItem
         anchors.horizontalCenter: parent.horizontalCenter
         highlighted: down || root.highlighted
 
@@ -29,6 +29,6 @@ SettingItem {
 
         // need this instead of binding Switch.checked to this value as
         // Switch internally overrides that binding.
-        onValueChanged: sw.checked = (value === true)
+        onValueChanged: switchItem.checked = (value === true)
     }
 }

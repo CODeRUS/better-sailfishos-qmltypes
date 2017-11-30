@@ -8,13 +8,12 @@ import QtQuick.tooling 1.2
 
 Module {
     dependencies: [
-        "QtQuick 2.5",
+        "QtQuick 2.6",
         "QtQuick.Window 2.1",
         "QtWebKit 3.0",
         "QtWebKit.experimental 1.0",
         "Sailfish.Silica 1.0",
         "Sailfish.Silica.private 1.0",
-        "Sailfish.Silica.theme 1.0",
         "org.nemomobile.configuration 1.0",
         "org.nemomobile.thumbnailer 1.0"
     ]

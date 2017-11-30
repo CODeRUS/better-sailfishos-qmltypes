@@ -1,9 +1,17 @@
+/****************************************************************************
+**
+** Copyright (C) 2013-2016 Jolla Ltd.
+** Contact: Raine Mäkeläinen <raine.makelainen@jollamobile.com>
+**
+****************************************************************************/
+
 import QtQuick 2.0
 import QtDocGallery 5.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Gallery 1.0
 import Sailfish.Pickers 1.0
+import "private"
 
 PickerDialog {
     id: videoPickerDialog

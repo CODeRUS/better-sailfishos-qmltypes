@@ -47,7 +47,7 @@ Lesson {
                 rejectMenu.busy = true
             }
         }
-        PauseAnimation { duration: 4000 }
+        PauseAnimation { duration: 3000 }
         ScriptAction  {
             script: {
                 hintLabel.opacity = 0.0

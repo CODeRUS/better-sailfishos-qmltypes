@@ -8,7 +8,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Email 1.1
-import org.nemomobile.dbus 1.0
+import Nemo.DBus 2.0
 import org.nemomobile.configuration 1.0
 
 Page {
@@ -33,7 +33,7 @@ Page {
     DBusInterface {
         id: storeInterface
 
-        destination: "com.jolla.jollastore"
+        service: "com.jolla.jollastore"
         path: "/StoreClient"
         iface: "com.jolla.jollastore"
 

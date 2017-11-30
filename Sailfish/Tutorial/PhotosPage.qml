@@ -45,11 +45,7 @@ Page {
                 hintLabel.text = qsTrId("tutorial-la-swipe_to_previous")
                 hintLabel.opacity = 1.0
                 hint.start()
-
-                // This is a workaround for JB#20714, making the MouseArea
-                // invisible effectively disables it:
-                touchBlocker.visible = false
-                //touchBlocker.enabled = false
+                touchBlocker.enabled = false
             }
         }
     }

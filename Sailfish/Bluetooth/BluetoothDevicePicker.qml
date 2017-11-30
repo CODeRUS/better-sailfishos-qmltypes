@@ -2,7 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Bluetooth 1.0
 import MeeGo.Connman 0.2
-import org.nemomobile.dbus 1.0
+import Nemo.DBus 2.0
 import org.kde.bluezqt 1.0 as BluezQt
 
 Column {

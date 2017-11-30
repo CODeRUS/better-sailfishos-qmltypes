@@ -5,7 +5,7 @@ import org.nemomobile.devicelock 1.0
 
 Dialog {
     id: page
-    property FingerprintSettings settings
+    property FingerprintSensor settings
     property variant authenticationToken
     property Component destination
 

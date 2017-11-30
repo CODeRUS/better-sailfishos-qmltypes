@@ -24,7 +24,7 @@ Item {
         id: background
         anchors.fill: content
         anchors.bottomMargin: -bottomPadding
-        color: "black"
+        color: Theme.overlayBackgroundColor
         opacity: 0.9
 
         MouseArea {

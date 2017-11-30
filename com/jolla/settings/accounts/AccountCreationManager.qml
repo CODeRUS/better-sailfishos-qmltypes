@@ -108,8 +108,13 @@ Item {
     }
 
     function accountCreationPageForProvider(providerName, properties) {
-        var agent = _accountCreationAgent(providerName, properties)
-        return agent.initialPage
+        try {
+            var agent = _accountCreationAgent(providerName, properties)
+            return agent.initialPage
+        } catch (e) {
+            console.log("Could not create account page for \"", providerName, "\" error: ", e)
+            return null
+        }
     }
 
     // xxxxxx for legacy versions of email and active sync plugins xxxxxx

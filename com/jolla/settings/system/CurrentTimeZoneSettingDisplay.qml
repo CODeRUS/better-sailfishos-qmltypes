@@ -19,7 +19,11 @@ ValueButton {
     enabled: !dateTimeSettings.automaticTimezoneUpdate
 
     onClicked: {
-        var timezonePicker = pageStack.push(timezonePickerComponent)
+        var timezonePicker = pageStack.push(Qt.resolvedUrl("CurrentTimeZonePicker.qml"))
+        timezonePicker.timezoneClicked.connect(function (name) {
+            root._selectedTimezone = name
+            pageStack.pop()
+        })
         timezonePicker.statusChanged.connect(function() {
             // Currently qmsystem (used by time settings) changes the date/time synchronously, which
             // causes a pause in the animation if done during a page transition. Wait until the page
@@ -33,15 +37,5 @@ ValueButton {
     TimezoneLocalizer {
         id: localizer
         timezone: dateTimeSettings.timezone
-    }
-
-    Component {
-        id: timezonePickerComponent
-        TimezonePicker {
-            onTimezoneClicked: {
-                root._selectedTimezone = name
-                pageStack.pop()
-            }
-        }
     }
 }

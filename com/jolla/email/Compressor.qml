@@ -9,8 +9,6 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 Item {
-    id: compressor
-
     property Item expanderItem
     property Item expansibleItem: children[0]
 
@@ -20,13 +18,13 @@ Item {
     property real minimumHeight: _heightRange.min
     property real maximumHeight: _heightRange.max
 
-    property variant _heightRange: _getHeightRange()
+    property var _heightRange: _getHeightRange()
     property real _compressionRange: (_heightRange.max - _heightRange.min)
     property real _expansionHeight: Math.round(_compressionRange * expanderItem.expansion)
     property real compressionHeight: _compressionRange - _expansionHeight
 
     // Don't allow a child's compressibility to become false while it is uncompressed
-    property variant _compressionPrevented
+    property var _compressionPrevented
 
     function _testCompressible() {
         var childNonCompressible = []
@@ -91,5 +89,4 @@ Item {
 
         return { 'min': Math.floor(min), 'max': Math.floor(max) }
     }
-
 }

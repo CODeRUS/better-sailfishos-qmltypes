@@ -30,7 +30,7 @@ ValueButton {
            : qsTrId("settings_sound-la-no_alarm_sound")
 
     onClicked: {
-        var dialog = pageStack.push(dialogComponent, {
+        var dialog = pageStack.push(Qt.resolvedUrl("SoundDialog.qml"), {
                         activeFilename: toneSettings[fileProperty],
                         activeSoundTitle: title,
                         activeSoundSubtitle: currentText,

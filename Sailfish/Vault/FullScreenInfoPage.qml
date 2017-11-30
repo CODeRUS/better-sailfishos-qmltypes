@@ -34,7 +34,7 @@ Page {
 
     Rectangle {
         anchors.fill: parent
-        color: "black"
+        color: Theme.overlayBackgroundColor
     }
 
     SilicaFlickable {

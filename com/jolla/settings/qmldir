@@ -1,5 +1,4 @@
 module com.jolla.settings
-plugin jollasettings
 SettingItem 1.0 SettingItem.qml
 SwitchSetting 1.0 SwitchSetting.qml
 SliderSetting 1.0 SliderSetting.qml

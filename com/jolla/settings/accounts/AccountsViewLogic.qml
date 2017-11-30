@@ -44,8 +44,10 @@ Item {
             } else {
                 var settingsAgent = _accountSettingsAgent(providerName, accountId)
                 pageStack.push(settingsAgent.initialPage)
+                var accountRef = model.getByAccount(accountId)
+                settingsAgent.accountIsReadOnly = accountRef.accountReadOnly
+                settingsAgent.accountIsProvisioned = accountRef.accountProvisioned
             }
-
         })
         _settingsLoader.start(accountId)
     }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013-2016 Jolla Ltd.
 ** Contact: Raine Mäkeläinen <raine.makelainen@jollamobile.com>
 **
 ****************************************************************************/
@@ -11,6 +11,7 @@ import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Pickers 1.0
 import Sailfish.Gallery 1.0
+import "private"
 
 PickerDialog {
     id: documentPickerDialog

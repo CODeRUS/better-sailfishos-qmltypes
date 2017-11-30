@@ -8,13 +8,13 @@ Page {
 
     property string entryPath
     property int depth: 1
-    property alias model: listview.model
+    property alias model: listView.model
     property string title
 
     function moveToSection(section) {
-        for (var i = 0; i < listview.model.count; ++i) {
-            if (listview.model.objectAt(i).name == section) {
-                listview.positionViewAtIndex(i, ListView.Beginning)
+        for (var i = 0; i < listView.model.count; ++i) {
+            if (listView.model.objectAt(i).name == section) {
+                listView.positionViewAtIndex(i, ListView.Beginning)
                 return
             }
         }
@@ -23,8 +23,9 @@ Page {
     }
 
     SilicaListView {
-        id: listview
+        id: listView
 
+        focus: true
         anchors.fill: parent
         displayMarginBeginning: Screen.height * 1000
         displayMarginEnd: Screen.height * 1000
@@ -38,20 +39,11 @@ Page {
             depth: page.depth
         }
 
-        delegate: Item {
-            id: wrapper
-
+        delegate: SettingComponentLoader {
+            settingsObject: model.object
+            sectionSource: "SettingsListView.qml"
+            pageSource: "SettingsFrontPageLink.qml"
             width: parent.width
-            height: loader.height
-
-            SettingComponentLoader {
-                id: loader
-
-                settingsObject: model.object
-                sectionSource: "SettingsListView.qml"
-                pageSource: "SettingsFrontPageLink.qml"
-                width: parent.width
-            }
         }
 
         VerticalScrollDecorator {}

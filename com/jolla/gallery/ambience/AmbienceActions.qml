@@ -9,7 +9,7 @@ QtObject {
     property var properties: [
         "ringerVolume",
         "ringerTone",
-        "internetCallTone",
+        // "internetCallTone", // JB#4599
         "messageTone",
         "chatTone",
         "mailTone",
@@ -19,7 +19,7 @@ QtObject {
 
     property alias ringerVolume: ringerVolume
     property alias ringerTone: ringerTone
-    property alias internetCallTone: internetCallTone
+    // property alias internetCallTone: internetCallTone // JB#4599
     property alias messageTone: messageTone
     property alias chatTone: chatTone
     property alias mailTone: mailTone
@@ -50,6 +50,8 @@ QtObject {
             //% "Current ringtone"
             currentText: qsTrId(" jolla-gallery-ambience-sound-la-current-ringtone")
         },
+/*
+  Re-enable once we have VOIP support JB#4599
         ToneAction {
             id: internetCallTone
             section: ambiences._tonesSection
@@ -59,6 +61,7 @@ QtObject {
             //% "Current internet call tone"
             currentText: qsTrId(" jolla-gallery-ambience-sound-la-current-internet-call-tone")
         },
+*/
         ToneAction {
             id: messageTone
             section: ambiences._tonesSection

@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Accounts 1.0
-import org.nemomobile.dbus 1.0
+import Nemo.DBus 2.0
 
 QtObject {
     id: root
@@ -123,16 +123,14 @@ QtObject {
     property AccountSyncManager _syncManager : AccountSyncManager {}
 
     property DBusInterface buteoDaemon: DBusInterface {
-        destination: "com.meego.msyncd"
-        path:        "/synchronizer"
-        iface:       "com.meego.msyncd"
-        busType:     DBusInterface.SessionBus
+        service: "com.meego.msyncd"
+        path: "/synchronizer"
+        iface: "com.meego.msyncd"
     }
 
     property DBusInterface asdaemon: DBusInterface {
-        destination: "com.nokia.asdbus"
-        path:        "/com/nokia/asdbus"
-        iface:       "com.nokia.asdbus"
-        busType:     DBusInterface.SessionBus
+        service: "com.nokia.asdbus"
+        path: "/com/nokia/asdbus"
+        iface: "com.nokia.asdbus"
     }
 }

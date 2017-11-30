@@ -1,13 +1,17 @@
+/****************************************************************************
+**
+** Copyright (C) 2013-2016 Jolla Ltd.
+** Contact: Raine Mäkeläinen <raine.makelainen@jollamobile.com>
+**
+****************************************************************************/
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as Private
+import "private"
 
 PickerPage {
     id: contentPicker
-
-    // ContentType.Image, ContentType.Video, ContentType.Music
-    // ContentType.Document, ContentType.Person
-    property int selectedContentType
 
     orientationTransitions: Private.PageOrientationTransition {
         fadeTarget: _background ? categoryList : __silica_applicationwindow_instance.contentItem
@@ -25,7 +29,7 @@ PickerPage {
             title: contentPicker.title
         }
 
-        delegate: ListItem {
+        delegate: BackgroundItem {
             Label {
                 id: categoryName
 
@@ -45,9 +49,7 @@ PickerPage {
                 }, pageStack._transitionDuration === 0 ? PageStackAction.Immediate : PageStackAction.Animated);
 
                 subview.selectedContentChanged.connect(function() {
-                    contentPicker.selectedContentProperties = subview.selectedContentProperties
-                    contentPicker.selectedContent = subview.selectedContent
-                    contentPicker.selectedContentType = model.contentType
+                    contentPicker._updateSelectedContent(subview.selectedContentProperties, subview.selectedContent)
                 })
             }
         }

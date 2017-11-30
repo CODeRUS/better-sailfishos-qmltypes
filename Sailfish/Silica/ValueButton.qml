@@ -77,6 +77,8 @@ BackgroundItem {
                 id: titleText
                 color: root.down ? Theme.highlightColor : Theme.primaryColor
                 width: Math.min(implicitWidth + Theme.paddingMedium, parent.width)
+                fontSizeMode: Text.HorizontalFit
+                minimumPixelSize: Theme.fontSizeSmallBase
                 truncationMode: TruncationMode.Fade
             }
 
@@ -94,7 +96,6 @@ BackgroundItem {
         Label {
             text: root.description
             height: text.length ? (implicitHeight + Theme.paddingMedium) : 0
-            opacity: root.enabled ? 1.0 : 0.4
             width: parent.width
             font.pixelSize: Theme.fontSizeExtraSmall
             color: descriptionColor

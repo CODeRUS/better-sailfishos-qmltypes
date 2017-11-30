@@ -4,6 +4,7 @@ import com.jolla.startupwizard 1.0
 import org.nemomobile.configuration 1.0
 import Sailfish.Accounts 1.0
 import Sailfish.Store 1.0
+import Sailfish.Policy 1.0
 
 Dialog {
     id: root
@@ -21,8 +22,8 @@ Dialog {
     property bool _selectedAppsToInstall: ((_sailfishAppInstallationDialog && _sailfishAppInstallationDialog.selectedAppCount > 0) ||
                                            (_androidAppsInstallDialog && _androidAppsInstallDialog.selectedAppCount > 0))
 
-    property bool _skipAppPage: sailfishAppSelectionSuppressed.value == true
-    property bool _skipAndroidPage: androidSelectionSuppressed.value == true
+    property bool _skipAppPage: sailfishAppSelectionSuppressed.value == true || !policy.value
+    property bool _skipAndroidPage: androidSelectionSuppressed.value == true || !policy.value
 
     Component.onCompleted: {
         if (!_skipAppPage) {
@@ -33,9 +34,12 @@ Dialog {
         }
     }
 
-    acceptDestination: _skipAppPage ? (_skipAndroidPage ? root.endDestination : root._androidAppsInstallDialog) : root._sailfishAppInstallationDialog
-    acceptDestinationAction: _skipAppPage ? (_skipAndroidPage ? root.endDestinationAction : PageStackAction.Push) : PageStackAction.Push
-    acceptDestinationProperties: _skipAppPage ? (_skipAndroidPage ? root.endDestinationProperties : undefined) : undefined
+    acceptDestination: _skipAppPage ? (_skipAndroidPage ? root.endDestination : root._androidAppsInstallDialog)
+                                    : root._sailfishAppInstallationDialog
+    acceptDestinationAction: _skipAppPage ? (_skipAndroidPage ? root.endDestinationAction : PageStackAction.Push)
+                                          : PageStackAction.Push
+    acceptDestinationProperties: _skipAppPage ? (_skipAndroidPage ? root.endDestinationProperties : undefined)
+                                              : undefined
     acceptDestinationReplaceTarget: acceptDestination == root.endDestination ? root.endDestinationReplaceTarget : undefined
 
     StartupApplicationModel {
@@ -65,6 +69,11 @@ Dialog {
             }
             return providerList
         }
+    }
+
+    PolicyValue {
+        id: policy
+        policyType: PolicyValue.ApplicationInstallationEnabled
     }
 
     Column {

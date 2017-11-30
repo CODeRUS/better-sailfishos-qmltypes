@@ -28,7 +28,8 @@ BackgroundItem {
     }
 
     Label {
-        anchors.centerIn: parent
+        x: Math.round((root.width - width) / 2)
+        y: root.height - baselineOffset - Theme.paddingLarge
         width: Math.min(implicitWidth, parent.width - 2*Theme.paddingSmall)
         text: root.text
         font.pixelSize: Theme.fontSizeMedium

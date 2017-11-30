@@ -9,8 +9,6 @@ SettingItem {
     property url pageSource
     property bool useHighlightColor: true
 
-    implicitHeight: Theme.itemSizeSmall
-
     onClicked: pageStack.push(pageSource.toString(), {})
 
     Image {

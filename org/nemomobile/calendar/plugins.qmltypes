@@ -222,6 +222,20 @@ Module {
         Method { name: "importToNotebook"; type: "bool" }
     }
     Component {
+        name: "NemoCalendarInvitationQuery"
+        prototype: "QObject"
+        exports: ["org.nemomobile.calendar/InvitationQuery 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "invitationFile"; type: "string" }
+        Property { name: "notebookUid"; type: "string"; isReadonly: true }
+        Property { name: "uid"; type: "string"; isReadonly: true }
+        Property { name: "rid"; type: "string"; isReadonly: true }
+        Property { name: "startTime"; type: "string"; isReadonly: true }
+        Property { name: "busy"; type: "bool"; isReadonly: true }
+        Signal { name: "queryFinished" }
+        Method { name: "query" }
+    }
+    Component {
         name: "NemoCalendarNotebookModel"
         prototype: "QAbstractListModel"
         exports: ["org.nemomobile.calendar/NotebookModel 1.0"]

@@ -8,7 +8,6 @@
 import QtQuick 2.0
 import QtQml.Models 2.1
 import Sailfish.Silica 1.0
-import org.nemomobile.dbus 1.0
 import Sailfish.Store 1.0
 
 Dialog {
@@ -28,8 +27,7 @@ Dialog {
         applicationList.installSelectedApps()
     }
 
-    // Android stores have momentarily been hidden JB#23623, skip the dialog
-    // to avoid empty page if Android support package is not available
+    // Skip the dialog to avoid empty page if Android support package is not available
     property bool skipDialog: status == PageStatus.Active && root.applicationModel.populated
                               && !_androidSupportPackageAvailable
     onSkipDialogChanged: if (skipDialog) accept()
@@ -151,9 +149,6 @@ Dialog {
                 visible: _androidSupportPackageAvailable
             }
 
-            /*
-              Hide Android stores until installation issue JB#23623 is fixed
-
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - x*2
@@ -162,6 +157,7 @@ Dialog {
                 color: Theme.highlightColor
                 font.pixelSize: Theme.fontSizeExtraSmall
                 textFormat: Text.RichText // to render "TM" symbol
+                visible: _androidSupportPackageAvailable
 
                 //: Explains how to install Android apps and stores later on. "%1" = the "TM" trademark symbol.
                 //% "You can install additional stores to your Jolla to find your favorite Android%1 apps like Facebook, Twitter and WhatsApp. For more Android%1 apps and stores, visit the Jolla Store later with the Store app."
@@ -171,6 +167,7 @@ Dialog {
             Column {
                 width: parent.width
                 spacing: Theme.paddingSmall
+                visible: _androidSupportPackageAvailable
 
                 Repeater {
                     model: root.applicationModel
@@ -190,7 +187,6 @@ Dialog {
                     }
                 }
             }
-            */
         }
 
         ViewPlaceholder {

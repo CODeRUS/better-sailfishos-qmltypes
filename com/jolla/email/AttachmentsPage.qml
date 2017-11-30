@@ -11,8 +11,6 @@ import Sailfish.Pickers 1.0
 import org.nemomobile.thumbnailer 1.0
 
 Page {
-    id: attachmentsPage
-
     property QtObject attachmentFiles
     property Component contentPicker
 
@@ -22,28 +20,22 @@ Page {
         var picker = pageStack.push(contentPicker, { selectedContent: attachmentFiles })
         picker.selectedContentChanged.connect(function() {
             attachmentFiles.clear()
-            for(var i=0; i < picker.selectedContent.count; ++i) {
+            for (var i = 0; i < picker.selectedContent.count; ++i) {
                 attachmentFiles.append(picker.selectedContent.get(i))
             }
         })
     }
 
     SilicaListView {
-        id: listView
         anchors.fill: parent
-        contentWidth: parent.width
-        contentHeight: parent.height
 
         PullDownMenu {
             MenuItem {
-                id: addItem
-                //: Add new attachment
                 //% "Add new attachment"
                 text: qsTrId("jolla-email-me-add_new_attachment")
                 onClicked: modifyAttachments()
             }
             MenuItem {
-                id: removeItem
                 visible: attachmentFiles.count > 0
                 // Defined in email composer page
                 text: qsTrId("jolla-email-me-remove_all_attachments", attachmentFiles.count)
@@ -54,7 +46,6 @@ Page {
         }
 
         header: PageHeader {
-            //: Attachments
             //% "Attachments"
             title: qsTrId("jolla-email-he-attachments_page")
         }
@@ -62,8 +53,6 @@ Page {
         model: attachmentFiles
 
         delegate: ListItem {
-            id: item
-            width: parent.width
             contentHeight: Theme.itemSizeMedium
             menu: menuComponent
 
@@ -80,7 +69,6 @@ Page {
                 }
 
                 Thumbnail {
-                    id: icon
                     visible: url != "" && status != Thumbnail.Null && status != Thumbnail.Error
                     height: defaultIcon.height
                     width: height
@@ -100,7 +88,6 @@ Page {
             }
 
             Label {
-                id: titleLabel
                 anchors {
                     left: iconContainer.right
                     leftMargin: Theme.paddingLarge
@@ -117,7 +104,6 @@ Page {
                 id: menuComponent
 
                 ContextMenu {
-
                     MenuItem {
                         // Defined in email composer page
                         text: qsTrId("jolla-email-me-remove_all_attachments", 1)

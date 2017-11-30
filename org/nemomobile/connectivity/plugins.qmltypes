@@ -19,4 +19,44 @@ Module {
         Method { name: "attemptToConnectNetwork" }
         Method { name: "closeNetworkSession" }
     }
+    Component {
+        name: "Nemo::MobileDataConnection"
+        prototype: "QObject"
+        exports: ["org.nemomobile.connectivity/MobileDataConnection 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Status"
+            values: {
+                "Unknown": -1,
+                "Disconnected": 0,
+                "Connecting": 1,
+                "Limited": 2,
+                "Online": 3
+            }
+        }
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "autoConnect"; type: "bool" }
+        Property { name: "connected"; type: "bool"; isReadonly: true }
+        Property { name: "status"; type: "Status"; isReadonly: true }
+        Property { name: "useDefaultModem"; type: "bool" }
+        Property { name: "connectionName"; type: "string"; isReadonly: true }
+        Property { name: "modemPath"; type: "string" }
+        Property { name: "defaultDataSim"; type: "string" }
+        Property { name: "presentSimCount"; type: "int"; isReadonly: true }
+        Property { name: "slotCount"; type: "int"; isReadonly: true }
+        Property { name: "slotIndex"; type: "int"; isReadonly: true }
+        Property { name: "subscriberIdentity"; type: "string"; isReadonly: true }
+        Property { name: "state"; type: "string"; isReadonly: true }
+        Property { name: "service"; type: "NetworkService"; isReadonly: true; isPointer: true }
+        Property { name: "error"; type: "string"; isReadonly: true }
+        Property { name: "offlineMode"; type: "bool"; isReadonly: true }
+        Property { name: "roamingAllowed"; type: "bool"; isReadonly: true }
+        Property { name: "roaming"; type: "bool"; isReadonly: true }
+        Signal {
+            name: "reportError"
+            Parameter { name: "errorString"; type: "string" }
+        }
+        Method { name: "connect" }
+        Method { name: "disconnect" }
+    }
 }

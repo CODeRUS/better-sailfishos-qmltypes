@@ -7,7 +7,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import org.nemomobile.dbus 1.0
+import org.nemomobile.dbus 2.0
 
 QtObject {
     property int selectionCount
@@ -36,7 +36,7 @@ QtObject {
     }
 
     property DBusInterface _storeClientInterface: DBusInterface {
-        destination: "com.jolla.jollastore"
+        service: "com.jolla.jollastore"
         path: "/StoreClient"
         iface: "com.jolla.jollastore"
     }

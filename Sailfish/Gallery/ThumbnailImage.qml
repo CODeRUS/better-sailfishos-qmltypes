@@ -46,9 +46,12 @@ ThumbnailBase {
             text: qsTrId("components_gallery-la-image-thumbnail-loading-failed")
             anchors.centerIn: parent
             width: parent.width - 2 * Theme.paddingMedium
+            height: parent.height - 2 * Theme.paddingSmall
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
             font.pixelSize: Theme.fontSizeSmall
+            fontSizeMode: Text.Fit
         }
     }
 }

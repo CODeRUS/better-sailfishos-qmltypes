@@ -61,6 +61,7 @@ Module {
         Property { name: "directories"; type: "QStringList" }
         Property { name: "iconDirectories"; type: "QStringList" }
         Property { name: "categories"; type: "QStringList" }
+        Property { name: "blacklistedApplications"; type: "QStringList" }
         Signal {
             name: "notifyLaunching"
             Parameter { name: "item"; type: "LauncherItem"; isPointer: true }
@@ -113,6 +114,7 @@ Module {
         Property { name: "dBusActivated"; type: "bool"; isReadonly: true }
         Property { name: "packageName"; type: "string" }
         Property { name: "updatingProgress"; type: "int" }
+        Property { name: "isBlacklisted"; type: "bool" }
         Signal { name: "itemChanged" }
         Method {
             name: "setIsLaunching"
@@ -139,6 +141,7 @@ Module {
         Property { name: "directories"; type: "QStringList" }
         Property { name: "iconDirectories"; type: "QStringList" }
         Property { name: "categories"; type: "QStringList" }
+        Property { name: "blacklistedApplications"; type: "QStringList" }
         Property { name: "scope"; type: "string" }
         Signal {
             name: "notifyLaunching"
@@ -286,7 +289,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "appName"; type: "string"; isReadonly: true }
         Property { name: "disambiguatedAppName"; type: "string"; isReadonly: true }
-        Property { name: "replacesId"; type: "uint"; isReadonly: true }
+        Property { name: "id"; type: "uint"; isReadonly: true }
         Property { name: "appIcon"; type: "string"; isReadonly: true }
         Property { name: "summary"; type: "string"; isReadonly: true }
         Property { name: "body"; type: "string"; isReadonly: true }
@@ -714,6 +717,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "windowVisible"; type: "bool" }
         Property { name: "supportedUSBModes"; type: "QStringList"; isReadonly: true }
+        Property { name: "availableUSBModes"; type: "QStringList"; isReadonly: true }
         Signal { name: "dialogShown" }
         Signal { name: "showUnlockScreen" }
         Method {

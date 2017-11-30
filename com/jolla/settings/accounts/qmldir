@@ -1,5 +1,4 @@
 module com.jolla.settings.accounts
-plugin accountsplugin
 JollaAccountSetupDialog 1.0 JollaAccountSetupDialog.qml
 JollaAccountCreationFirstDialog 1.0 JollaAccountCreationFirstDialog.qml
 JollaAccountCreationSecondDialog 1.0 JollaAccountCreationSecondDialog.qml

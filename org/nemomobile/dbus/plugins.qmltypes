@@ -67,6 +67,16 @@ Module {
         prototype: "QObject"
         exports: ["org.nemomobile.dbus/DBusInterface 2.0"]
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Status"
+            values: {
+                "Unknown": 0,
+                "Unavailable": 1,
+                "Available": 2
+            }
+        }
+        Property { name: "watchServiceStatus"; type: "bool" }
+        Property { name: "status"; type: "Status"; isReadonly: true }
         Property { name: "service"; type: "string" }
         Property { name: "path"; type: "string" }
         Property { name: "iface"; type: "string" }

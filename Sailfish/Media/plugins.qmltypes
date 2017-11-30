@@ -9,7 +9,7 @@ import QtQuick.tooling 1.2
 Module {
     dependencies: [
         "QtMultimedia 5.6",
-        "QtQuick 2.5",
+        "QtQuick 2.6",
         "QtQuick.Window 2.1",
         "QtWebKit 3.0",
         "QtWebKit.experimental 1.0",

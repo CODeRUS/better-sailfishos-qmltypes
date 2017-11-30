@@ -3,7 +3,7 @@ import Sailfish.Silica 1.0
 import com.jolla.settings 1.0
 import org.nemomobile.configuration 1.0
 
-Item {
+FocusScope {
     id: root
     property string name
     property string entryPath
@@ -18,6 +18,7 @@ Item {
     SilicaListView {
         id: listView
 
+        focus: true
         height: Screen.height * 1000
         width: parent.width
 
@@ -26,15 +27,9 @@ Item {
             depth: root.depth
         }
 
-        delegate: Item {
-            id: wrapper
-            height: loaderObj.height
-            width: parent.width
-            SettingComponentLoader {
-                id: loaderObj
-                settingsObject: model.object
-                sectionSource: "SettingsSectionView.qml"
-            }
+        delegate: SettingComponentLoader {
+            settingsObject: model.object
+            sectionSource: "SettingsSectionView.qml"
         }
     }
 }

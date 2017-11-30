@@ -8,8 +8,6 @@
 import QtQuick 2.0
 
 FocusScope {
-    id: compressible
-
     property bool compressible: true
     property real expandedHeight: children[0].implicitHeight
     property real compressionHeight

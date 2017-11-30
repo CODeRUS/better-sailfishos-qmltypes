@@ -1,5 +1,4 @@
 module com.jolla.mediaplayer
-plugin mediaplayerplugin
 AddToPlaylistPage 1.0 AddToPlaylistPage.qml
 AlbumArt 1.0 AlbumArt.qml
 singleton AudioPlayer 1.0 AudioPlayer.qml

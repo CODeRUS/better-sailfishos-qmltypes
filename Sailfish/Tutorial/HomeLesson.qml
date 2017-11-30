@@ -78,7 +78,7 @@ Lesson {
         id: lockHintTimeline
 
         alwaysRunToEnd: true
-        PauseAnimation { duration: 1000 }
+        PauseAnimation { duration: 400 }
         ParallelAnimation {
             FadeAnimation {
                 targets: [leftIndicator, rightIndicator]
@@ -116,7 +116,7 @@ Lesson {
                 to: 2*Theme.paddingLarge
             }
         }
-        PauseAnimation { duration: 1500 }
+        PauseAnimation { duration: 1000 }
         ParallelAnimation {
             SmoothedAnimation {
                 target: leftIndicator
@@ -142,7 +142,7 @@ Lesson {
 
     SequentialAnimation {
         id: timeline
-        PauseAnimation { duration: 1000 }
+        PauseAnimation { duration: 400 }
         ScriptAction  {
             script: {
                 hintLabel.atBottom = false

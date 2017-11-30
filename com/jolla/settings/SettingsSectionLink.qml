@@ -18,20 +18,24 @@ SettingItem {
                        })
     }
 
-    Row {
-        id: row
-        height: Theme.itemSizeSmall
+    Image {
+        id: icon
         x: Theme.horizontalPageMargin
-
-        Image {
-            id: icon
-            source: (root.down && root.iconSource != "") ? root.iconSource + "?" + Theme.highlightColor : root.iconSource
-            anchors.verticalCenter: parent.verticalCenter
-        }
-        Label {
-            id: label
-            anchors.verticalCenter: parent.verticalCenter
-            color: root.down ? Theme.highlightColor : Theme.primaryColor
+        anchors.verticalCenter: parent.verticalCenter
+        source: (root.highlighted && root.iconSource)
+                ? root.iconSource + "?" + Theme.highlightColor
+                : root.iconSource
+    }
+    Label {
+        id: label
+        truncationMode: TruncationMode.Fade
+        color: root.highlighted ? Theme.highlightColor : Theme.primaryColor
+        anchors {
+            left: icon.right
+            leftMargin: icon.width > 0 ? Theme.paddingMedium : 0
+            verticalCenter: parent.verticalCenter
+            right: parent.right
+            rightMargin: Theme.horizontalPageMargin
         }
     }
 }

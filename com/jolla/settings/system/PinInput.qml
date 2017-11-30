@@ -32,8 +32,8 @@ Item {
     property color titleColor: Theme.secondaryHighlightColor
     property string subTitleText
     property string warningText
-    property color warningTextColor: Theme.primaryColor
-    property bool highlightTitle
+    property color warningTextColor: _inputOrCancelEnabled ? Theme.primaryColor : Theme.secondaryHighlightColor
+    property bool highlightTitle: !_inputOrCancelEnabled && !emergency
     property color pinDisplayColor: Theme.highlightColor
     property color keypadTextColor: Theme.primaryColor
     property bool dimmerBackspace
@@ -50,7 +50,14 @@ Item {
     property string _badPinWarning
     property string _overridingTitleText
     property string _overridingWarningText
+    property string _emergencyWarningText
     property bool lastChance
+
+    property bool _showSuggestedPin
+    property bool suggestionsEnabled
+    property bool suggestionsEnforced
+    readonly property bool _showSuggestionButton: !emergency
+            && ((_showSuggestedPin && suggestionsEnforced) || (suggestionsEnabled && enteredPin === ""))
 
     property bool showEmergencyButton: true
 
@@ -75,13 +82,23 @@ Item {
     property QtObject _voiceCallManager
 
     property bool showDigitPad: true
-    property bool _showDigitPad: showDigitPad || emergency
+    property bool inputEnabled: true
+    property bool _showDigitPad: (showDigitPad && _inputOrCancelEnabled)
+            || emergency
+            || (root._showSuggestedPin && root.suggestionsEnforced)
     property bool visibleInDashboard
+
+    readonly property bool _inputOrCancelEnabled: inputEnabled || (showCancelButton && cancelText !== "")
 
     signal pinConfirmed()
     signal pinEntryCanceled()
+    signal suggestionRequested()
 
     function clear() {
+        inputEnabled = true
+        lastChance = false
+        suggestionsEnabled = false
+        _showSuggestedPin = false
         _displayedPin = ""
         enteredPin = ""
 
@@ -92,6 +109,18 @@ Item {
         if (enteringNewPin && _pinConfirmTitleText === "") {
             enteringNewPin = false
         }
+    }
+
+    function suggestPin(pin) {
+        _showSuggestedPin = true
+        enteredPin = pin
+        _displayedPin = pin
+    }
+
+    function clearSuggestedPin() {
+        _showSuggestedPin = false
+        enteredPin = ""
+        _displayedPin = ""
     }
 
     // Delays emission of pinConfirmed() until the same PIN has been entered twice.
@@ -138,6 +167,10 @@ Item {
             _displayedPin += digit
             enteredPin += digit
         } else {
+            if (_showSuggestedPin) {
+                clearSuggestedPin()
+            }
+
             if (maximumLength > 0 && enteredPin.length >= maximumLength) {
                 _overridingWarningText = pinLengthWarning
                 return
@@ -158,6 +191,10 @@ Item {
     function _popPinDigit(digit) {
         if (_feedbackEffect) {
             _feedbackEffect.play()
+        }
+        if (_showSuggestedPin) {
+            clearSuggestedPin()
+            return
         }
         obfuscateLastDigit.stop()
         if (_overridingWarningText === pinLengthWarning) {
@@ -198,6 +235,15 @@ Item {
 
     width: parent.width
     height: parent.height
+
+    onEmergencyChanged: {
+        if (!emergency) {
+            _emergencyWarningText = ""
+        } else if (_showSuggestedPin) {
+            clearSuggestedPin()
+        }
+    }
+
     Rectangle {
         // emergency background
         color: "#4c0000"
@@ -210,61 +256,82 @@ Item {
         id: obfuscateLastDigit
         interval: 1000
         onTriggered: {
-            if (!root.emergency) {
+            if (!root.emergency && !root._showSuggestedPin) {
                 _displayedPin = _passwordString(_displayedPin.length)
             }
         }
     }
 
-    Label {
-        id: headingLabel
-        y: Theme.itemSizeExtraSmall + headingVerticalOffset
+    Image {
+        anchors {
+            horizontalCenter: root.horizontalCenter
+            bottom: headingColumn.top
+            bottomMargin: Theme.paddingLarge
+        }
+        visible: !root._inputOrCancelEnabled && !root.emergency
+
+        source: "image://theme/icon-m-device-lock?" + headingLabel.color
+    }
+
+    Column {
+        id: headingColumn
+
+        property int availableSpace: pinInputDisplay.y
+
+        y: root._inputOrCancelEnabled || root.emergency
+                ? Math.min(availableSpace/4 + headingVerticalOffset, availableSpace - height - Theme.paddingMedium)
+                : (parent.height / 2) - headingLabel.height - subHeadingLabel.height
         anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width - Theme.paddingLarge * 2
-        horizontalAlignment: Text.AlignHCenter
-        wrapMode: Text.Wrap
-        color: root.emergency
-               ? root.emergencyTextColor
-               :  root.lastChance
-                 ? "#ff4956"
-                 : root.highlightTitle
-                   ? Theme.secondaryHighlightColor
-                   : root.titleColor
-        font.pixelSize: Theme.fontSizeExtraLarge
-        text: root.emergency
-                  //: Shown when user has chosen emergency call mode
-                  //% "Emergency call"
-                ? qsTrId("settings_pin-la-emergency_call")
-                : (root._overridingTitleText !== "" ? root._overridingTitleText : root.titleText)
-    }
+        width: parent.width - Theme.horizontalPageMargin * 2
+        spacing: Theme.paddingMedium
 
-    Label {
-        id: subHeadingLabel
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            top: headingLabel.bottom
+        Label {
+            id: headingLabel
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.Wrap
+            color: root.emergency
+                   ? root.emergencyTextColor
+                   :  root.lastChance
+                     ? "#ff4956"
+                     : root.highlightTitle
+                       ? Theme.secondaryHighlightColor
+                       : root.titleColor
+            font.pixelSize: Theme.fontSizeExtraLarge
+            text: root.emergency
+                      //: Shown when user has chosen emergency call mode
+                      //% "Emergency call"
+                    ? qsTrId("settings_pin-la-emergency_call")
+                    : (root._overridingTitleText !== "" ? root._overridingTitleText : root.titleText)
         }
-        width: parent.width - Theme.paddingLarge * 2
-        wrapMode: Text.Wrap
-        horizontalAlignment: Text.AlignHCenter
-        color: headingLabel.color
 
-        font.pixelSize: Theme.fontSizeExtraLarge
-        text: root.subTitleText
-    }
-
-    Label {
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            top: subHeadingLabel.bottom
+        Label {
+            width: parent.width
+            wrapMode: Text.Wrap
+            horizontalAlignment: Text.AlignHCenter
+            color: headingLabel.color
+            visible: root._inputOrCancelEnabled || root.emergency
+            font.pixelSize: Theme.fontSizeExtraLarge
+            text: root.subTitleText
         }
-        width: parent.width - Theme.paddingLarge * 2
-        wrapMode: Text.Wrap
-        horizontalAlignment: Text.AlignHCenter
-        color: root.warningTextColor
 
-        font.pixelSize: Theme.fontSizeSmall
-        text: root._overridingWarningText !== "" ? root._overridingWarningText : root.warningText
+        Label {
+            width: parent.width
+            wrapMode: Text.Wrap
+            horizontalAlignment: Text.AlignHCenter
+            color: root.warningTextColor
+
+            font.pixelSize: root._inputOrCancelEnabled ? Theme.fontSizeSmall : Theme.fontSizeMedium
+            text: {
+                if (root.emergency) {
+                    return root._emergencyWarningText
+                } else if (root._overridingWarningText !== "") {
+                    return root._overridingWarningText
+                } else {
+                    return root.warningText
+                }
+            }
+        }
     }
 
     BackgroundItem {
@@ -278,8 +345,23 @@ Item {
     IconButton {
         id: emergencyButton
 
-        anchors.horizontalCenter: option1Button.horizontalCenter
-        anchors.verticalCenter: pinInputDisplay.verticalCenter
+        anchors {
+            horizontalCenter: root._inputOrCancelEnabled
+                    ? option1Button.horizontalCenter
+                    : root.horizontalCenter
+            verticalCenter: root._inputOrCancelEnabled
+                    ? pinInputDisplay.verticalCenter
+                    : keypad.bottom
+            verticalCenterOffset: {
+                if (root._inputOrCancelEnabled) {
+                    return 0
+                } else if (Screen.sizeCategory > Screen.Medium) {
+                    return -Math.round(Theme.itemSizeExtraLarge / 2)
+                } else {
+                    return -Math.round(Theme.itemSizeLarge / 2)
+                }
+            }
+        }
         enabled: showEmergencyButton && !root.emergency && root.enteredPin.length < 5
         opacity: enabled ? 1 : 0
         icon.source: "image://theme/icon-lockscreen-emergency-call"
@@ -287,7 +369,8 @@ Item {
         Behavior on opacity { FadeAnimation {} }
 
         onClicked: {
-            root.clear()
+            root._displayedPin = ""
+            root.enteredPin = ""
             root.emergency = !root.emergency
             if (_feedbackEffect) {
                 _feedbackEffect.play()
@@ -297,6 +380,7 @@ Item {
     IconButton {
         x: Theme.itemSizeSmall
         anchors.verticalCenter: pinInputDisplay.verticalCenter
+        height: pinInputDisplay.height + pinInputDisplay.anchors.bottomMargin
         enabled: !showEmergencyButton && !_showDigitPad && root.enteredPin.length < 5
         opacity: enabled ? 1 : 0
         icon.source: "image://theme/icon-m-close"
@@ -335,17 +419,29 @@ Item {
             horizontalCenter: option2Button.horizontalCenter
             verticalCenter: pinInputDisplay.verticalCenter
         }
-        icon.source: "image://theme/icon-m-backspace" + (root.dimmerBackspace && !root.emergency ? "?" + Theme.highlightDimmerColor : "")
+        height: pinInputDisplay.height + pinInputDisplay.anchors.bottomMargin // increase reactive area
+        icon.source: root._showSuggestionButton
+                ? "image://theme/icon-m-reload"
+                : ("image://theme/icon-m-backspace" + (root.dimmerBackspace && !root.emergency
+                    ? "?" + Theme.highlightDimmerColor
+                    : ""))
 
-        opacity: root.enteredPin === "" ? 0 : 1
+        opacity: root.enteredPin === "" && !root._showSuggestionButton ? 0 : 1
         enabled: opacity
 
         Behavior on opacity { FadeAnimation {} }
 
         onClicked: {
-            root._popPinDigit()
+            if (root._showSuggestionButton) {
+                 root.suggestionRequested()
+            } else {
+                root._popPinDigit()
+            }
         }
         onPressAndHold: {
+            if (root._showSuggestionButton) {
+                return
+            }
             root._popPinDigit()
             if (root._displayedPin.length > 0) {
                 backspaceRepeat.start()
@@ -378,6 +474,8 @@ Item {
 
     Keypad {
         id: keypad
+        readonly property bool interactive: root.emergency
+                    || (root.inputEnabled && !(root._showSuggestedPin && root.suggestionsEnforced))
         anchors {
             bottom: parent.bottom
             bottomMargin: screen.sizeCategory > Screen.Medium && pageStack.currentPage.isPortrait ? 2*Theme.paddingLarge
@@ -386,12 +484,21 @@ Item {
         symbolsVisible: false
         visible: opacity > 0
         opacity: _showDigitPad
-        textColor: root.emergency ? root.emergencyTextColor : root.keypadTextColor
+        textColor: {
+            if (root.emergency) {
+                return root.emergencyTextColor
+            } else if (interactive) {
+                return root.keypadTextColor
+            } else {
+                return Theme.highlightColor
+            }
+        }
+
         pressedTextColor: root.emergency ? "black" : Theme.highlightColor
         pressedButtonColor: root.emergency
                             ? "white"
                             : Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
-
+        enabled: interactive
         onPressed: root._pushPinDigit(number + "")
     }
 
@@ -429,7 +536,7 @@ Item {
     PinInputOptionButton {
         id: option2Button
 
-        visible: keypad.visible && text !== "" && showOkButton
+        visible: keypad.visible && text !== "" && ((root.showOkButton && root.inputEnabled) || root.emergency)
 
         anchors {
             right: parent.right
@@ -466,6 +573,7 @@ Item {
 
         horizontalAlignment: TextInput.AlignHCenter
         inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhSensitiveData | Qt.ImhNoAutoUppercase | Qt.ImhHiddenText
+        enabled: root.inputEnabled && !(root._showSuggestedPin && root.suggestionsEnforced)
         focus: !keypad.visible
         color: root.keypadTextColor
         onCursorVisibleChanged: if (cursorVisible) cursorVisible = false
@@ -508,7 +616,7 @@ Item {
     // 1) Set org.ofono.Modem online=true
     // 2) Dial number using telephony VoiceCallManager
     function _dialEmergencyNumber() {
-        root._overridingWarningText = ""
+        root._emergencyWarningText = ""
         if (!modem.online) {
             modem.onlineChanged.connect(_dialEmergencyNumber)
             modem.online = true
@@ -519,7 +627,7 @@ Item {
         if (root.enteredPin !== "" && emergencyNumbers.indexOf(root.enteredPin) === -1) {
             //: Indicates that user has entered invalid emergency number
             //% "Only emergency calls permitted"
-            root._overridingWarningText = qsTrId("settings_pin-la-invalid_emergency_number")
+            root._emergencyWarningText = qsTrId("settings_pin-la-invalid_emergency_number")
             return
         }
 
@@ -540,7 +648,8 @@ Item {
     }
 
     function _resetView() {
-        clear()
+        _displayedPin = ""
+        enteredPin = ""
         emergency = false
     }
 
@@ -563,13 +672,13 @@ Item {
     }
 
     on_ShowDigitPadChanged: {
-        if (!_showDigitPad) {
+        if (!_showDigitPad && inputEnabled) {
             alphanumProxy.forceActiveFocus()
         }
     }
 
     onVisibleInDashboardChanged: {
-        if (!_showDigitPad && visibleInDashboard && enabled) {
+        if (!_showDigitPad && visibleInDashboard && enabled && inputEnabled) {
             alphanumProxy.forceActiveFocus()
         }
     }

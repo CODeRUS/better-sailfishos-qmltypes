@@ -83,7 +83,7 @@ Page {
                 if (itemType == DocumentGallery.Image) {
                     dateTakenItem.value = galleryItem.metaData.dateTaken != ""
                             ? Format.formatDate(galleryItem.metaData.dateTaken, Format.Timepoint)
-                             : ""
+                            : ""
                     cameraManufacturerItem.value = galleryItem.metaData.cameraManufacturer
                     cameraModelItem.value = galleryItem.metaData.cameraModel
                     exposureTimeItem.value = galleryItem.metaData.exposureTime
@@ -96,12 +96,17 @@ Page {
                             //: Camera focal length in millimeters
                             //% "%1 mm"
                             ? qsTrId("gallery-value-focal-length").arg(galleryItem.metaData.focalLength) : ""
-                    meteringModeItem.value = meteringModeValues[galleryItem.metaData.meteringMode]
-                    whiteBalanceItem.value = whiteBalanceValues[galleryItem.metaData.whiteBalance]
+                    meteringModeItem.value = galleryItem.metaData.meteringMode != ""
+                            ? meteringModeValues[galleryItem.metaData.meteringMode]
+                            : ""
+                    whiteBalanceItem.value = galleryItem.metaData.whiteBalance != ""
+                              ? whiteBalanceValues[galleryItem.metaData.whiteBalance]
+                              : ""
                     gpsItem.value = galleryItem.metaData.latitude != ""
                             //: GPS coordinates
                             //% "Latitude %1 - Longitude %2 - Altitude %3"
-                            ? qsTrId("gallery-value-gps").arg(galleryItem.metaData.latitude).arg(galleryItem.metaData.longitude).arg(galleryItem.metaData.altitude) : ""
+                            ? qsTrId("gallery-value-gps").arg(galleryItem.metaData.latitude).arg(galleryItem.metaData.longitude).arg(galleryItem.metaData.altitude)
+                            : ""
                 }
 
                 if (itemType == DocumentGallery.Video) {

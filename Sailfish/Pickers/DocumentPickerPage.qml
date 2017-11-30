@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013-2015 Jolla Ltd.
+** Copyright (C) 2013-2016 Jolla Ltd.
 ** Contact: Raine Mäkeläinen <raine.makelainen@jollamobile.com>
 **
 ****************************************************************************/
@@ -11,9 +11,13 @@ import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Pickers 1.0
 import Sailfish.Gallery 1.0
+import "private"
 
 PickerPage {
     id: documentPicker
+
+    //% "Select document"
+    title: qsTrId("components_pickers-he-select_document")
 
     orientationTransitions: Private.PageOrientationTransition {
         fadeTarget: _background ? listView : __silica_applicationwindow_instance.contentItem

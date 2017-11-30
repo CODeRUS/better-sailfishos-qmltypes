@@ -637,7 +637,7 @@ MouseArea {
         id: logic
         flickable: pulleyBase.flickable
         onFinalPositionReached: {
-            if (active && _ngfEffect && !menuItem && !delayedBounceTimer.running && !bounceBackAnimation.running) {
+            if (active && _ngfEffect && !menuItem && !quickSelect && !delayedBounceTimer.running && !bounceBackAnimation.running) {
                 _ngfEffect.play()
             }
         }

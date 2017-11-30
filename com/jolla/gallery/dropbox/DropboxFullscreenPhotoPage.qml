@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.socialcache 1.0
 import com.jolla.gallery.extensions 1.0
+import com.jolla.gallery.dropbox 1.0
 
 FullscreenPhotoPage {
     id: fullscreenPage
@@ -26,6 +27,11 @@ FullscreenPhotoPage {
 
     onDeletePhoto: {
         var imageUrl = fullscreenPage.model.getField(index, DropboxImageCacheModel.Image)
+        var imagePath = DropboxImageUrlHelper.pathFromImageUrl(imageUrl)
+        if (imagePath.length === 0) {
+            console.warn("Failed to determine remote path of image from url: " + imageUrl)
+            return
+        }
 
         var doc = new XMLHttpRequest()
         doc.onreadystatechange = function() {
@@ -38,14 +44,14 @@ FullscreenPhotoPage {
                         pageStack.pop()
                     }
                 } else {
-                    console.warn("Failed to delete Dropbox image")
+                    console.warn("Failed to delete Dropbox image: " + doc.responseText)
                 }
             }
         }
-        var url = "https://api.dropboxapi.com/1/fileops/delete?root=auto&path=" + encodeURIComponent(
-                    imageUrl.replace(/https:\/\/content.dropboxapi.com\/1\/files\/auto\//gi,''))
-        doc.open("GET", url)
-        doc.setRequestHeader("Authorization", "Bearer "+ accessToken);
-        doc.send()
+        var url = "https://api.dropboxapi.com/2/files/delete_v2"
+        doc.open("POST", url, true)
+        doc.setRequestHeader("Authorization", "Bearer " + accessToken)
+        doc.setRequestHeader("Content-Type", "application/json")
+        doc.send(JSON.stringify({ "path": imagePath }))
     }
 }

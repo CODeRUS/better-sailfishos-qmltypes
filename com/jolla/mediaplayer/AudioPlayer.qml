@@ -374,6 +374,23 @@ Container {
                 player.shuffle = true
             }
         }
+
+        onNextRequested: audio.playNext()
+        onPreviousRequested: audio.playPrevious()
+        onPlayRequested: player._play()
+        onPauseRequested: player.pause()
+        onSeekRequested: {
+            var position = audio.position + (offset / 1000)
+
+            if (offset > 0) {
+                position = (Math.ceil(position / 1000) + 1) * 1000
+            } else if (offset < 0) {
+                position = (Math.floor(position / 1000) - 1) * 1000
+            }
+
+            player.setPosition(Math.max(0, position))
+        }
+
     }
 
     MprisPlayer {

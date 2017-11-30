@@ -8,7 +8,9 @@ FingerEnrollmentPage {
 
     property bool canSkip
 
-    acceptDestination: Qt.resolvedUrl("FingerEnrollmentDialog.qml")
+    acceptDestination: authenticationToken
+            ? Qt.resolvedUrl("FingerEnrollmentProgressPage.qml")
+            : Qt.resolvedUrl("FingerEnrollmentDialog.qml")
     acceptDestinationAction: canSkip ? PageStackAction.Push : PageStackAction.Replace
 
     //% "Set up the fingerprint sensor"
@@ -43,7 +45,7 @@ FingerEnrollmentPage {
                                 Qt.resolvedUrl("FingerEnrollmentSkipPage.qml"),
                                 page.acceptDestinationProperties)
                 } else {
-                    // The page is the start of explicit request to enroll a finger.  Cancelling
+                    // The page is the start of explicit request to enroll a finger. Cancelling
                     // a step should exit the wizard.
                     page.goTo(Qt.resolvedUrl("FingerEnrollmentSkipPage.qml"))
                 }

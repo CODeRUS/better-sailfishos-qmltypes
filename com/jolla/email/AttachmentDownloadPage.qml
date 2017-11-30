@@ -21,7 +21,6 @@ Page {
     }
 
     Column {
-        id: infoColumn
         x: Theme.horizontalPageMargin
         anchors.top: parent.top
         anchors.topMargin: Theme.itemSizeLarge // Page header size
@@ -30,7 +29,6 @@ Page {
         visible: !busyIndicator.running
 
         Label {
-            id: headingLabel
             width: parent.width
             wrapMode: Text.Wrap
             font.pixelSize: Theme.fontSizeExtraLarge
@@ -73,7 +71,6 @@ Page {
             }
         }
         Button {
-            id: discardButton
             visible: !busyIndicator.running
             //: Discard not downloaded attachments button
             //% "Discard"
@@ -87,7 +84,6 @@ Page {
     }
 
     Column {
-        id: busyIndicatorColumn
         anchors.centerIn: parent
         x: Theme.horizontalPageMargin
         width: parent.width - x*2
@@ -95,7 +91,6 @@ Page {
         visible: busyIndicator.running
 
         Label {
-            id: statusLabel
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
@@ -129,7 +124,7 @@ Page {
             informationLabel.text = qsTrId("jolla-email-la-attachments-download-failed-info", undownloadedAttachmentsCount)
             //: Try again button
             //% "Try again"
-            downloadAttachButton.text =  qsTrId("jolla-email-la-download-attachments_try_again")
+            downloadAttachButton.text = qsTrId("jolla-email-la-download-attachments_try_again")
             busyIndicator.running = false
         }
     }

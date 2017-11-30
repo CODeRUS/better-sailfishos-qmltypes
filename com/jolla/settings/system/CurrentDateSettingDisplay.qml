@@ -8,7 +8,6 @@ ValueButton {
     id: root
 
     property QtObject dateTimeSettings
-    property int dateFormatType: Qt.DefaultLocaleLongDate // unused, remove when startup wizard updated
     property date defaultDate: wallClock.time
 
     //% "Date"
@@ -17,7 +16,8 @@ ValueButton {
     value: Format.formatDate(wallClock.time, Format.DateLong)
 
     onClicked: {
-        var dialog = pageStack.push(datePickerComponent)
+        var dialog = pageStack.push("Sailfish.Silica.DatePickerDialog", { "date": root.defaultDate })
+        dialog.date = Qt.binding(function() { return root.defaultDate })
         dialog.statusChanged.connect(function() {
             // Currently qmsystem (used by time settings) changes the date/time synchronously, which
             // causes a pause in the animation if done during a page transition. Wait until the page
@@ -26,13 +26,6 @@ ValueButton {
                 dateTimeSettings.setDate(dialog.date)
             }
         })
-    }
-
-    Component {
-        id: datePickerComponent
-        DatePickerDialog {
-            date: root.defaultDate
-        }
     }
 
     WallClock {

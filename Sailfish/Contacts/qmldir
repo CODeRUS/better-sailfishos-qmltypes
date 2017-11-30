@@ -1,5 +1,4 @@
 module Sailfish.Contacts
-plugin sailfishcontactsplugin
 ContactsUtil 1.0 common/common.js
 ContactCard 1.0 ContactCard.qml
 ContactCardPage 1.0 ContactCardPage.qml

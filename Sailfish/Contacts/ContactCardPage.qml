@@ -170,10 +170,6 @@ Page {
                 //% "Edit"
                 text: qsTrId("components_contacts-me-edit")
                 onClicked: {
-                    // While the menu is closing, the indicator opacity is reduced - close to prevent
-                    menu.cancelBounceBack()
-                    menu.close()
-
                     if (root.handleEdit) {
                         root.showEditor()
                     } else {

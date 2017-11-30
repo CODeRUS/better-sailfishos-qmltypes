@@ -2,7 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
 import com.jolla.settings.accounts 1.0
-import org.nemomobile.dbus 1.0
+import Nemo.Connectivity 1.0
 
 Dialog {
     id: root
@@ -14,22 +14,18 @@ Dialog {
 
     signal skipClicked()
 
-    property bool _connectionSelected
+    property bool _connectionSelected: connection.haveNetworkConnectivity()
     property bool _connectionSelectorClosed
     property bool _shouldAccept
-    property bool _shouldReject
 
     function _showConnSelector() {
-        _connectionSelectorClosed = false
-        _connectionSelected = false
-        connectionSelector.call('openConnectionNow', ["wlan"])
+        connection.attemptToConnectNetwork()
+        _connectionSelectorClosed = _connectionSelected
     }
 
     function _checkStatus() {
-        if (status == PageStatus.Active) {
-            if (_shouldReject) {
-                pageStack.pop()
-            } else if (_shouldAccept) {
+        if (status === PageStatus.Active) {
+            if (_shouldAccept) {
                 forwardNavigation = true
                 canAccept = true
                 accept()
@@ -39,70 +35,42 @@ Dialog {
 
     function _tryAccept() {
         _shouldAccept = true
-        _shouldReject = false
-        _checkStatus()
-    }
-
-    function _tryReject() {
-        _shouldAccept = false
-        _shouldReject = true
         _checkStatus()
     }
 
     acceptDestinationAction: PageStackAction.Replace
 
     onStatusChanged: {
-        if (status == PageStatus.Active) {
-            forwardNavigation = false
+        if (status === PageStatus.Active) {
             canAccept = false
-
-            if (accountFactory.haveNetworkConnectivity()) {
-                _tryAccept()
-            } else if (_shouldAccept || _shouldReject) {
-                _checkStatus()
-            } else {
-                accountFactory.attemptToConnectNetwork()
-                openConnSelector.start() // delay in case network connection is available
-            }
+            forwardNavigation = false
+            _showConnSelector()
         }
-    }
-
-    on_ShouldAcceptChanged: {
-        _checkStatus()
-    }
-
-    on_ShouldRejectChanged: {
-        _checkStatus()
     }
 
     onDone: {
         _shouldAccept = false
-        _shouldReject = false
     }
 
-    Timer {
-        id: openConnSelector
-        interval: 100
-        onTriggered: {
-            if (status == PageStatus.Active && !accountFactory.haveNetworkConnectivity()) {
-                _showConnSelector()
-            }
+    ConnectionHelper {
+        id: connection
+
+        onNetworkConnectivityEstablished: {
+            root._connectionSelected = true
+            root._connectionSelectorClosed = true
+            root._tryAccept()
+
         }
-    }
-
-    BusyIndicator {
-        id: busyIndicator
-        anchors.centerIn: parent
-        size: BusyIndicatorSize.Large
-        running: root._connectionSelected
+        onNetworkConnectivityUnavailable: {
+            root._connectionSelected = false
+            root._connectionSelectorClosed = true
+        }
     }
 
     Column {
         id: retryText
 
-        property bool display: root._connectionSelectorClosed && !openConnSelector.running
-                               && root.status != PageStatus.Activating
-                               && root.status != PageStatus.Inactive    // don't show when backstepping to this page
+        property bool display: root._connectionSelectorClosed && !root._connectionSelected
 
         width: parent.width
 
@@ -149,9 +117,7 @@ Dialog {
             //% "Connect"
             text: qsTrId("settings_accounts-bt-connect")
 
-            onClicked: {
-                root._showConnSelector()
-            }
+            onClicked: root._showConnSelector()
         }
     }
 
@@ -176,44 +142,6 @@ Dialog {
         onClicked: {
             root.forwardNavigation = true
             root.skipClicked()
-        }
-    }
-
-    DBusInterface {
-        id: connectionSelector
-        destination: "com.jolla.lipstick.ConnectionSelector"
-        path: "/"
-        iface: "com.jolla.lipstick.ConnectionSelectorIf"
-        signalsEnabled: true
-
-        function connectionSelectorClosed(connectionSelected) {
-            root._connectionSelectorClosed = true
-            root._connectionSelected = connectionSelected
-            if (connectionSelected) {
-                root._tryAccept()
-            }
-        }
-    }
-
-    SequentialAnimation {
-        id: delayedAcceptAnim
-        PauseAnimation { duration: 400 }
-        ScriptAction { script: root._tryAccept() }
-    }
-
-    AccountFactory {
-        id: accountFactory
-
-        onNetworkConnectivityEstablished: {
-            if (retryText.visible) {
-                // system automatically connected after the connection selector was closed;
-                // avoid accepting the dialog immediately so that it looks less jumpy
-                busyIndicator.running = true
-                retryText.visible = false
-                delayedAcceptAnim.start()
-            } else {
-                root._tryAccept()
-            }
         }
     }
 }

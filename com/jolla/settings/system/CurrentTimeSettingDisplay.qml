@@ -16,7 +16,7 @@ ValueButton {
 
     onClicked: {
         var date = new Date()
-        var dialog = pageStack.push(timePickerComponent, {
+        var dialog = pageStack.push("Sailfish.Silica.TimePickerDialog", {
             hour: date.getHours(),
             minute: date.getMinutes()
         })
@@ -28,11 +28,6 @@ ValueButton {
                 dateTimeSettings.setTime(dialog.hour, dialog.minute)
             }
         })
-    }
-
-    Component {
-        id: timePickerComponent
-        TimePickerDialog {}
     }
 
     WallClock {

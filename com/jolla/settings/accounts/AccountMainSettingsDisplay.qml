@@ -8,6 +8,7 @@ Item {
     property Provider accountProvider
     property bool accountEnabled
     property bool accountEnabledReadOnly
+    property bool accountIsProvisioned
     property alias accountUserName: usernameLabel.text
     property alias accountDisplayName: accountDisplayNameField.text
 
@@ -83,6 +84,21 @@ Item {
             topMargin: Theme.paddingLarge
         }
         enabled: !root.accountEnabledReadOnly
+        description: {
+            if (root.accountIsProvisioned && root.accountEnabledReadOnly) {
+                if (accountEnabled) {
+                    //: Indicates that the account is currently enabled by MDM
+                    //% "Enabled by Sailfish Device Manager"
+                    return qsTrId("settings-accounts-la-account_enabled_by_mdm")
+                } else {
+                    //: Indicates that the account is currently disabled by MDM
+                    //% "Disabled by Sailfish Device Manager"
+                    return qsTrId("settings-accounts-la-account_disabled_by_mdm")
+                }
+            } else {
+                return "";
+            }
+        }
 
         //: Indicates whether the account is currently enabled
         //% "Account status"

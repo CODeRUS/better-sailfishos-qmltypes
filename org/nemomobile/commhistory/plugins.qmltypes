@@ -587,6 +587,11 @@ Module {
         Method { name: "save" }
         Method { name: "reset" }
         Method { name: "deleteEvent" }
+        Method {
+            name: "load"
+            type: "bool"
+            Parameter { name: "eventId"; type: "int" }
+        }
     }
     Component {
         name: "MmsHelper"

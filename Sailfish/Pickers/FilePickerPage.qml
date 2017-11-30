@@ -12,13 +12,14 @@ import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Gallery 1.0
 import Sailfish.Pickers 1.0
 import org.nemomobile.systemsettings 1.0
+import "private"
 
 PickerPage {
     id: filePicker
 
     property var nameFilters
-    property var caseSensitivity
-    property QtObject sourceModel: defaultModel
+    // Qt::CaseSensitivity
+    property int caseSensitivity: Qt.CaseInsensitive
 
     function _filePicked(props) {
         _lastAppPage = pageStack.previousPage(filePicker)
@@ -26,20 +27,25 @@ PickerPage {
 
     }
 
-    ListModel {
-        id: defaultModel
+    //% "Select location"
+    title: qsTrId("components_pickers-he-select_location")
 
-        ListElement {
-            //% "Home folder"
-            name: qsTrId("components_pickers-la-home_folder")
-            iconSource: 'image://theme/icon-m-file-folder'
-            path: '/home/nemo'
-        }
-        ListElement {
-            //% "System files"
-            name: qsTrId("components_pickers-la-system_files")
-            iconSource: 'image://theme/icon-m-file-folder'
-            path: '/'
+    ListModel {
+        id: sourceModel
+
+        Component.onCompleted: {
+            append({
+                       //% "Home folder"
+                       name: qsTrId("components_pickers-la-home_folder"),
+                       iconSource: 'image://theme/icon-m-file-folder',
+                       path: StandardPaths.home
+                   })
+            append({
+                       //% "System files"
+                       name: qsTrId("components_pickers-la-system_files"),
+                       iconSource: 'image://theme/icon-m-file-folder',
+                       path: '/'
+                   })
         }
     }
 
@@ -51,7 +57,7 @@ PickerPage {
         delegate: QtObject {
             Component.onCompleted: {
                 if (model.status == PartitionModel.Mounted) {
-                    defaultModel.append({
+                    sourceModel.append({
                         //% "Memory card"
                         name: qsTrId("components_pickers-la-memory_card"),
                         iconSource: 'image://theme/icon-m-file-folder',
@@ -74,25 +80,16 @@ PickerPage {
         anchors.fill: parent
 
         header: PageHeader {
-            //% "Select location"
-            title: qsTrId("components_pickers-he-select_location")
+            title: filePicker.title
         }
 
         model: sourceModel
 
-        delegate: ListItem {
+        delegate: BackgroundItem {
             id: listItem
 
             width: ListView.view.width
-            contentHeight: Theme.itemSizeMedium
-            highlighted: down
-            _showPress: false
-
-            HighlightItem {
-                anchors.fill: parent
-                highlightOpacity: Theme.highlightBackgroundOpacity
-                active: highlighted
-            }
+            height: Theme.itemSizeMedium
 
             Row {
                 anchors.fill: parent
@@ -120,7 +117,7 @@ PickerPage {
             }
 
             onClicked: {
-                var page = pageStack.push('DirectoryPage.qml', {
+                var page = pageStack.push('private/DirectoryPage.qml', {
                     title: model.name,
                     path: model.path,
                     nameFilters: filePicker.nameFilters,

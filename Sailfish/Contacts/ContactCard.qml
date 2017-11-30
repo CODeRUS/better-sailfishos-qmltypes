@@ -254,6 +254,11 @@ SilicaFlickable {
                                                   addressParts["country"])
                     }
 
+                    onCopyAddressClicked: {
+                        console.log("Copy Address: " + address)
+                        Clipboard.text = address
+                    }
+
                     onWebsiteClicked: {
                         var schemeSeparatorIndex =  url.indexOf(':')
                         if (schemeSeparatorIndex <= 0 || schemeSeparatorIndex > 'https'.length) {

@@ -9,8 +9,11 @@ QtObject {
     property QtObject _authorization
     property var _authenticated
     property var _canceled
+    property var _delayedAction
 
-    readonly property bool lockCodeSet: deviceLock.availableMethods & Authenticator.LockCode
+    // TODO: could be made opt-out if we get a chance to update sailfish-utilities usage
+    property bool returnOnCancel
+    property bool returnOnAccept
 
     function authenticate(authorization, onAuthenticated, onCanceled) {
         query._authorization = authorization
@@ -22,20 +25,48 @@ QtObject {
             authorization.requestChallenge()
             break
         case Authorization.ChallengeIssued:
-            _handleChallenge()
+            deviceLock.authenticate(authorization.challengeCode, authorization.allowedMethods)
             break
         default:
             break
         }
     }
 
-    function _handleChallenge() {
-        if (deviceLock.availableMethods !== 0) {
-            pageStack.push(inputPage)
+    function cancel() {
+        deviceLock.cancel()
+
+        var canceled = query._canceled
+        query._authenticated = undefined
+        query._canceled = undefined
+        query._authorization = null
+
+        if (canceled)
+            canceled()
+    }
+
+    function _aborted() {
+        var canceled = query._canceled
+        query._authenticated = undefined
+        query._canceled = undefined
+        query._authorization = null
+
+        _runWhenPageStackNotBusy(function() {
+            if (canceled) {
+                canceled()
+            }
+
+            if (returnOnCancel) {
+                pageStack.pop()
+            }
+        })
+    }
+
+    function _runWhenPageStackNotBusy(action) {
+        if (pageStack.busy) {
+            query._delayedAction = action
         } else {
-            // No lock code is set so don't display the UI, but authenticate anyway to acquire
-            // an authentication token for the challenge code.
-            deviceLock.authenticate(query._authorization.challengeCode)
+            query._delayedAction = undefined
+            action()
         }
     }
 
@@ -53,73 +84,59 @@ QtObject {
             }
         },
 
-        Connections {
-            target: query._authorization
+        AuthenticationInput {
+            id: authentication
 
-            onChallengeIssued: query._handleChallenge()
-            onChallengeDeclined: {
-                var canceled = query._canceled
-                query._authenticated = undefined
-                query._canceled = undefined
-                query._authorization = null
+            registered: true
 
-                if (_canceled) {
-                    _canceled()
+            onAuthenticationStarted: {
+                query._runWhenPageStackNotBusy(function() {
+                    pageStack.push(Qt.resolvedUrl("DeviceLockQueryInputPage.qml"), {"authentication": authentication})
+                    authentication.feedback(feedback, -1)
+                })
+            }
+            onAuthenticationUnavailable: {
+                query._runWhenPageStackNotBusy(function() {
+                    pageStack.push(Qt.resolvedUrl("DeviceLockQueryInputPage.qml"), {"authentication": authentication})
+                    authentication.error(error)
+                })
+            }
+            onAuthenticationEnded: {
+                if (confirmed) {
+                    query._authorization = null
+
+                    if (returnOnAccept) {
+                        pageStack.pop()
+                    }
+                } else {
+                    query._aborted()
                 }
             }
         },
 
-        Component {
-            id: inputPage
+        Connections {
+            target: query._authorization
 
-            Page {
-                id: page
+            onChallengeIssued: {
+                deviceLock.authenticate(
+                            query._authorization.challengeCode,
+                            query._authorization.allowedMethods)
+            }
+            onChallengeDeclined: {
+                query._aborted()
+            }
+            onChallengeExpired: {
+                query._aborted()
+            }
+        },
 
-                property QtObject authorization
-
-                backNavigation: false
-                opacity: status === PageStatus.Active ? 1.0 : 0.0
-
-                onStatusChanged: {
-                    if (status == PageStatus.Active) {
-                        deviceLock.authenticate(
-                                    query._authorization.challengeCode,
-                                    query._authorization.allowedMethods)
-                    } else if (deviceLock.authenticating) {
-                        deviceLock.cancel()
-                    }
-                }
-
-                DeviceLockInput {
-                    id: devicelockinput
-
-                    authenticator: deviceLock
-
-                    //% "Confirm with lock code"
-                    titleText: qsTrId("settings_devicelock-he-lock_code_confirm_title")
-                    //% "Confirm"
-                    okText: qsTrId("settings_devicelock-bt-devicelock_confirm")
-
-                    showEmergencyButton: false
-
-                    onPinEntryCanceled: {
-                        var canceled = query._canceled
-                        var authorization = query._authorization
-                        query._authenticated = undefined
-                        query._canceled = undefined
-                        query._authorization = null
-
-                        clear()
-
-                        authorization.relinquishChallenge()
-                        if (canceled) {
-                            canceled()
-                        } else {
-                            pageStack.pop()
-                        }
-                    }
-
-                    onPinConfirmed: deviceLock.enterLockCode(enteredPin)
+        Connections {
+            target: pageStack
+            onBusyChanged: {
+                if (!pageStack.busy && query._delayedAction) {
+                    var action = query._delayedAction
+                    query._delayedAction = undefined
+                    action()
                 }
             }
         }

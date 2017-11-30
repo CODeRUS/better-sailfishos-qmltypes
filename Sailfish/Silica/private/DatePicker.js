@@ -60,7 +60,7 @@ function _maxDaysForMonth(month, year) {
 // previous month
 // weekstart indicates on which day a week starts, sunday=0, monday=1
 function _getStartDateForMonthView(year, month, weekstart) {
-    var start = new Date(Date.UTC(year, month-1, 1))
+    var start = new Date(year, month-1, 1, 12)
     if (start.getDay() > 0) {
         start.setDate(start.getDate() - start.getDay())
     }
@@ -79,22 +79,12 @@ function _getStartDateForMonthView(year, month, weekstart) {
 // falls after Thursday for this year.
 // Given month should be 1-12.
 function _loadWeekNumbers(model, year, month, day, weekCount) {
-    var dt = new Date(Date.UTC(year, month-1, day))
-    var num = SilicaPrivate.Util.weekNumber(dt)
-    for (var i=0; i<weekCount; i++) {
+    var numbers = SilicaPrivate.Util.weekNumberList(year, month, day, weekCount)
+    for (var i = 0; i < numbers.length; ++i) {
         if (model.count <= i) {
-            model.append({'weekNumber': num})
+            model.append({'weekNumber': numbers[i]})
         } else {
-            model.setProperty(i, 'weekNumber', num)
-        }
-
-        // get next week number
-        dt.setDate(dt.getDate() + 7)
-        if ((month === 1 && num !== 1) || month >= 11) {
-            // may display week 52 in Jan calendar or week 1 in Dec
-            num = SilicaPrivate.Util.weekNumber(dt)
-        } else {
-            num++
+            model.setProperty(i, 'weekNumber', numbers[i])
         }
     }
 }

@@ -41,8 +41,9 @@ Image {
     property alias running: animationGroup.running
     property alias loops: animationGroup.loops
     property alias taps: blinkAnimation.loops
+    property color color: Theme.primaryColor
 
-    source: "image://theme/graphic-gesture-hint"
+    source: "image://theme/graphic-gesture-hint?" + color
     opacity: 0.0
 
     function start() {

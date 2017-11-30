@@ -96,8 +96,12 @@ function load(source, parent, callback) {
             } else if (component.status === Component.Loading) {
                 component.statusChanged.connect(
                     function(status) {
-                        if (component && status == Component.Ready) {
-                            incubateCover(component, parent, callback)
+                        if (component) {
+                            if (status == Component.Ready) {
+                                incubateCover(component, parent, callback)
+                            } else if (status == Component.Error) {
+                                console.log("CoverLoader.js: createComponent error: ", component.errorString())
+                            }
                         }
                     })
                 return

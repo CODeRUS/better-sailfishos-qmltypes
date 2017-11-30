@@ -213,7 +213,7 @@ Dialog {
                 text: qsTrId("settings_accounts-la-have_jolla_account_heading")
 
                 //: User selects this option if he/she already has a Jolla account
-                //% "You probably have a Jolla account if you have used a Jolla device, created an account at accounts.jolla.com or used our community platform at together.jolla.com."
+                //% "You probably have a Jolla account if you have used a Jolla device, created an account at account.jolla.com or used our community platform at together.jolla.com."
                 description: qsTrId("settings_accounts-la-have_jolla_account_description")
 
                 onClicked: {

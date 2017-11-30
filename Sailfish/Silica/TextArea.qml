@@ -84,7 +84,7 @@ TextBase {
         focus: true
         activeFocusOnPress: false
         color: textArea.color
-        selectionColor: Qt.rgba(1.0, 1.0, 1.0, 0.3)
+        selectionColor: Theme.rgba(Theme.primaryColor, 0.3)
         selectedTextColor: Theme.highlightColor
         font: textArea.font
         cursorDelegate: Rectangle {

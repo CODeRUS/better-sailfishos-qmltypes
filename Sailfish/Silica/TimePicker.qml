@@ -3,7 +3,7 @@
 ** Copyright (C) 2013 Jolla Ltd.
 ** Contact: Matt Vogt <matthew.vogt@jollamobile.com>
 ** All rights reserved.
-** 
+**
 ** This file is part of Sailfish Silica UI component package.
 **
 ** You may use this file under the terms of BSD license as follows:
@@ -18,7 +18,7 @@
 **     * Neither the name of the Jolla Ltd nor the
 **       names of its contributors may be used to endorse or promote products
 **       derived from this software without specific prior written permission.
-** 
+**
 ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -104,14 +104,16 @@ Item {
         anchors.fill: parent
         property size size: Qt.size(width, height)
         property real border: _minuteWidth / width
+        property color color: Theme.primaryColor
         fragmentShader: "
             uniform lowp vec2 size;
             uniform lowp float border;
+            uniform lowp vec4 color;
             varying highp vec2 qt_TexCoord0;
             uniform lowp float qt_Opacity;
             void main() {
                 highp float dist = length(qt_TexCoord0 - vec2(0.5));
-                gl_FragColor = vec4(0.1, 0.1, 0.1, 0.1) * (smoothstep(0.5-border,0.505-border, dist) - smoothstep(0.5-0.005, 0.5, dist)) * qt_Opacity;
+                gl_FragColor = color*vec4(0.1, 0.1, 0.1, 0.1) * (smoothstep(0.5-border,0.505-border, dist) - smoothstep(0.5-0.005, 0.5, dist)) * qt_Opacity;
             }"
     }
 
@@ -125,7 +127,7 @@ Item {
         property real value
         property bool animationEnabled: true
 
-        transform: Translate { 
+        transform: Translate {
             // The hours circle ends at 132px from the center
             x: (width - 3*_minuteWidth)/2 * _xTranslation(hourIndicator.value, 12)
             y: -(height - 3*_minuteWidth)/2 * _yTranslation(hourIndicator.value, 12)
@@ -147,7 +149,7 @@ Item {
 
         property real value
 
-        transform: Translate { 
+        transform: Translate {
             // The minutes band is 72px wide, ending at 204px from the center
             x: (width - _minuteWidth)/2 * _xTranslation(minuteIndicator.value, 60)
             y: -(height - _minuteWidth)/2 * _yTranslation(minuteIndicator.value, 60)

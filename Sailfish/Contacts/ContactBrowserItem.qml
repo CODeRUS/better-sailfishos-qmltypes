@@ -33,11 +33,12 @@ ContactItem {
             // Retrieve the person to delete; it will be no longer accessible if the
             // remorse function is triggered by delegate destruction
             var person = getPerson()
+            var model = peopleModel
 
             //: Deleting in n seconds
             //% "Deleting"
             remorseAction(qsTrId("components_contacts-la-deleting"), function () {
-                peopleModel.removePerson(person)
+                model.removePerson(person)
             })
         }
     }

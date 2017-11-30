@@ -44,6 +44,45 @@ Module {
         }
     }
     Component {
+        name: "BatteryStatus"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/BatteryStatus 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "ChargerStatus"
+            values: {
+                "ChargerStatusUnknown": -1,
+                "Disconnected": 0,
+                "Connected": 1
+            }
+        }
+        Enum {
+            name: "Status"
+            values: {
+                "BatteryStatusUnknown": -1,
+                "Full": 0,
+                "Normal": 1,
+                "Low": 2,
+                "Empty": 3
+            }
+        }
+        Property { name: "chargerStatus"; type: "ChargerStatus"; isReadonly: true }
+        Property { name: "chargePercentage"; type: "int"; isReadonly: true }
+        Property { name: "status"; type: "Status"; isReadonly: true }
+        Signal {
+            name: "chargerStatusChanged"
+            Parameter { name: "status"; type: "ChargerStatus" }
+        }
+        Signal {
+            name: "chargePercentageChanged"
+            Parameter { name: "percentage"; type: "int" }
+        }
+        Signal {
+            name: "statusChanged"
+            Parameter { name: "status"; type: "Status" }
+        }
+    }
+    Component {
         name: "CertificateModel"
         prototype: "QAbstractListModel"
         exports: ["org.nemomobile.systemsettings/CertificateModel 1.0"]
@@ -73,6 +112,7 @@ Module {
                 "TwelveHours": 1
             }
         }
+        Property { name: "ready"; type: "bool"; isReadonly: true }
         Property { name: "automaticTimeUpdate"; type: "bool" }
         Property { name: "automaticTimezoneUpdate"; type: "bool" }
         Property { name: "timezone"; type: "string" }
@@ -217,6 +257,29 @@ Module {
             Parameter { name: "localeCode"; type: "string" }
             Parameter { name: "updateMode"; type: "LocaleUpdateMode" }
         }
+    }
+    Component {
+        name: "LocationSettings"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/LocationSettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "OnlineAGpsState"
+            values: {
+                "OnlineAGpsAgreementNotAccepted": 0,
+                "OnlineAGpsDisabled": 1,
+                "OnlineAGpsEnabled": 2
+            }
+        }
+        Property { name: "locationEnabled"; type: "bool" }
+        Property { name: "gpsEnabled"; type: "bool" }
+        Property { name: "gpsFlightMode"; type: "bool" }
+        Property { name: "gpsAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "hereState"; type: "OnlineAGpsState" }
+        Property { name: "hereAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "mlsEnabled"; type: "bool" }
+        Property { name: "mlsOnlineState"; type: "OnlineAGpsState" }
+        Property { name: "mlsAvailable"; type: "bool"; isReadonly: true }
     }
     Component {
         name: "ObjectListModel"
@@ -376,6 +439,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "available"; type: "bool"; isReadonly: true }
         Property { name: "supportedModes"; type: "QStringList"; isReadonly: true }
+        Property { name: "availableModes"; type: "QStringList"; isReadonly: true }
         Property { name: "hiddenModes"; type: "QStringList"; isReadonly: true }
         Property { name: "currentMode"; type: "string" }
         Property { name: "configMode"; type: "string" }

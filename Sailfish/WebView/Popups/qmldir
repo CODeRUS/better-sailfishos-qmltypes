@@ -1,0 +1,15 @@
+module Sailfish.WebView.Popups
+singleton LocationSettings 1.0 LocationSettings.qml
+UserPrompt 1.0 UserPrompt.qml
+AlertDialog 1.0 AlertDialog.qml
+AuthDialog 1.0 AuthDialog.qml
+ConfirmDialog 1.0 ConfirmDialog.qml
+LocationDialog 1.0 LocationDialog.qml
+PasswordManagerDialog 1.0 PasswordManagerDialog.qml
+PopupOpener 1.0 PopupOpener.qml
+PromptDialog 1.0 PromptDialog.qml
+PromptLabel 1.0 PromptLabel.qml
+ContextMenu 1.0 ContextMenu.qml
+DownloadMenuItem 1.0 DownloadMenuItem.qml
+ShareLinkPage 1.0 ShareLinkPage.qml
+ShareTextPage 1.0 ShareTextPage.qml

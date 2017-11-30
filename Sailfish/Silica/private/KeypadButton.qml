@@ -34,6 +34,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0
 
 MouseArea {
     id: dialerButton
@@ -44,14 +45,24 @@ MouseArea {
     property bool down: pressed && containsMouse
 
     onClicked: dialer._buttonClicked(text)
-    onPressed: dialer._buttonPressed(dialerButton, text)
+    onPressed: {
+        dialerButton.DragFilter.begin(mouse.x, mouse.y)
+        dialer._buttonPressed(dialerButton, text)
+    }
     onReleased: dialer._buttonReleased(text)
-    onCanceled: dialer._buttonCanceled(text)
+    onCanceled: {
+        dialerButton.DragFilter.end()
+        dialer._buttonCanceled(text)
+    }
+
     onEntered: dialer._buttonEntered()
     onExited: dialer._buttonExited()
 
     width: dialer._buttonWidth
     height: dialer._buttonHeight
+
+    preventStealing: down
+    onPreventStealingChanged: if (preventStealing) dialerButton.DragFilter.end()
 
     Label {
         id: numberLabel

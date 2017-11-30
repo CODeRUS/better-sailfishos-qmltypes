@@ -1,3 +1,10 @@
+/****************************************************************************
+**
+** Copyright (C) 2013-2016 Jolla Ltd.
+** Contact: Raine Mäkeläinen <raine.makelainen@jollamobile.com>
+**
+****************************************************************************/
+
 import QtQuick 2.0
 import QtDocGallery 5.0
 import Sailfish.Silica 1.0
@@ -6,9 +13,13 @@ import Sailfish.Pickers 1.0
 import Sailfish.Media 1.0
 import Sailfish.Gallery 1.0
 import "mediaformatter.js" as MediaFormatter
+import "private"
 
 PickerPage {
     id: musicPicker
+
+    //% "Select music"
+    title: qsTrId("components_pickers-he-select_music")
 
     orientationTransitions: Private.PageOrientationTransition {
         fadeTarget: _background ? listView : __silica_applicationwindow_instance.contentItem
@@ -25,7 +36,6 @@ PickerPage {
         header: SearchPageHeader {
             width: listView.width
             title: musicPicker.title
-
             //: Placeholder text of music search field in content picker
             //% "Search music"
             placeholderText: qsTrId("components_pickers-ph-search_music")

@@ -9,7 +9,7 @@ import QtQuick.tooling 1.2
 Module {
     dependencies: ["QtQuick 2.0"]
     Component {
-        name: "StoreInterface"
+        name: "Jolla::Settings::StoreInterface"
         prototype: "QObject"
         exports: ["com.jolla.settings.sailfishos/StoreInterface 1.0"]
         exportMetaObjectRevisions: [0]
@@ -42,15 +42,23 @@ Module {
         Property { name: "osWebsite"; type: "string"; isReadonly: true }
         Property { name: "osDownloadSize"; type: "qlonglong"; isReadonly: true }
         Property { name: "osInstallSize"; type: "qlonglong"; isReadonly: true }
+        Property { name: "availableSpaceForDownload"; type: "qlonglong"; isReadonly: true }
+        Property { name: "availableSpaceForInstall"; type: "qlonglong"; isReadonly: true }
         Property { name: "validOsInstallSize"; type: "bool"; isReadonly: true }
         Property { name: "checked"; type: "bool"; isReadonly: true }
         Property { name: "lastChecked"; type: "QDateTime"; isReadonly: true }
         Property { name: "accountStatus"; type: "AccountStatus"; isReadonly: true }
+        Property { name: "sufficientSpaceForDownload"; type: "bool"; isReadonly: true }
+        Property { name: "sufficientSpaceForInstall"; type: "bool"; isReadonly: true }
+        Property { name: "sufficientBatteryForInstall"; type: "bool"; isReadonly: true }
+        Property { name: "batteryChargerConnected"; type: "bool"; isReadonly: true }
         Signal { name: "updateInfoChanged" }
         Signal { name: "updateCheckCacheCleared" }
+        Signal { name: "updateInstallationStarted" }
         Method { name: "checkForUpdate" }
         Method { name: "getUpdateSize" }
-        Method { name: "downloadUpdate" }
-        Method { name: "clearOsUpdateCheckCache" }
+        Method { name: "calculateDiskSpaceRequirements" }
+        Method { name: "downloadUpdate"; type: "bool" }
+        Method { name: "installDownloadedUpdate"; type: "bool" }
     }
 }

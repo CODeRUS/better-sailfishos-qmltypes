@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Pickers 1.0
 import QtMultimedia 5.0
+import Sailfish.Ambience 1.0
 
 Dialog {
     id: soundDialog
@@ -12,7 +13,7 @@ Dialog {
     property bool noSound
     property string selectedFilename: activeFilename
     property string selectedSoundTitle: activeSoundTitle
-    property QtObject alarmModel
+    property QtObject alarmModel: ToneModel {}
 
     onSelectedFilenameChanged: previewPlayer.source = selectedFilename
     onActiveFilenameChanged: previewPlayer.source = activeFilename

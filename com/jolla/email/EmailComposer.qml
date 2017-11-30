@@ -15,6 +15,7 @@ import org.nemomobile.configuration 1.0
 
 Item {
     id: messageComposer
+
     anchors.fill: parent
 
     property alias attachmentsModel: attachmentFiles
@@ -24,6 +25,9 @@ Item {
     property alias emailBcc: message.bcc
     property alias emailBody: message.body
     property alias messageId: message.messageId
+
+    property alias _toSummary: to.summary
+    property alias _bodyText: body.text
 
     property bool isEmailApp
     property string action
@@ -46,7 +50,6 @@ Item {
     //: Save draft message
     //% "Save draft"
     readonly property string _strSaveDraft: qsTrId("jolla-components_email-me-save_draft")
-    //: Add attachment
     //% "Add attachment"
     readonly property string _strAddAttach: qsTrId("jolla-components_email-me-add_attachment")
     //: Send message
@@ -107,7 +110,7 @@ Item {
         }
 
         //Save any existent attachment that is not from the original message
-        if(attachmentFiles.count) {
+        if (attachmentFiles.count) {
             for (var i = attachmentFiles.count -1; i >= 0; --i) {
                 if (attachmentFiles.get(i).FromOriginalMessage === "true") {
                     attachmentFiles.remove(i)
@@ -136,7 +139,7 @@ Item {
 
     function removeUndownloadedAttachments() {
         //Remove any existent attachment that is not downloaded
-        if(attachmentFiles.count) {
+        if (attachmentFiles.count) {
             for (var i = attachmentFiles.count -1; i >= 0; --i) {
                 if (attachmentFiles.get(i).url === "") {
                     attachmentFiles.remove(i)
@@ -156,8 +159,8 @@ Item {
         message.body = body.text + body.quote
 
         if (attachmentFiles.count > 0) {
-             var att = []
-             for (var i = 0; i < attachmentFiles.count; ++i) {
+            var att = []
+            for (var i = 0; i < attachmentFiles.count; ++i) {
                 att.push(attachmentFiles.get(i).url)
             }
             message.attachments = att
@@ -172,7 +175,7 @@ Item {
         buildMessage()
         message.send()
         discardDraft = true
-        if(isEmailApp) {
+        if (isEmailApp) {
             // pop any page/dialog on top of composer if it exists
             pageStack.pop(popDestination)
         } else {
@@ -195,7 +198,7 @@ Item {
 
     function _discardDraft() {
         discardDraft = true
-        if(isEmailApp) {
+        if (isEmailApp) {
             // pop any page/dialog on top of composer if it exists
             pageStack.pop(popDestination)
             if (draft) {
@@ -210,7 +213,7 @@ Item {
         var picker = pageStack.push(contentPicker, { selectedContent: attachmentFiles })
         picker.selectedContentChanged.connect(function() {
             attachmentFiles.clear()
-            for(var i=0; i < picker.selectedContent.count; ++i) {
+            for (var i = 0; i < picker.selectedContent.count; ++i) {
                 attachmentFiles.append(picker.selectedContent.get(i))
             }
         })
@@ -222,11 +225,10 @@ Item {
     }
 
     function messageContentModified() {
-        if(hasRecipients || subject.text != '' || body.text != ''
+        if (hasRecipients || subject.text != '' || body.text != ''
                 && body.text != signature  || attachmentFiles.count) {
             return true
-        }
-        else {
+        } else {
             return false
         }
     }
@@ -304,7 +306,7 @@ Item {
         PullDownMenu {
             visible: accountListModel.numberOfAccounts
             MenuItem {
-                // if discardDrafs is set to false we auto-save drafts, so
+                // if discardDraft is set to false we auto-save drafts, so
                 // discardDraft is shown in pulley menu, by default this property is set to true
                 // so drafts are discarded.
                 text: discardDraft ? _strSaveDraft : _strDiscardDraft
@@ -484,20 +486,20 @@ Item {
                         menu: ContextMenu {
                             width: parent ? parent.width : 0
 
-                            Repeater {
-                                model:
-                                    //: Normal priority
-                                    //% "Normal"
-                                    [qsTrId("jolla-email-la-priority_Normal"),
-                                    //: High priority
-                                    //% "High"
-                                    qsTrId("jolla-email-la-priority_high"),
-                                    //: Low priority
-                                    //% "Low"
-                                    qsTrId("jolla-email-la-priority_low")]
-                                MenuItem {
-                                    text: modelData
-                                }
+                            MenuItem {
+                                //: Normal priority
+                                //% "Normal"
+                                text: qsTrId("jolla-email-la-priority_Normal")
+                            }
+                            MenuItem {
+                                //: High priority
+                                //% "High"
+                                text: qsTrId("jolla-email-la-priority_high")
+                            }
+                            MenuItem {
+                                //: Low priority
+                                //% "Low"
+                                text: qsTrId("jolla-email-la-priority_low")
                             }
                         }
 
@@ -572,7 +574,6 @@ Item {
 
                                 ContextMenu {
                                     MenuItem {
-                                        id: removeItem
                                         visible: attachmentFiles.count > 0
                                         //: When plural "Remove all attachments" and singular "Remove attachment".
                                         //% "Remove attachment"
@@ -583,8 +584,6 @@ Item {
                                         }
                                     }
                                     MenuItem {
-                                        id: addItem
-                                        //: Add new attachment
                                         //% "Add new attachment"
                                         text: qsTrId("jolla-components_email-me-add_new_attachment")
                                         onClicked: modifyAttachments()
@@ -632,8 +631,9 @@ Item {
 
                 width: parent.width
                 background: null // expanding text areas with nothing below them don't need bottom border background
-                height: Math.max(messageComposer.height - (contentItem.y + (isLandscape ? 0 : pageHeader.height) + metadata.height + expanderControl.height), implicitHeight)
-
+                height: Math.max(messageComposer.height - (contentItem.y + (isLandscape ? 0 : pageHeader.height)
+                                                           + metadata.height + expanderControl.height),
+                                 implicitHeight)
                 color: Theme.primaryColor
                 font { pixelSize: Theme.fontSizeMedium; family: Theme.fontFamily }
 
@@ -657,23 +657,10 @@ Item {
         VerticalScrollDecorator {}
     }
 
-    Binding {
-        target: (cover && cover.hasOwnProperty("editorTo")) ? cover : null
-        property: "editorTo"
-        value: to.summary
-    }
-
-    Binding {
-        target: (cover && cover.hasOwnProperty("editorBody")) ? cover : null
-        property: "editorBody"
-        value: body.text
-    }
-
     Component {
         id: contentPicker
 
         MultiContentPickerDialog {
-            //: Attach files
             //% "Attach files"
             title: qsTrId("jolla-components_email-he-attach-files")
         }
@@ -686,7 +673,7 @@ Item {
 
     function _updateAttachmentText() {
         var names = []
-        for (var i=0; i<attachmentFiles.count; ++i) {
+        for (var i = 0; i < attachmentFiles.count; ++i) {
             names.push(attachmentFiles.get(i).title)
             attachments.text = names.join(", ")
             if (attachments.implicitWidth > attachments.width) {
@@ -711,7 +698,6 @@ Item {
     }
 
     Component.onCompleted: {
-
         if (accountListModel.numberOfAccounts) {
             if (action) {
                 accountId = originalMessage.accountId
@@ -805,7 +791,7 @@ Item {
                 bcc.setRecipients(message.bcc)
                 subject.text = message.subject
                 body.text = message.body + (draft ? "" : signature)
-                if(draft) {
+                if (draft) {
                     setOriginalMessageAttachments()
                 }
             }
@@ -829,8 +815,8 @@ Item {
     }
 
     ConfigurationValue {
-       id: defaultAccountConfig
-       key: "/apps/jolla-email/settings/default_account"
-       defaultValue: 0
+        id: defaultAccountConfig
+        key: "/apps/jolla-email/settings/default_account"
+        defaultValue: 0
     }
 }

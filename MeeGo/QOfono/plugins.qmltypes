@@ -715,6 +715,7 @@ Module {
         Property { name: "revision"; type: "string"; isReadonly: true }
         Property { name: "serial"; type: "string"; isReadonly: true }
         Property { name: "type"; type: "string"; isReadonly: true }
+        Property { name: "softwareVersionNumber"; type: "string"; isReadonly: true }
         Property { name: "features"; type: "QStringList"; isReadonly: true }
         Property { name: "interfaces"; type: "QStringList"; isReadonly: true }
         Property { name: "modemPath"; type: "string" }
@@ -757,6 +758,10 @@ Module {
         Signal {
             name: "typeChanged"
             Parameter { name: "type"; type: "string" }
+        }
+        Signal {
+            name: "softwareVersionNumberChanged"
+            Parameter { name: "version"; type: "string" }
         }
         Signal {
             name: "featuresChanged"

@@ -175,7 +175,7 @@ BackgroundItem {
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(0, 0, 0, 0.6)
+        color: Theme.rgba(Theme.overlayBackgroundColor, 0.6)
     }
 
     Row {

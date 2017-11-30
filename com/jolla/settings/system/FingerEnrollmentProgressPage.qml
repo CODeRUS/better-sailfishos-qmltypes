@@ -58,23 +58,23 @@ FingerEnrollmentPage {
         }
         onAcquisitionFeedback: {
             switch (feedback) {
-            case FingerprintSettings.PartialPrint:
+            case FingerprintSensor.PartialPrint:
                 //% "Place and lift your finger again"
                 page.feedback = qsTrId("settings_devicelock-la-fingerprint_feedback_partial_print_explanation")
                 break;
-            case FingerprintSettings.PrintIsUnclear:
+            case FingerprintSensor.PrintIsUnclear:
                 //% "Touch the fingerprint sensor a bit harder"
                 page.feedback = qsTrId("settings_devicelock-la-fingerprint_feedback_print_unclear_explanation")
                 break
-            case FingerprintSettings.SensorIsDirty:
+            case FingerprintSensor.SensorIsDirty:
                 //% "Wipe the sensor to clear any grime that might be obstructing it"
                 page.feedback = qsTrId("settings_devicelock-la-fingerprint_feedback_sensor_is_dirty_explanation")
                 break
-            case FingerprintSettings.SwipeFaster:
+            case FingerprintSensor.SwipeFaster:
                 //% "Swipe the fingerprint sensor a bit faster"
                 page.feedback = qsTrId("settings_devicelock-la-fingerprint_feedback_swipe_faster_explanation")
                 break;
-            case FingerprintSettings.SwipeSlower:
+            case FingerprintSensor.SwipeSlower:
                 //% "Swipe the fingerprint sensor a bit slower"
                 page.feedback = qsTrId("settings_devicelock-la-fingerprint_feedback_swipe_slower_explanation")
                 break;
@@ -95,21 +95,21 @@ FingerEnrollmentPage {
             page.acceptDestinationAction = PageStackAction.Replace
 
             switch (error) {
-            case FingerprintSettings.Canceled:
+            case FingerprintSensor.Canceled:
                 return  // Should have received some feeback prior to this pushing the feedback page.
-            case FingerprintSettings.HardwareUnavailable:
+            case FingerprintSensor.HardwareUnavailable:
                 //% "The hardware is reporting an error and fingerprint acquisition cannot continue"
                 page.explanation = qsTrId("settings_devicelock-la-fingerprint_error_hardware_unavailable_explanation")
                 break
-            case FingerprintSettings.CannotContinue:
+            case FingerprintSensor.CannotContinue:
                 //% "An internal error has occurred or data is corrupted and fingerprint acquisition cannot continue"
                 page.explanation = qsTrId("settings_devicelock-la-fingerprint_error_cannot_continue_explanation")
                 break
-            case FingerprintSettings.Timeout:
+            case FingerprintSensor.Timeout:
                 //% "Fingerprint acquisition has timed out waiting for input"
                 page.explanation = qsTrId("settings_devicelock-la-fingerprint_error_timeout_explanation")
                 break
-            case FingerprintSettings.NoSpace:
+            case FingerprintSensor.NoSpace:
                 //% "There is insufficient storage space to save the fingerprint"
                 page.explanation = qsTrId("settings_devicelock-la-fingerprint_error_no_space_explanation")
                 break;

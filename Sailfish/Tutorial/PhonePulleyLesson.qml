@@ -128,9 +128,13 @@ Lesson {
                 hintLabel.opacity = 1.0
                 hintLabel.showGradient = true
                 root._demonstrated = true
+                // unblock user interaction immediately
+                pulleyMenu.userAttempt = true
+                flickable.interactive = true
+                touchBlocker.enabled = false
             }
         }
-        PauseAnimation { duration: 2000 }
+        PauseAnimation { duration: 1500 }
         ScriptAction  {
             script: {
                 hintLabel.opacity = 0.0
@@ -176,6 +180,7 @@ Lesson {
             script: {
                 touchBlocker.enabled = true
                 playButton.enabled = false
+                hint.stop()
                 closeAnimation.restart()
                 lessonCompleted()
             }
@@ -273,6 +278,13 @@ Lesson {
         opacity: 0.0
     }
 
+    // for text placement in list items
+    Image {
+        id: dummyIcon
+        source: "image://theme/icon-phone-missed-call"
+        visible: false
+    }
+
     Flickable {
         id: flickable
         anchors {
@@ -356,10 +368,8 @@ Lesson {
 
                     Image {
                         id: directionIcon
-                        anchors {
-                            left: parent.left
-                            top: firstNameLabel.top
-                        }
+                        x: Theme.horizontalPageMargin - Theme.paddingLarge
+                        anchors.top: firstNameLabel.top
                         source: model.type === 1
                                 ? "image://theme/icon-phone-incoming-call"
                                 : model.type === 2
@@ -371,7 +381,7 @@ Lesson {
                         id: firstNameLabel
                         anchors {
                             left: parent.left
-                            leftMargin: 42
+                            leftMargin: dummyIcon.width + Theme.horizontalPageMargin - Theme.paddingLarge
                             verticalCenter: parent.verticalCenter
                             verticalCenterOffset: -Theme.paddingMedium
                         }

@@ -32,7 +32,7 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "private"
 import "private/Util.js" as Util
@@ -173,6 +173,14 @@ BackgroundItem {
             visible: dialogHeader._backgroundVisible
         }
 
+        FontMetrics {
+            id: fontMetrics
+
+            property bool smallFont: boundingRect(cancelLabel.text + acceptLabel.text).width
+                                     > (dialogHeader.width - dialogHeader.leftMargin - dialogHeader.rightMargin - Theme.paddingMedium)
+            font.pixelSize: Theme.fontSizeLarge
+        }
+
         BackgroundItem {
             id: cancelButton
             property real preferredWidth: Math.min(cancelLabel.implicitWidth*(reserveExtraContent?1.0:cancelLabel.opacity)
@@ -201,7 +209,7 @@ BackgroundItem {
                 x: dialogHeader.leftMargin
                 width: Math.min(dialogHeader.width - acceptButton.width - x - Theme.paddingMedium, implicitWidth)
                 font {
-                    pixelSize: dialog.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
+                    pixelSize: dialog.isPortrait && !fontMetrics.smallFont ? Theme.fontSizeLarge : Theme.fontSizeMedium
                     family: Theme.fontFamilyHeading
                 }
                 anchors.verticalCenter: parent.verticalCenter
@@ -255,7 +263,7 @@ BackgroundItem {
                 width: acceptButton.width - Theme.paddingLarge - Theme.horizontalPageMargin
                 truncationMode: TruncationMode.Fade
                 font {
-                    pixelSize: dialog.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
+                    pixelSize: dialog.isPortrait && !fontMetrics.smallFont ? Theme.fontSizeLarge : Theme.fontSizeMedium
                     family: Theme.fontFamilyHeading
                 }
                 anchors {

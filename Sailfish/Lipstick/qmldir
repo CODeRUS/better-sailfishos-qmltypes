@@ -1,5 +1,4 @@
 module Sailfish.Lipstick
-plugin sailfishlipstickplugin
 SystemDialog 1.0 SystemDialog.qml
 SystemDialogLayout 1.0 SystemDialogLayout.qml
 SystemDialogTextButton 1.0 SystemDialogTextButton.qml
@@ -19,3 +18,5 @@ BoundedModel 1.0 BoundedModel.qml
 ShutDownItem 1.0 ShutDownItem.qml
 Pannable 1.0 Pannable.qml
 PannableItem 1.0 PannableItem.qml
+BatteryStatusIndicator 1.0 BatteryStatusIndicator.qml
+ClockItem 1.0 ClockItem.qml

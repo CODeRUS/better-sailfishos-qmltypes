@@ -43,8 +43,10 @@ BackgroundItem {
     id: root
 
     property bool iconized: true
-    property int modelCount: -1
+    property int matchCount: -1
     property real iconizedWidth
+    property bool searching
+    property alias searchProgress: progressBar.progress
 
     property real _margin: Math.max((iconizedWidth - searchIcon.width) / 2., 0.)
 
@@ -81,6 +83,25 @@ BackgroundItem {
     }
     highlighted: down || searchIcon.down
 
+    Rectangle {
+        id: progressBar
+        property real progress: 0.0
+        height: parent.height
+        width: progress * parent.width
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.5) }
+            GradientStop { position: 1.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.0) }
+        }
+        opacity: searching ? 1. : 0.
+        visible: opacity > 0.
+
+        Behavior on width {
+            enabled: progressBar.visible
+            SmoothedAnimation { velocity: 480; duration: 200 }
+        }
+        Behavior on opacity { FadeAnimation {} }
+    }
+
     IconButton {
         id: searchIcon
         anchors {
@@ -114,7 +135,9 @@ BackgroundItem {
 
         focusOutBehavior: FocusBehavior.ClearPageFocus
         font {
-            pixelSize: Theme.fontSizeLarge
+            // visible label doesn't leave much room. match count might go away if heavy full-document search is replaced
+            // with more incremental approach, so should be good for now
+            pixelSize: labelVisible ? Theme.fontSizeMediumBase : Theme.fontSizeLarge
             family: Theme.fontFamilyHeading
         }
 
@@ -123,11 +146,11 @@ BackgroundItem {
             + (searchNext.visible ? searchNext.width + Theme.paddingLarge : 0.)
         textTopMargin: labelVisible ? Theme.paddingSmall : (height/2 - _editor.implicitHeight/2)
 
-        labelVisible: root.modelCount > 0 && !searchField.activeFocus
+        labelVisible: root.matchCount > 0 && !searchField.activeFocus
         //% "%n item(s) found"
-        label: qsTrId("sailfish-office-lb-%n-matches", root.modelCount)
+        label: qsTrId("sailfish-office-lb-%n-matches", root.matchCount)
 
-        placeholderText: (root.modelCount == 0 && !activeFocus)
+        placeholderText: (root.matchCount == 0 && !activeFocus)
             //% "No result"
             ? qsTrId("sailfish-office-search-no-result")
             //% "Search on document"
@@ -135,21 +158,23 @@ BackgroundItem {
 
         Connections {
             target: root
-            onModelCountChanged: if (modelCount == 0) {
-                searchField.text = "" // Allow the placeholder
-                searchField._searchText = ""
+            onSearchingChanged: {
+                if (!searching && matchCount == 0) {
+                    searchField.text = "" // Allow the placeholder
+                }
             }
         }
+        on_SearchTextChanged: root.requestSearch(_searchText)
 
         onActiveFocusChanged: {
             if (activeFocus) {
+                text = _searchText
                 cursorPosition = text.length
             } else {
-                if (text != _searchText) {
-                    text = _searchText
-                }
                 if (!text) {
                     root.iconized = true
+                } else if (matchCount == 0 && !searching) {
+                    text = ""
                 }
             }
         }
@@ -160,9 +185,6 @@ BackgroundItem {
         EnterKey.onClicked: {
             if (text != "") {
                 _searchText = text
-                root.requestSearch(text)
-            } else {
-                root.iconized = true
             }
             focus = false
         }
@@ -192,7 +214,7 @@ BackgroundItem {
 
                 visible: opacity > 0.
 
-                opacity: root.modelCount > 0 && !searchField.activeFocus ? 1 : 0
+                opacity: root.matchCount > 0 && !searchField.activeFocus ? 1 : 0
                 Behavior on opacity { FadeAnimation {} }
 
                 onClicked: root.requestPreviousMatch()
@@ -210,7 +232,7 @@ BackgroundItem {
 
                 visible: opacity > 0.
 
-                opacity: root.modelCount > 0 && !searchField.activeFocus ? 1 : 0
+                opacity: root.matchCount > 0 && !searchField.activeFocus ? 1 : 0
                 Behavior on opacity { FadeAnimation {} }
 
                 onClicked: root.requestNextMatch()
@@ -225,8 +247,14 @@ BackgroundItem {
                 icon.source: "image://theme/icon-m-clear"
 
                 onClicked: {
+                    var _searching = root.searching
+
                     // Cancel any pending search.
                     root.requestCancel()
+
+                    // Cancel case, nothing to do further.
+                    if (_searching) return
+
                     searchField._searchText = ""
                     if (!searchField.activeFocus || searchField.text == "") {
                         // Close case.

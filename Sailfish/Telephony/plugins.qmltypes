@@ -10,7 +10,7 @@ Module {
     dependencies: [
         "MeeGo.QOfono 0.2",
         "QtQml 2.2",
-        "QtQuick 2.5",
+        "QtQuick 2.6",
         "QtQuick.Window 2.1",
         "QtWebKit 3.0",
         "QtWebKit.experimental 1.0",

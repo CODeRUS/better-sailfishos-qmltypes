@@ -97,7 +97,7 @@ TextBase {
         activeFocusOnPress: false
         passwordCharacter: "\u2022"
         color: textField.color
-        selectionColor: Qt.rgba(1.0, 1.0, 1.0, 0.3)
+        selectionColor: Theme.rgba(Theme.primaryColor, 0.3)
         selectedTextColor: Theme.highlightColor
         font: textField.font
         cursorDelegate: Rectangle {

@@ -8,18 +8,36 @@ import QtQuick.tooling 1.2
 
 Module {
     dependencies: [
-        "QtQuick 2.5",
+        "Nemo.DBus 2.0",
+        "QtQuick 2.6",
         "QtQuick.Window 2.1",
         "QtWebKit 3.0",
         "QtWebKit.experimental 1.0",
         "Sailfish.Silica 1.0",
         "Sailfish.Silica.private 1.0",
+        "Sailfish.TextLinking 1.0",
+        "org.nemomobile.calendar 1.0",
         "org.nemomobile.calendar.lightweight 1.0",
         "org.nemomobile.configuration 1.0",
+        "org.nemomobile.contacts 1.0",
         "org.nemomobile.dbus 2.0",
         "org.nemomobile.thumbnailer 1.0",
         "org.nemomobile.time 1.0"
     ]
+    Component {
+        name: "CalendarUtils"
+        prototype: "QObject"
+        exports: ["Sailfish.Calendar/CalendarUtils 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Property { name: "calendarAppInstalled"; type: "bool"; isReadonly: true }
+        Method {
+            name: "parseTime"
+            type: "QDateTime"
+            Parameter { type: "string" }
+        }
+    }
     Component {
         prototype: "QObject"
         name: "Remorse 1.0"

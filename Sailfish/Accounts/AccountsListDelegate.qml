@@ -17,8 +17,14 @@ ListItem {
         id: menuComponent
 
         ContextMenu {
+            MenuLabel {
+                //: Displayed if the account is read-only
+                //% "Account is read-only"
+                text: qsTrId("components_accounts-la-account_read_only")
+                visible: model.accountReadOnly
+            }
             MenuItem {
-                visible: model.providerName !== "jolla"
+                visible: model.providerName !== "jolla" && !model.accountReadOnly
                 text: model.accountEnabled
                         //: Disables a user account
                         //% "Disable"
@@ -32,6 +38,7 @@ ListItem {
             }
 
             MenuItem {
+                visible: !model.accountReadOnly
                 //: Removes a user account
                 //% "Remove"
                 text: qsTrId("components_accounts-me-remove_account")

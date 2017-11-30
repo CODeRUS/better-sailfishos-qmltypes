@@ -5,9 +5,8 @@ Loader {
     id: root
 
     property variant settingsObject
-    property bool gridMode
     property url sectionSource: "SettingsSectionLink.qml"
-    property url pageSource: gridMode ? "SettingsPageLinkGrid.qml" : "SettingsPageLink.qml"
+    property url pageSource: "SettingsPageLink.qml"
 
     width: parent.width
 

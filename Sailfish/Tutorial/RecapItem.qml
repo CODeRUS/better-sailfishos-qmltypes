@@ -130,7 +130,7 @@ Item {
         }
 
         visible: allowSystemGesturesBetweenLessons
-        icon.source: "image://theme/icon-m-dismiss"
+        icon.source: "image://theme/icon-m-clear"
 
         onClicked: Qt.quit()
     }

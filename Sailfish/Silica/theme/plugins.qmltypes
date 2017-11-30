@@ -24,6 +24,15 @@ Module {
                 "PresenceOffline": 3
             }
         }
+        Enum {
+            name: "Style"
+            values: {
+                "StyleLight": 0,
+                "StyleDark": 1
+            }
+        }
+        Property { name: "pixelRatio"; type: "float"; isReadonly: true }
+        Property { name: "style"; type: "Style"; isReadonly: true }
         Property { name: "fontFamilyHeading"; type: "string"; isReadonly: true }
         Property { name: "fontFamily"; type: "string"; isReadonly: true }
         Property { name: "fontSizeTiny"; type: "int"; isReadonly: true }
@@ -63,9 +72,9 @@ Module {
         Property { name: "paddingMedium"; type: "float"; isReadonly: true }
         Property { name: "paddingLarge"; type: "float"; isReadonly: true }
         Property { name: "horizontalPageMargin"; type: "float"; isReadonly: true }
+        Property { name: "_homePageMargin"; type: "float"; isReadonly: true }
         Property { name: "flickDeceleration"; type: "float"; isReadonly: true }
         Property { name: "maximumFlickVelocity"; type: "float"; isReadonly: true }
-        Property { name: "pixelRatio"; type: "float"; isReadonly: true }
         Property { name: "pageStackIndicatorWidth"; type: "float"; isReadonly: true }
         Property { name: "highlightBackgroundOpacity"; type: "float"; isReadonly: true }
         Property { name: "highlightColor"; type: "QColor"; isReadonly: true }
@@ -73,6 +82,7 @@ Module {
         Property { name: "highlightDimmerColor"; type: "QColor"; isReadonly: true }
         Property { name: "primaryColor"; type: "QColor"; isReadonly: true }
         Property { name: "secondaryColor"; type: "QColor"; isReadonly: true }
+        Property { name: "overlayBackgroundColor"; type: "QColor"; isReadonly: true }
         Property { name: "secondaryHighlightColor"; type: "QColor"; isReadonly: true }
         Property { name: "backgroundImage"; type: "QUrl"; isReadonly: true }
         Property { name: "startDragDistance"; type: "int"; isReadonly: true }

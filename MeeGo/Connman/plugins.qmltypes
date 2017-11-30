@@ -45,12 +45,6 @@ Module {
             name: "setTime"
             Parameter { name: "time"; type: "QTime" }
         }
-        Method {
-            name: "time"
-            type: "QTime"
-            Parameter { name: "h"; type: "string" }
-            Parameter { name: "m"; type: "string" }
-        }
     }
     Component {
         name: "Counter"
@@ -109,8 +103,13 @@ Module {
         Property { name: "offlineMode"; type: "bool" }
         Property { name: "defaultRoute"; type: "NetworkService"; isReadonly: true; isPointer: true }
         Property { name: "sessionMode"; type: "bool" }
+        Property { name: "inputRequestTimeout"; type: "uint"; isReadonly: true }
         Property { name: "servicesEnabled"; type: "bool" }
         Property { name: "technologiesEnabled"; type: "bool" }
+        Property { name: "WifiTechnology"; type: "string"; isReadonly: true }
+        Property { name: "CellularTechnology"; type: "string"; isReadonly: true }
+        Property { name: "BluetoothTechnology"; type: "string"; isReadonly: true }
+        Property { name: "GpsTechnology"; type: "string"; isReadonly: true }
         Signal {
             name: "availabilityChanged"
             Parameter { name: "available"; type: "bool" }
@@ -146,6 +145,14 @@ Module {
             name: "serviceRemoved"
             Parameter { name: "servicePath"; type: "string" }
         }
+        Signal {
+            name: "serviceCreated"
+            Parameter { name: "servicePath"; type: "string" }
+        }
+        Signal {
+            name: "serviceCreationFailed"
+            Parameter { name: "error"; type: "string" }
+        }
         Method {
             name: "setOfflineMode"
             Parameter { name: "offlineMode"; type: "bool" }
@@ -179,6 +186,58 @@ Module {
             Parameter { name: "sessionAgentPath"; type: "string" }
         }
         Method {
+            name: "createService"
+            type: "bool"
+            Parameter { name: "settings"; type: "QVariantMap" }
+            Parameter { name: "tech"; type: "string" }
+            Parameter { name: "service"; type: "string" }
+            Parameter { name: "device"; type: "string" }
+        }
+        Method {
+            name: "createService"
+            type: "bool"
+            Parameter { name: "settings"; type: "QVariantMap" }
+            Parameter { name: "tech"; type: "string" }
+            Parameter { name: "service"; type: "string" }
+        }
+        Method {
+            name: "createService"
+            type: "bool"
+            Parameter { name: "settings"; type: "QVariantMap" }
+            Parameter { name: "tech"; type: "string" }
+        }
+        Method {
+            name: "createService"
+            type: "bool"
+            Parameter { name: "settings"; type: "QVariantMap" }
+        }
+        Method {
+            name: "createServiceSync"
+            type: "string"
+            Parameter { name: "settings"; type: "QVariantMap" }
+            Parameter { name: "tech"; type: "string" }
+            Parameter { name: "service"; type: "string" }
+            Parameter { name: "device"; type: "string" }
+        }
+        Method {
+            name: "createServiceSync"
+            type: "string"
+            Parameter { name: "settings"; type: "QVariantMap" }
+            Parameter { name: "tech"; type: "string" }
+            Parameter { name: "service"; type: "string" }
+        }
+        Method {
+            name: "createServiceSync"
+            type: "string"
+            Parameter { name: "settings"; type: "QVariantMap" }
+            Parameter { name: "tech"; type: "string" }
+        }
+        Method {
+            name: "createServiceSync"
+            type: "string"
+            Parameter { name: "settings"; type: "QVariantMap" }
+        }
+        Method {
             name: "setSessionMode"
             Parameter { name: "sessionMode"; type: "bool" }
         }
@@ -198,6 +257,12 @@ Module {
             Parameter { name: "tech"; type: "string" }
         }
         Method { name: "savedServicesList"; type: "QStringList" }
+        Method {
+            name: "availableServices"
+            type: "QStringList"
+            Parameter { name: "tech"; type: "string" }
+        }
+        Method { name: "availableServices"; type: "QStringList" }
         Method { name: "technologiesList"; type: "QStringList" }
         Method {
             name: "technologyPathForService"
@@ -226,11 +291,31 @@ Module {
         prototype: "QObject"
         exports: ["MeeGo.Connman/NetworkService 0.2"]
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "SecurityType"
+            values: {
+                "SecurityUnknown": 0,
+                "SecurityNone": 1,
+                "SecurityWEP": 2,
+                "SecurityPSK": 3,
+                "SecurityIEEE802": 4
+            }
+        }
+        Enum {
+            name: "EapMethod"
+            values: {
+                "EapNone": 0,
+                "EapPEAP": 1,
+                "EapTTLS": 2,
+                "EapTLS": 3
+            }
+        }
         Property { name: "name"; type: "string"; isReadonly: true }
         Property { name: "state"; type: "string"; isReadonly: true }
         Property { name: "type"; type: "string"; isReadonly: true }
         Property { name: "error"; type: "string"; isReadonly: true }
         Property { name: "security"; type: "QStringList"; isReadonly: true }
+        Property { name: "securityType"; type: "SecurityType"; isReadonly: true }
         Property { name: "strength"; type: "uint"; isReadonly: true }
         Property { name: "favorite"; type: "bool"; isReadonly: true }
         Property { name: "autoConnect"; type: "bool" }
@@ -250,11 +335,22 @@ Module {
         Property { name: "connected"; type: "bool"; isReadonly: true }
         Property { name: "timeservers"; type: "QStringList"; isReadonly: true }
         Property { name: "timeserversConfig"; type: "QStringList" }
+        Property { name: "eapMethod"; type: "EapMethod" }
+        Property { name: "identity"; type: "string" }
+        Property { name: "passphrase"; type: "string" }
+        Property { name: "eapMethodAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "identityAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "passphraseAvailable"; type: "bool"; isReadonly: true }
         Property { name: "bssid"; type: "string"; isReadonly: true }
         Property { name: "maxRate"; type: "uint"; isReadonly: true }
         Property { name: "frequency"; type: "ushort"; isReadonly: true }
         Property { name: "encryptionMode"; type: "string"; isReadonly: true }
         Property { name: "hidden"; type: "bool"; isReadonly: true }
+        Property { name: "available"; type: "bool"; isReadonly: true }
+        Property { name: "managed"; type: "bool"; isReadonly: true }
+        Property { name: "saved"; type: "bool"; isReadonly: true }
+        Property { name: "connecting"; type: "bool"; isReadonly: true }
+        Property { name: "lastConnectError"; type: "string"; isReadonly: true }
         Signal {
             name: "nameChanged"
             Parameter { name: "name"; type: "string" }
@@ -377,6 +473,14 @@ Module {
         Signal {
             name: "hiddenChanged"
             Parameter { type: "bool" }
+        }
+        Signal {
+            name: "passphraseChanged"
+            Parameter { type: "string" }
+        }
+        Signal {
+            name: "identityChanged"
+            Parameter { type: "string" }
         }
         Method { name: "requestConnect" }
         Method { name: "requestDisconnect" }
@@ -513,6 +617,14 @@ Module {
             Parameter { name: "path"; type: "string" }
         }
         Signal { name: "propertiesReady" }
+        Signal {
+            name: "nameChanged"
+            Parameter { name: "name"; type: "string" }
+        }
+        Signal {
+            name: "typeChanged"
+            Parameter { name: "type"; type: "string" }
+        }
         Method {
             name: "setPowered"
             Parameter { name: "powered"; type: "bool" }
@@ -524,48 +636,13 @@ Module {
         }
     }
     Component {
-        name: "NetworkingModel"
-        prototype: "QObject"
-        exports: ["MeeGo.Connman/NetworkingModel 0.2"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "available"; type: "bool"; isReadonly: true }
-        Property { name: "wifiPowered"; type: "bool" }
-        Property { name: "networks"; type: "QList<QObject*>"; isReadonly: true }
-        Signal {
-            name: "availabilityChanged"
-            Parameter { name: "available"; type: "bool" }
-        }
-        Signal {
-            name: "wifiPoweredChanged"
-            Parameter { name: "wifiPowered"; type: "bool" }
-        }
-        Signal { name: "technologiesChanged" }
-        Signal {
-            name: "userInputRequested"
-            Parameter { name: "fields"; type: "QVariantMap" }
-        }
-        Signal {
-            name: "errorReported"
-            Parameter { name: "error"; type: "string" }
-        }
-        Signal { name: "scanRequestFinished" }
-        Method {
-            name: "setWifiPowered"
-            Parameter { name: "wifiPowered"; type: "bool" }
-        }
-        Method { name: "requestScan" }
-        Method {
-            name: "sendUserReply"
-            Parameter { name: "input"; type: "QVariantMap" }
-        }
-    }
-    Component {
         name: "SavedServiceModel"
         prototype: "QAbstractListModel"
         exports: ["MeeGo.Connman/SavedServiceModel 0.2"]
         exportMetaObjectRevisions: [0]
         Property { name: "name"; type: "string" }
         Property { name: "sort"; type: "bool" }
+        Property { name: "groupByCategory"; type: "bool" }
         Signal {
             name: "nameChanged"
             Parameter { name: "name"; type: "string" }
@@ -586,6 +663,14 @@ Module {
         prototype: "QAbstractListModel"
         exports: ["MeeGo.Connman/TechnologyModel 0.2"]
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "ServiceFilter"
+            values: {
+                "AllServices": 0,
+                "SavedServices": 1,
+                "AvailableServices": 2
+            }
+        }
         Property { name: "name"; type: "string" }
         Property { name: "available"; type: "bool"; isReadonly: true }
         Property { name: "connected"; type: "bool"; isReadonly: true }
@@ -593,6 +678,7 @@ Module {
         Property { name: "scanning"; type: "bool"; isReadonly: true }
         Property { name: "changesInhibited"; type: "bool" }
         Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "filter"; type: "ServiceFilter" }
         Signal {
             name: "nameChanged"
             Parameter { name: "name"; type: "string" }
@@ -620,11 +706,6 @@ Module {
         Signal { name: "technologiesChanged" }
         Signal { name: "scanRequestFinished" }
         Method {
-            name: "setPowered"
-            Parameter { name: "powered"; type: "bool" }
-        }
-        Method { name: "requestScan" }
-        Method {
             name: "indexOf"
             type: "int"
             Parameter { name: "dbusObjectPath"; type: "string" }
@@ -634,6 +715,7 @@ Module {
             type: "NetworkService*"
             Parameter { name: "index"; type: "int" }
         }
+        Method { name: "requestScan" }
     }
     Component {
         name: "UserAgent"
@@ -684,7 +766,7 @@ Module {
         Method { name: "path"; type: "string" }
         Method {
             name: "setAgentPath"
-            Parameter { name: "path"; type: "QString&" }
+            Parameter { name: "path"; type: "string" }
         }
     }
 }

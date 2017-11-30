@@ -68,36 +68,21 @@ Dialog {
                 color: Theme.highlightColor
             }
 
-            CurrentTimeZoneSettingDisplay {
-                dateTimeSettings: dateTimeSettings
-                enabled: true
-            }
-
-            CurrentDateSettingDisplay {
-                id: dateSettingDisplay
+            AllDateTimeSettingsDisplay {
                 property date noDate
-                dateTimeSettings: dateTimeSettings
-                enabled: true
+
                 defaultDate: noDate
+                showAutoUpdateOptions: false
+                overrideAutoUpdatedValues: true
+
+                dateTimeSettings: DateTimeSettings {
+                    id: dateTimeSettings
+
+                    onTimeChanged: {
+                        root._reloadDateString()
+                    }
+                }
             }
-
-            CurrentTimeSettingDisplay {
-                id: timeSettingDisplay
-                dateTimeSettings: dateTimeSettings
-                enabled: true
-            }
-
-            Use24HourClockSettingDisplay {
-                dateTimeSettings: dateTimeSettings
-            }
-        }
-    }
-
-    DateTimeSettings {
-        id: dateTimeSettings
-
-        onTimeChanged: {
-            root._reloadDateString()
         }
     }
 
