@@ -9,6 +9,47 @@ import QtQuick.tooling 1.2
 Module {
     dependencies: ["QtQuick 2.0"]
     Component {
+        name: "QMceBatteryLevel"
+        prototype: "QObject"
+        exports: ["Nemo.Mce/MceBatteryLevel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "percent"; type: "int"; isReadonly: true }
+    }
+    Component {
+        name: "QMceBatteryStatus"
+        prototype: "QObject"
+        exports: ["Nemo.Mce/MceBatteryStatus 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Status"
+            values: {
+                "Empty": 0,
+                "Low": 1,
+                "Ok": 2,
+                "Full": 3
+            }
+        }
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "status"; type: "Status"; isReadonly: true }
+    }
+    Component {
+        name: "QMceCableState"
+        prototype: "QObject"
+        exports: ["Nemo.Mce/MceCableState 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "connected"; type: "bool"; isReadonly: true }
+    }
+    Component {
+        name: "QMceChargerState"
+        prototype: "QObject"
+        exports: ["Nemo.Mce/MceChargerState 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "charging"; type: "bool"; isReadonly: true }
+    }
+    Component {
         name: "QMceDisplay"
         prototype: "QObject"
         exports: ["Nemo.Mce/MceDisplay 1.0"]
@@ -23,6 +64,14 @@ Module {
         }
         Property { name: "valid"; type: "bool"; isReadonly: true }
         Property { name: "state"; type: "State"; isReadonly: true }
+    }
+    Component {
+        name: "QMcePowerSaveMode"
+        prototype: "QObject"
+        exports: ["Nemo.Mce/McePowerSaveMode 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "active"; type: "bool"; isReadonly: true }
     }
     Component {
         name: "QMceTkLock"

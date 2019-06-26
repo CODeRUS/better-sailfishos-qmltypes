@@ -1,2 +1,2 @@
 module com.jolla.xt9
-plugin jollaxt9plugin
+typeinfo plugins.qmltypes

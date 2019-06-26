@@ -1,2 +1,2 @@
 module org.nemomobile.commhistory
-plugin commhistory-declarative
+typeinfo plugins.qmltypes

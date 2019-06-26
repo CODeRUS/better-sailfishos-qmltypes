@@ -1,2 +1,2 @@
 module Sailfish.Silica.theme
-plugin sailfishsilicaplugin
+typeinfo plugins.qmltypes

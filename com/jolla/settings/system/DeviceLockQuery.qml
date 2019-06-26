@@ -10,6 +10,7 @@ QtObject {
     property var _authenticated
     property var _canceled
     property var _delayedAction
+    property alias _availableMethods: deviceLock.availableMethods
 
     // TODO: could be made opt-out if we get a chance to update sailfish-utilities usage
     property bool returnOnCancel
@@ -91,13 +92,13 @@ QtObject {
 
             onAuthenticationStarted: {
                 query._runWhenPageStackNotBusy(function() {
-                    pageStack.push(Qt.resolvedUrl("DeviceLockQueryInputPage.qml"), {"authentication": authentication})
+                    pageStack.animatorPush(Qt.resolvedUrl("DeviceLockQueryInputPage.qml"), {"authentication": authentication})
                     authentication.feedback(feedback, -1)
                 })
             }
             onAuthenticationUnavailable: {
                 query._runWhenPageStackNotBusy(function() {
-                    pageStack.push(Qt.resolvedUrl("DeviceLockQueryInputPage.qml"), {"authentication": authentication})
+                    pageStack.animatorPush(Qt.resolvedUrl("DeviceLockQueryInputPage.qml"), {"authentication": authentication})
                     authentication.error(error)
                 })
             }

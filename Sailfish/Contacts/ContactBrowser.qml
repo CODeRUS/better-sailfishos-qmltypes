@@ -22,6 +22,7 @@ SilicaFlickable {
     property bool contactsSelectable
     property QtObject selectedContacts: selectedContactsModel
     property alias showSearchPatternAsNewContact: searchView.showSearchPatternAsNewContact
+    property bool promptSimSelection: Telephony.voiceSimUsageMode === Telephony.AlwaysAskSim
 
     property bool handleEdit: true
     property bool deleteOnlyContextMenu
@@ -356,6 +357,7 @@ SilicaFlickable {
                 firstText: model.primaryName
                 secondText: model.secondaryName
                 presenceState: model.globalPresenceState
+                promptSimSelection: root.promptSimSelection
 
                 searchString: root.searchPattern
 
@@ -402,6 +404,7 @@ SilicaFlickable {
             selectionModel: root.selectionModel
             requiredProperty: root._filterProperty
             contextMenuComponent: contactContextMenuComponent
+            promptSimSelection: root.promptSimSelection
 
             enabled: !_searchFiltered && favoritesModel.populated && (favoritesModel.count > 0)
             opacity: enabled ? 1 : 0
@@ -415,7 +418,7 @@ SilicaFlickable {
             id: contactList
 
             Column {
-                enabled: !_searchFiltered && recentContactsList.count > 0
+                enabled: !_searchFiltered
                 opacity: enabled ? 1.0 : 0.0
                 height: enabled ? implicitHeight : 0
                 width: contentColumn.width
@@ -424,6 +427,7 @@ SilicaFlickable {
                     //% "Recent"
                     text: qsTrId("components_contacts-he-recent")
                     opacity: recentContactsList.opacity
+                    visible: recentContactsList.count > 0 || !recentContactsList.model.ready
                 }
 
                 Item {
@@ -438,11 +442,12 @@ SilicaFlickable {
                         selectionModel: root.selectionModel
                         requiredProperty: root._filterProperty
                         eventCategoryMask: root.recentContactsCategoryMask
-                        contextMenuComponent: contactContextMenuComponent
+                        contextMenuComponent: root.deleteOnlyContextMenu ?
+                                                  null : contactContextMenuComponent
 
                         enabled: !_searchFiltered && root.favoriteContactsModel.populated
                         opacity: enabled ? 1 : 0
-                        Behavior on opacity { FadeAnimation {} }
+                        Behavior on opacity { FadeAnimator {} }
 
                         onContactPressed: _closeVKB()
                     }
@@ -490,6 +495,7 @@ SilicaFlickable {
                 firstText: model.primaryName
                 secondText: model.secondaryName
                 presenceState: model.globalPresenceState
+                promptSimSelection: root.promptSimSelection
 
                 function getPerson() { return model.person }
                 function getSelectableProperties() {
@@ -595,6 +601,7 @@ SilicaFlickable {
                 //: Delete contact, from list
                 //% "Delete"
                 text: qsTrId("components_contacts-me-delete")
+                visible: !(menu.parent && menu.parent.recent)
                 onClicked: menu.parent.remove()
             }
         }

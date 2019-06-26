@@ -1,2 +1,2 @@
 module org.nemomobile.signon
-plugin nemosignon
+typeinfo plugins.qmltypes

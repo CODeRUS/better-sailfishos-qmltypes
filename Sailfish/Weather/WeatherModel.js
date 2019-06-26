@@ -31,55 +31,55 @@ function getWeatherData(weather, forecast) {
         timestamp.setSeconds(timeArray[2])
     }
 
-    var precipirationRateCode = weather.code.charAt(2)
-    var precipirationRate = ""
-    switch (precipirationRateCode) {
+    var precipitationRateCode = weather.code.charAt(2)
+    var precipitationRate = ""
+    switch (precipitationRateCode) {
     case '0':
         //% "No precipitation"
-        precipirationRate = qsTrId("weather-la-precipitation_none")
+        precipitationRate = qsTrId("weather-la-precipitation_none")
         break
     case '1':
         //% "Slight precipitation"
-        precipirationRate = qsTrId("weather-la-precipitation_slight")
+        precipitationRate = qsTrId("weather-la-precipitation_slight")
         break
     case '2':
         //% "Showers"
-        precipirationRate = qsTrId("weather-la-precipitation_showers")
+        precipitationRate = qsTrId("weather-la-precipitation_showers")
         break
     case '3':
         //% "Precipitation"
-        precipirationRate = qsTrId("weather-la-precipitation_normal")
+        precipitationRate = qsTrId("weather-la-precipitation_normal")
         break
     case '4':
         //% "Thunder"
-        precipirationRate = qsTrId("weather-la-precipitation_thunder")
+        precipitationRate = qsTrId("weather-la-precipitation_thunder")
         break
     default:
-        console.log("WeatherModel warning: invalid precipiration rate code", precipirationRateCode)
+        console.log("WeatherModel warning: invalid precipitation rate code", precipitationRateCode)
         break
     }
 
-    var precipirationType = ""
-    if (precipirationRateCode === '0') { // no rain
+    var precipitationType = ""
+    if (precipitationRateCode === '0') { // no rain
         //% "None"
-        precipirationType = qsTrId("weather-la-precipirationtype_none")
+        precipitationType = qsTrId("weather-la-precipitationtype_none")
     } else {
-        var precipirationTypeCode = weather.code.charAt(3)
-        switch (precipirationTypeCode) {
+        var precipitationTypeCode = weather.code.charAt(3)
+        switch (precipitationTypeCode) {
         case '0':
             //% "Rain"
-            precipirationType = qsTrId("weather-la-precipitationtype_rain")
+            precipitationType = qsTrId("weather-la-precipitationtype_rain")
             break
         case '1':
             //% "Sleet"
-            precipirationType = qsTrId("weather-la-precipitationtype_sleet")
+            precipitationType = qsTrId("weather-la-precipitationtype_sleet")
             break
         case '2':
             //% "Snow"
-            precipirationType = qsTrId("weather-la-precipitationtype_snow")
+            precipitationType = qsTrId("weather-la-precipitationtype_snow")
             break
         default:
-            console.log("WeatherModel warning: invalid precipiration type code", precipirationTypeCode)
+            console.log("WeatherModel warning: invalid precipitation type code", precipitationTypeCode)
             break
         }
     }
@@ -117,8 +117,8 @@ function getWeatherData(weather, forecast) {
         "weatherType": weatherType(weather.code),
         "timestamp": timestamp,
         "cloudiness": (100*parseInt(weather.code.charAt(1))/4),
-        "precipitationRate": precipirationRate,
-        "precipitationType": precipirationType,
+        "precipitationRate": precipitationRate,
+        "precipitationType": precipitationType,
         "windSpeed": Math.round(weather.windSpeed),
         "windDirection": windDirection
     }
@@ -137,12 +137,12 @@ function getWeatherData(weather, forecast) {
 function weatherType(code) {
     var dayTime = code.charAt(0) === "d" ? "day" : "night"
     var cloudiness = code.charAt(1)
-    var precipirationRate = code.charAt(2)
-    var precipirationType = code.charAt(3)
+    var precipitationRate = code.charAt(2)
+    var precipitationType = code.charAt(3)
 
     var type
 
-    switch(precipirationRate) {
+    switch(precipitationRate) {
     case '0':
         switch (cloudiness) {
         case '0':
@@ -171,24 +171,24 @@ function weatherType(code) {
     case '2':
     case '3':
     case '4':
-        switch (precipirationType) {
+        switch (precipitationType) {
         case '0':
-            type = "rain-water-" + precipirationRate
+            type = "rain-water-" + precipitationRate
             break
         case '1':
-            type = "rain-sleet-" + precipirationRate
+            type = "rain-sleet-" + precipitationRate
             break
         case '2':
-            type = "rain-snow-" + precipirationRate
+            type = "rain-snow-" + precipitationRate
             break
         default:
-            console.log("WeatherModel warning: invalid precipiration type code", precipirationType)
+            console.log("WeatherModel warning: invalid precipitation type code", precipitationType)
             break
         }
         break
     default:
         type = "cloud-day-0"
-        console.log("WeatherModel warning: invalid precipiration rate code", precipirationRate)
+        console.log("WeatherModel warning: invalid precipitation rate code", precipitationRate)
         break
     }
     return type

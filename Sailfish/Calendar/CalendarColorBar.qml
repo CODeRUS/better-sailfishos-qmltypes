@@ -18,5 +18,8 @@ Rectangle {
         leftMargin: root.leftMargin
     }
     height: parent.height
-    width: Math.round(Theme.pixelRatio * (Screen.sizeCategory <= Screen.Medium ? 1 : 2))
+    width: Theme.colorScheme == Theme.LightOnDark
+           ? Math.round(Theme.pixelRatio * (Screen.sizeCategory <= Screen.Medium ? 1 : 2))
+           : Math.round(Theme.paddingSmall * 0.7)
+    radius: Theme.colorScheme == Theme.LightOnDark ? 0 : Math.round(width/3)
 }

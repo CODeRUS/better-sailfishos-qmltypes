@@ -10,6 +10,7 @@ Item {
 
     property bool active
     property bool _grabKeys: AudioPlayer.active && keysResource.acquired
+    property int _playPauseClicks
 
     Permissions {
         enabled: mediaKeys.active
@@ -28,7 +29,16 @@ Item {
     MediaKey { enabled: _grabKeys; key: Qt.Key_MediaStop; onReleased: AudioPlayer.stop() }
     MediaKey { enabled: _grabKeys; key: Qt.Key_MediaNext; onReleased: AudioPlayer.playNext(false) }
     MediaKey { enabled: _grabKeys; key: Qt.Key_MediaPrevious; onReleased: AudioPlayer.playPrevious(false) }
-    MediaKey { enabled: _grabKeys; key: Qt.Key_ToggleCallHangup; onReleased: AudioPlayer.playPause() }
+    MediaKey {
+        enabled: _grabKeys
+        key: Qt.Key_ToggleCallHangup
+        onReleased: {
+            if (mediaKeys._playPauseClicks < 3) {
+                playPauseTimer.restart()
+                mediaKeys._playPauseClicks += 1
+            }
+        }
+    }
 
     MediaKey {
         id: forwardKey
@@ -54,5 +64,22 @@ Item {
             AudioPlayer.rewinding = true
         }
         onReleased: AudioPlayer.rewinding = false
+    }
+
+    Timer {
+        id: playPauseTimer
+
+        interval: 250
+
+        onTriggered: {
+            if (mediaKeys._playPauseClicks == 1) {
+                AudioPlayer.playPause()
+            } else if (mediaKeys._playPauseClicks == 2) {
+                AudioPlayer.AudioPlayer.playNext(false)
+            } else if (mediaKeys._playPauseClicks >= 3) {
+                AudioPlayer.playPrevious(false)
+            }
+            mediaKeys._playPauseClicks = 0
+        }
     }
 }

@@ -3,7 +3,7 @@
 ** Copyright (C) 2013 Jolla Ltd.
 ** Contact: Martin Jones <martin.jones@jollamobile.com>
 ** All rights reserved.
-** 
+**
 ** This file is part of Sailfish Silica UI component package.
 **
 ** You may use this file under the terms of BSD license as follows:
@@ -18,7 +18,7 @@
 **     * Neither the name of the Jolla Ltd nor the
 **       names of its contributors may be used to endorse or promote products
 **       derived from this software without specific prior written permission.
-** 
+**
 ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,244 +36,64 @@ import QtQuick 2.4
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 
-MouseArea {
+SliderBase {
     id: slider
 
-    property real maximumValue: 1.0
-    property real minimumValue: 0.0
-    property real stepSize
-    property real value: 0.0
-    readonly property real sliderValue: Math.max(minimumValue, Math.min(maximumValue, value))
-    property bool handleVisible: true
-    property string valueText
-    property alias label: labelText.text
-    property bool down: pressed && !DragFilter.canceled && !_cancel
-    property bool highlighted: down
-    property real leftMargin: Math.round(Screen.width/8)
-    property real rightMargin: Math.round(Screen.width/8)
+    property color backgroundGlowColor: slider.colorScheme === Theme.DarkOnLight ? Theme.highlightDimmerColor : "transparent"
 
-    property bool _hasValueLabel: false
-    property Item _valueLabel
-    property real _oldValue
-    property real _precFactor: 1.0
+    readonly property real _glassItemPadding: Theme.paddingMedium
 
-    property real _grooveWidth: Math.max(0, width - leftMargin - rightMargin)
-    property bool _widthChanged
-    property bool _cancel
+    // compensate the existence of glow effect on light ambiences
+    _highlightPadding: (slider.colorScheme === Theme.LightOnDark ? 1 : 2) * _glassItemPadding
 
-    property bool _componentComplete
-    property int _extraPadding: Math.max(height - implicitHeight, 0) / 2
-
-    DragFilter.orientations: Qt.Vertical
-    onPreventStealingChanged: if (preventStealing) slider.DragFilter.end()
-
-    onStepSizeChanged: {
-        // Avoid rounding errors.  We assume that the range will
-        // be sensibly related to stepSize
-        var decimial = Math.floor(stepSize) - stepSize
-        if (decimial < 0.001) {
-            _precFactor = Math.pow(10, 7)
-        } else if (decimial < 0.1) {
-            _precFactor = Math.pow(10, 4)
-        } else {
-            _precFactor = 1.0
-        }
-    }
-
-    implicitHeight: labelText.visible ? (background.topPadding + background.height / 2 + 2 * Theme.paddingMedium + labelText.height)
-                                      : (background.topPadding + background.height + background.bottomPadding)
-
-    onWidthChanged: updateWidth()
-    onLeftMarginChanged: updateWidth()
-    onRightMarginChanged: updateWidth()
-
-    // changing the width of the slider shouldn't animate the slider bar/handle
-    function updateWidth() {
-        _widthChanged = true
-        _grooveWidth = Math.max(0, width - leftMargin - rightMargin)
-        _widthChanged = false
-    }
-
-    function cancel() {
-        _cancel = true
-        value = _oldValue
-    }
-
-    drag {
-        target: draggable
-        minimumX: leftMargin - highlight.width/2
-        maximumX: slider.width - leftMargin - highlight.width/2
-        axis: Drag.XAxis
-        onActiveChanged: if (drag.active && !slider.DragFilter.canceled) slider.DragFilter.end()
-    }
-
-    function _updateValueToDraggable() {
-        if (width > (leftMargin + rightMargin)) {
-            var pos = draggable.x + highlight.width/2 - leftMargin
-            value = _calcValue((pos / _grooveWidth) * (maximumValue - minimumValue) + minimumValue)
-        }
-    }
-
-    function _calcValue(newVal) {
-        if (newVal <= minimumValue) {
-            return minimumValue
-        }
-
-        if (stepSize > 0.0) {
-            var offset = newVal - minimumValue
-            var intervals = Math.round(offset / stepSize)
-            newVal = Math.round((minimumValue + (intervals * stepSize)) * _precFactor) / _precFactor
-        }
-
-        if (newVal > maximumValue) {
-            return maximumValue
-        }
-
-        return newVal
-    }
-
-    onPressed: {
-        slider.DragFilter.begin(mouse.x, mouse.y)
-        _cancel = false
-        _oldValue = value
-        draggable.x = Math.min(Math.max(drag.minimumX, mouseX - highlight.width/2), drag.maximumX)
-    }
-
-    onReleased: {
-        if (!_cancel) {
-            _updateValueToDraggable()
-            _oldValue = value
-        }
-    }
-
-    onCanceled: {
-        slider.DragFilter.end()
-        value = _oldValue
-    }
-
-    onValueTextChanged: {
-        if (valueText && !_hasValueLabel) {
-            _hasValueLabel = true
-            var valueIndicatorComponent = Qt.createComponent("private/SliderValueLabel.qml")
-            if (valueIndicatorComponent.status === Component.Ready) {
-                _valueLabel = valueIndicatorComponent.createObject(slider)
-            } else {
-                console.log(valueIndicatorComponent.errorString())
-            }
-        }
-    }
-
-    FontMetrics {
-        id: fontMetrics
-        font.pixelSize: Theme.fontSizeHuge
-    }
+    _highlightItem: highlight
+    _backgroundItem: background
+    _progressBarItem: progressBar
 
     GlassItem {
         id: background
+
         // extra painting margins (Theme.paddingMedium on both sides) are needed,
         // because glass item doesn't visibly paint across the full width of the item
-        property int bottomPadding: (Theme.itemSizeSmall - height) / 2
-        // ascent enough to keep text in slider area
-        property int topPadding: (slider._valueLabel != null && slider._valueLabel.visible) ? fontMetrics.ascent
-                                                                                            : bottomPadding
-
-        x: slider.leftMargin-Theme.paddingMedium
-        width: slider._grooveWidth + 2*Theme.paddingMedium
-        y: slider._extraPadding + topPadding
-        height: Theme.itemSizeExtraSmall/2
+        x: slider.leftMargin-_glassItemPadding
+        width: slider._grooveWidth + 2*_glassItemPadding
+        y: slider._extraPadding + _backgroundTopPadding
+        height: (slider.colorScheme === Theme.DarkOnLight ? 1.0 : 0.5) * Theme.itemSizeExtraSmall
 
         dimmed: true
-        radius: 0.06
-        falloffRadius: 0.09
+        radius: slider.colorScheme === Theme.DarkOnLight ? 0.06 : 0.05
+        falloffRadius: slider.colorScheme === Theme.DarkOnLight ? 0.09 : 0.05
         ratio: 0.0
-        color: slider.highlighted ? Theme.highlightColor : Theme.secondaryColor
+        color: slider.highlighted ? slider.secondaryHighlightColor : slider.backgroundColor
     }
 
     GlassItem {
         id: progressBar
-        x: background.x // some margin at each end
+
+        x: background.x
         anchors.verticalCenter: background.verticalCenter
-        // height added as GlassItem will not display correctly with width < height
-        width: (sliderValue - minimumValue) / (maximumValue - minimumValue) * (background.width-height) + height
-        height: Theme.itemSizeExtraSmall/2
+        width: slider._progressBarWidth
+        height: background.height
         visible: sliderValue > minimumValue
         dimmed: false
-        radius: 0.05
-        falloffRadius: 0.14
+        radius: slider.colorScheme === Theme.DarkOnLight ? 0.05 : 0.04
+        falloffRadius: slider.colorScheme === Theme.DarkOnLight ? 0.14 : 0.10
         ratio: 0.0
-        color: slider.highlighted ? Theme.highlightColor : Theme.primaryColor
-        Behavior on width {
-            enabled: !_widthChanged
-            SmoothedAnimation {
-                duration: 300
-                velocity: 1500*Theme.pixelRatio
-            }
-        }
+        color: slider.highlighted ? slider.highlightColor : slider.color
+        backgroundColor: slider.backgroundGlowColor
     }
 
-    Item {
-        id: draggable
-        width: highlight.width
-        height: highlight.height
-        onXChanged: {
-            if (_cancel || slider.DragFilter.canceled) {
-                return
-            }
-            if (slider.drag.active) {
-                _updateValueToDraggable()
-            }
-        }
-    }
     GlassItem {
         id: highlight
-        x: (maximumValue > minimumValue)
-                ? (sliderValue - minimumValue) / (maximumValue - minimumValue) * _grooveWidth - highlight.width/2 + leftMargin
-                : leftMargin - highlight.width/2
+
+        x: slider._highlightX
         width: Theme.itemSizeMedium
         height: Theme.itemSizeMedium
         radius: 0.17
         falloffRadius: 0.17
         anchors.verticalCenter: background.verticalCenter
         visible: handleVisible
-        color: slider.highlighted ? Theme.highlightColor : Theme.primaryColor
-        Behavior on x {
-            enabled: !_widthChanged
-            SmoothedAnimation {
-                duration: 300
-                velocity: 1500*Theme.pixelRatio
-            }
-        }
-    }
-
-    Label {
-        id: labelText
-        visible: text.length
-        font.pixelSize: Theme.fontSizeSmall
-        color: slider.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: background.verticalCenter
-        anchors.topMargin: Theme.paddingMedium
-        width: Math.min(paintedWidth, parent.width - 2*Theme.paddingMedium)
-        truncationMode: TruncationMode.Fade
-    }
-    states: State {
-        name: "invalidRange"
-        when: _componentComplete && minimumValue >= maximumValue
-        PropertyChanges {
-            target: progressBar
-            width: progressBar.height
-        }
-        PropertyChanges {
-            target: slider
-            enabled: false
-            opacity: 0.6
-        }
-        StateChangeScript {
-            script: console.log("Warning: Slider.maximumValue needs to be higher than Slider.minimumValue")
-        }
-    }
-
-    Component.onCompleted: {
-        _componentComplete = true
+        color: slider.highlighted ? slider.highlightColor : slider.color
+        backgroundColor: slider.backgroundGlowColor
     }
 }

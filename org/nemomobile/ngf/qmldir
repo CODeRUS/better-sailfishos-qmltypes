@@ -1,2 +1,2 @@
 module org.nemomobile.ngf
-plugin ngf-declarative
+typeinfo plugins.qmltypes

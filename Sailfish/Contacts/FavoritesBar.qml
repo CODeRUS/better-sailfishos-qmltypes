@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Telephony 1.0
 import org.nemomobile.contacts 1.0
 
 Item {
@@ -9,6 +10,7 @@ Item {
     property ListModel selectionModel
     property int requiredProperty
     property alias heightAnimationEnabled: heightAnimation.enabled
+    property bool promptSimSelection: Telephony.voiceSimUsageMode === Telephony.AlwaysAskSim
 
     property Component contextMenuComponent
 
@@ -133,6 +135,7 @@ Item {
                 id: contactItem
                 selected: selectionModel !== null && selectionModel.findContactId(contactId) >= 0
                 requiredProperty: favoriteBar.requiredProperty
+                promptSimSelection: favoriteBar.promptSimSelection
 
                 onPressed: contactPressed()
                 onClicked: {

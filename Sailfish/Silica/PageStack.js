@@ -73,10 +73,12 @@
 ****************************************************************************/
 
 // Page stack. Items are page containers.
-var pageStack = [];
+var pageStack = []
 
 // Page component cache map. Key is page url, value is page component.
-var componentCache = {};
+var componentCache = {}
+
+var placeholderPageCache = null
 
 var pendingAction
 var pendingReplaceAboveTarget
@@ -108,6 +110,7 @@ function modifyPageStack(operation, callback) {
         }
     } catch (exception) {
         inProgress = undefined
+        console.warn("Error while modifying page stack:", exception)
         throw exception
     }
 
@@ -116,14 +119,17 @@ function modifyPageStack(operation, callback) {
 
 
 // Pushes a page on the stack.
-function push(page, properties, replace, operationType, targetPage) {
-    return modifyPageStack('push', function() { return doPush(page, properties, replace, operationType, targetPage) })
+function push(page, properties, pushProperties) {
+    return modifyPageStack('push', function() { return doPush(page, properties, pushProperties) })
 }
-function doPush(page, properties, replace, operationType, targetPage) {
+
+function doPush(page, properties, pushProperties) {
+    var replace = pushProperties.replace
+    var operationType = pushProperties.operationType
     // page order sanity check
     if ((!replace && page == currentPage) ||
             (replace && pageStack.length > 1 && page == pageStack[pageStack.length - 2].page)) {
-        throw new Error("Cannot navigate so that the resulting page stack has two consecutive entries of the same page instance.");
+        throw new Error("Cannot navigate so that the resulting page stack has two consecutive entries of the same page instance.")
     }
 
     // if we're expected to transition, then ignore if there's an ongoing transition.
@@ -132,6 +138,7 @@ function doPush(page, properties, replace, operationType, targetPage) {
         return ({ 'rv': null })
     }
 
+    var targetPage = pushProperties.targetPage
     if (replace) {
         if (targetPage) {
             var targetIndex = indexOfPage(targetPage)
@@ -162,7 +169,7 @@ function doPush(page, properties, replace, operationType, targetPage) {
 
         // pop the old container off the stack if this is a replace
         if (replace) {
-            if (operationType === PageStackAction.Animated) {
+            if (operationType !== PageStackAction.Immediate) {
                 _previousContainer = oldContainer
             }
 
@@ -189,36 +196,51 @@ function doPush(page, properties, replace, operationType, targetPage) {
     }
 
     // figure out if more than one page is being pushed
-    var pages;
+    var pages
     if (page instanceof Array) {
-        pages = page;
-        page = pages.pop();
+        pages = page
+        page = pages.pop()
         if (page.createObject === undefined && page.parent === undefined && typeof page != "string") {
-            properties = properties || page.properties;
-            page = page.page;
+            properties = properties || page.properties
+            page = page.page
         }
     }
 
     // push any extra defined pages onto the stack
     if (pages) {
-        var i;
+        var i
         for (i = 0; i < pages.length; i++) {
-            var tPage = pages[i];
-            var tProps;
+            var tPage = pages[i]
+            var tProps
             if (tPage.createObject === undefined && tPage.parent === undefined && typeof tPage != "string") {
-                tProps = tPage.properties;
-                tPage = tPage.page;
+                tProps = tPage.properties
+                tPage = tPage.page
             }
 
-            container = initPage(tPage, tProps)
+            container = initPage(tPage, tProps, false)
             container.pageStackIndex = pageStack.length
             pageStack.push(container)
         }
     }
 
+    // animator-based push will turn into immediate if there is no old container
+    var useAnimator = pushProperties.useAnimator
+    var canUseAnimator = useAnimator && !!oldContainer && operationType !== PageStackAction.Immediate
     // initialize the page
-    container = initPage(page, properties)
+    container = initPage(page, properties, canUseAnimator)
     container.pageStackIndex = pageStack.length
+
+    if (useAnimator) {
+        var asyncObject = asyncObjectComponent.createObject(container)
+        if (container.page.hasOwnProperty("__placeholder")) {
+            container.page.asyncObject = asyncObject
+        } else {
+            asyncObject.page = container.page
+            // if page was created immediately still make sure to emit pageCompleted() signal
+            // TODO: replace with Qt.callLater() after Qt 5.9 migration
+            asyncObject.simulateCompletionTimer.restart()
+        }
+    }
 
     // push the page container onto the stack
     pageStack.push(container)
@@ -228,13 +250,17 @@ function doPush(page, properties, replace, operationType, targetPage) {
     _currentContainer = targetContainer
 
     // perform page transition
-    var stateChange = root._pushTransition(container, oldContainer, replace, operationType)
+    var stateChange = root._pushTransition(container, oldContainer, pushProperties)
 
     depth = pageStack.length
 
     if (stateChange) {
         // No animated transition is in progress
         prepareDestination(container)
+    }
+
+    if (useAnimator) {
+        return ({ 'rv': asyncObject, 'stateChange': stateChange })
     }
 
     return ({ 'rv': container.page, 'stateChange': stateChange })
@@ -293,7 +319,7 @@ function prepareDestination(container) {
                 _pendingProps = container.page._forwardDestinationProperties
             }
 
-            _pendingContainer = initPage(container.page._forwardDestination, _pendingProps)
+            _pendingContainer = initPage(container.page._forwardDestination, _pendingProps, false)
             if (_pendingContainer) {
                 container.page._forwardDestinationInstance = _pendingContainer.page
             }
@@ -307,6 +333,7 @@ function prepareDestination(container) {
 function pushPending(operationType) {
     return modifyPageStack('pushPending', function() { return doPushPending(operationType) })
 }
+
 function doPushPending(operationType) {
     // if we're expected to transition, then ignore if there's an ongoing transition.
     if (_ongoingTransitionCount > 0) {
@@ -362,7 +389,8 @@ function doPushPending(operationType) {
     if (action === PageStackAction.Replace) {
         stateChange = root._popTransition(container, oldContainer, true, operationType)
     } else {
-        stateChange = root._pushTransition(container, oldContainer, false, operationType)
+        var pushProperties = {operationType: operationType, useAnimator: false, replace: false}
+        stateChange = root._pushTransition(container, oldContainer, pushProperties)
     }
 
     depth = pageStack.length
@@ -399,7 +427,7 @@ function doPushAttached(page, properties) {
         _currentContainer.attachedContainer = null
     }
     if (page) {
-        var container = initPage(page, properties)
+        var container = initPage(page, properties, false)
         container.attached = true
         _currentContainer.attachedContainer = container
 
@@ -410,14 +438,30 @@ function doPushAttached(page, properties) {
 }
 
 // Initializes a page and its container.
-function initPage(page, properties) {
-    var container = containerComponent.createObject(root);
+function initPage(page, properties, useAnimator) {
+    var container = containerComponent.createObject(root)
 
-    var pageComp;
+    var pageComp
+
+    if (useAnimator && (page.createObject || typeof page == "string")) {
+        if (!placeholderPageCache) {
+            page = placeholderPageCache = placeholderPage.createObject(root, { "page": page, "properties": properties })
+        } else {
+            placeholderPageCache.reset()
+            placeholderPageCache.page = page
+            placeholderPageCache.properties = properties
+            page = placeholderPageCache
+        }
+        page.parent = container
+        container.page = page
+        container.owner = root
+
+        return container
+    }
 
     if (page.createObject) {
         // page defined as component
-        pageComp = page;
+        pageComp = page
     } else if (typeof page == "string") {
         // If 'page' is a string but does not end in .qml, assume it is an
         // import-path style import (e.g. push(Sailfish.Contacts.Foo))
@@ -426,9 +470,9 @@ function initPage(page, properties) {
         }
 
         // page defined as string (a url)
-        pageComp = componentCache[page];
+        pageComp = componentCache[page]
         if (!pageComp) {
-            pageComp = componentCache[page] = Qt.createComponent(page);
+            pageComp = componentCache[page] = Qt.createComponent(page)
             if (!pageComp) {
                 throw new Error("Unable to locate component: " + page)
             }
@@ -436,36 +480,40 @@ function initPage(page, properties) {
     }
     if (pageComp) {
         if (pageComp.status == Component.Error) {
-            throw new Error("Error while loading page: " + pageComp.errorString());
+            throw new Error("Error while loading page: " + pageComp.errorString())
         } else {
             // instantiate page from component
-            page = pageComp.createObject(container, properties || {});
+            page = pageComp.createObject(container, properties || {})
         }
     } else {
         // copy properties to the page
         for (var prop in properties) {
             if (prop in page) {
-                page[prop] = properties[prop];
+                page[prop] = properties[prop]
             }
         }
     }
 
-    container.page = page;
-    container.owner = page.parent;
+    container.page = page
+    container.owner = page.parent
 
     // the page has to be reparented if
     if (page.parent != container) {
-        page.parent = container;
+        page.parent = container
     }
 
+    connectForwardDestinationHandlers(container)
+
+    return container;
+}
+
+function connectForwardDestinationHandlers(container) {
     container.page._forwardDestinationChanged.connect(function () {
         forwardDestinationChanged(container)
     })
     container.page._forwardDestinationActionChanged.connect(function () {
         forwardDestinationChanged(container)
     })
-
-    return container;
 }
 
 function forwardDestinationChanged(container) {
@@ -760,7 +808,13 @@ function doEnterAttached(container, operationType) {
     _currentContainer = container
     targetContainer = container
 
-    var stateChange = root._pushTransition(container, oldContainer, false, operationType)
+    var pushProperties = {
+        operationType: operationType,
+        useAnimator: false,
+        replace: false
+    }
+
+    var stateChange = root._pushTransition(container, oldContainer, pushProperties)
     if (stateChange) {
         // No animated transition is in progress
         prepareDestination(container)

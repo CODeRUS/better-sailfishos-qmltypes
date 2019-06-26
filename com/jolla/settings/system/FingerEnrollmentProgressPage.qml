@@ -154,7 +154,7 @@ FingerEnrollmentPage {
         property real progress: {
             if (page._finished && !page._failed) {
                 return 1
-            } else if (page.settings.acquiring) {
+            } else if (page.settings.acquiring && page.settings.samplesRequired > 0) {
                 return square(Math.max(0, page.settings.samplesRequired - page.settings.samplesRemaining)
                     / (page.settings.samplesRequired))
             } else {
@@ -197,8 +197,8 @@ FingerEnrollmentPage {
 
             void main() {
                 lowp vec4 tx = texture2D(fingerprint, uv);
-                lowp float fade = 0.4 + (0.6 * step(dot(distance, distance), progress));
-                gl_FragColor = vec4(tx.rgb * fade, tx.a) * qt_Opacity;
+                lowp float fade = 0.35 + (0.65 * step(dot(distance, distance), progress));
+                gl_FragColor = tx * qt_Opacity * fade;
             }
 "
     }

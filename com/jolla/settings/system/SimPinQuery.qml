@@ -132,6 +132,9 @@ Item {
 
     Notification {
         id: notification
-        category: "x-nemo.pin.authresult"
+
+        isTransient: true
+        urgency: Notification.Critical
+        icon: "icon-system-resources"
     }
 }

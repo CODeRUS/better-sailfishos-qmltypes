@@ -79,6 +79,7 @@ Page {
         interactive: false
 
         PullDownMenu {
+            colorScheme: Theme.LightOnDark
             highlightColor: tutorialTheme.highlightColor
             backgroundColor: tutorialTheme.highlightBackgroundColor
         }

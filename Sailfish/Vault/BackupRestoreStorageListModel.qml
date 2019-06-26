@@ -9,7 +9,7 @@ ListModel {
     readonly property int storageTypeInvalid: 0
     readonly property int storageTypeMemoryCard: 1
     readonly property int storageTypeCloud: 2
-    property bool ready
+    readonly property bool ready: count > 0 || !_waitForStorage.running
 
     property AccountModel cloudAccountModel: AccountModel {
         filterType: AccountModel.ServiceTypeFilter
@@ -17,18 +17,23 @@ ListModel {
     }
 
     function refresh() {
-        ready = false
         clear()
         _addCloudAccounts()
         _addDrives()
-        ready = true
     }
-
 
     property AboutSettings _aboutSettings: AboutSettings {
         onExternalStorageUsageModelChanged: {
-            refresh()
+            root.refresh()
         }
+    }
+
+    // PartitionManager in org.nemomobile.systemsettings does not see the memory card storage
+    // immediately, and we can't tell if a storage is not yet seen or does not exist at all,
+    // so wait up to a second to confirm.
+    property Timer _waitForStorage: Timer {
+        running: true
+        interval: 1000
     }
 
     function _addCloudAccounts() {
@@ -70,9 +75,5 @@ ListModel {
                 append(props)
             }
         }
-    }
-
-    Component.onCompleted: {
-        refresh()
     }
 }

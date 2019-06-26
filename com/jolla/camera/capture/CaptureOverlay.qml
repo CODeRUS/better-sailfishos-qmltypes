@@ -19,7 +19,6 @@ SettingsOverlay {
     property var captureView
     property var camera
     property Item focusArea
-    property alias captureButtonPressed: captureButton.pressed
 
     property int _recordingDuration: clock.enabled ? ((clock.time - _startTime) / 1000) : 0
     property var _startTime: new Date()
@@ -28,7 +27,16 @@ SettingsOverlay {
     height: captureView.height
 
     function writeMetaData() {
-        captureView.captureOrientation = captureView.viewfinderOrientation
+        var rotation = 0
+        switch (captureView.orientation) {
+        case Orientation.Landscape: rotation = 90; break;
+        case Orientation.PortraitInverted: rotation = 180; break;
+        case Orientation.LandscapeInverted: rotation = 270; break;
+        }
+        captureView.captureOrientation = camera.position === Camera.FrontFace
+                       ? (720 + camera.orientation - rotation) % 360
+                       : (720 + camera.orientation + rotation) % 360
+
         // Camera documentation says dateTimeOriginal should be used but at the moment CameraBinMetaData uses only
         // date property (which the documentation doesn't even list)
         camera.metaData.date = new Date()
@@ -98,6 +106,7 @@ SettingsOverlay {
     showCommonControls: !captureView.recording
     isPortrait: captureView.isPortrait
     topButtonRowHeight: Screen.sizeCategory >= Screen.Large ? Theme.itemSizeLarge : Theme.itemSizeSmall
+    deviceToggleEnabled: !captureView.captureBusy
 
     onPinchStarted: {
         // We're not getting notifications when the maximumDigitalZoom changes,
@@ -117,8 +126,7 @@ SettingsOverlay {
         ignoreUnknownSignals: true
         onEffectiveActiveChanged: {
             if (!captureView.effectiveActive) {
-                settingsOverlay.open = false
-                settingsOverlay.inButtonLayout = false
+                settingsOverlay.closeMenus()
             }
         }
     }
@@ -156,8 +164,11 @@ SettingsOverlay {
             focusPoint.y = focusPoint.y / focusArea.height
 
             // Mirror the point if the viewfinder is mirrored.
-            if (captureView._mirrorViewfinder) {
+            if (captureView._horizontalMirror) {
                 focusPoint.x = 1 - focusPoint.x
+            }
+            if (captureView._verticalMirror) {
+                focusPoint.y = 1 - focusPoint.y
             }
 
             if (focusPoint.x >= 0.0 && focusPoint.x <= 1.0 && focusPoint.y >= 0.0 && focusPoint.y <= 1.0) {
@@ -169,13 +180,13 @@ SettingsOverlay {
     shutter: CameraButton {
         id: captureButton
 
+        property bool canStopVideo: startRecordTimer.running || camera.videoRecorder.recorderState == CameraRecorder.RecordingState
+
         z: settingsOverlay.inButtonLayout ? 1 : 0
         size: Theme.iconSizeMedium
         background.visible: icon.opacity < 1.0
         enabled: captureView._canCapture
                     && !captureView._captureOnFocus
-                    && !volumeDown.pressed // avoid click + volume key release taking two pictures
-                    && !volumeUp.pressed
 
         onPressed: camera.lockAutoFocus()
         onReleased: {
@@ -193,12 +204,14 @@ SettingsOverlay {
                     return 0.2
                 } else if (captureButton.pressed) {
                     return 0.5
+                } else if (captureView._captureOnFocus) {
+                    return 0.7
                 } else {
                     return 1.0
                 }
             }
 
-            source: startRecordTimer.running || camera.videoRecorder.recorderState == CameraRecorder.RecordingState
+            source: canStopVideo
                     ? "image://theme/icon-camera-video-shutter-off"
                     : (camera.captureMode == Camera.CaptureVideo
                        ? "image://theme/icon-camera-video-shutter-on"
@@ -206,11 +219,17 @@ SettingsOverlay {
         }
 
         Label {
-            anchors.centerIn: parent
+            anchors {
+                centerIn: parent
+                // The font is not monospaced so countdown values over 10 seconds will be slightly off center
+                // TODO: FontMetrics might make more sense than magic below, but also be quite much more complex codewise
+                verticalCenterOffset: -Math.round(font.pixelSize/20)
+                horizontalCenterOffset: text.length > 1 ? -Math.round(font.pixelSize/20) : 0
+            }
             text: captureTimer.running ? Math.floor(captureView._captureCountdown + 1) : Settings.mode.timer
-            visible: Settings.mode.timer != 0
+            visible: Settings.mode.timer != 0 && !captureButton.canStopVideo
             opacity: captureTimer.running ? captureView._captureCountdown % 1 : 1.0
-            color: captureTimer.running ? Theme.primaryColor : Theme.highlightDimmerColor
+            color: captureTimer.running ? Theme.lightPrimaryColor : Theme.darkPrimaryColor
             font {
                 pixelSize: captureTimer.running ? Theme.fontSizeHuge : Theme.fontSizeTiny
                 weight: Font.Light
@@ -232,6 +251,7 @@ SettingsOverlay {
         text: Format.formatDuration(_recordingDuration,
                                     _recordingDuration >= 3600 ? Formatter.DurationLong : Formatter.DurationShort)
         font.pixelSize: Theme.fontSizeLarge
+        color: Theme.lightPrimaryColor
         style: Text.Outline
         styleColor: "#20000000"
     }

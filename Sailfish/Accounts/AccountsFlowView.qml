@@ -38,6 +38,7 @@ Flow {
             enabled: root.entriesInteractive
             visible: !root._hideJollaAccount || model.providerName !== "jolla"
             entriesInteractive: root.entriesInteractive
+            allowRemoveOnly: !model.providerValid
 
             onAccountSyncRequested: root.accountSyncRequested(accountId)
             onAccountRemoveRequested: root.accountRemoveRequested(accountId)

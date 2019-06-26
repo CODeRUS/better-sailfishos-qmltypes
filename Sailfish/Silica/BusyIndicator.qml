@@ -40,14 +40,14 @@ Item {
 
     property bool running
     property int size: BusyIndicatorSize.Medium
-    property color color: Theme.highlightColor
+    property alias color: busyIndicator.color
 
     implicitWidth: busyIndicator.implicitWidth
     implicitHeight: busyIndicator.implicitHeight
     opacity: running ? 1.0 : 0.0
     Behavior on opacity { FadeAnimation { id: fadeAnimation }}
 
-    Image {
+    HighlightImage {
         id: busyIndicator
 
         function _updateSize() {
@@ -66,9 +66,10 @@ Item {
                 return ""
             }
 
-            return prefix + indicatorSize + "?" + root.color
+            return prefix + indicatorSize
         }
 
+        color: Theme.highlightColor
         smooth: true
         source: _updateSize()
         transformOrigin: Item.Center

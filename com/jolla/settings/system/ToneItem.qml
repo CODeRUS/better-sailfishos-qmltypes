@@ -30,21 +30,21 @@ ValueButton {
            : qsTrId("settings_sound-la-no_alarm_sound")
 
     onClicked: {
-        var dialog = pageStack.push(Qt.resolvedUrl("SoundDialog.qml"), {
+        var obj = pageStack.animatorPush(Qt.resolvedUrl("SoundDialog.qml"), {
                         activeFilename: toneSettings[fileProperty],
                         activeSoundTitle: title,
                         activeSoundSubtitle: currentText,
                         noSound: !toneSettings[enabledProperty]
                         })
-
-        dialog.accepted.connect(
-            function() {
+        obj.pageCompleted.connect(function(dialog) {
+            dialog.accepted.connect(function() {
                 if (dialog.selectedFilename != "") {
                     toneSettings[fileProperty] = dialog.selectedFilename
                 }
                 toneSettings[enabledProperty] = !dialog.noSound
             })
-     }
+        })
+    }
     ContentInfo {
         id: info
 

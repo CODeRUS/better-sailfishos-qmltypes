@@ -11,6 +11,8 @@ Module {
     Component {
         name: "SignonUiService"
         prototype: "QObject"
+        exports: ["com.jolla.signonuiservice/SignonUiService 1.0"]
+        exportMetaObjectRevisions: [0]
         Property { name: "inProcessParent"; type: "QQuickItem"; isPointer: true }
         Property { name: "inProcessServiceName"; type: "string" }
         Property { name: "inProcessObjectPath"; type: "string" }
@@ -28,11 +30,5 @@ Module {
             name: "cancelUiRequest"
             Parameter { name: "dialogId"; type: "string" }
         }
-    }
-    Component {
-        name: "SignonUiServiceType"
-        prototype: "SignonUiService"
-        exports: ["com.jolla.signonuiservice/SignonUiService 1.0"]
-        exportMetaObjectRevisions: [0]
     }
 }

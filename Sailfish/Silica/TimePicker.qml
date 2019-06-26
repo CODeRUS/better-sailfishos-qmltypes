@@ -34,6 +34,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import "private"
 
 // TODO: Investigate using one quarter of the image mirrored in two directions
 // TODO: Investigate using a scaled down version of the image
@@ -80,15 +81,6 @@ Item {
         }
     }
 
-    function _xTranslation(value, bound) {
-        // Use sine to map range of 0-bound to the X translation of a circular locus (-1 to 1)
-        return Math.sin((value % bound) / bound * Math.PI * 2)
-    }
-
-    function _yTranslation(value, bound) {
-        // Use cosine to map range of 0-bound to the Y translation of a circular locus (-1 to 1)
-        return Math.cos((value % bound) / bound * Math.PI * 2)
-    }
 
     function _formatTime() {
         var fmt = (hourMode == DateTime.DefaultHours ? Formatter.TimeValue
@@ -117,49 +109,24 @@ Item {
             }"
     }
 
-    GlassItem {
+    TimePickerGlassItem {
         id: hourIndicator
-        falloffRadius: 0.22
-        radius: 0.25
+        stepCount: 12
+        rotationRadius: (timePicker.width - 3*_minuteWidth)/2
+        velocity: 30
+        highlighted: mouse.changingProperty == 1
+        moving: mouse.isMoving && !mouse.isLagging
         anchors.centerIn: parent
-        color: mouse.changingProperty == 1 ? Theme.highlightColor : Theme.primaryColor
-
-        property real value
-        property bool animationEnabled: true
-
-        transform: Translate {
-            // The hours circle ends at 132px from the center
-            x: (width - 3*_minuteWidth)/2 * _xTranslation(hourIndicator.value, 12)
-            y: -(height - 3*_minuteWidth)/2 * _yTranslation(hourIndicator.value, 12)
-        }
-
-        Behavior on value {
-            id: hoursAnimation
-            SmoothedAnimation { velocity: 30 }
-            enabled: hourIndicator.animationEnabled && (!mouse.isMoving || mouse.isLagging)
-        }
     }
 
-    GlassItem {
+    TimePickerGlassItem {
         id: minuteIndicator
-        falloffRadius: 0.22
-        radius: 0.25
+        stepCount: 60
+        rotationRadius: (timePicker.width - _minuteWidth)/2
+        velocity: 80
+        highlighted: mouse.changingProperty == 2
+        moving: mouse.isMoving && !mouse.isLagging
         anchors.centerIn: parent
-        color: mouse.changingProperty == 2 ? Theme.highlightColor : Theme.primaryColor
-
-        property real value
-
-        transform: Translate {
-            // The minutes band is 72px wide, ending at 204px from the center
-            x: (width - _minuteWidth)/2 * _xTranslation(minuteIndicator.value, 60)
-            y: -(height - _minuteWidth)/2 * _yTranslation(minuteIndicator.value, 60)
-        }
-
-        Behavior on value {
-            id: minutesAnimation
-            SmoothedAnimation { velocity: 80 }
-            enabled: !mouse.isMoving || mouse.isLagging
-        }
     }
 
     MouseArea {

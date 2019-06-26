@@ -8,8 +8,9 @@ Item {
     id: root
 
     property int count
+    property bool populated
 
-    signal updated()
+    signal updated(url playlistUrl)
 
     onUpdated: playlistListModel.refresh()
 
@@ -28,7 +29,7 @@ Item {
         if (success) {
             store.updateEntryCounter(playlist.url, playlistModel.count)
 
-            root.updated()
+            root.updated(playlist.url)
         }
 
         return success
@@ -39,7 +40,7 @@ Item {
         if (url != "") {
             store.addPlaylist(url, title, media ? 1 : 0)
 
-            root.updated()
+            root.updated(url)
 
             return true
         }
@@ -59,18 +60,18 @@ Item {
         if (success) {
             store.updateEntryCounter(media.url, model.count)
 
-            root.updated()
+            root.updated(model.url)
         }
 
         return success
     }
 
-    function clearPlaylist(media) {
+    function clearPlaylist(media, model) {
         var success = saver.clear(media.url, media.title)
         if (success) {
             store.updateEntryCounter(media.url, 0)
 
-            root.updated()
+            root.updated(model.url)
         }
 
         return success
@@ -83,7 +84,7 @@ Item {
             // Because it would take tracker ~2 seconds to index
             store.updateEntryCounter(media.url, -1)
 
-            root.updated()
+            root.updated("")
         }
 
         return success
@@ -131,14 +132,14 @@ Item {
 
         // Update models at once. Otherwise there seem to be weird behavior
         if (refreshModels) {
-            root.updated()
+            root.updated("")
         }
     }
 
     function updateAccessTime(url)
     {
         store.updateAccessTime(url)
-        root.updated()
+        root.updated("")
     }
 
     Timer {
@@ -175,5 +176,6 @@ Item {
     GriloTrackerModel {
         id: playlistListModel
         query: PlaylistTrackerHelpers.getPlaylistsQuery("", {})
+        onFinished: populated = true
     }
 }

@@ -42,12 +42,19 @@ AmbienceAction {
     editor: ValueButton {
         id: toneEditor
 
+        property color primaryColor: Theme.primaryColor
+        property color secondaryColor: Theme.secondaryColor
+        property color highlightColor: Theme.highlightColor
+        property int colorScheme: Theme.colorScheme
+
         label: action.label
         value: action.title
+        labelColor: down ? highlightColor : primaryColor
+        valueColor: highlightColor
 
         rightMargin: Theme.horizontalPageMargin + Theme.itemSizeSmall + Theme.paddingMedium
 
-        onClicked: pageStack.push(dialog)
+        onClicked: pageStack.animatorPush(dialog)
     }
 
     dialog: Component {

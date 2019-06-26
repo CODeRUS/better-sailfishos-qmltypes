@@ -1,2 +1,2 @@
 module org.nemomobile.connectivity
-plugin nemoconnectivity
+typeinfo plugins.qmltypes

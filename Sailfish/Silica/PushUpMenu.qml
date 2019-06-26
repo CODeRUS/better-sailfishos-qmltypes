@@ -76,7 +76,7 @@ PulleyMenuBase {
                 position: 1.0-(pushUpMenu.height-pushUpMenu.spacing)/bg.height
                 color: Theme.rgba(pushUpMenu.backgroundColor, Theme.highlightBackgroundOpacity)
             }
-            GradientStop { position: 1.0; color: Theme.rgba(pushUpMenu.backgroundColor, 0.4) }
+            GradientStop { position: 1.0; color: Theme.rgba(pushUpMenu.backgroundColor, Theme.highlightBackgroundOpacity + 0.1) }
         }
     }
 

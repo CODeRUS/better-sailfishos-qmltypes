@@ -1,118 +1,101 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import QtMultimedia 5.0
 import org.nemomobile.thumbnailer 1.0
 
 MouseArea {
-    id: videoItem
+    id: root
 
-    property QtObject player
-    property bool active
+    signal togglePlay
+
     property url source
     property string mimeType
-    property int duration
+
+    property bool playing
+    property bool loaded
+    property alias busy: busyIndicator.running
 
     property real contentWidth: width
     property real contentHeight: height
 
+    property bool overlayMode
     property bool transpose
-
-    property bool playing: active && videoItem.player && videoItem.player.playbackState == MediaPlayer.PlayingState
-    readonly property bool _loaded: active
-                && videoItem.player
-                && videoItem.player.status >= MediaPlayer.Loaded
-                && videoItem.player.status < MediaPlayer.EndOfMedia
+    readonly property bool error: poster.status == Thumbnail.Error
+    readonly property bool down: pressed && containsMouse
 
     implicitWidth: poster.implicitWidth
     implicitHeight: poster.implicitHeight
-
-    Connections {
-        target: videoItem._loaded ? videoItem.player : null
-
-        onPositionChanged: positionSlider.value = videoItem.player.position / 1000
-    }
-
-    onActiveChanged: {
-        if (!active) {
-            positionSlider.value = 0
-        }
-    }
 
     // Poster
     Thumbnail {
         id: poster
 
+        property var errorLabel
+
         anchors.centerIn: parent
 
-
-        width: !videoItem.transpose ? videoItem.contentWidth : videoItem.contentHeight
-        height: !videoItem.transpose ? videoItem.contentHeight : videoItem.contentWidth
+        width: !transpose ? root.contentWidth : root.contentHeight
+        height: !transpose ? root.contentHeight : root.contentWidth
 
         sourceSize.width: Screen.height
         sourceSize.height: Screen.height
 
-        source: videoItem.source
-        mimeType: videoItem.mimeType
+        source: root.source
+        mimeType: root.mimeType
 
         priority: Thumbnail.HighPriority
         fillMode: Thumbnail.PreserveAspectFit
-        opacity: !videoItem._loaded ? 1.0 : 0.0
-        Behavior on opacity { FadeAnimation { id: posterFade } }
-
-        visible: !videoItem._loaded || posterFade.running
-
-        rotation: videoItem.transpose ? (implicitHeight > implicitWidth ? 270 : 90)  : 0
-    }
-
-    Item {
-        width: videoItem.width
-        height: videoItem.height
-
-        opacity: videoItem.playing ? 0.0 : 1.0
-        Behavior on opacity { FadeAnimation { id: controlFade } }
-
-        visible: videoItem.player && (!videoItem.playing || controlFade.running)
-
-        Image {
-            anchors.centerIn: parent
-            source: "image://theme/icon-video-overlay-play?"
-                    + (mouseArea.down ? Theme.highlightColor : Theme.primaryColor)
-
-            MouseArea {
-                id: mouseArea
-
-                property bool down: pressed && containsMouse
-                anchors.fill: parent
-                enabled: !videoItem.playing
-                onClicked: {
-                    videoItem.player.source = videoItem.source
-                    videoItem.player.play()
-                }
+        opacity: !loaded ? 1.0 : 0.0
+        Behavior on opacity { FadeAnimator {} }
+        onStatusChanged: {
+            if (status == Thumbnail.Error) {
+                errorLabel = errorLabelComponent.createObject(poster)
+            } else if (errorLabel) {
+                errorLabel.destroy()
+                errorLabel = null
             }
         }
 
-        Slider {
-            id: positionSlider
+        visible: !loaded
+        rotation: transpose ? (implicitHeight > implicitWidth ? 270 : 90)  : 0
+    }
 
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+    BusyIndicator {
+        id: busyIndicator
+        anchors.centerIn: parent
+        size: BusyIndicatorSize.Large
+    }
 
-            enabled: !videoItem.playing
-            height: Math.max(implicitHeight, Theme.itemSizeExtraLarge)
-            handleVisible: false
-            minimumValue: 0
-            maximumValue: videoItem._loaded ? videoItem.player.duration / 1000 : videoItem.duration
+    Image {
+        id: icon
+        anchors.centerIn: parent
+        enabled: !busy && (overlayMode || !playing) && !root.error
+        opacity: enabled ? 1.0 : 0.0
+        Behavior on opacity { FadeAnimator {} }
 
-            valueText: Format.formatDuration(value, value >= 3600
-                        ? Format.DurationLong
-                        : Format.DurationShort)
+        Binding	{
+            target: icon
+            when: overlayMode || !playing // avoid flicker to pause icon when pressing play
+            property: "source"
+            value: "image://theme/icon-video-overlay-" + (playing ?  "pause" : "play")
+                   + "?" + (mouseArea.down ? Theme.highlightColor : Theme.lightPrimaryColor)
+        }
+        MouseArea {
+            id: mouseArea
 
-            onReleased: {
-                if (videoItem.active) {
-                    videoItem.player.source = videoItem.source
-                    videoItem.player.seek(value * 1000)
-                    videoItem.player.pause()
-                }
-            }
+            property bool down: pressed && containsMouse
+            anchors.fill: parent
+            onClicked: togglePlay()
         }
     }
+    Component {
+        id: errorLabelComponent
+        InfoLabel {
+            //% "Oops, can't load the video"
+            text: qsTrId("components_gallery-la-video-loading-failed")
+            anchors.verticalCenter: parent.verticalCenter
+            opacity: poster.status == Thumbnail.Error ? 1.0 : 0.0
+            Behavior on opacity { FadeAnimator {}}
+        }
+    }
+
 }

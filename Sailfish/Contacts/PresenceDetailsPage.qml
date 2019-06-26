@@ -203,7 +203,7 @@ Page {
                         text: accountName
                     }
 
-                    onClicked: showMenu()
+                    onClicked: openMenu()
                 }
             }
         }

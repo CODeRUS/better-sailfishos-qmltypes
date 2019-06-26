@@ -44,6 +44,8 @@ PickerDialog {
             model: videoModel
             contentType: ContentType.Video
             visible: active || videoModel.count > 0
+            selectedCount: _selectedCount
+            showBack: !_clearOnBackstep
             _glassOnly: videoPickerDialog._background
 
             onActiveFocusChanged: {

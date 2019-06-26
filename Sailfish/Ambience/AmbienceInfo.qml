@@ -9,6 +9,7 @@ ContentInfo {
     property bool readOnly
     property string displayName
     property bool favorite
+    property int colorScheme
     property int version
     property url wallpaperUrl
     property url applicationWallpaperUrl

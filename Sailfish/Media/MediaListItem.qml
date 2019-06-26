@@ -72,8 +72,7 @@ ListItem {
             }
             truncationMode: TruncationMode.Fade
             textFormat: titleLabel.textFormat
-            opacity: 0.6
-            color: highlighted || playing ? Theme.highlightColor : Theme.primaryColor
+            color: highlighted || playing ? Theme.secondaryHighlightColor : Theme.secondaryColor
             maximumLineCount: 1
         }
     }

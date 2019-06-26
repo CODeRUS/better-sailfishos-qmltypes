@@ -37,22 +37,24 @@ import Sailfish.Silica 1.0
 
 Item {
     property alias text: text.text
+    property alias wrapMode: text.wrapMode
+    property alias truncationMode: text.truncationMode
     property alias color: text.color
     property real verticalOffset
     property int __silica_menulabel
 
-    height: Theme.itemSizeExtraSmall - (screen.sizeCategory <= Screen.Medium ? Theme.paddingLarge : Theme.paddingMedium)
+    height: Math.max(text.height + Theme.paddingSmall*2, Theme.itemSizeExtraSmall - (screen.sizeCategory <= Screen.Medium ? Theme.paddingLarge : Theme.paddingMedium))
     width: parent ? parent.width : Screen.width
     Label {
         id: text
-        opacity: 0.6
-        color: Theme.highlightColor
+        color: Theme.secondaryHighlightColor
         font.pixelSize: Theme.fontSizeSmall
         width: parent.width - Theme.horizontalPageMargin*2
+        wrapMode: Text.Wrap
         anchors {
             verticalCenterOffset: verticalOffset
             centerIn: parent
         }
-        horizontalAlignment: Text.AlignHCenter
+        horizontalAlignment: implicitWidth > width && truncationMode != TruncationMode.None ? Text.AlignLeft : Text.AlignHCenter
     }
 }

@@ -104,7 +104,7 @@ WebView {
         }
     }
 
-    boundsBehavior: pageStack._backFlickDifference == 0 && pageStack._forwardFlickDifference == 0
+    boundsBehavior: pageStack._leftFlickDifference == 0 && pageStack._rightFlickDifference == 0
                     && ((pullDownMenu && pullDownMenu._activationPermitted) || (pushUpMenu && pushUpMenu._activationPermitted)) ? Flickable.DragOverBounds : Flickable.StopAtBounds
 
     // Experimental API usage
@@ -124,7 +124,7 @@ WebView {
     experimental.enableResizeContent: !vkbObserver.animating
 
     TouchBlocker {
-        target: pageStack._backFlickDifference != 0 || pageStack._forwardFlickDifference != 0 ? webView : null
+        target: pageStack._leftFlickDifference != 0 || pageStack._rightFlickDifference != 0 ? webView : null
     }
 
     // Binding contentWidth: Math.max(webView.width, _webPage.width) doesn't work.

@@ -1,2 +1,2 @@
 module com.jolla.apkd
-plugin apkdplugin
+typeinfo plugins.qmltypes

@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Vault 1.0
-import com.jolla.settings.accounts 1.0
+import MeeGo.Connman 0.2
 
 Column {
     id: root
@@ -75,7 +75,7 @@ Column {
         } else if (data.type === storageListModel.storageTypeCloud) {
             root.cloudAccountId = data.accountId
             _errorText = _accountErrorText(root.cloudAccountId)
-            if (_errorText.length == 0 && !accountFactory.haveNetworkConnectivity()) {
+            if (_errorText.length == 0 && networkManager.state != "online") {
                 _errorText = _connectionErrorText
             }
         }
@@ -119,8 +119,9 @@ Column {
         id: backupUtils
     }
 
-    AccountFactory {
-        id: accountFactory
+    NetworkManager {
+        id: networkManager
+        onStateChanged: root._update()
     }
 
     Connections {

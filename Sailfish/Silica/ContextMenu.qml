@@ -34,6 +34,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0
 import "private/Util.js" as Util
 import "private/RemorseItem.js" as RemorseItem
 import "private"
@@ -44,6 +45,9 @@ MouseArea {
     property bool active
     property bool closeOnActivation: true
     property bool hasContent: contentColumn.children.length > 0
+    property Item container
+    property alias backgroundColor: background.color
+    property alias highlightColor: highlightBar.color
 
     property int _openAnimationDuration: 200
     property Item _highlightedItem
@@ -57,6 +61,9 @@ MouseArea {
     property real _targetHeight
     property Item _page
     property bool _activeAllowed: (!_page || _page.status != PageStatus.Inactive) && Qt.application.active
+    readonly property alias _displayHeightAnimating: displayHeightAnimation.running
+
+    property Item _activeMenuItem
 
     signal activated(int index)
     signal closed
@@ -65,15 +72,24 @@ MouseArea {
     property alias _contentColumn: contentColumn
 
     x: {
-        if (!parent || !_page)
+        if (!parent)
             return 0
 
         var offset = 0
         var p = parent
+
+        if (_flickable) {
+            if (_flickable.width != width) {
+                offset = (width - _flickable.width) / 2
+            }
+
+            offset -= _flickable.contentX
+        }
+
         do {
             offset += p.x
             p = p.parent
-        } while (p !== _page)
+        } while (p != null && _flickable && p !== _flickable.contentItem)
 
         return -offset
     }
@@ -81,7 +97,7 @@ MouseArea {
     width: _flickable !== null ? _flickable.width : (parent ? parent.width : 0)
     parent: null
     clip: true
-    enabled: active
+    enabled: contextMenu._expanded
     anchors.bottom: parent ? parent.bottom : undefined
 
     onPressed: {
@@ -100,6 +116,11 @@ MouseArea {
         }
     }
     drag.target: Item {}
+
+    VerticalAutoScroll.modal: _closeOnOutsideClick
+    VerticalAutoScroll.keepVisible: _open
+    VerticalAutoScroll.animated: false
+    VerticalAutoScroll.restorePosition: true
 
     Component {
         id: removeOpacityEffect
@@ -132,11 +153,9 @@ MouseArea {
 
     onActiveChanged: {
         if (active) {
-            if (_flickable) {
-                _flickableContentYAtOpen = _flickable.contentY
-            }
             contextMenu._open = true
         }
+
         if (_parentMouseArea) {
             _parentMouseArea.preventStealing = active
         }
@@ -146,32 +165,46 @@ MouseArea {
 
     on_ActiveAllowedChanged: {
         if (!_activeAllowed && active) {
-            hide()
+            close()
         }
     }
 
-    function show(item) {
+    function open(item) {
         if (item) {
             parent = item
             if (hasContent) {
-                _parentMouseArea = _findBackgroundItem(item)
+                _parentMouseArea = _closeOnOutsideClick ? _findBackgroundItem(item) : null
                 _flickable = Util.findFlickable(item)
-                _flickableMoved = false
                 _expandedPosition = -1
                 _targetHeight = parent.height + _getDisplayHeight()
+
                 active = true
+
                 _page = Util.findPage(contextMenu)
             } else {
                 parent = null
                 _page = null
             }
         } else {
-            console.log("ContextMenu::show() called with an invalid item")
+            console.log("ContextMenu::open() called with an invalid item")
         }
     }
-    function hide() {
+
+    function close() {
         active = false
         _parentMouseArea = null
+    }
+
+    function show(item) {
+        console.warn("ContextMenu::show is deprecated in Sailfish Silica package 0.25.6 (Dec 2017), use ContextMenu::open instead.")
+        console.trace()
+        open(item)
+    }
+
+    function hide() {
+        console.warn("ContextMenu::hide is deprecated in Sailfish Silica package 0.25.6 (Dec 2017), use ContextMenu::close instead.")
+        console.trace()
+        close()
     }
 
     // Called from number animation of _displayHeight behavior when animation has finished.
@@ -180,6 +213,12 @@ MouseArea {
             parent = null
             _page = null
             contextMenu.closed()
+
+            if (_activeMenuItem) {
+                _activeMenuItem.delayedClick()
+            }
+            _activeMenuItem = null
+
             _setHighlightedItem(null)
             contextMenu._open = false
         }
@@ -192,7 +231,7 @@ MouseArea {
 
     function _findBackgroundItem(item) {
         if (item.hasOwnProperty("preventStealing") && item.pressed) {
-            return item;
+            return item
         }
 
         if (!item.hasOwnProperty("children")) {
@@ -253,6 +292,7 @@ MouseArea {
         _foreachMenuItem(function (menuItem, index) {
             if (menuItem === item) {
                 menuItem.clicked()
+                _activeMenuItem = menuItem
                 contextMenu.activated(index)
                 if (contextMenu.closeOnActivation) {
                     delayedHiding.restart()
@@ -310,7 +350,7 @@ MouseArea {
 
 
     Binding {
-        when: active && (!_parentMouseArea || !_parentMouseArea.pressed)
+        when: active && contextMenu._closeOnOutsideClick
         target: __silica_applicationwindow_instance
         property: "_dimScreen"
         value: true
@@ -318,7 +358,7 @@ MouseArea {
 
     states: [
         State {
-            when: contextMenu.parent && (active || displayHeightAnimation.running)
+            when: contextMenu.parent && contextMenu._closeOnOutsideClick && (active || displayHeightAnimation.running)
             PropertyChanges {
                 target: contextMenu.parent
                 layer.effect: removeOpacityEffect
@@ -332,17 +372,21 @@ MouseArea {
     ]
 
     Connections {
-        target: _flickable
+        target: _flickable && _flickable.flickableDirection != Flickable.HorizontalFlick ? _flickable : null
         onContentYChanged: _flickableMoved = true
     }
 
     Connections {
-        target: _parentMouseArea
+        // TODO: replace with Connections.enabled binding (pending Qt 5.7+)
+        ignoreUnknownSignals: true
+        target: _expanded ? _parentMouseArea : null
         onPositionChanged: _updatePosition(contentColumn.mapFromItem(_parentMouseArea, mouse.x, mouse.y).y)
         onReleased: contextMenu.released(mouse)
     }
 
     Rectangle {
+        id: background
+
         anchors.fill: parent
         color: Theme.highlightBackgroundColor
         opacity: Theme.highlightBackgroundOpacity
@@ -350,17 +394,19 @@ MouseArea {
             anchors.fill: parent
             enabled: active && _closeOnOutsideClick
             stealPress: true
-            onPressedOutside: hide()
+            onPressedOutside: close()
         }
 
-        // We used to use a Binding to change interactive, but it was affected by
-        // https://bugreports.qt-project.org/browse/QTBUG-33444
         states: State {
-            when: contextMenu._open && contextMenu._flickable !== null
+            when: contextMenu._open
+                  && contextMenu.parent !== null
+                  && contextMenu._flickable !== null
+                  && _flickable.flickableDirection === Flickable.HorizontalFlick
             PropertyChanges {
                 target: contextMenu._flickable
-                interactive: false
-                contentY: contextMenu._flickableContentY
+                interactive: contextMenu._closeOnOutsideClick
+
+                height: contextMenu.parent.height
             }
         }
     }
@@ -379,7 +425,7 @@ MouseArea {
     Timer {
         id: delayedHiding
         interval: 10
-        onTriggered: contextMenu.hide()
+        onTriggered: contextMenu.close()
     }
 
     property real _displayHeight: active && contentColumn.height > 0 ? _getDisplayHeight() : 0
@@ -397,9 +443,6 @@ MouseArea {
         }
     }
 
-    property real _flickableContentYAtOpen
-    property real _flickableContentY: _flickable ? Math.max(contextMenu.mapToItem(_flickable.contentItem, 0, _displayHeight).y - _flickable.height, _flickableContentYAtOpen) : 0
-
     Component.onDestruction: {
         if (active) {
             RemorseItem.activeChanged(contextMenu, false)
@@ -407,5 +450,6 @@ MouseArea {
         // This guarantees that the interactive property of the flickable
         // is restored back to its original state.
         _open = false
+        active = false
     }
 }

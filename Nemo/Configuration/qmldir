@@ -1,0 +1,2 @@
+module Nemo.Configuration
+typeinfo plugins.qmltypes

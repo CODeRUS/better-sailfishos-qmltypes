@@ -24,8 +24,10 @@ BackgroundItem {
     enabled: weather && weather.populated
 
     onClicked: {
+        var alreadyOpened = !!forecastLoader.item
         expanded = !expanded
         weatherModel.attemptReload()
+        if (expanded && alreadyOpened) forecastLoader.item.attemptReload()
     }
 
     Column {
@@ -78,6 +80,7 @@ BackgroundItem {
             property int defaultHeight: 2*(Screen.sizeCategory >= Screen.Large ? Theme.itemSizeExtraLarge : Theme.itemSizeLarge)
 
             source: "WeatherBannerForecast.qml"
+            onLoaded: item.highlighted = Qt.binding( function () { return weatherBanner.highlighted })
             states: State {
                 name: "expanded"
                 when: weatherBanner.expanded

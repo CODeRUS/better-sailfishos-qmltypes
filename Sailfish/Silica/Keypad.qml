@@ -52,7 +52,7 @@ Column {
     property int _buttonWidth: (3*Theme.itemSizeHuge - 4*Theme.paddingLarge) / 3
     property int _buttonHeight: screen.sizeCategory > Screen.Medium ? Theme.itemSizeExtraLarge : Theme.itemSizeLarge
     property int _horizontalSpacing: screen.sizeCategory > Screen.Medium ? Theme.paddingLarge : 0
-    property int _horizontalPadding: Math.max((width - 3*_buttonWidth - 2*_horizontalSpacing) / 2, 0)
+    property int _horizontalPadding: Math.max((width - implicitWidth) / 2, 0)
 
     signal pressed(string number)
     signal released(string number)
@@ -106,7 +106,7 @@ Column {
     Component.onCompleted: {
         // Avoid hard dependency to feedback
         _feedbackEffect = Qt.createQmlObject("import QtQuick 2.0; import QtFeedback 5.0; ThemeEffect { effect: ThemeEffect.PressWeak }",
-                           dialer, 'ThemeEffect');
+                                             dialer, 'ThemeEffect')
     }
 
     Item {

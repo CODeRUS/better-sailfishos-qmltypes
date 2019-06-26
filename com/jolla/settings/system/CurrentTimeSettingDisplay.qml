@@ -16,17 +16,20 @@ ValueButton {
 
     onClicked: {
         var date = new Date()
-        var dialog = pageStack.push("Sailfish.Silica.TimePickerDialog", {
+        var obj = pageStack.animatorPush("Sailfish.Silica.TimePickerDialog", {
             hour: date.getHours(),
             minute: date.getMinutes()
         })
-        dialog.statusChanged.connect(function() {
-            // Currently qmsystem (used by time settings) changes the date/time synchronously, which
-            // causes a pause in the animation if done during a page transition. Wait until the page
-            // is popped to avoid this.
-            if (dialog.status === PageStatus.Inactive && dialog.result === DialogResult.Accepted) {
-                dateTimeSettings.setTime(dialog.hour, dialog.minute)
-            }
+
+        obj.pageCompleted.connect(function(dialog) {
+            dialog.statusChanged.connect(function() {
+                // Currently qmsystem (used by time settings) changes the date/time synchronously, which
+                // causes a pause in the animation if done during a page transition. Wait until the page
+                // is popped to avoid this.
+                if (dialog.status === PageStatus.Inactive && dialog.result === DialogResult.Accepted) {
+                    dateTimeSettings.setTime(dialog.hour, dialog.minute)
+                }
+            })
         })
     }
 

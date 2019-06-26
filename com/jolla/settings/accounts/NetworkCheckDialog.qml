@@ -1,8 +1,9 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
+import MeeGo.Connman 0.2
+import Nemo.DBus 2.0
 import com.jolla.settings.accounts 1.0
-import Nemo.Connectivity 1.0
 
 Dialog {
     id: root
@@ -11,16 +12,17 @@ Dialog {
     property alias bodyText: bodyLabel.text
     property alias skipText: skipLabel.text
     property alias skipPressed: skipLabel.pressed
+    property NetworkManager networkManager: NetworkManager {}
 
     signal skipClicked()
 
-    property bool _connectionSelected: connection.haveNetworkConnectivity()
+    property bool _connectionSelected: networkManager.state == "online"
     property bool _connectionSelectorClosed
     property bool _shouldAccept
 
     function _showConnSelector() {
-        connection.attemptToConnectNetwork()
-        _connectionSelectorClosed = _connectionSelected
+        connectionSelector.openConnection()
+        _connectionSelectorClosed = false
     }
 
     function _checkStatus() {
@@ -52,19 +54,42 @@ Dialog {
         _shouldAccept = false
     }
 
-    ConnectionHelper {
-        id: connection
-
-        onNetworkConnectivityEstablished: {
-            root._connectionSelected = true
-            root._connectionSelectorClosed = true
-            root._tryAccept()
-
+    Connections {
+        target: root.networkManager
+        onStateChanged: {
+            if (root.networkManager.state == "online"
+                    && root == pageStack.currentPage) {
+                root._connectionSelected = true
+                root._connectionSelectorClosed = true
+                root._tryAccept()
+            }
         }
-        onNetworkConnectivityUnavailable: {
-            root._connectionSelected = false
+    }
+
+    DBusInterface {
+        id: connectionSelector
+
+        service: "com.jolla.lipstick.ConnectionSelector"
+        path: "/"
+        iface: "com.jolla.lipstick.ConnectionSelectorIf"
+        signalsEnabled: true
+
+        function openConnection() {
+            call('openConnectionNow', 'wifi')
+        }
+
+        function connectionSelectorClosed(connectionSelected) {
+            root._connectionSelected = connectionSelected
             root._connectionSelectorClosed = true
         }
+    }
+
+    // The dialog may be visible briefly after the connection dialog is closed and
+    // before the dialog is auto-accepted, so show a busy indicator as a placeholder.
+    BusyIndicator {
+        anchors.centerIn: parent
+        running: root._connectionSelectorClosed && root._connectionSelected
+        size: BusyIndicatorSize.Large
     }
 
     Column {

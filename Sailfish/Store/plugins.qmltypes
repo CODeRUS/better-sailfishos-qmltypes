@@ -13,9 +13,18 @@ Module {
         prototype: "QAbstractListModel"
         exports: ["Sailfish.Store/StartupApplicationModel 1.0"]
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "InstallStatus"
+            values: {
+                "Unknown": 0,
+                "NotInstalled": 1,
+                "Installed": 2
+            }
+        }
         Property { name: "category"; type: "string" }
         Property { name: "count"; type: "int"; isReadonly: true }
         Property { name: "populated"; type: "bool"; isReadonly: true }
+        Property { name: "androidSupportStatus"; type: "InstallStatus"; isReadonly: true }
         Method {
             name: "setCategory"
             Parameter { name: "category"; type: "string" }

@@ -25,14 +25,14 @@ Module {
             }
         }
         Enum {
-            name: "Style"
+            name: "ColorScheme"
             values: {
-                "StyleLight": 0,
-                "StyleDark": 1
+                "LightOnDark": 0,
+                "DarkOnLight": 1
             }
         }
         Property { name: "pixelRatio"; type: "float"; isReadonly: true }
-        Property { name: "style"; type: "Style"; isReadonly: true }
+        Property { name: "colorScheme"; type: "ColorScheme"; isReadonly: true }
         Property { name: "fontFamilyHeading"; type: "string"; isReadonly: true }
         Property { name: "fontFamily"; type: "string"; isReadonly: true }
         Property { name: "fontSizeTiny"; type: "int"; isReadonly: true }
@@ -63,6 +63,7 @@ Module {
         Property { name: "iconSizeExtraLarge"; type: "float"; isReadonly: true }
         Property { name: "iconSizeLauncher"; type: "float"; isReadonly: true }
         Property { name: "launcherIconDirectories"; type: "QStringList"; isReadonly: true }
+        Property { name: "buttonWidthExtraSmall"; type: "float"; isReadonly: true }
         Property { name: "buttonWidthSmall"; type: "float"; isReadonly: true }
         Property { name: "buttonWidthMedium"; type: "float"; isReadonly: true }
         Property { name: "buttonWidthLarge"; type: "float"; isReadonly: true }
@@ -84,10 +85,26 @@ Module {
         Property { name: "secondaryColor"; type: "QColor"; isReadonly: true }
         Property { name: "overlayBackgroundColor"; type: "QColor"; isReadonly: true }
         Property { name: "secondaryHighlightColor"; type: "QColor"; isReadonly: true }
+        Property { name: "backgroundGlowColor"; type: "QColor"; isReadonly: true }
+        Property { name: "errorColor"; type: "QColor"; isReadonly: true }
         Property { name: "backgroundImage"; type: "QUrl"; isReadonly: true }
+        Property { name: "_homeBackgroundImage"; type: "QUrl"; isReadonly: true }
+        Property { name: "lightPrimaryColor"; type: "QColor"; isReadonly: true }
+        Property { name: "lightSecondaryColor"; type: "QColor"; isReadonly: true }
+        Property { name: "darkPrimaryColor"; type: "QColor"; isReadonly: true }
+        Property { name: "darkSecondaryColor"; type: "QColor"; isReadonly: true }
         Property { name: "startDragDistance"; type: "int"; isReadonly: true }
         Property { name: "minimumPressHighlightTime"; type: "int"; isReadonly: true }
         Property { name: "_webviewCustomLayoutWidthScalingFactor"; type: "float"; isReadonly: true }
+        Signal { name: "homeBackgroundImageChanged" }
+        Method {
+            name: "setColorScheme"
+            Parameter { name: "colorScheme"; type: "ColorScheme" }
+        }
+        Method {
+            name: "_setHighlightColor"
+            Parameter { name: "color"; type: "QColor" }
+        }
         Method {
             name: "highlightText"
             type: "string"
@@ -110,6 +127,30 @@ Module {
             name: "iconForMimeType"
             type: "string"
             Parameter { name: "mimeType"; type: "string" }
+        }
+        Method {
+            name: "highlightFromColor"
+            type: "QColor"
+            Parameter { name: "color"; type: "QColor" }
+            Parameter { name: "scheme"; type: "Silica::Theme::ColorScheme" }
+        }
+        Method {
+            name: "secondaryHighlightFromColor"
+            type: "QColor"
+            Parameter { name: "color"; type: "QColor" }
+            Parameter { name: "scheme"; type: "Silica::Theme::ColorScheme" }
+        }
+        Method {
+            name: "highlightBackgroundFromColor"
+            type: "QColor"
+            Parameter { name: "color"; type: "QColor" }
+            Parameter { name: "scheme"; type: "Silica::Theme::ColorScheme" }
+        }
+        Method {
+            name: "highlightDimmerFromColor"
+            type: "QColor"
+            Parameter { name: "color"; type: "QColor" }
+            Parameter { name: "scheme"; type: "Silica::Theme::ColorScheme" }
         }
     }
 }

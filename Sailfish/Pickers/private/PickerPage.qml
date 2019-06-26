@@ -50,7 +50,9 @@ Page {
             "filePath": properties.filePath,
             "url": properties.url,
             "title": properties.title,
-            "mimeType": properties.mimeType
+            "mimeType": properties.mimeType,
+            "contentType": properties.contentType,
+            "fileSize": properties.fileSize
         }
         selectedContent = url
     }

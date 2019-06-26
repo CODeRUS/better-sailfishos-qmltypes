@@ -38,6 +38,7 @@ import Sailfish.Silica 1.0
 Item {
     property alias icon: image
     property alias text: label.text
+    property alias textColor: label.color
 
     anchors.fill: parent
 
@@ -51,7 +52,7 @@ Item {
     Label {
         id: label
         anchors.centerIn: parent
-        width: parent.width - (screen.sizeCategory > Screen.Medium
+        width: parent.width - (Screen.sizeCategory > Screen.Medium
                                ? 2*Theme.paddingMedium : 2*Theme.paddingLarge)
         height: width
         color: Theme.secondaryColor

@@ -17,6 +17,9 @@ Dialog {
     property int _animationDuration: 150
 
     property Component _background
+    property bool _clearOnBackstep: true
+
+    readonly property int _selectedCount: _selectedModel ? _selectedModel.count : 0
 
     allowedOrientations: Orientation.All
     canAccept: _selectedModel && _selectedModel.count > 0 ? true : false
@@ -30,11 +33,13 @@ Dialog {
                                            "filePath": properties.filePath,
                                            "url": properties.url,
                                            "title": properties.title,
-                                           "mimeType": properties.mimeType
+                                           "mimeType": properties.mimeType,
+                                           "contentType": properties.contentType,
+                                           "fileSize": properties.fileSize
                                        })
             }
             pickerDialog.selectedContent = selectedContent
-        } else {
+        } else if (_clearOnBackstep) {
             _selectedModel.clear()
         }
     }

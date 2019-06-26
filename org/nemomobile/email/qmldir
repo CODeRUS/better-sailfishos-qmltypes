@@ -1,2 +1,2 @@
 module org.nemomobile.email
-plugin nemoemail
+typeinfo plugins.qmltypes

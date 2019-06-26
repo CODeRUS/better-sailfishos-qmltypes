@@ -18,7 +18,8 @@ Item {
 
         font.pixelSize: Screen.sizeCategory >= Screen.Large ? Theme.fontSizeSmall : Theme.fontSizeExtraSmall
         font.bold: Screen.sizeCategory < Screen.Large
-        color: Theme.highlightColor
+        color: Theme.colorScheme == Theme.LightOnDark
+               ? Theme.highlightColor : Theme.highlightFromColor(Theme.highlightColor, Theme.LightOnDark)
 
         textFormat: Text.AutoText
         text: header.highlightItem

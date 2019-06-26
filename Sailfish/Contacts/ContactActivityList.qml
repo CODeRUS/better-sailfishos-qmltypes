@@ -185,7 +185,7 @@ SilicaListView {
             textFormat: Text.PlainText
         }
 
-        onClicked: showMenu()
+        onClicked: openMenu()
 
         menu: Component {
             ContextMenu {
@@ -206,8 +206,7 @@ SilicaListView {
                     anchors.horizontalCenter: parent.horizontalCenter
                     height: Theme.itemSizeExtraSmall - Theme.paddingLarge - Theme.paddingSmall
                     Label {
-                        opacity: 0.6
-                        color: Theme.highlightColor
+                        color: Theme.secondaryHighlightColor
                         font.pixelSize: Theme.fontSizeSmall
                         width: Math.min(implicitWidth, eventItem.width - Theme.horizontalPageMargin*2 - durationIcon.width - durationLabel.width - 2*parent.spacing)
                         anchors.verticalCenter: parent.verticalCenter
@@ -226,8 +225,7 @@ SilicaListView {
                         property int duration: (model.endTime.valueOf()-model.startTime.valueOf())/1000
 
                         visible: !isMessage && !model.isMissedCall
-                        opacity: 0.6
-                        color: Theme.highlightColor
+                        color: Theme.secondaryHighlightColor
                         font.pixelSize: Theme.fontSizeSmall
                         anchors.verticalCenter: parent.verticalCenter
                         text: Format.formatDuration(duration, duration >= 3600 ? Formatter.DurationLong : Formatter.DurationShort)

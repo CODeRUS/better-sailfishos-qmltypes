@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import org.nemomobile.email 0.1
+import Nemo.Email 0.1
 
 Page {
     id: root
@@ -94,7 +94,7 @@ Page {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
-            color: Theme.rgba(Theme.highlightColor, 0.6)
+            color: Theme.secondaryHighlightColor
             //: When singular "Downloading attachment", when plural "Downloading attachments
             //% "Downloading attachment..."
             text: qsTrId("jolla-email-la-downloading-attachments", undownloadedAttachmentsCount)

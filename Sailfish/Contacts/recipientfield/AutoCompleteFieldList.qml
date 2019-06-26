@@ -48,7 +48,15 @@ Item {
         if (!entriesRepeater.count) {
             recipientsModel.append({ "person": undefined, "formattedNameText": "", "property": {}, "propertyType": "" })
         }
-        entriesRepeater.itemAt(entriesRepeater.count - 1).forceActiveFocus()
+        for (var index = entriesRepeater.count - 1; index >= 0; index--) {
+             if (entriesRepeater.itemAt(index).editable) {
+                 break
+             }
+        }
+        if (index < 0) {
+            index = entriesRepeater.count - 1
+        }
+        entriesRepeater.itemAt(index).forceActiveFocus()
     }
 
     function clearFocus() {
@@ -218,7 +226,8 @@ Item {
                 var page = comp.createObject(root, {
                     "requiredProperty": requiredProperty,
                     "recentContactsCategoryMask": recentContactsCategoryMask,
-                    "actionType": root.actionType
+                    "actionType": root.actionType,
+                    "promptSimSelection": false
                 })
                 page.selectedRecipients.connect(addContacts)
                 page.statusChanged.connect(function() {
@@ -232,7 +241,7 @@ Item {
                 root.peoplePicker.clearSelections()
             }
 
-            pageStack.push(root.peoplePicker)
+            pageStack.animatorPush(root.peoplePicker)
         }
 
         function addContacts(contacts) {

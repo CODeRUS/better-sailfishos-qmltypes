@@ -13,7 +13,7 @@ BackgroundItem {
     id: root
 
     property bool userRemovable
-    property real iconCenterY
+    property real deleteIconCenterY
 
     property alias contentWidth: content.width
     property alias contentHeight: content.height
@@ -108,7 +108,7 @@ BackgroundItem {
 
         IconButton {
             x: content.x - width - _deleteIconMargin
-            y: root.iconCenterY - height/2
+            y: root.deleteIconCenterY - height/2
             enabled: Lipstick.compositor.eventsLayer.housekeeping && root.userRemovable
             opacity: enabled ? 1.0 : 0
             icon.source: "image://theme/icon-m-clear"

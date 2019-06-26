@@ -7,7 +7,7 @@
 
 import QtQuick 2.4
 import Sailfish.Silica 1.0
-import Sailfish.Calendar 1.0
+import Sailfish.Calendar 1.0 as Calendar // QTBUG-27645
 import org.nemomobile.calendar.lightweight 1.0
 import org.nemomobile.dbus 2.0
 import org.nemomobile.time 1.0
@@ -162,7 +162,7 @@ Column {
         width: parent.width
         height: enabled ? Theme.itemSizeSmall : 0
         opacity: enabled ? 1.0 : 0.0
-        visible: height > 0 && (calendarWidget.shownEvents != calendarWidget.maximumEvents || CalendarUtils.calendarAppInstalled)
+        visible: height > 0 && (calendarWidget.shownEvents != calendarWidget.maximumEvents || Calendar.CalendarUtils.calendarAppInstalled)
 
         Behavior on height { NumberAnimation { duration: 250 } } // decrease in parallel with event list expansion
 

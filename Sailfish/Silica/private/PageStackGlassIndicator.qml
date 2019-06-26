@@ -37,7 +37,8 @@ import Sailfish.Silica 1.0
 
 GlassItem {
     anchors.centerIn: parent
-    color: Theme.primaryColor
+    color: Theme.lightPrimaryColor
+    backgroundColor: Theme.backgroundGlowColor
     radius: 0.22
     falloffRadius: 0.18
 }

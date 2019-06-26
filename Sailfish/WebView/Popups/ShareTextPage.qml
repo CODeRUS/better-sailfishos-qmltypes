@@ -13,38 +13,20 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.TransferEngine 1.0
 
-Page {
+SharePage {
     id: root
 
     property string text
     property string type: "text/plain"
-    property string icon: "icon-launcher-browser"
 
-    ShareMethodList {
-        id: shareMethodList
-
-        anchors.fill: parent
-        header: PageHeader {
-            //: List header for sharing method list (generic)
-            //% "Share"
-            title: qsTrId("sailfish_components_webview_popups-he-share")
-        }
-        content: {
-            "name": text,
-            "data": text,
-            "type": type,
-            "icon": icon,
-            // also some non-standard fields for Twitter/Facebook status sharing:
-            "status" : text,
-            "linkTitle" : text
-        }
-        filter: type
-
-        ViewPlaceholder {
-            enabled: shareMethodList.count == 0 && shareMethodList.model.ready
-            //: Empty state for share method selection page
-            //% "No sharing accounts available. You can add accounts in settings"
-            text: qsTrId("sailfish_components_webview_popups-no-share-methods")
-        }
+    showAddAccount: false
+    content: {
+        "name": text,
+        "data": text,
+        "type": type,
+        // also some non-standard fields for Twitter/Facebook status sharing:
+        "status": text,
+        "linkTitle": text
     }
+    mimeType: type
 }

@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Nemo.FileManager 1.0
 import com.jolla.settings.accounts 1.0
 
 Dialog {
@@ -32,6 +33,9 @@ Dialog {
     //: Next page
     //% "Next"
     property string _nextPageText: qsTrId("settings_accounts-he-next_page")
+
+    // SUW loads on boot, so if it has not finished, then it should be running
+    property bool startupWizardRunning: startupWizardDoneWatcher.fileName !== "" || startupWizardSf2TutorialDoneWatcher.fileName !== ""
 
     canAccept: userCredentials.canValidateCredentials
                && ((root.state == "createNewAccount" && userCredentials.usernameValid) || root.state == "signIn")
@@ -85,7 +89,7 @@ Dialog {
             PropertyChanges { target: newUserSwitch; checked: false }
             PropertyChanges { target: forgottenPasswordSection; state: "visible" }
             PropertyChanges {
-                target: eulaReminder
+                target: termOfServiceAndPolicy
                 height: 0
                 opacity: 0
                 enabled: false
@@ -98,8 +102,8 @@ Dialog {
             PropertyChanges { target: newUserSwitch; checked: true }
             PropertyChanges { target: forgottenPasswordSection; state: "hidden" }
             PropertyChanges {
-                target: eulaReminder
-                height: eulaReminder.implicitHeight
+                target: termOfServiceAndPolicy
+                height: termOfServiceAndPolicy.implicitHeight
                 opacity: 1
                 enabled: true
             }
@@ -118,7 +122,7 @@ Dialog {
                         easing.type: root._animationEasingType
                     }
                     NumberAnimation {
-                        target: eulaReminder
+                        target: termOfServiceAndPolicy
                         property: "opacity"
                         duration: root._animationDuration * 0.5
                         easing.type: root._animationEasingType
@@ -149,6 +153,28 @@ Dialog {
         id: jollaAccountUtil
     }
 
+    FileWatcher {
+        id: startupWizardDoneWatcher
+        Component.onCompleted: {
+            var markerFile = StandardPaths.home + "/.jolla-startupwizard-usersession-done"
+            if (!testFileExists(markerFile)) {
+                fileName = markerFile
+            }
+        }
+        onExistsChanged: if (exists) fileName = ""
+    }
+
+    FileWatcher {
+        id: startupWizardSf2TutorialDoneWatcher
+        Component.onCompleted: {
+            var markerFile = StandardPaths.home + "/.jolla-startupwizard-sfos2-tutorial"
+            if (!testFileExists(markerFile)) {
+                fileName = markerFile
+            }
+        }
+        onExistsChanged: if (exists) fileName = ""
+    }
+
     SilicaFlickable {
         id: flickable
 
@@ -164,7 +190,7 @@ Dialog {
 
             DialogHeader {
                 dialog: root
-                acceptText: root.wizardMode ? root._nextPageText : defaultAcceptText
+                acceptText: root._nextPageText
                 cancelText: root.wizardMode ? root._previousPageText : defaultCancelText
 
                 //: Heading for page that allows sign-up for a Jolla account
@@ -213,7 +239,7 @@ Dialog {
                 text: qsTrId("settings_accounts-la-have_jolla_account_heading")
 
                 //: User selects this option if he/she already has a Jolla account
-                //% "You probably have a Jolla account if you have used a Jolla device, created an account at account.jolla.com or used our community platform at together.jolla.com."
+                //% "You probably have a Jolla account if you have used a Sailfish device, created an account at account.jolla.com or used our community platform at together.jolla.com."
                 description: qsTrId("settings_accounts-la-have_jolla_account_description")
 
                 onClicked: {
@@ -230,7 +256,7 @@ Dialog {
                 text: qsTrId("settings_accounts-la-new_jolla_user_heading")
 
                 //: User selects this option if he/she already has a Jolla account
-                //% "Select this if you haven't used any Jolla devices or Jolla web services before."
+                //% "Select this if you haven't used any Sailfish devices or Jolla web services before."
                 description: qsTrId("settings_accounts-la-new_jolla_user_description")
 
                 onClicked: {
@@ -267,19 +293,63 @@ Dialog {
                 height: Theme.paddingMedium
             }
 
-            ClickableTextLabel {
-                id: eulaReminder
+            Column {
+                id: termOfServiceAndPolicy
+
                 x: Theme.horizontalPageMargin
                 width: parent.width - x*2
-                font.pixelSize: Theme.fontSizeSmall
 
-                //: Text above the link to the Terms of Service and Privacy Policy. (Text surrounded by %1 and %2 is underlined and colored differently)
-                //% "By creating an account you accept the %1Jolla Terms of Service and Jolla Privacy Policy%2. Please read these carefully before moving forward."
-                text: qsTrId("settings_accounts-la-jolla_account_agree_terms_and_privacy")
-                                .arg("<u><font color=\"" + (pressed ? Theme.highlightColor : Theme.primaryColor) + "\">")
-                                .arg("</font></u>")
-                onClicked: {
-                    pageStack.push(legaleseComponent)
+                ClickableTextLabel {
+
+                    readonly property string url: "https://jolla.com/terms-of-service/"
+
+                    width: parent.width
+                    font.pixelSize: Theme.fontSizeSmall
+
+                    //: Text above the link to the Terms of Service and Privacy Policy. (Text surrounded by %1 and %2 is underlined and colored differently)
+                    //% "By creating an account you accept the %1Jolla Terms of Service%2 and"
+                    text: qsTrId("settings_accounts-la-jolla_account_agree_terms")
+                                    .arg("<u><font color=\"" + (pressed ? Theme.highlightColor : Theme.primaryColor) + "\">")
+                                    .arg("</font></u>")
+                    onClicked: {
+                        if (startupWizardRunning) {
+                            pageStack.animatorPush("com.jolla.settings.accounts.TermsWebView", {
+                                                       "url": url,
+                                                       //: Terms of Service header that is used e.g. with webview
+                                                       //% "Terms of Service"
+                                                       "title": qsTrId("settings_accounts-he-terms_of_service")
+                                                   })
+                        } else {
+                            Qt.openUrlExternally(url)
+                        }
+
+                    }
+                }
+
+                ClickableTextLabel {
+                    readonly property string url: "https://jolla.com/privacy-policy/"
+
+                    width: parent.width
+                    font.pixelSize: Theme.fontSizeSmall
+
+                    //: Text above the link to the Terms of Service and Privacy Policy. (Text surrounded by %1 and %2 is underlined and colored differently)
+                    //% "%1Jolla Privacy Policy%2. Please read these carefully before moving forward."
+                    text: qsTrId("settings_accounts-la-jolla_account_agree_privacy_policy")
+                                    .arg("<u><font color=\"" + (pressed ? Theme.highlightColor : Theme.primaryColor) + "\">")
+                                    .arg("</font></u>")
+                    onClicked: {
+                        if (startupWizardRunning) {
+                            pageStack.animatorPush("com.jolla.settings.accounts.TermsWebView", {
+                                                       "url": url,
+                                                       //: Privacy policy header that is used e.g. with webview
+                                                       //% "Privacy Policy"
+                                                       "title": qsTrId("settings_accounts-he-privacy_policy")
+                                                   })
+                        } else {
+                            Qt.openUrlExternally(url)
+                        }
+
+                    }
                 }
             }
 
@@ -317,7 +387,7 @@ Dialog {
                             .arg("<u><font color=\"" + (pressed ? Theme.highlightColor : Theme.primaryColor) + "\">")
                             .arg("</font></u>")
             onClicked: {
-                pageStack.push(skipConfirmationComponent)
+                pageStack.animatorPush(skipConfirmationComponent)
             }
         }
     }
@@ -366,29 +436,6 @@ Dialog {
 
             onInfoButtonClicked: {
                 root.skipRequested()
-            }
-        }
-    }
-
-    Component {
-        id: legaleseComponent
-        JollaAccountLegaleseDialog {
-            Component.onCompleted: {
-                var termsOfService = jollaAccountUtil.termsOfService(Qt.locale().name)
-                if (termsOfService.length == 2) {
-                    termsOfServiceHeading = termsOfService[0]
-                    termsOfServiceText = termsOfService[1]
-                } else {
-                    console.log("Unable to load Terms of Service for locale:", Qt.locale().name)
-                }
-
-                var privacyPolicy = jollaAccountUtil.privacyPolicy(Qt.locale().name)
-                if (privacyPolicy.length == 2) {
-                    privacyPolicyHeading = privacyPolicy[0]
-                    privacyPolicyText = privacyPolicy[1]
-                } else {
-                    console.log("Unable to load Privacy Policy for locale:", Qt.locale().name)
-                }
             }
         }
     }

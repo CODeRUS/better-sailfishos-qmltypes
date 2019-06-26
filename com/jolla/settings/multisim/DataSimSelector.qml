@@ -10,6 +10,14 @@ import Sailfish.Telephony 1.0
 SimSelectorBase {
     id: root
 
+    function show() {
+        if (enabled) {
+            comboBox.menu.open(comboBox)
+        }
+    }
+
+    signal closed
+
     width: parent.width
     height: comboBox.height
     controlType: SimManagerType.Data
@@ -37,6 +45,8 @@ SimSelectorBase {
         label: qsTrId("settings_networking-la-use_sim_card")
         currentIndex: root.activeSim
 
+        //% "None"
+        value: (currentItem !== null && currentItem.text !== "") ? currentItem.text : qsTrId("settings_networking-la-none")
         opacity: root.enabled ? 1.0 : 0.4
         Behavior on opacity {
             FadeAnimation {}
@@ -44,6 +54,8 @@ SimSelectorBase {
 
         menu: ContextMenu {
             id: contextMenu
+
+            onClosed: root.closed()
             Repeater {
                 model: root.modemManager.modemSimModel
                 delegate: MenuItem {
@@ -61,7 +73,7 @@ SimSelectorBase {
                         anchors.fill: parent
                         onClicked: {
                             root.modemManager.setActiveSim(index)
-                            contextMenu.hide()
+                            contextMenu.close()
                         }
                     }
 

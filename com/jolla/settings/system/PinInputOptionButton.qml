@@ -5,6 +5,7 @@ BackgroundItem {
     id: root
 
     property string text
+    property color primaryColor: Theme.primaryColor
     property bool emergency
     property bool showWhiteBackgroundByDefault
 
@@ -43,7 +44,7 @@ BackgroundItem {
                 }
                 return root.highlighted ? "black" : "white"
             }
-            return root.highlighted ? Theme.highlightColor : Theme.primaryColor
+            return root.highlighted ? Theme.highlightColor : root.primaryColor
         }
     }
 }

@@ -191,6 +191,7 @@ Lesson {
 
             quickSelect: true
 
+            colorScheme: Theme.LightOnDark
             highlightColor: tutorialTheme.highlightColor
             backgroundColor: tutorialTheme.highlightBackgroundColor
 
@@ -223,6 +224,7 @@ Lesson {
 
             quickSelect: true
 
+            colorScheme: Theme.LightOnDark
             highlightColor: tutorialTheme.highlightColor
             backgroundColor: tutorialTheme.highlightBackgroundColor
 

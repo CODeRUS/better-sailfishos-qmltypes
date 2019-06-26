@@ -7,6 +7,9 @@ Item {
     property real topPadding: 2*Theme.paddingLarge
     property real bottomPadding: Theme.paddingLarge
 
+    property alias titleColor: titleLabel.color
+    property alias descriptionColor: descriptionLabel.color
+
     height: content.height + topPadding + bottomPadding
     width: (Screen.sizeCategory >= Screen.Large) ? Screen.height / 2 : parent.width
     anchors.horizontalCenter: parent.horizontalCenter

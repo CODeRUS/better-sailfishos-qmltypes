@@ -133,9 +133,12 @@ SplitViewPage {
                 }
 
                 if (component) {
-                    imageEditPreview.splitView = pageStack.push(component, { splitOpen: false })
-                    imageEditPreview.editOperation = model.type
-                    imageEditPreview.resetParent(imageEditPreview.splitView.foregroundItem)
+                    var obj = pageStack.animatorPush(component, { splitOpen: false })
+                    obj.pageCompleted.connect(function(dialog) {
+                        imageEditPreview.splitView = dialog
+                        imageEditPreview.editOperation = model.type
+                        imageEditPreview.resetParent(imageEditPreview.splitView.foregroundItem)
+                    })
                 }
             }
         }

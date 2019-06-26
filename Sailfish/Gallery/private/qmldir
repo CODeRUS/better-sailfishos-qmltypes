@@ -1,7 +1,7 @@
 module Sailfish.Gallery.private
-plugin sailfishgalleryplugin
-CropDialog 1.0 CropDialog.qml
+AvatarCropDialog 1.0 AvatarCropDialog.qml
+FadeGradient 1.0 FadeGradient.qml
+FlickableDebugItem 1.0 FlickableDebugItem.qml
 ImageEditPreview 1.0 ImageEditPreview.qml
 ZoomableImage 1.0 ZoomableImage.qml
-RotateDialog 1.0 RotateDialog.qml
-LevelsDialog 1.0 LevelsDialog.qml
+typeinfo plugins.qmltypes

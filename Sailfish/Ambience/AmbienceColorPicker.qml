@@ -36,7 +36,7 @@ Grid {
             id: coloredSquare
             height: width
             width: root.width/root.columns
-            color: Ambience.highlightBackgroundColor(model.highlightColor)
+            color: Theme.highlightBackgroundFromColor(model.highlightColor, model.colorScheme)
 
             MouseArea {
                 id: mouseArea

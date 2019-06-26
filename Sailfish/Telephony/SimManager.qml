@@ -39,40 +39,12 @@ Item {
     property alias activeSimCount: modemManager.activeSimCount
     property alias simCount: modemManager.presentSimCount
     property alias presentSims: modemManager.presentSims
+    property alias voiceModem: modemManager.defaultVoiceModem
 
     property alias modemSimModel: modemSimModel
 
     // The modems with active call(s)
     property var activeVoiceCallModems: []
-
-    // Subscriber identity is normally available only after SIM PIN is entered.
-    // OfonoSimInfo caches the subscriber identity after SIM PIN has been entered once.
-    // OfonoModemManager.defaultVoiceSim contains last known voice sim imsi.
-    // Thus, finding voice modem is possible without entering sim pin or
-    // knowing modem.
-    // If only one sim is inserted, try to use the modem that contains the sim
-    // as a default modem.
-    readonly property string voiceModem: {
-        var i = 0
-        for (i = 0; i < simData.count; ++i) {
-            var sim = simData.itemAt(i)
-            if (sim && sim.isVoiceSim) {
-                return sim.modemPath
-            }
-        }
-
-        // Only one sim card inserted.
-        if (simCount === 1) {
-            var modemContainingSim = ""
-            for (i = 0; i < presentSims.length; ++i) {
-                if (presentSims[i]) {
-                    return availableModems[i]
-                }
-            }
-        }
-
-        return ""
-    }
 
     function updateSimNames() {
         simNames = _updateSimData()
@@ -156,17 +128,15 @@ Item {
         var activeModems = []
         for (var i = 0; i < simData.count; ++i) {
             var sim = simData.itemAt(i)
-            //% "SIM%1"
-            var shortSimDescription = qsTrId("sailfish-telephony-la-short_sim_identity").arg(i+1)
 
+            var shortSimDescription = Telephony.shortSimDescription(i+1)
             var simName = shortSimDescription
             if (sim && sim.operatorDescription) {
                 simName += " | " + sim.operatorDescription
             }
             names.push(simName)
 
-            //% "SIM card %1"
-            var longSimDescription =  qsTrId("sailfish-telephony-la-long_sim_identity").arg(i+1)
+            var longSimDescription =  Telephony.longSimDescription(i+1)
             var modem = availableModems[i]
 
             if (sim && sim.callCount) {

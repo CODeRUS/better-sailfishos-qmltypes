@@ -19,18 +19,20 @@ ValueButton {
     enabled: !dateTimeSettings.automaticTimezoneUpdate
 
     onClicked: {
-        var timezonePicker = pageStack.push(Qt.resolvedUrl("CurrentTimeZonePicker.qml"))
-        timezonePicker.timezoneClicked.connect(function (name) {
-            root._selectedTimezone = name
-            pageStack.pop()
-        })
-        timezonePicker.statusChanged.connect(function() {
-            // Currently qmsystem (used by time settings) changes the date/time synchronously, which
-            // causes a pause in the animation if done during a page transition. Wait until the page
-            // is popped to avoid this.
-            if (timezonePicker.status === PageStatus.Inactive && root._selectedTimezone != "") {
-                dateTimeSettings.timezone = root._selectedTimezone
-            }
+        var obj = pageStack.animatorPush(Qt.resolvedUrl("CurrentTimeZonePicker.qml"))
+        obj.pageCompleted.connect(function(timezonePicker) {
+            timezonePicker.timezoneClicked.connect(function (name) {
+                root._selectedTimezone = name
+                pageStack.pop()
+            })
+            timezonePicker.statusChanged.connect(function() {
+                // Currently qmsystem (used by time settings) changes the date/time synchronously, which
+                // causes a pause in the animation if done during a page transition. Wait until the page
+                // is popped to avoid this.
+                if (timezonePicker.status === PageStatus.Inactive && root._selectedTimezone != "") {
+                    dateTimeSettings.timezone = root._selectedTimezone
+                }
+            })
         })
     }
 

@@ -118,6 +118,7 @@ MouseArea {
 
     property color highlightColor: Theme.highlightBackgroundColor
     property color backgroundColor: Theme.highlightBackgroundColor
+    property int colorScheme: Theme.colorScheme
 
     property bool _bounceBackEnabled: false
     property bool _bounceBackRunning: bounceBackAnimation.running
@@ -236,12 +237,20 @@ MouseArea {
     }
     onPositionChanged: _highlightMenuItem(contentColumn, mouse.y - contentColumn.y)
     onReleased: {
-        if (menuItem !== null) {
+        if (menuItem) {
             menuItem.clicked()
         }
         hide()
     }
     onActiveChanged: {
+        if (!active) {
+            if (menuItem) {
+                menuItem.delayedClick()
+            }
+
+            menuItem = null
+        }
+
         _bounceBackEnabled = active
         if (_inListView) {
             expandedStateTimer.restart()
@@ -385,11 +394,18 @@ MouseArea {
         _forEachItem(function (item) { item._invertColors = inverted })
     }
 
+    function _handleClicked() {
+        if (active && menuItem) {
+            menuItem.clicked()
+        }
+        hide()
+        _doClick = false
+    }
+
     function hide() {
         if (active && _bounceBackEnabled) {
             delayedBounceTimer.restart()
         }
-        menuItem = null
     }
 
     function cancelBounceBack() {
@@ -434,20 +450,21 @@ MouseArea {
 
         property real _opacity: {
             if (highlightedItem) return 1.0
-            if ((!active && !_hinting) || _bounceBackRunning) return busyOpacity
+            if ((!active && !_hinting) || _bounceBackRunning) return busyMultiplier
             if (!_hasMenuItems(_contentColumn)) return 1.0 - logic.dragDistance/Theme.paddingMedium
             return Math.max(1.5 - logic.dragDistance/_menuItemHeight,
                             logic.dragDistance <= _contentEnd && !flickAnimation.running ? 0.5 : 0.0)
         }
 
-        property real busyOpacity: 1.0
+        property real busyMultiplier: busyMultiplierBase
+        property real busyMultiplierBase: pulleyBase.colorScheme === Theme.LightOnDark ? 1.0 : 1.6
         Timer {
             id: busyTimer
             running: busy && !active && Qt.application.active
             interval: 500
             repeat: true
-            onRunningChanged: highlightItem.busyOpacity = 1.0
-            onTriggered: highlightItem.busyOpacity = highlightItem.busyOpacity >= 0.99 ? 0.2 : 1.2
+            onRunningChanged: highlightItem.busyMultiplier = Qt.binding( function () { return highlightItem.busyMultiplierBase })
+            onTriggered: highlightItem.busyMultiplier = highlightItem.busyMultiplier >= 0.99 ? 0.2 : highlightItem.busyMultiplierBase * 1.2
         }
 
         states: [
@@ -475,68 +492,76 @@ MouseArea {
                 }
             }
         ]
+
+        Timer {
+            id: earlyClickTimer
+            interval: 1
+            onTriggered: menuItem.earlyClick()
+        }
+
         transitions: [
             Transition {
+                onRunningChanged: running ? earlyClickTimer.restart() : _handleClicked()
+
                 to: "click"
                 SequentialAnimation {
-                    FadeAnimation {
+                    FadeAnimator {
                         target: highlightItem
-                        duration: 135
-                        to: 0.15
+                        duration: 120
+                        from: Theme.highlightBackgroundOpacity // QTBUG-70366
+                        to: Theme.highlightBackgroundOpacity/2
                     }
-                    FadeAnimation {
+                    FadeAnimator {
                         target: highlightItem
-                        duration: 65
+                        duration: 60
+                        from: Theme.highlightBackgroundOpacity/2 // QTBUG-70366
                         to: Theme.highlightBackgroundOpacity
                     }
-                    FadeAnimation {
+                    FadeAnimator {
                         target: highlightItem
-                        duration: 135
-                        to: 0.15
+                        duration: 120
+                        from: Theme.highlightBackgroundOpacity // QTBUG-70366
+                        to: Theme.highlightBackgroundOpacity/2
                     }
-                    FadeAnimation {
+                    FadeAnimator {
                         target: highlightItem
-                        duration: 65
+                        duration: 60
+                        from: Theme.highlightBackgroundOpacity/2 // QTBUG-70366
                         to: Theme.highlightBackgroundOpacity
                     }
-                    PauseAnimation {
+                    // QTBUG-70365: No PauseAnimator animation element available
+                    // Mimick PauseAnimation. SequentialAnimation is only
+                    // non-blocking if all sub-animations are animators.
+                    FadeAnimator {
+                        target: highlightItem
                         duration: 50
-                    }
-                    ScriptAction {
-                        script: {
-                            if (active && menuItem) {
-                                menuItem.clicked()
-                            }
-                            hide()
-                            _doClick = false
-                        }
+                        from: Theme.highlightBackgroundOpacity // QTBUG-70366
+                        to: Theme.highlightBackgroundOpacity
                     }
                 }
             },
             Transition {
+                onRunningChanged: running ? earlyClickTimer.restart() : _handleClicked()
+
                 to: "quickselectclick"
                 SequentialAnimation {
-                    FadeAnimation {
+                    FadeAnimator {
                         target: highlightItem
-                        duration: 135
-                        to: 0.15
+                        duration: 120
+                        from: Theme.highlightBackgroundOpacity // QTBUG-70366
+                        to: Theme.highlightBackgroundOpacity/2
                     }
-                    FadeAnimation {
+                    FadeAnimator {
                         target: highlightItem
-                        duration: 65
+                        duration: 60
+                        from: Theme.highlightBackgroundOpacity/2 // QTBUG-70366
                         to: Theme.highlightBackgroundOpacity
                     }
-                    PauseAnimation {
+                    FadeAnimator {
+                        target: highlightItem
                         duration: 50
-                    }
-                    ScriptAction {
-                        script: {
-                            if (active && menuItem) {
-                                menuItem.clicked()
-                            }
-                            hide()
-                            _doClick = false
-                        }
+                        from: Theme.highlightBackgroundOpacity // QTBUG-70366
+                        to: Theme.highlightBackgroundOpacity
                     }
                 }
             },
@@ -611,7 +636,7 @@ MouseArea {
     function _forceReposition() {
         if (flickable) {
             _stopAnimations()
-            flickable.contentY = _inactivePosition;
+            flickable.contentY = _inactivePosition
         }
     }
     function _stopAnimations() {
@@ -738,7 +763,7 @@ MouseArea {
     Component.onCompleted: {
         // avoid hard dependency to ngf module
         _ngfEffect = Qt.createQmlObject("import org.nemomobile.ngf 1.0; NonGraphicalFeedback { event: 'pulldown_lock' }",
-                           highlightItem, 'NonGraphicalFeedback');
+                                        highlightItem, 'NonGraphicalFeedback')
     }
 
     Component.onDestruction: {

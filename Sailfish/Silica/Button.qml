@@ -45,7 +45,8 @@ MouseArea {
     property color color: Theme.primaryColor
     property color highlightColor: Theme.highlightColor
     property color highlightBackgroundColor: Theme.highlightBackgroundColor
-    property real preferredWidth: Theme.buttonWidthSmall
+    property real preferredWidth: _implicitPreferredWidth
+    property real _implicitPreferredWidth: Theme.buttonWidthSmall
     property bool __silica_button
 
     onPressedChanged: {
@@ -79,6 +80,8 @@ MouseArea {
             id: buttonText
             anchors.centerIn: parent
             color: _showPress ? button.highlightColor : button.color
+            font.pixelSize: preferredWidth > Theme.buttonWidthExtraSmall ? Theme.fontSizeMedium
+                                                                         : Theme.fontSizeSmall
         }
     }
 

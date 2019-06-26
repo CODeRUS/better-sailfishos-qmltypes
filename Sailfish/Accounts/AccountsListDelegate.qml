@@ -5,6 +5,7 @@ import Sailfish.Accounts 1.0
 ListItem {
     id: delegateItem
     property bool entriesInteractive
+    property bool allowRemoveOnly
 
     signal accountRemoveRequested(int accountId)
     signal accountSyncRequested(int accountId)
@@ -24,7 +25,7 @@ ListItem {
                 visible: model.accountReadOnly
             }
             MenuItem {
-                visible: model.providerName !== "jolla" && !model.accountReadOnly
+                visible: model.providerName !== "jolla" && !model.accountReadOnly && !delegateItem.allowRemoveOnly
                 text: model.accountEnabled
                         //: Disables a user account
                         //% "Disable"
@@ -51,6 +52,7 @@ ListItem {
                 text: qsTrId("components_accounts-me-sync")
                 visible: model.accountEnabled
                         && (model.providerName === "activesync" || accountSyncManager.profileIds(model.accountId).length > 0)
+                        && !delegateItem.allowRemoveOnly
 
                 onClicked: {
                     delegateItem.accountSyncRequested(model.accountId)
@@ -143,6 +145,10 @@ ListItem {
     }
 
     onClicked: {
-        delegateItem.accountClicked(model.accountId, model.providerName)
+        if (allowRemoveOnly) {
+            openMenu()
+        } else {
+            delegateItem.accountClicked(model.accountId, model.providerName)
+        }
     }
 }

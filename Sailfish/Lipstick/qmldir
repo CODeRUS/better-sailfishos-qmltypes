@@ -7,7 +7,6 @@ SystemDialogHeader 1.0 SystemDialogHeader.qml
 LauncherIcon 1.0 LauncherIcon.qml
 LauncherGridItem 1.0 LauncherGridItem.qml
 PartnerspaceModel 1.0 PartnerspaceModel.qml
-PressEffect 1.0 PressEffect.qml
 NotificationExpansionButton 1.0 NotificationExpansionButton.qml
 NotificationIndicator 1.0 NotificationIndicator.qml
 NotificationGroupHeader 1.0 NotificationGroupHeader.qml
@@ -20,3 +19,4 @@ Pannable 1.0 Pannable.qml
 PannableItem 1.0 PannableItem.qml
 BatteryStatusIndicator 1.0 BatteryStatusIndicator.qml
 ClockItem 1.0 ClockItem.qml
+typeinfo plugins.qmltypes

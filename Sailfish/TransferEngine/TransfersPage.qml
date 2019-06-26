@@ -121,13 +121,8 @@ Page {
             property Item thumbnailItem
 
             menu: contextMenuComponent
-            showMenuOnPressAndHold: false
-
-            // Adjust height if file name is very long
-            contentHeight: Math.max(thumbnail.height,
-                                    transferTypeIcon.height
-                                    + transferProgressBar.height + fileNameLabel.height
-                                    + Theme.paddingMedium*2)    // padding above and below status+progress+filename details
+            openMenuOnPressAndHold: false
+            contentHeight: Math.max(thumbnail.height, fileNameLabel.y + fileNameLabel.height + Theme.paddingMedium)
 
             // Load thumbs on demand and only once. Note that share thumbnail is used only for local images/thumbs
             onFileUrlChanged: if (thumbnailItem == null) thumbnailItem = shareThumbnail.createObject(thumbnail)
@@ -135,7 +130,7 @@ Page {
             onAppIconUrlChanged: if (thumbnailItem == null) thumbnailItem = appThumbnail.createObject(thumbnail)
 
             // Close open context menu, if the status changes
-            onTransferStatusChanged: hideMenu()
+            onTransferStatusChanged: closeMenu()
 
             // Component for local thumbnails. Used for Upload or 'finished' entries.
             Component {
@@ -230,11 +225,12 @@ Page {
                 }
                 leftMargin: 0
                 rightMargin: Theme.horizontalPageMargin
-                height: visible ? Theme.itemSizeSmall : Theme.paddingMedium
+                height: visible ? implicitHeight : Theme.paddingMedium
                 value: visible ? progress : 0
                 visible: status === TransferModel.TransferStarted
                 indeterminate: progress < 0 || 1 < progress
                 clip: true
+                highlighted: transferEntry.highlighted
 
                 Behavior on height { NumberAnimation {} }
             }
@@ -269,7 +265,7 @@ Page {
 
             onPressAndHold: {
                 if (down) {
-                    showTransferContextMenu()
+                    openTransferContextMenu()
                 }
             }
 
@@ -320,17 +316,17 @@ Page {
                     return;
                 }
 
-                showTransferContextMenu()
+                openTransferContextMenu()
             }
 
-            function showTransferContextMenu() {
+            function openTransferContextMenu() {
                 // There must be something enabled in order to show context menu
                 var canRemove = status != TransferModel.TransferStarted
                 var canCancel = model.cancelEnabled && status == TransferModel.TransferStarted
                 var canRestart = model.restartEnabled
                         && (status == TransferModel.TransferInterrupted || status == TransferModel.TransferCanceled)
                 if (canRemove || canCancel || canRestart) {
-                    showMenu({"transferId": transferId,
+                    openMenu({"transferId": transferId,
                               "removeEnabled": canRemove,
                               "cancelEnabled": canCancel,
                               "restartEnabled": canRestart})
@@ -344,10 +340,13 @@ Page {
         id: transferInterface
     }
 
+    TransferModel {
+        id: transferModel
+    }
+
     // Actual list which displays transfers
     SilicaListView {
         id: transferList
-        property Item contextMenu
 
         header: PageHeader {
             //% "Transfers"
@@ -369,7 +368,7 @@ Page {
         }
 
         ViewPlaceholder {
-            enabled: transferModel.count === 0
+            enabled: transferModel.count === 0 && transferModel.status == TransferModel.Finished
             //% "No Transfers"
             text: qsTrId("transferui-la-no_transfers")
         }
@@ -385,10 +384,11 @@ Page {
 
         //% "Transfers"
         appName: qsTrId("transferui-ap-name")
-        category: "x-jolla.transferui.error"
+        appIcon: "icon-lock-warning"
+        icon: "icon-lock-warning"
+        isTransient: true
 
-        function show(summary)
-        {
+        function show(summary) {
             previewSummary = summary
             publish()
         }

@@ -16,9 +16,11 @@ ContactItem {
 
     property var selectionModel
     property bool selected: selectionModel !== null && selectionModel.findContactId(contactId) >= 0
+    property bool recent
+    property bool promptSimSelection: Telephony.voiceSimUsageMode === Telephony.AlwaysAskSim
 
     highlighted: down || menuOpen || selected
-    showMenuOnPressAndHold: false
+    openMenuOnPressAndHold: false
 
     ContactAddressesModel {
         id: addressesModel
@@ -63,7 +65,7 @@ ContactItem {
     function _showContextMenu(menuItem) {
         // Don't reuse any menu, since we may show either of two different context menus
         _menuItem = menuItem
-        showMenu()
+        openMenu()
     }
 
     onPressAndHold: {
@@ -91,7 +93,7 @@ ContactItem {
             selectedPropertyType = addressesModel.get(0).type
         }
 
-        if (selectedPropertyType == 'phoneNumber' && Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
+        if (selectedPropertyType == 'phoneNumber' && promptSimSelection) {
             // Select a SIM via menu
             properties = { 'person': getPerson(), 'clickedItemY': itemY, 'property': selectedProperty, 'type': selectedPropertyType, 'simPickerActive': true }
             _showContextMenu(propertyMenuComponent.createObject(contactItem, properties))
@@ -132,7 +134,7 @@ ContactItem {
                     text: displayLabel
                     truncationMode: TruncationMode.Fade
                     onClicked: {
-                        if (type == 'phoneNumber' && Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
+                        if (type == 'phoneNumber' && promptSimSelection) {
                             contextMenu.property = property
                             contextMenu.type = type
                             simPicker.active = true

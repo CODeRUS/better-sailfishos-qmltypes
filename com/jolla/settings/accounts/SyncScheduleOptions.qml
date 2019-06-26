@@ -76,7 +76,7 @@ ValueButton {
            : qsTrId("settings-accounts-la-download_new_content")
 
     onClicked: {
-        pageStack.push(optionsComponent)
+        pageStack.animatorPush(optionsComponent)
     }
 
     onScheduleChanged: {
@@ -112,7 +112,7 @@ ValueButton {
                         root.schedule.enabled = false
                         root.schedule.peakScheduleEnabled = false
                         if (!root.isAlwaysOn) {
-                            root.alwaysOnChanged(true);
+                            root.alwaysOnChanged(true)
                         }
                         root._optionClicked()
                     }
@@ -135,7 +135,7 @@ ValueButton {
                         root.schedule.setIntervalSyncMode(accountSyncInterval)
                         root.schedule.peakScheduleEnabled = false
                         if (root.isAlwaysOn) {
-                            root.alwaysOnChanged(false);
+                            root.alwaysOnChanged(false)
                         }
                         root._optionClicked()
                     }
@@ -147,7 +147,7 @@ ValueButton {
                         root.schedule.enabled = false
                         root.schedule.peakScheduleEnabled = false
                         if (root.isAlwaysOn) {
-                            root.alwaysOnChanged(false);
+                            root.alwaysOnChanged(false)
                         }
                         root._optionClicked()
                     }
@@ -170,7 +170,7 @@ ValueButton {
                         root.schedule.setDefaultPeakSchedule()
                         root.schedule.peakScheduleEnabled = true
                         if (root.isAlwaysOn) {
-                            root.alwaysOnChanged(false);
+                            root.alwaysOnChanged(false)
                         }
                         root._optionClicked()
                     }

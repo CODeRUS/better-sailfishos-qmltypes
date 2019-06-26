@@ -25,11 +25,11 @@ Page {
         }
         onPinEntryCanceled: {
             clear()
-            pageStack.push(pinQuerySkippedComponent)
+            pageStack.animatorPush(pinQuerySkippedComponent)
         }
         onSimPermanentlyLocked: {
             clear()
-            pageStack.replace(pinLockedNoticeComponent)
+            pageStack.animatorReplace(pinLockedNoticeComponent)
         }
     }
 

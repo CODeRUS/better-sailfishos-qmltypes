@@ -11,22 +11,30 @@ ListModel {
     property bool active: true
     property date timestamp
     readonly property int locationId: weather ? weather.locationId : -1
+    readonly property bool online: WeatherConnectionHelper.online
     property int status: Weather.Loading
 
     function reload() {
         forecast.reload()
     }
-    function update() {
-        if (active) {
-            ready = true
-            if (WeatherModel.updateAllowed(180*60*1000)) { // update allowed every 3 hours
+
+    function updateAllowed() {
+        // update allowed every 3 hours
+        return status == XmlListModel.Error || WeatherModel.updateAllowed(180*60*1000)
+    }
+
+    function attemptReload() {
+        if (updateAllowed()) {
+            if (online) {
                 reload()
+            } else {
+                WeatherConnectionHelper.requestNetwork()
             }
         }
     }
 
-    onActiveChanged: update()
-    Component.onCompleted: update()
+    onActiveChanged: if (active) attemptReload()
+    onOnlineChanged: if (online) attemptReload()
 
     property var forecast: XmlListModel {
         onStatusChanged: {
@@ -65,7 +73,7 @@ ListModel {
         }
 
         query: "/xml/weather/fc"
-        source: ready && root.locationId > 0 ? "http://feed-jll.foreca.com/jolla-jan14fi/data.php?l=" + root.locationId + "&products=daily" : ""
+        source: active && root.locationId > 0 ? "http://feed-jll.foreca.com/jolla-jan14fi/data.php?l=" + root.locationId + "&products=daily" : ""
 
         XmlRole {
             name: "code"

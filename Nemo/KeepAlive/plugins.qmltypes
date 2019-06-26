@@ -39,7 +39,6 @@ Module {
         Property { name: "frequency"; type: "Frequency" }
         Property { name: "minimumWait"; type: "int" }
         Property { name: "maximumWait"; type: "int" }
-        Property { name: "id"; type: "string"; isReadonly: true }
         Signal { name: "triggered" }
         Method { name: "begin" }
         Method { name: "finished" }

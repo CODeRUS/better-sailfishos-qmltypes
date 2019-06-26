@@ -8,6 +8,8 @@ SimSelectorBase {
 
     property bool updateSelectedSim: true
     property bool restrictToActive
+    // A margin that is applied between sim indicators
+    property int innerMargin: Theme.paddingLarge * 2
 
     signal simSelected(int sim, string modemPath)
 
@@ -24,17 +26,28 @@ SimSelectorBase {
         id: simIndicators
 
         width: parent.width
+        height: {
+            var tallest = 0
+            for (var i = 0; i < repeater.count; ++i) {
+                tallest = Math.max(tallest, repeater.itemAt(i).implicitHeight)
+            }
+            return tallest
+        }
+
         Repeater {
+            id: repeater
+
             enabled: root.active
             model: modemManager.modemSimModel
-
             delegate: BackgroundItem {
                 id: backgroundItem
 
                 readonly property bool canHighlight: (!simIndicator.selected || Telephony.voiceSimUsageMode === Telephony.AlwaysAskSim)
 
                 width: parent.width / 2
-                height: Math.max(simIndicator.height + Theme.paddingMedium * 2, simIndicators.implicitHeight)
+                implicitHeight: simIndicator.height + Theme.paddingMedium * 2
+                height: simIndicators.height
+
                 // Disabling the whole component passes the event to the component under this.
                 // Thus, better to consume the event.
                 highlightedColor: canHighlight ? Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
@@ -74,6 +87,7 @@ SimSelectorBase {
                     operator: valid ? operatorDescription : errorState.shortErrorString
                     selected: root.activeSim === index && Telephony.voiceSimUsageMode === Telephony.ActiveSim
                     highlighted: backgroundItem.highlighted && backgroundItem.canHighlight
+                    innerMargin: root.innerMargin / 2
                 }
             }
         }

@@ -20,11 +20,6 @@ Page {
         opacity: evaluatingIndicator.running ? 0 : 1
         Behavior on opacity { FadeAnimation{} }
 
-        //% "Confirm with security code"
-        titleText: qsTrId("settings_devicelock-he-security_code_confirm_title")
-        //% "Confirm"
-        okText: qsTrId("settings_devicelock-bt-devicelock_confirm")
-
         showEmergencyButton: false
     }
 

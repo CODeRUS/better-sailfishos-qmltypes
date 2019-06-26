@@ -23,7 +23,7 @@ ListItem {
     function _regExpFor(term) {
         // Escape any significant chars in the search term
         term = term.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1")
-        return new RegExp('\\b' + term, 'i')
+        return new RegExp(term, 'i')
     }
 
     Row {

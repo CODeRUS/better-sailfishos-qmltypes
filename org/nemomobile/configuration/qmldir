@@ -1,2 +1,2 @@
 module org.nemomobile.configuration
-plugin nemoconfiguration
+typeinfo plugins.qmltypes

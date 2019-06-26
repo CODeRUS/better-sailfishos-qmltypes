@@ -1,7 +1,6 @@
 import QtQuick 2.4
 import QtMultimedia 5.4
 import Sailfish.Silica 1.0
-import Sailfish.Media 1.0
 import Sailfish.Policy 1.0
 import com.jolla.camera 1.0
 import org.nemomobile.policy 1.0
@@ -16,10 +15,10 @@ FocusScope {
     id: captureView
 
     property bool active
-    property bool windowVisible
     property int orientation
-    property int effectiveIso: Settings.global.iso
+    property int effectiveIso: Settings.mode.iso
     property bool inButtonLayout: captureOverlay == null || captureOverlay.inButtonLayout
+    property QtObject captureModel
 
     readonly property int viewfinderOrientation: {
         var rotation = 0
@@ -28,9 +27,8 @@ FocusScope {
         case Orientation.PortraitInverted: rotation = 180; break;
         case Orientation.LandscapeInverted: rotation = 270; break;
         }
-        return camera.position == Camera.FrontFace
-                ? (720 + camera.orientation - rotation) % 360
-                : (720 + camera.orientation + rotation) % 360
+
+        return (720 + camera.orientation + rotation) % 360
     }
     property int captureOrientation
     property int pageRotation
@@ -51,20 +49,14 @@ FocusScope {
     property bool _captureOnFocus
     property real _captureCountdown
 
-    readonly property real _viewfinderPosition: orientation == Orientation.Portrait || orientation == Orientation.Landscape
-                                                ? parent.x + x
-                                                : -parent.x - x
-
     readonly property real viewfinderOffset: Math.min(0, isPortrait ? (focusArea.width - height)/2 : (focusArea.width - width)/2)
 
     readonly property bool isPortrait: orientation == Orientation.Portrait
                 || orientation == Orientation.PortraitInverted
-    readonly property bool effectiveActive: ((activeFocus && active) || (windowVisible && recording)) && _applicationActive
+    readonly property bool effectiveActive: (active || recording) && _applicationActive
 
     readonly property bool _canCapture: (camera.captureMode == Camera.CaptureStillImage && camera.imageCapture.ready)
                 || (camera.captureMode == Camera.CaptureVideo && camera.videoRecorder.recorderStatus >= CameraRecorder.LoadedStatus)
-
-    property bool captureButtonPressed: !!captureOverlay && captureOverlay.captureButtonPressed
 
     property bool _captureQueued
     property bool captureBusy
@@ -75,7 +67,20 @@ FocusScope {
         }
     }
 
-    readonly property bool _mirrorViewfinder: Settings.global.cameraDevice == "secondary"
+    property bool handleVolumeKeys: camera.imageCapture.ready
+                                    && keysResource.acquired
+                                    && camera.captureMode == Camera.CaptureStillImage
+                                    && !captureView._captureOnFocus
+    property bool captureOnVolumeRelease
+
+    onHandleVolumeKeysChanged: {
+        if (!handleVolumeKeys)
+            captureOnVolumeRelease = false
+    }
+
+    readonly property bool _mirrorViewfinder: camera.position === Camera.FrontFace
+    readonly property bool _horizontalMirror: _mirrorViewfinder && camera.orientation % 180 == 0
+    readonly property bool _verticalMirror: _mirrorViewfinder && camera.orientation % 180 != 0
 
     readonly property bool _applicationActive: Qt.application.state == Qt.ApplicationActive
     on_ApplicationActiveChanged: if (_applicationActive) flashlightServiceProbe.checkFlashlightServiceStatus()
@@ -128,6 +133,8 @@ FocusScope {
     }
 
     function _triggerCapture() {
+        captureOnVolumeRelease = false // avoid duplicate capture if volume key and some other key trigger (e.g. shutter)
+
         if (captureTimer.running) {
             captureTimer.reset()
         } else if (startRecordTimer.running) {
@@ -164,7 +171,7 @@ FocusScope {
         if (effectiveIso == 0) {
             camera.exposure.setAutoIsoSensitivity()
         } else {
-            camera.exposure.manualIso = Settings.global.iso
+            camera.exposure.manualIso = Settings.mode.iso
         }
     }
 
@@ -296,19 +303,21 @@ FocusScope {
     }
 
     onRecordingStopped: {
-        captureModel.appendCapture(
-                    url,
-                    mimeType,
-                    captureOrientation,
-                    camera.videoRecorder.duration / 1000,
-                    camera.videoRecorder.resolution)
+        if (captureModel) {
+            captureModel.appendCapture(
+                        url,
+                        mimeType,
+                        captureOrientation,
+                        camera.videoRecorder.duration / 1000,
+                        camera.videoRecorder.resolution)
+        }
     }
 
     Camera {
         id: camera
 
         function lockAutoFocus() {
-            captureOverlay.close()
+            captureOverlay.closeMenus()
             // timed capture locks when timer triggers
             if (camera.captureMode == Camera.CaptureStillImage
                     && focus.focusMode != Camera.FocusInfinity
@@ -404,12 +413,14 @@ FocusScope {
                 camera.unlockAutoFocus()
                 captureBusy = false
 
-                captureModel.appendCapture(
-                            path,
-                            "image/jpeg",
-                            captureOrientation,
-                            0,
-                            camera.imageCapture.resolution)
+                if (captureModel) {
+                    captureModel.appendCapture(
+                                path,
+                                "image/jpeg",
+                                captureOrientation,
+                                0,
+                                camera.imageCapture.resolution)
+                }
             }
             onCaptureFailed: {
                 camera.unlockAutoFocus()
@@ -419,7 +430,7 @@ FocusScope {
         videoRecorder {
             resolution: Settings.mode.videoResolution
             onResolutionChanged: reload()
-            frameRate: 30
+            frameRate: Settings.mode.videoFrameRate
             audioChannels: 2
             audioSampleRate: Settings.global.audioSampleRate
             audioCodec: Settings.global.audioCodec
@@ -433,7 +444,12 @@ FocusScope {
             // could expect that locking focus on auto or continous behaves the same, but
             // continuous doesn't work as well
             focusMode: {
-                if (tapFocusActive) {
+                // The cameraStatus doesn't really matter as a precondition but incorporating
+                // it ensures the binding is reevaluated when the status changes and the desired
+                // focus mode is assigned. Otherwise QtMultimedia may reject a mode as unsupported
+                // and default to auto because the binding was evaluated in the unloaded state and
+                // real support was unknown at that time.
+                if (camera.cameraStatus == Camera.ActiveStatus && tapFocusActive) {
                     return Camera.FocusAuto
                 } else if (Settings.mode.focusDistanceValues.indexOf(Camera.FocusContinuous) >= 0) {
                     return Camera.FocusContinuous
@@ -454,8 +470,7 @@ FocusScope {
 
         viewfinder {
             resolution: Settings.mode.viewfinderResolution
-            minimumFrameRate: 30
-            maximumFrameRate: 30
+            // Let gst-droid decide the best framerate
         }
 
         metaData {
@@ -627,10 +642,12 @@ FocusScope {
         Repeater {
             model: camera.focus.focusZones
             delegate: Item {
-                x: focusArea.width * (captureView._mirrorViewfinder
+                x: focusArea.width * (captureView._horizontalMirror
                                       ? 1 - area.x - area.width
                                       : area.x)
-                y: focusArea.height * area.y
+                y: focusArea.height * (captureView._verticalMirror
+                                      ? 1 - area.y - area.height
+                                      : area.y)
                 width: focusArea.width * area.width
                 height: focusArea.height * area.height
 
@@ -645,7 +662,10 @@ FocusScope {
                     radius: width / 2
                     border {
                         width: Math.round(Theme.pixelRatio * 2)
-                        color: status == Camera.FocusAreaFocused ? Theme.highlightColor : "white"
+                        color: status == Camera.FocusAreaFocused
+                               ? (Theme.colorScheme == Theme.LightOnDark
+                                  ? Theme.highlightColor : Theme.highlightFromColor(Theme.highlightColor, Theme.LightOnDark))
+                               : "white"
                     }
                     color: "#00000000"
                 }
@@ -666,44 +686,58 @@ FocusScope {
         }
     }
 
-    // TODO: camera shouldn't commonly really use MediaKeys with GRABBED_KEYS, no need for global filtering,
-    // enough if only filtering inside the application
-    MediaKey {
-        id: volumeUp
-        enabled: camera.imageCapture.ready
-                    && keysResource.acquired
-                    && camera.captureMode == Camera.CaptureStillImage
-                    && !captureButtonPressed
-                    && !captureView._captureOnFocus
-        key: Qt.Key_VolumeUp
-        onPressed: camera.lockAutoFocus()
-        onReleased: {
-            if (enabled)
-                captureView._triggerCapture()
+    Keys.onVolumeDownPressed: {
+        if (handleVolumeKeys && !event.isAutoRepeat) {
+            camera.lockAutoFocus()
+            captureOnVolumeRelease = true
         }
     }
-    MediaKey {
-        id: volumeDown
-        enabled: volumeUp.enabled
-        key: Qt.Key_VolumeDown
-        onPressed: camera.lockAutoFocus()
-        onReleased: {
-            if (enabled)
-                captureView._triggerCapture()
+    Keys.onVolumeUpPressed: {
+        if (handleVolumeKeys && !event.isAutoRepeat) {
+            camera.lockAutoFocus()
+            captureOnVolumeRelease = true
         }
     }
-    MediaKey {
-        enabled: volumeUp.enabled
-        key: Qt.Key_CameraFocus
-        onPressed: camera.lockAutoFocus()
-        onReleased: camera.unlockAutoFocus()
+
+    function supportedKey(key) {
+        return key === Qt.Key_CameraFocus
+                || key === Qt.Key_Camera
+                || key === Qt.Key_VolumeDown
+                || key === Qt.Key_VolumeUp
     }
-    MediaKey {
-        enabled: volumeUp.enabled || (captureView.activeFocus && camera.captureMode == Camera.CaptureVideo)
-        key: Qt.Key_Camera
-        // compared to volume keys, this captures already on press.
-        // can be done because there's half pressed state too.
-        onPressed: captureView._triggerCapture()
+
+    Keys.onPressed: {
+        if (supportedKey(event.key)) {
+            event.accepted = true
+        }
+
+        if (event.isAutoRepeat) {
+            return
+        }
+
+        if (event.key == Qt.Key_CameraFocus) {
+            camera.lockAutoFocus()
+        } else if (event.key == Qt.Key_Camera) {
+            captureView._triggerCapture() // key having half-pressed state too so can capture already here
+        }
+    }
+
+    Keys.onReleased: {
+        if (supportedKey(event.key)) {
+            event.accepted = true
+        }
+
+        if (event.isAutoRepeat) {
+            return
+        }
+
+        if (event.key == Qt.Key_CameraFocus) {
+            // note: forces capture if it was still pending. debatable if that should be allowed to finish.
+            camera.unlockAutoFocus()
+        } else if ((event.key == Qt.Key_VolumeDown || event.key == Qt.Key_VolumeUp)
+                   && captureOnVolumeRelease && handleVolumeKeys) {
+            captureView._triggerCapture()
+        }
     }
 
     Permissions {
@@ -716,6 +750,17 @@ FocusScope {
         Resource {
             id: keysResource
             type: Resource.ScaleButton
+            optional: true
+        }
+    }
+
+    Permissions {
+        enabled: Qt.application.state == Qt.ApplicationActive
+        autoRelease: true
+        applicationClass: "camera"
+
+        Resource {
+            type: Resource.SnapButton
             optional: true
         }
     }

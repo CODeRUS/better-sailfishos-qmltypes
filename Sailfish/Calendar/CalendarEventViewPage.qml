@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Calendar 1.0
+import Sailfish.Calendar 1.0 as Calendar // QTBUG-27645
 import org.nemomobile.calendar 1.0
 import Nemo.DBus 2.0
 
@@ -15,7 +15,7 @@ Page {
         id: query
         property string startTimeString
         onStartTimeStringChanged: {
-            query.startTime = CalendarUtils.parseTime(query.startTimeString)
+            query.startTime = Calendar.CalendarUtils.parseTime(query.startTimeString)
         }
     }
 
@@ -31,8 +31,7 @@ Page {
         contentHeight: column.height + Theme.paddingLarge
 
         PullDownMenu {
-            id: pulley
-            visible: !!query.event && CalendarUtils.calendarAppInstalled
+            visible: !!query.event && Calendar.CalendarUtils.calendarAppInstalled
             MenuItem {
                 //% "Show in Calendar"
                 text: qsTrId("sailfish_calendar-me-show_event_in_calendar")
@@ -50,12 +49,15 @@ Page {
 
             PageHeader {
                 width: parent.width
+                title: query.event ? query.event.displayLabel : ""
+                wrapMode: Text.Wrap
             }
 
             CalendarEventView {
                 id: eventDetails
                 event: query.event
                 occurrence: query.occurrence
+                showHeader: false
                 Connections {
                     target: query
                     onAttendeesChanged: {

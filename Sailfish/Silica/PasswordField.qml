@@ -43,6 +43,10 @@ TextField {
     property bool _usePasswordEchoMode: true
     property int _buttonLeftMargin: Theme.paddingLarge
 
+    // Used by SettingsPasswordField for overriding toggle behavior
+    property bool _automaticEchoModeToggle: true
+    signal _echoModeToggleClicked
+
     width: parent ? parent.width : Screen.width
     textRightMargin: textMargin
     echoMode: _usePasswordEchoMode ? passwordEchoMode : TextInput.Normal
@@ -78,6 +82,12 @@ TextField {
         FadeAnimation { target: passwordVisibilityButton }
     }
 
+    // Hide the password when user leaves the app
+    Connections {
+        target: Qt.application
+        onActiveChanged: if (!Qt.application.active && text.length > 0) _usePasswordEchoMode = true
+    }
+
     MouseArea {
         id: passwordVisibilityButton
         parent: root    // ensure the field is visible, avoid auto-parenting to TextBase contentItem
@@ -88,7 +98,10 @@ TextField {
         enabled: false
 
         onClicked: {
-            root._usePasswordEchoMode = !root._usePasswordEchoMode
+            if (_automaticEchoModeToggle) {
+                root._usePasswordEchoMode = !root._usePasswordEchoMode
+            }
+            _echoModeToggleClicked()
         }
 
         Text {

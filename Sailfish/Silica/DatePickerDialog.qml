@@ -210,7 +210,7 @@ Dialog {
                     } else {
                         _yearSelectionPage.currentYear = datePicker.year
                     }
-                    pageStack.push(_yearSelectionPage)
+                    pageStack.animatorPush(_yearSelectionPage)
                 }
 
                 Label {

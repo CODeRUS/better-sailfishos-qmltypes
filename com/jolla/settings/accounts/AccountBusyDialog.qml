@@ -119,11 +119,11 @@ Dialog {
     Column {
         anchors.centerIn: parent
         spacing: Theme.paddingLarge
-        opacity: busyIndicator.opacity
 
         Label {
             id: statusLabel
             width: root.width - Theme.horizontalPageMargin*2
+            opacity: busyIndicator.opacity
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
             color: Theme.highlightColor

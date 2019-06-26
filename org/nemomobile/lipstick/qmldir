@@ -1,2 +1,2 @@
 module org.nemomobile.lipstick
-plugin lipstickplugin
+typeinfo plugins.qmltypes

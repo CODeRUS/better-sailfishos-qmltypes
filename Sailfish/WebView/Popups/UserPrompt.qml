@@ -19,7 +19,6 @@ Dialog {
     default property alias defaultContent: promptContent.children
 
     SilicaFlickable {
-        id: flickable
         anchors.fill: parent
         contentHeight: contentColumn.height
 

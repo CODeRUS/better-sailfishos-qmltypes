@@ -130,16 +130,6 @@ Module {
             name: "create"
             Parameter { name: "source"; type: "QUrl" }
         }
-        Method {
-            name: "highlightDimmerColor"
-            type: "QColor"
-            Parameter { name: "color"; type: "QColor" }
-        }
-        Method {
-            name: "highlightBackgroundColor"
-            type: "QColor"
-            Parameter { name: "color"; type: "QColor" }
-        }
     }
     Component {
         name: "PhotoModel"

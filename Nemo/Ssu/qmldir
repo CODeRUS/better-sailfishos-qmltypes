@@ -1,2 +1,2 @@
 module Nemo.Ssu
-plugin declarativessu
+typeinfo plugins.qmltypes

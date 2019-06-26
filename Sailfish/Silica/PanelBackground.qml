@@ -56,6 +56,7 @@ Item {
 
         width: (rotation % 180 == 0) ? root.width : root.height
         height: (rotation % 180 == 0) ? root.height : root.width
+        anchors.centerIn: parent
 
         gradient: Gradient {
             GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.15) }

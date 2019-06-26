@@ -145,8 +145,8 @@ Page {
                 //% "Link"
                 text: qsTrId("components_contacts-me-link")
                 onClicked: {
-                    pageStack.push(Qt.resolvedUrl("ContactLinksPage.qml"),
-                                   {"person": contactCard.contact, "peopleModel": root.peopleModel})
+                    pageStack.animatorPush(Qt.resolvedUrl("ContactLinksPage.qml"),
+                                           {"person": contactCard.contact, "peopleModel": root.peopleModel})
                 }
             }
 
@@ -161,7 +161,7 @@ Page {
                         "type": "text/vcard",
                         "icon": contactCard.contact.avatarPath.toString()
                     }
-                    pageStack.push(Qt.resolvedUrl("ContactSharePage.qml"), {"content": content})
+                    pageStack.animatorPush(Qt.resolvedUrl("ContactSharePage.qml"), {"content": content})
                 }
             }
 

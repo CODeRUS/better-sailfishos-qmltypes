@@ -18,6 +18,7 @@ Module {
         Property { name: "cameraEnabled"; type: "bool"; isReadonly: true }
         Property { name: "locationSettingsEnabled"; type: "bool"; isReadonly: true }
         Property { name: "osUpdatesEnabled"; type: "bool"; isReadonly: true }
+        Property { name: "flightModeToggleEnabled"; type: "bool"; isReadonly: true }
         Property { name: "wlanToggleEnabled"; type: "bool"; isReadonly: true }
         Property { name: "internetSharingEnabled"; type: "bool"; isReadonly: true }
         Property { name: "sideLoadingSettingsEnabled"; type: "bool"; isReadonly: true }
@@ -28,6 +29,11 @@ Module {
         Property { name: "screenshotEnabled"; type: "bool"; isReadonly: true }
         Property { name: "microphoneEnabled"; type: "bool"; isReadonly: true }
         Property { name: "mobileNetworkSettingsEnabled"; type: "bool"; isReadonly: true }
+        Property { name: "networkProxySettingsEnabled"; type: "bool"; isReadonly: true }
+        Property { name: "networkDataCounterSettingsEnabled"; type: "bool"; isReadonly: true }
+        Property { name: "callStatisticsSettingsEnabled"; type: "bool"; isReadonly: true }
+        Property { name: "cellularTechnologySettingsEnabled"; type: "bool"; isReadonly: true }
+        Property { name: "mobileDataAccessPointSettingsEnabled"; type: "bool"; isReadonly: true }
     }
     Component {
         name: "Sailfish::PolicyValue"
@@ -57,7 +63,13 @@ Module {
                 "UsbDiagnosticModeEnabled": 17,
                 "UsbAdbEnabled": 18,
                 "DateTimeSettingsEnabled": 19,
-                "MicrophoneEnabled": 20
+                "MicrophoneEnabled": 20,
+                "FlightModeToggleEnabled": 21,
+                "NetworkProxySettingsEnabled": 22,
+                "NetworkDataCounterSettingsEnabled": 23,
+                "CallStatisticsSettingsEnabled": 24,
+                "CellularTechnologySettingsEnabled": 25,
+                "MobileDataAccessPointSettingsEnabled": 26
             }
         }
         Property { name: "policyType"; type: "int" }

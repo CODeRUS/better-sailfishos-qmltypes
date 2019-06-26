@@ -28,6 +28,8 @@ Page {
 
     property bool _emailInstalled
 
+    property var popDestination
+
     _clickablePageIndicators: !(isLandscape && emailComposer.item && emailComposer.item.toFieldHasFocus)
 
     DBusInterface {
@@ -54,7 +56,7 @@ Page {
         ViewPlaceholder {
             id: placeholder
             //: Email application is not installed, user should be guided to Jolla store for installing it.
-            //% "Install Jolla Email from Store."
+            //% "Install Email from Jolla Store."
             text: qsTrId("components_email-la-install-email-application-from-store")
 
             //: "Placeholder hint text to guide user to trigger email application install from store"
@@ -65,9 +67,8 @@ Page {
 
         PullDownMenu {
             MenuItem {
-
                 //: "Pull down menu item to install email application from store"
-                //% "Install Jolla Email"
+                //% "Install Email"
                 text: qsTrId("components_email-me-install-email-application")
                 onClicked: storeInterface.openStoreEmail()
             }
@@ -82,7 +83,7 @@ Page {
 
         onLoaded: {
             messageComposer.attachmentsModel = Qt.binding(function() { return item.attachmentsModel })
-            //append any existent temp attachments
+            // append any existent temp attachments
             for (var i = 0; i < tmpAttachmentFiles.count; ++i) {
                 messageComposer.attachmentsModel.append(tmpAttachmentFiles.get(i))
             }
@@ -103,7 +104,9 @@ Page {
                                             "messageId": messageId,
                                             "action": action,
                                             "originalMessageId": originalMessageId,
-                                            "accountId": accountId
+                                            "accountId": accountId,
+                                            "popDestination": popDestination,
+                                            "popOnDraftSaved": true
                                         })
             } else {
                 _emailInstalled = false

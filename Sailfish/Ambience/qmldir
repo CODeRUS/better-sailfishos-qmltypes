@@ -1,5 +1,5 @@
 module Sailfish.Ambience
-plugin declarativeambience-qt5
 AmbienceColorPicker 1.0 AmbienceColorPicker.qml
 AmbienceInfo 1.0 AmbienceInfo.qml
 PhotoInfo 1.0 PhotoInfo.qml
+typeinfo plugins.qmltypes

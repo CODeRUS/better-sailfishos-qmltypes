@@ -1,14 +1,18 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Calendar 1.0
 import Sailfish.TextLinking 1.0
 import org.nemomobile.calendar 1.0
+import Sailfish.Calendar 1.0 as Calendar
+import org.nemomobile.notifications 1.0 as SystemNotifications
 
 Column {
     id: root
 
     property QtObject event
     property QtObject occurrence
+    property alias showDescription: descriptionText.visible
+    property alias showHeader: eventHeader.visible
+    property bool showSelector: !showHeader // by default, show calendar selector if colored header is not visible
 
     function setAttendees(attendeeList) {
         var newOrganizer = ""
@@ -43,6 +47,7 @@ Column {
     spacing: Theme.paddingMedium
 
     Item {
+        id: eventHeader
         height: displayLabel.height
         width: parent.width - 2*Theme.horizontalPageMargin
         x: Theme.horizontalPageMargin
@@ -80,7 +85,8 @@ Column {
         Column {
             id: timeColumn
 
-            property bool multiDay: {
+            readonly property bool twoLineDates: !startDate.fitsOneLine || !endDate.fitsOneLine
+            readonly property bool multiDay: {
                 if (!root.occurrence) {
                     return false
                 }
@@ -92,22 +98,24 @@ Column {
                         || start.getDate() !== end.getDate()
             }
 
+            width: parent.width - (recurrenceIcon.visible ? recurrenceIcon.width : 0)
+
             CalendarEventDate {
+                id: startDate
+
                 eventDate: root.occurrence ? root.occurrence.startTime : new Date(-1)
                 showTime: parent.multiDay && (root.event && !root.event.allDay)
                 timeContinued: parent.multiDay
-            }
-
-            Item {
-                visible: parent.multiDay
-                width: parent.width
-                height: Theme.paddingLarge
+                useTwoLines: timeColumn.twoLineDates
             }
 
             CalendarEventDate {
+                id: endDate
+
                 visible: parent.multiDay
                 eventDate: root.occurrence ? root.occurrence.endTime : new Date(-1)
                 showTime: root.event && !root.event.allDay
+                useTwoLines: timeColumn.twoLineDates
             }
 
             Text {
@@ -123,19 +131,43 @@ Column {
                                  : ""
             }
         }
-        Row {
-            anchors.right: parent.right
-            height: parent.height
-            Image {
-                visible: root.event && root.event.reminder != CalendarEvent.ReminderNone
-                anchors.verticalCenter: parent.verticalCenter
-                source: "image://theme/icon-s-alarm?" + Theme.highlightColor
+        Image {
+            id: recurrenceIcon
+            visible: root.event && root.event.recur !== CalendarEvent.RecurOnce
+            anchors {
+                right: parent.right
+                verticalCenter: parent.verticalCenter
             }
-            Image {
-                visible: root.event && root.event.recur != CalendarEvent.RecurOnce
-                anchors.verticalCenter: parent.verticalCenter
-                source: "image://theme/icon-s-sync?" + Theme.highlightColor
+            source: "image://theme/icon-s-sync?" + Theme.highlightColor
+        }
+    }
+
+    Item {
+        // reminderRow
+        width: parent.width - 2*Theme.horizontalPageMargin
+        height: reminderText.height
+        x: Theme.horizontalPageMargin
+        visible: root.event && root.event.reminder >= 0
+
+        Label {
+            id: reminderText
+            width: parent.width - reminderIcon.width
+            anchors.left: parent.left
+            color: Theme.highlightColor
+            wrapMode: Text.WordWrap
+            //: %1 gets replaced with reminder time, e.g. "15 minutes before"
+            //% "Reminder %1"
+            text: root.event ? qsTrId("sailfish_calendar-view-reminder")
+                               .arg(Calendar.CommonCalendarTranslations.getReminderText(root.event.reminder))
+                             : ""
+        }
+        Image {
+            id: reminderIcon
+            anchors {
+                verticalCenter: parent.verticalCenter
+                right: parent.right
             }
+            source: "image://theme/icon-s-alarm?" + Theme.highlightColor
         }
     }
 
@@ -162,11 +194,72 @@ Column {
                 x: locationIcon.width
                 anchors.top: lineCount > 1 ? parent.top : undefined
                 anchors.verticalCenter: lineCount > 1 ? undefined : locationIcon.verticalCenter
-                opacity: 0.7
                 color: Theme.highlightColor
                 font.pixelSize: Theme.fontSizeSmall
                 wrapMode: Text.WordWrap
                 text: root.event ? root.event.location : ""
+            }
+        }
+
+        Loader {
+            active: event && event.rsvp
+            width: parent.width
+            sourceComponent: Item {
+                width: parent.width
+                height: responseButtons.height + responseButtons.anchors.topMargin + Theme.paddingMedium
+                InvitationResponseButtons {
+                    id: responseButtons
+                    width: parent.width
+                    anchors.top: parent.top
+                    anchors.topMargin: Theme.paddingMedium
+                    responseState: event ? event.ownerStatus : CalendarEvent.ResponseUnspecified
+                    enabled: !disableTimer.running
+                    onResponseStateChanged: {
+                        disableTimer.stop()
+                    }
+
+                    onCalendarInvitationResponded: {
+                        var res = root.event.sendResponse(response)
+                        disableTimer.start()
+                        if (!res) {
+                            var previewText
+                            switch (response) {
+                            case CalendarEvent.ResponseAccept:
+                                //: Failed to send invitation response (accept)
+                                //% "Failed to accept invitation"
+                                previewText = qsTrId("sailfish_calendar-la-response_failed_body_accept")
+                                break
+                            case CalendarEvent.ResponseTentative:
+                                //: Failed to send invitation response (tentative)
+                                //% "Failed to tentatively accept invitation"
+                                previewText = qsTrId("sailfish_calendar-la-response_failed_body_tentative")
+                                break
+                            case CalendarEvent.ResponseDecline:
+                                //: Failed to send invitation response (decline)
+                                //% "Failed to decline invitation"
+                                previewText = qsTrId("sailfish_calendar-la-la-response_failed_body_decline")
+                                break
+                            default:
+                                break
+                            }
+                            if (previewText.length > 0) {
+                                systemNotification.previewBody = previewText
+                                systemNotification.publish()
+                            }
+                        }
+                    }
+                }
+                Timer {
+                    id: disableTimer
+                    interval: 5000
+                    repeat: false
+                }
+                SystemNotifications.Notification {
+                    id: systemNotification
+
+                    icon: "icon-lock-calendar"
+                    isTransient: true
+                }
             }
         }
 
@@ -197,7 +290,6 @@ Column {
                 Label {
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    opacity: 0.7
                     visible: attendees.organizer != ""
                     color: Theme.highlightColor
                     font.pixelSize: Theme.fontSizeSmall
@@ -211,7 +303,6 @@ Column {
                 Label {
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    opacity: 0.7
                     visible: attendees.mandatoryAttendees != ""
                     color: Theme.highlightColor
                     font.pixelSize: Theme.fontSizeSmall
@@ -225,7 +316,6 @@ Column {
                 Label {
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    opacity: 0.7
                     visible: attendees.optionalAttendees != ""
                     color: Theme.highlightColor
                     font.pixelSize: Theme.fontSizeSmall
@@ -240,7 +330,7 @@ Column {
         }
 
         SectionHeader {
-            visible: descriptionText.text != ""
+            visible: descriptionText.visible && descriptionText.text != ""
             //% "Description:"
             text: qsTrId("sailfish_calendar-he-event_description")
         }
@@ -254,6 +344,21 @@ Column {
             font.pixelSize: Theme.fontSizeSmall
             wrapMode: Text.WordWrap
             plainText: root.event ? root.event.description : ""
+        }
+    }
+
+    CalendarSelector {
+        name: query.isValid ? query.name : ""
+        localCalendar: query.localCalendar
+        description: query.isValid ? query.description : ""
+        color: query.isValid ? query.color : "transparent"
+        accountIcon: query.isValid ? query.accountIcon : ""
+        enabled: false
+        opacity: 1.0
+        visible: showSelector
+        NotebookQuery {
+            id: query
+            targetUid: (root.event && root.event.calendarUid) ? root.event.calendarUid : ""
         }
     }
 }

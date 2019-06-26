@@ -16,15 +16,17 @@ ValueButton {
     value: Format.formatDate(wallClock.time, Format.DateLong)
 
     onClicked: {
-        var dialog = pageStack.push("Sailfish.Silica.DatePickerDialog", { "date": root.defaultDate })
-        dialog.date = Qt.binding(function() { return root.defaultDate })
-        dialog.statusChanged.connect(function() {
-            // Currently qmsystem (used by time settings) changes the date/time synchronously, which
-            // causes a pause in the animation if done during a page transition. Wait until the page
-            // is popped to avoid this.
-            if (dialog.status === PageStatus.Inactive && dialog.result === DialogResult.Accepted) {
-                dateTimeSettings.setDate(dialog.date)
-            }
+        var obj = pageStack.animatorPush("Sailfish.Silica.DatePickerDialog", { "date": root.defaultDate })
+        obj.pageCompleted.connect(function(dialog) {
+            dialog.date = Qt.binding(function() { return root.defaultDate })
+            dialog.statusChanged.connect(function() {
+                // Currently qmsystem (used by time settings) changes the date/time synchronously, which
+                // causes a pause in the animation if done during a page transition. Wait until the page
+                // is popped to avoid this.
+                if (dialog.status === PageStatus.Inactive && dialog.result === DialogResult.Accepted) {
+                    dateTimeSettings.setDate(dialog.date)
+                }
+            })
         })
     }
 

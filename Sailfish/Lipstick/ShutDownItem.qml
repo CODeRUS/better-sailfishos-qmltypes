@@ -31,7 +31,7 @@ Rectangle {
         anchors.centerIn: parent
         width: parent.width - 2 * Theme.horizontalPageMargin
         // Non themable color since we always want it white over black
-        color: "white"
+        color: Theme.lightPrimaryColor
         font.pixelSize: Theme.fontSizeExtraLarge
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.WordWrap

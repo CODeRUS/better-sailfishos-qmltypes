@@ -2,7 +2,7 @@ import QtQuick 2.2
 import Sailfish.Silica 1.0
 import Sailfish.Lipstick 1.0
 
-PixelAlignedItem {
+PixelAlignedFocusScope {
     id: homescreenItem
 
     property Item leftItem

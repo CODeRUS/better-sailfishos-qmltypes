@@ -38,8 +38,8 @@ import Sailfish.Silica 1.0
 SilicaFlickable {
     id: panel
 
-    readonly property bool expanded: open || horizontalAnimation.running || verticalAnimation.running
     property bool open
+    readonly property bool expanded: open || horizontalAnimation.running || verticalAnimation.running
     readonly property bool moving: horizontalAnimation.running || verticalAnimation.running || mouseArea.drag.active
     property int dock: Dock.Bottom
     property bool modal
@@ -70,6 +70,7 @@ SilicaFlickable {
     property bool _isVertical: _managedDock == Dock.Top || _managedDock == Dock.Bottom
     property real _threshold: Math.min((_isVertical ? height / 3 : width / 3), Theme.pixelRatio*90)
     property bool _initialized
+    property bool _wasOpen
 
     property Component background: PanelBackground {
         position: dock
@@ -77,7 +78,6 @@ SilicaFlickable {
 
     visible: expanded
 
-    onOpenChanged: _initialized = true
     function show(immediate) {
         _initialized = true
         _immediate = !!immediate
@@ -92,12 +92,22 @@ SilicaFlickable {
     }
 
     Component.onCompleted: {
-        if (parent === __silica_applicationwindow_instance.contentItem) {
+        if (__silica_applicationwindow_instance && parent === __silica_applicationwindow_instance.contentItem) {
             // The panel is most probably a direct child of ApplicationWindow and should not be
             // parented on a resizing item, i.e. contentItem, but a non-resizing (but still
             // orientation aware) item instead, i.e. _rotatingItem.
             parent = __silica_applicationwindow_instance._rotatingItem
         }
+
+        // before allowing opening wait for content item's
+        // (e.g. column's) async height changes to kick in
+        delayedInitialization.restart()
+    }
+
+    Timer {
+        id: delayedInitialization
+        interval: 16
+        onTriggered: _initialized = true
     }
 
     onDockChanged: {
@@ -135,46 +145,85 @@ SilicaFlickable {
             "
     }
 
-    Binding {
-        target: panel
-        property: "x"
-        value: {
-            if (_managedDock == Dock.Left) {
-                return open ? 0 : -panel.width
-            } else if (_managedDock == Dock.Right && panel.parent) {
-                return open ? panel.parent.width - panel.width : panel.parent.width
-            } else {
-                return 0
+    // State transitions would be more appropriate, but the Qt Quick Transition animation
+    // jumps to the end position before animating from beginning to the end, which causes
+    // various issues when the docked panel reduces page height and flickable viewport.
+    onTargetXChanged: {
+        if ((_wasOpen !== open || verticalAnimation.running) && _initialized && !_immediate) {
+            horizontalBehavior.enabled = true
+        }
+        x = targetX
+        horizontalBehavior.enabled = false
+        _wasOpen = open
+    }
+
+    onTargetYChanged: {
+        if ((_wasOpen !== open || horizontalAnimation.running) && _initialized && !_immediate) {
+            verticalBehavior.enabled = true
+        }
+        y = targetY
+        verticalBehavior.enabled = false
+        _wasOpen = open
+    }
+
+    property real targetX: {
+        if (_managedDock == Dock.Left) {
+            return -panel.width
+        } else if (_managedDock == Dock.Right && panel.parent) {
+            return panel.parent.width
+        } else {
+            return 0
+        }
+    }
+
+    property real targetY: {
+        if (_managedDock == Dock.Top) {
+            return -panel.height
+        } else if (_managedDock == Dock.Bottom && panel.parent) {
+            return panel.parent.height
+        } else {
+            return 0
+        }
+    }
+
+    states: State {
+        name: "open"
+        when: open && _initialized
+        PropertyChanges {
+            target: panel
+            targetX: {
+                if (_managedDock == Dock.Left) {
+                    return 0
+                } else if (_managedDock == Dock.Right && panel.parent) {
+                    return panel.parent.width - panel.width
+                } else {
+                    return 0
+                }
+            }
+            targetY: {
+                if (_managedDock == Dock.Top) {
+                    return 0
+                } else if (_managedDock == Dock.Bottom && panel.parent) {
+                    return panel.parent.height - panel.height
+                } else {
+                    return 0
+                }
             }
         }
-        when: horizontalBehavior.enabled || panel._immediate || !panel._initialized
     }
+
     Behavior on x {
         id: horizontalBehavior
-        enabled: !mouseArea.drag.active && !panel._immediate && panel._initialized
+        enabled: false
         NumberAnimation {
             id: horizontalAnimation
             duration: animationDuration; easing.type: Easing.OutQuad
         }
     }
 
-    Binding {
-        target: panel
-        property: "y"
-        value: {
-            if (_managedDock == Dock.Top) {
-                return open ? 0 : -panel.height
-            } else if (_managedDock == Dock.Bottom && panel.parent) {
-                return open ? panel.parent.height - panel.height : panel.parent.height
-            } else {
-                return 0
-            }
-        }
-        when: verticalBehavior.enabled || panel._immediate || !panel._initialized
-    }
     Behavior on y {
         id: verticalBehavior
-        enabled: !mouseArea.drag.active && !panel._immediate && panel._initialized 
+        enabled: false
         NumberAnimation {
             id: verticalAnimation
             duration: animationDuration; easing.type: Easing.OutQuad
@@ -200,12 +249,24 @@ SilicaFlickable {
             axis: panel._isVertical ? Drag.YAxis : Drag.XAxis
             filterChildren: true
             onActiveChanged: {
-                if (!drag.active
-                        &&((panel._managedDock == Dock.Left   && panel.x < -panel._threshold && panel._direction <= 0)
-                        || (panel._managedDock == Dock.Top    && panel.y < -panel._threshold && panel._direction <= 0)
-                        || (panel._managedDock == Dock.Right  && panel.x - drag.minimumX >  panel._threshold && panel._direction >= 0)
-                        || (panel._managedDock == Dock.Bottom && panel.y - drag.minimumY >  panel._threshold && panel._direction >= 0))) {
-                    panel.open = false
+                if (!drag.active) {
+                    if ((panel._managedDock == Dock.Left          && panel.x < -panel._threshold && panel._direction <= 0)
+                            || (panel._managedDock == Dock.Top    && panel.y < -panel._threshold && panel._direction <= 0)
+                            || (panel._managedDock == Dock.Right  && panel.x - drag.minimumX >  panel._threshold && panel._direction >= 0)
+                            || (panel._managedDock == Dock.Bottom && panel.y - drag.minimumY >  panel._threshold && panel._direction >= 0)) {
+                        panel.open = false
+                    } else {
+                        if (targetX !== panel.x) {
+                            horizontalBehavior.enabled = true
+                            panel.x = targetX
+                            horizontalBehavior.enabled = false
+                        }
+                        if (targetY !== panel.y) {
+                            verticalBehavior.enabled = true
+                            panel.y = targetY
+                            verticalBehavior.enabled = false
+                        }
+                    }
                 }
             }
         }

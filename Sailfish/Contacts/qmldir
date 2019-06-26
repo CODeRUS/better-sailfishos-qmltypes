@@ -16,7 +16,7 @@ ContactPresenceUpdate 1.0 ContactPresenceUpdate.qml
 TemporaryContactCardPage 1.0 TemporaryContactCardPage.qml
 RecipientField 1.0 RecipientField.qml
 ContactImportPage 1.0 ContactImportPage.qml
-ContactBluetoothImport 1.0 ContactBluetoothImport.qml
 PresenceDetailsPage 1.0 PresenceDetailsPage.qml
 SelfPresenceDetailsPage 1.0 SelfPresenceDetailsPage.qml
 GlobalPresenceSwitchBar 1.0 GlobalPresenceSwitchBar.qml
+typeinfo plugins.qmltypes

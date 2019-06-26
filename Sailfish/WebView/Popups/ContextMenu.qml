@@ -108,7 +108,6 @@ Rectangle {
             visible: !isHyperTextLink && !isImage
             text: {
                 if (isMailto) {
-                    //: Write email
                     //% "Write email"
                     return qsTrId("sailfish_components_webview_popups-me-write-email")
                 } else if (isTel) {
@@ -155,7 +154,7 @@ Rectangle {
             onClicked: {
                 root._hide()
                 if (pageStack != null && pageStack != undefined) {
-                    pageStack.push(shareLinkPage, {"link" : root.linkHref, "linkTitle": root.linkTitle})
+                    pageStack.animatorPush(shareLinkPage, {"link" : root.linkHref, "linkTitle": root.linkTitle})
                 }
             }
         }

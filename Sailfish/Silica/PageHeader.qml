@@ -32,7 +32,7 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "private/Util.js" as Util
 
@@ -53,7 +53,7 @@ Item {
     onDescriptionChanged: {
         if (description.length > 0 && !_descriptionLabel) {
             var component = Qt.createComponent(Qt.resolvedUrl("private/PageHeaderDescription.qml"))
-            if (component.status == Component.Ready) {
+            if (component.status === Component.Ready) {
                 _descriptionLabel = component.createObject(pageHeader)
             } else {
                 console.warn("PageHeaderDescription.qml instantiation failed " + component.errorString())
@@ -69,7 +69,7 @@ Item {
 
     width: parent ? parent.width : Screen.width
     // set height that keeps the first line of text aligned with the page indicator
-    height: Math.max(_preferredHeight, headerText.y + headerText.height + (_descriptionLabel ? _descriptionLabel.height : 0) + Theme.paddingMedium)
+    height: Math.max(_preferredHeight, headerText.y + headerText.height + ((_descriptionLabel && description.length > 0) ? _descriptionLabel.height : 0) + Theme.paddingMedium)
 
     Label {
         id: headerText
@@ -77,7 +77,8 @@ Item {
         width: Math.min(implicitWidth, parent.width - leftMargin - rightMargin)
         truncationMode: TruncationMode.Fade
         color: Theme.highlightColor
-        y: _preferredHeight/2 - height/2
+        // align first line with page indicator
+        y: Math.floor(_preferredHeight/2 - metrics.height/2)
         anchors {
             right: parent.right
             rightMargin: pageHeader.rightMargin
@@ -85,6 +86,11 @@ Item {
         font {
             pixelSize: Theme.fontSizeLarge
             family: Theme.fontFamilyHeading
+        }
+        TextMetrics {
+            id: metrics
+            font: headerText.font
+            text: "X"
         }
     }
     Item {

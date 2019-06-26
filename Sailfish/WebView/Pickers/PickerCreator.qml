@@ -69,30 +69,30 @@ Item {
         if (mode == _nsIFilePicker_modeOpenMultiple) {
             switch (filter) {
             case _nsIFilePicker_filterImages:
-                pageStack.push(Qt.resolvedUrl("MultiImagePicker.qml"), {"creator": pickerCreator})
+                pageStack.animatorPush(Qt.resolvedUrl("MultiImagePicker.qml"), {"creator": pickerCreator})
                 break
             case _nsIFilePicker_filterAudio:
-                pageStack.push(Qt.resolvedUrl("MultiMusicPicker.qml"), {"creator": pickerCreator})
+                pageStack.animatorPush(Qt.resolvedUrl("MultiMusicPicker.qml"), {"creator": pickerCreator})
                 break
             case _nsIFilePicker_filterVideo:
-                pageStack.push(Qt.resolvedUrl("MultiVideoPicker.qml"), {"creator": pickerCreator})
+                pageStack.animatorPush(Qt.resolvedUrl("MultiVideoPicker.qml"), {"creator": pickerCreator})
                 break
             default:
-                pageStack.push(Qt.resolvedUrl("MultiContentPicker.qml"), {"creator": pickerCreator})
+                pageStack.animatorPush(Qt.resolvedUrl("MultiContentPicker.qml"), {"creator": pickerCreator})
             }
         } else if (mode == _nsIFilePicker_modeOpen) {
             switch (filter) {
             case _nsIFilePicker_filterImages:
-                pageStack.push(Qt.resolvedUrl("ImagePicker.qml"), {"creator": pickerCreator})
+                pageStack.animatorPush(Qt.resolvedUrl("ImagePicker.qml"), {"creator": pickerCreator})
                 break
             case _nsIFilePicker_filterAudio:
-                pageStack.push(Qt.resolvedUrl("MusicPicker.qml"), {"creator": pickerCreator})
+                pageStack.animatorPush(Qt.resolvedUrl("MusicPicker.qml"), {"creator": pickerCreator})
                 break
             case _nsIFilePicker_filterVideo:
-                pageStack.push(Qt.resolvedUrl("VideoPicker.qml"), {"creator": pickerCreator})
+                pageStack.animatorPush(Qt.resolvedUrl("VideoPicker.qml"), {"creator": pickerCreator})
                 break
             default:
-                pageStack.push(Qt.resolvedUrl("ContentPicker.qml"), {"creator": pickerCreator})
+                pageStack.animatorPush(Qt.resolvedUrl("ContentPicker.qml"), {"creator": pickerCreator})
             }
         } else {
             console.log("Unsupported file open mode: " + mode)

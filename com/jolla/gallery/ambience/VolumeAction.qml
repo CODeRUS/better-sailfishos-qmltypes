@@ -21,6 +21,11 @@ AmbienceAction {
 
         height: slider.y + slider.height
 
+        property color primaryColor: Theme.primaryColor
+        property color secondaryColor: Theme.secondaryColor
+        property color highlightColor: Theme.highlightColor
+        property color secondaryHighlightColor: Theme.secondaryHighlightColor
+        property int colorScheme: Theme.colorScheme
         property int volume: ambience[action.property]
         onVolumeChanged: slider.value = volume
 
@@ -33,7 +38,7 @@ AmbienceAction {
                 verticalCenter: editor.top
                 verticalCenterOffset: Theme.itemSizeSmall / 2
             }
-            color: Theme.highlightColor
+            color: editor.highlightColor
             text: action.label
         }
 
@@ -43,7 +48,13 @@ AmbienceAction {
             y: Theme.itemSizeSmall
             width: editor.width
             height: implicitHeight + valueLabel.height
-
+            colorScheme: editor.colorScheme
+            highlightColor: editor.highlightColor
+            backgroundColor: editor.secondaryColor
+            secondaryHighlightColor: editor.secondaryHighlightColor
+            backgroundGlowColor: slider.colorScheme === Theme.DarkOnLight
+                        ? Theme.highlightDimmerFromColor(editor.highlightColor, editor.colorScheme)
+                        : "transparent"
             minimumValue: 0
             maximumValue: 100
             stepSize: 20
@@ -61,11 +72,12 @@ AmbienceAction {
                 anchors.bottom: parent.verticalCenter // assuming slider centers its content vertically
                 anchors.bottomMargin: Theme.paddingSmall + Theme.paddingMedium
                 scale: slider.down ? Theme.fontSizeLarge / Theme.fontSizeMedium : 1.0
-                color: slider.highlighted ? Theme.highlightColor : Theme.primaryColor
+                color: slider.highlighted ? editor.highlightColor : editor.primaryColor
+
                 Behavior on scale { NumberAnimation { duration: 80 } }
 
                 Image {
-                    source: "image://theme/icon-status-silent" + (slider.highlighted ? ("?" + Theme.highlightColor) : "")
+                    source: "image://theme/icon-status-silent" + (slider.highlighted ? ("?" + editor.highlightColor) : "")
                     visible: slider.value === 0
                     anchors.centerIn: parent
                 }

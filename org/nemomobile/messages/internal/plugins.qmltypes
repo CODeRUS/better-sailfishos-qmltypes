@@ -71,6 +71,11 @@ Module {
             Parameter { name: "localUid"; type: "string" }
             Parameter { name: "remoteUid"; type: "string" }
         }
+        Method {
+            name: "isPendingEvent"
+            type: "bool"
+            Parameter { name: "eventId"; type: "int" }
+        }
     }
     Component {
         name: "ConversationChannel"

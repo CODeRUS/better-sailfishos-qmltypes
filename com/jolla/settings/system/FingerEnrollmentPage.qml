@@ -28,7 +28,7 @@ Dialog {
             destinationProperties[property] = properties[property]
         }
 
-        pageStack.replace(target, destinationProperties)
+        pageStack.animatorReplace(target, destinationProperties)
     }
 
     acceptDestinationProperties: {

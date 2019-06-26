@@ -9,12 +9,22 @@ import QtQuick 2.0
 import QtDocGallery 5.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as Private
-import Sailfish.Pickers 1.0
-import Sailfish.Gallery 1.0
 import "private"
 
 PickerDialog {
     id: documentPickerDialog
+
+    property alias _contentModel: documentModel
+
+    //: Placeholder text of document search field in content picker
+    //% "Search documents"
+    property string _headerPlaceholderText: qsTrId("components_pickers-ph-search_documents")
+
+    //: Empty state text if no documents available. This should be positive and inspiring for the user.
+    //% "Copy some documents to device"
+    property string _emptyPlaceholderText: qsTrId("components_pickers-la-no-documents-on-device")
+
+    property alias _contentType: documentModel.contentType
 
     orientationTransitions: Private.PageOrientationTransition {
         fadeTarget: _background ? listView : __silica_applicationwindow_instance.contentItem
@@ -31,12 +41,12 @@ PickerDialog {
         header: SearchDialogHeader {
             width: listView.width
             dialog: documentPickerDialog
-            //: Placeholder text of document search field in content picker
-            //% "Search documents"
-            placeholderText: qsTrId("components_pickers-ph-search_documents")
+            placeholderText: _headerPlaceholderText
             model: documentModel
-            contentType: ContentType.Document
+            contentType: _contentType
             visible: active || documentModel.count > 0
+            selectedCount: _selectedCount
+            showBack: !_clearOnBackstep
             _glassOnly: documentPickerDialog._background
 
             onActiveFocusChanged: {
@@ -51,9 +61,7 @@ PickerDialog {
         model: documentModel.model
 
         ViewPlaceholder {
-            //: Empty state text if no documents available. This should be positive and inspiring for the user.
-            //% "Copy some documents to device"
-            text: qsTrId("components_pickers-la-no-documents-on-device")
+            text: _emptyPlaceholderText
             enabled: !listView.searchActive && documentModel.count === 0 && (documentModel.status === DocumentGalleryModel.Finished || documentModel.status === DocumentGalleryModel.Idle)
         }
 
@@ -62,15 +70,23 @@ PickerDialog {
             selectedModel: _selectedModel
         }
 
-        delegate: DocumentItem {
+        delegate: FileItem {
             id: documentItem
+
             leftMargin: listView.headerItem.searchFieldLeftMargin
             baseName: Theme.highlightText(documentModel.baseName(model.fileName), documentModel.filter, Theme.highlightColor)
             extension: Theme.highlightText(documentModel.extension(model.fileName), documentModel.filter, Theme.highlightColor)
+            size: model.fileSize
+            // Should be lastModified but QDocumentGallery (or tracker) doesn't return sane values
+            // Worth adding QFileInfo Qml wrapper to nemo-qml-plugin-filemanager
+            modified: model.lastAccessed
+            iconSource: model.mimeType ? Theme.iconForMimeType(model.mimeType) : ""
             selected: model.selected
+            textFormat: Text.StyledText
 
             ListView.onAdd: AddAnimation { target: documentItem; duration: _animationDuration }
             ListView.onRemove: RemoveAnimation { target: documentItem; duration: _animationDuration }
+
             onClicked: documentModel.updateSelected(index, !selected)
         }
 

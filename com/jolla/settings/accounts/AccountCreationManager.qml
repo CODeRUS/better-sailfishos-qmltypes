@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
+import MeeGo.Connman 0.2
 import com.jolla.settings.accounts 1.0
 import org.nemomobile.configuration 1.0
 import "accountcreationmanager.js" as ManagerScript
@@ -88,7 +89,7 @@ Item {
     property QtObject _currSettingsPage
 
     function startAccountCreation() {
-        pageStack.push(accountProviderPickerComponent)
+        pageStack.animatorPush(accountProviderPickerComponent)
     }
 
     function startAccountCreationForProvider(providerName, properties, pageStackOperation) {
@@ -96,14 +97,14 @@ Item {
             pageStackOperation = PageStackAction.Animated
         }
         var agent = _accountCreationAgent(providerName, properties)
-        if (accountFactory.haveNetworkConnectivity()) {
-            pageStack.push(agent.initialPage, {}, pageStackOperation)
+        if (hasNetworkConnectivity) {
+            pageStack.animatorPush(agent.initialPage, {}, pageStackOperation)
         } else {
             var props = {
                 "acceptDestination": agent.initialPage,
                 "acceptDestinationAction": PageStackAction.Replace
             }
-            pageStack.push(networkCheckComponent, props, {}, pageStackOperation)
+            pageStack.animatorPush(networkCheckComponent, props, {}, pageStackOperation)
         }
     }
 
@@ -179,8 +180,6 @@ Item {
         return runner.agent
     }
 
-    AccountFactory { id: accountFactory }
-
     ConfigurationValue {
         id: hasCreatedJollaAccountBefore
     }
@@ -189,6 +188,8 @@ Item {
 
      // used by accountcreationmanager.js
     property AccountManager _accountManager: AccountManager {}
+    property NetworkManager _networkManager: NetworkManager {}
+    readonly property bool hasNetworkConnectivity: _networkManager.state == "online"
 
     Component {
         id: accountProviderPickerComponent
@@ -221,7 +222,9 @@ Item {
 
     Component {
         id: networkCheckComponent
-        NetworkCheckDialog { }
+        NetworkCheckDialog {
+            networkManager: accountCreationManager._networkManager
+        }
     }
 
     Component {

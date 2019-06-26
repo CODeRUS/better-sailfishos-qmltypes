@@ -49,6 +49,81 @@ Module {
         }
     }
     Component {
+        name: "Ssu"
+        prototype: "QObject"
+        exports: ["Nemo.Ssu/Ssu 1.1"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "DeviceModeFlags"
+            values: {
+                "DisableRepoManager": 1,
+                "RndMode": 2,
+                "ReleaseMode": 4,
+                "LenientMode": 8,
+                "UpdateMode": 16,
+                "AppInstallMode": 32
+            }
+        }
+        Property { name: "registered"; type: "bool"; isReadonly: true }
+        Property { name: "deviceMode"; type: "DeviceModeFlags"; isReadonly: true }
+        Property { name: "domain"; type: "string"; isReadonly: true }
+        Signal { name: "done" }
+        Signal { name: "registrationStatusChanged" }
+        Signal { name: "credentialsChanged" }
+        Method {
+            name: "sendRegistration"
+            Parameter { name: "username"; type: "string" }
+            Parameter { name: "password"; type: "string" }
+        }
+        Method {
+            name: "updateCredentials"
+            Parameter { name: "force"; type: "bool" }
+        }
+        Method { name: "updateCredentials" }
+        Method { name: "updateStoreCredentials" }
+        Method { name: "error"; type: "bool" }
+        Method { name: "lastError"; type: "string" }
+        Method { name: "unregister" }
+        Method { name: "flavour"; type: "string" }
+        Method { name: "deviceMode"; type: "DeviceModeFlags" }
+        Method { name: "domain"; type: "string" }
+        Method { name: "isRegistered"; type: "bool" }
+        Method { name: "lastCredentialsUpdate"; type: "QDateTime" }
+        Method {
+            name: "release"
+            type: "string"
+            Parameter { name: "rnd"; type: "bool" }
+        }
+        Method { name: "release"; type: "string" }
+        Method {
+            name: "setDeviceMode"
+            Parameter { name: "mode"; type: "DeviceModeFlags" }
+            Parameter { name: "editMode"; type: "EditMode" }
+        }
+        Method {
+            name: "setDeviceMode"
+            Parameter { name: "mode"; type: "DeviceModeFlags" }
+        }
+        Method {
+            name: "setFlavour"
+            Parameter { name: "flavour"; type: "string" }
+        }
+        Method {
+            name: "setRelease"
+            Parameter { name: "release"; type: "string" }
+            Parameter { name: "rnd"; type: "bool" }
+        }
+        Method {
+            name: "setRelease"
+            Parameter { name: "release"; type: "string" }
+        }
+        Method {
+            name: "setDomain"
+            Parameter { name: "domain"; type: "string" }
+        }
+        Method { name: "useSslVerify"; type: "bool" }
+    }
+    Component {
         name: "SsuFeatureModel"
         prototype: "QAbstractListModel"
         Property { name: "count"; type: "int"; isReadonly: true }

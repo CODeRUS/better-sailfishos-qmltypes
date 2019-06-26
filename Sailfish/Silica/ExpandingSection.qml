@@ -56,7 +56,7 @@ Item {
     property real rightMargin: _group ? _group.leftMargin : Theme.paddingMedium
 
     property Item _group
-    property int _animationDuration: _group ? _group.animationDuration : 200
+    readonly property int _animationDuration: _group ? _group.animationDuration : 200
     property int __silica_expandingsection
 
     width: parent ? parent.width : 0
@@ -67,7 +67,7 @@ Item {
     }
 
     onExpandedChanged: {
-        expandBehavior.enabled = true
+        expandBehavior.enabled = _group && _group._initialized
         if (expanded) {
             loader.active = true
         }
@@ -153,6 +153,7 @@ Item {
                 rightMargin: Theme.paddingSmall
                 verticalCenter: parent.verticalCenter
             }
+
             source: "image://theme/icon-m-right"
             highlighted: button.down
             opacity: root.expanded ? 1.0 : 0.0
@@ -200,6 +201,10 @@ Item {
 
             transitions: [
                 Transition {
+                    // Prevent expansion from animating when the group expands its initial
+                    // current section.
+                    enabled: expandBehavior.enabled
+
                     AnchorAnimation { duration: root._animationDuration }
                 }
             ]
@@ -213,6 +218,7 @@ Item {
                 rightMargin: root.rightMargin
                 verticalCenter: parent.verticalCenter
             }
+
             source: "image://theme/icon-m-down"
             highlighted: button.down
             opacity: root.expanded ? 0.0 : 1.0

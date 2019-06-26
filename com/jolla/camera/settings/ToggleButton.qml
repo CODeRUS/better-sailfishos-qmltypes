@@ -9,6 +9,9 @@ MouseArea {
     property string property
     property QtObject settings
     readonly property int nextIndex: (model.indexOf(settings[property]) + 1) % model.length
+    property color highlightColor: Theme.colorScheme == Theme.LightOnDark
+                                   ? Theme.highlightColor : Theme.highlightFromColor(Theme.highlightColor, Theme.LightOnDark)
+
 
     width: Theme.itemSizeExtraSmall
     height: Theme.itemSizeExtraSmall
@@ -23,7 +26,7 @@ MouseArea {
 
         radius: width / 2
 
-        color: Theme.highlightColor
+        color: highlightColor
         opacity: menuItem.pressed ? 0.4 : 0.0
         Behavior on opacity { FadeAnimation {} }
     }
@@ -31,7 +34,7 @@ MouseArea {
     Image {
         anchors.centerIn: parent
         source: menuItem.pressed
-                ? menuItem.icon + "?" + Theme.highlightColor
-                : menuItem.icon
+                ? menuItem.icon + "?" + highlightColor
+                : menuItem.icon + "?" + Theme.lightPrimaryColor
     }
 }

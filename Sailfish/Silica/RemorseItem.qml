@@ -34,8 +34,9 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import "private/RemorsePopup.js" as Remorse
-import "private/RemorseItem.js" as RemorseItem
+import Sailfish.Silica.private 1.0
+import "private/RemorsePopup.js" as RemorseJs
+import "private/RemorseItem.js" as RemorseItemJs
 import "private/Util.js" as Util
 
 BackgroundItem {
@@ -51,7 +52,7 @@ BackgroundItem {
 
     function execute(item, title, callback, timeout) {
         remorseItem.text = title
-        Remorse.callback = callback
+        RemorseJs.callback = callback
         _timeout = timeout === undefined ? 5000 : timeout
         _triggered = false
         parent = item.parent
@@ -62,8 +63,8 @@ BackgroundItem {
         _page = Util.findPage(remorseItem)
         state = "active"
         countdown.restart()
-        RemorseItem.remorseItemCancel(remorseItem)
-        RemorseItem.remorseItemActivated(remorseItem)
+        RemorseItemJs.remorseItemCancel(remorseItem)
+        RemorseItemJs.remorseItemActivated(remorseItem)
     }
     function cancel() {
         _close()
@@ -71,7 +72,7 @@ BackgroundItem {
             parent.__silica_remorse_item = null
         }
         canceled()
-        RemorseItem.remorseItemCancel(remorseItem)
+        RemorseItemJs.remorseItemCancel(remorseItem)
     }
     function trigger() {
         if (countdown.running) {
@@ -88,12 +89,24 @@ BackgroundItem {
     function _execute(closeAfterExecute) {
         if (!_triggered) {
             _triggered = true
-            RemorseItem.remorseItemTrigger(remorseItem, Remorse.callback, closeAfterExecute)
+            RemorseItemJs.remorseItemTrigger(remorseItem, RemorseJs.callback, closeAfterExecute)
             return true
         }
         return false
     }
 
+    drag.minimumX: -width
+    drag.maximumX: width
+    drag.target: _swipeToTrigger ? contentItem : null
+    drag.axis: Drag.XAxis
+    drag.onActiveChanged: if (!drag.active) dismissAnimation.animate(contentItem, 0, width)
+
+    DismissAnimation {
+        id: dismissAnimation
+        onCompleted: _execute(true)
+    }
+
+    property bool _swipeToTrigger: _page &&  (Screen.sizeCategory >= Screen.Large ? _page.width / 2 : _page.width) <= width
     property int _timeout: 5000
     property int _seconds: (_timeout + 999) / 1000
     property int _secsRemaining: (_msRemaining + 999) / 1000
@@ -120,7 +133,7 @@ BackgroundItem {
             PropertyChanges {
                 target: remorseItem
                 anchors.fill: _item
-                opacity: 1
+                opacity: remorseItem.width > 0 ? 1 - Math.abs(remorseItem.contentItem.x / remorseItem.width) : 1
                 visible: true
                 _contentOpacity: 1
             }
@@ -172,7 +185,7 @@ BackgroundItem {
                     duration: 200
                 }
                 PropertyAction { target: remorseItem; property: "visible" }
-                ScriptAction { script: { RemorseItem.remorseItemDeactivated(remorseItem) } }
+                ScriptAction { script: { RemorseItemJs.remorseItemDeactivated(remorseItem) } }
                 FadeAnimation {
                     target: _item
                     duration: 100
@@ -205,12 +218,14 @@ BackgroundItem {
             model: _seconds
 
             Rectangle {
+                property real baseOpacity: Theme.colorScheme === Theme.DarkOnLight ? 1.0 : 0.7
+
                 width: row.cellWidth
                 height: parent ? parent.height : 0
                 color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
-                opacity: remorseItem._secsRemaining > Positioner.index ? 0.7 : 0
+                opacity: remorseItem._secsRemaining > Positioner.index ? baseOpacity : 0
                 Behavior on opacity {
-                    FadeAnimation { duration: 200 }
+                    FadeAnimator {}
                 }
             }
         }
@@ -236,8 +251,13 @@ BackgroundItem {
         }
         Label {
             id: cancelTextLabel
-            //% "Tap to cancel"
-            text: qsTrId("components-la-tap-to-cancel")
+
+            text: drag.active || dismissAnimation.running ?
+                      //% "Swipe to commit"
+                      qsTrId("components-la-swipe-to-commit")
+                    :
+                      //% "Tap to cancel"
+                      qsTrId("components-la-tap-to-cancel")
             width: parent.width
             color: remorseItem.down ? Theme.secondaryHighlightColor : Theme.secondaryColor
             font.pixelSize: Theme.fontSizeExtraSmall
@@ -265,7 +285,7 @@ BackgroundItem {
         if (countdown.running) {
             _execute(false)
         }
-        RemorseItem.remorseItemDeactivated(remorseItem)
+        RemorseItemJs.remorseItemDeactivated(remorseItem)
         state = "destroying"
     }
 }

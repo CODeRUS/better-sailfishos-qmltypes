@@ -71,7 +71,7 @@ function startAccountCreation(picker) {
                     destroyCachedData(_accountCreationQueue[i])
                 }
                 // preload the page for the first selected provider
-                if (_firstSelectedProviderIndex >= 0 && accountFactory.haveNetworkConnectivity()) {
+                if (_firstSelectedProviderIndex >= 0 && accountCreationManager.hasNetworkConnectivity) {
                     _cachedCreationPage(_firstSelectedProviderIndex, {})
                 }
             }
@@ -85,7 +85,7 @@ function _setFirstAcceptDestination(picker) {
         return
     }
     picker.acceptDestination = null
-    if (!accountFactory.haveNetworkConnectivity()) {
+    if (!accountCreationManager.hasNetworkConnectivity) {
         var comp = Qt.createComponent(Qt.resolvedUrl("NetworkCheckDialog.qml"))
         if (comp.status == Component.Ready) {
             picker.acceptDestinationAction = PageStackAction.Push
@@ -95,7 +95,8 @@ function _setFirstAcceptDestination(picker) {
                     "acceptDestination": _firstCachedCreationPage({}),
                     "acceptDestinationAction": PageStackAction.Replace,
                     "acceptDestinationActionProperties": ({}),
-                    "acceptDestinationReplaceTarget": undefined
+                    "acceptDestinationReplaceTarget": undefined,
+                    "networkManager": accountCreationManager._networkManager
             })
         }
     }
@@ -309,7 +310,7 @@ function _selectedProviderToCreate(index, providerName) {
     // Pre-emptively load the first account creation page that is selected in the dialog,
     // otherwise this loading causes a blocking delay when the picker is accepted.
     if ((_firstSelectedProviderIndex < 0 || index < _firstSelectedProviderIndex)
-            && accountFactory.haveNetworkConnectivity()) {
+            && accountCreationManager.hasNetworkConnectivity) {
         _firstSelectedProviderIndex = index
         _cachedCreationPage(index, {})
     }

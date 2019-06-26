@@ -19,6 +19,8 @@ Column {
     property alias account: accountObj
     property int accountId
 
+    property alias accountUserName: mainAccountSettings.accountUserName
+
     default property alias _children: contentColumn.data
 
     signal aboutToSaveAccount()

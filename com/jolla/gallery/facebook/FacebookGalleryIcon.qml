@@ -5,6 +5,7 @@ import org.nemomobile.socialcache 1.0
 
 MediaSourceIcon {
     id: root
+
     property int modelCount: model ? model.count : 0
     timerEnabled: modelCount > 0
 
@@ -41,7 +42,6 @@ MediaSourceIcon {
         }
 
         Image {
-            id: fbIcon
             anchors.fill: parent
             Behavior on opacity { NumberAnimation { duration: 5000 }}
             source: "image://theme/graphic-service-facebook"

@@ -90,6 +90,8 @@ MouseArea {
     property bool showNavigationIndicator: true
     property bool forwardNavigation: _belowTop
     property bool canNavigateForward: forwardNavigation
+    property int navigationStyle: PageNavigation.Horizontal
+    readonly property bool _horizontalNavigationStyle: navigationStyle === PageNavigation.Horizontal
     property Item pageContainer
 
     property int allowedOrientations: __silica_applicationwindow_instance._defaultPageOrientations
@@ -102,8 +104,9 @@ MouseArea {
     property bool isPortrait: (orientation === Orientation.Portrait || orientation === Orientation.PortraitInverted || orientation === Orientation.None)
     property bool isLandscape: (orientation === Orientation.Landscape || orientation === Orientation.LandscapeInverted)
 
-    property int _navigation: PageNavigation.None
-    property int _navigationPending: PageNavigation.None
+    property int _navigation: PageNavigation.NoNavigation
+    property int _navigationPending: PageNavigation.NoNavigation
+    property int _direction: PageNavigation.NoDirection
     property int _wallpaperOrientation: Orientation.Portrait
 
     property int _allowedOrientations: {

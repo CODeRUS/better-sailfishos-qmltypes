@@ -216,4 +216,89 @@ Module {
         Method { name: "selectAllFiles" }
         Method { name: "selectedFiles"; type: "QStringList" }
     }
+    Component {
+        name: "FileWatcher"
+        prototype: "QObject"
+        exports: ["Nemo.FileManager/FileWatcher 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "fileName"; type: "string" }
+        Property { name: "exists"; type: "bool"; isReadonly: true }
+        Method {
+            name: "testFileExists"
+            type: "bool"
+            Parameter { name: "fileName"; type: "string" }
+        }
+    }
+    Component {
+        name: "Sailfish::ArchiveModel"
+        prototype: "QAbstractListModel"
+        exports: ["Nemo.FileManager/ArchiveModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Status"
+            values: {
+                "Null": 0,
+                "Loading": 1,
+                "Ready": 2,
+                "Extracting": 3,
+                "Error": 4
+            }
+        }
+        Enum {
+            name: "ErrorState"
+            values: {
+                "NoError": 0,
+                "ErrorArchiveFileNoSet": 1,
+                "ErrorArchiveNotFound": 2,
+                "ErrorArchiveOpenFailed": 3,
+                "ErrorArchiveExtractFailed": 4,
+                "ErrorInvalidArchivePath": 5,
+                "ErrorInvalidArchiveEntry": 6,
+                "ErrorExtractingInProgress": 7,
+                "ErrorUnsupportedArchiveFormat": 8
+            }
+        }
+        Property { name: "path"; type: "string" }
+        Property { name: "status"; type: "Status"; isReadonly: true }
+        Property { name: "errorState"; type: "ErrorState"; isReadonly: true }
+        Property { name: "populated"; type: "bool"; isReadonly: true }
+        Property { name: "extracting"; type: "bool"; isReadonly: true }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "active"; type: "bool" }
+        Property { name: "autoRename"; type: "bool" }
+        Property { name: "archiveFile"; type: "string" }
+        Property { name: "fileName"; type: "string"; isReadonly: true }
+        Property { name: "baseName"; type: "string"; isReadonly: true }
+        Property { name: "completeSuffix"; type: "string"; isReadonly: true }
+        Property { name: "requiredSpace"; type: "qlonglong"; isReadonly: true }
+        Signal {
+            name: "filesExtracted"
+            Parameter { name: "path"; type: "string" }
+            Parameter { name: "isDir"; type: "bool" }
+            Parameter { name: "entryName"; type: "string" }
+            Parameter { name: "entries"; type: "QStringList" }
+        }
+        Method {
+            name: "appendPath"
+            type: "string"
+            Parameter { name: "pathName"; type: "string" }
+        }
+        Method { name: "errorString"; type: "string" }
+        Method {
+            name: "extractAllFiles"
+            type: "bool"
+            Parameter { name: "targetPath"; type: "string" }
+        }
+        Method {
+            name: "extractFile"
+            type: "bool"
+            Parameter { name: "entryName"; type: "string" }
+            Parameter { name: "targetPath"; type: "string" }
+        }
+        Method {
+            name: "cleanExtractedEntry"
+            type: "bool"
+            Parameter { name: "entry"; type: "string" }
+        }
+    }
 }

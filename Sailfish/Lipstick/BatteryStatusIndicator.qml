@@ -51,6 +51,40 @@ Item {
             x: isCharging ? 0 : -width
             Behavior on x { NumberAnimation { id: chargeCableAnim; duration: 500; easing.type: Easing.InOutQuad } }
         }
+
+        layer.enabled: usbModeSelector.preparingMode != ""
+        layer.effect: ShaderEffect {
+            property real pulse
+            NumberAnimation on pulse {
+                running: chargeItem.layer.enabled && chargeCableIcon.visible
+                loops: Animation.Infinite
+                from: 0.0
+                to: 1.0
+                duration: 1000
+            }
+
+            fragmentShader: "
+                uniform sampler2D source;
+                varying mediump vec2 qt_TexCoord0;
+                uniform lowp float qt_Opacity;
+                uniform mediump float pulse;
+                const lowp float width = 0.2;
+                const lowp float start = 0.0;
+                // The end value is calculated from the SVG coordinates so that
+                // the pulse stops at the cable connector
+                const lowp float end = 16.816 / 24.0;
+                const lowp float wavelength = 1.0;
+                void main() {
+                    lowp vec4 col = texture2D(source, qt_TexCoord0);
+                    if ((mod(qt_TexCoord0.x - pulse, wavelength) < width)
+                        && (qt_TexCoord0.x >= start) && (qt_TexCoord0.x < end)) {
+                        col.rgba = vec4(0.0);
+                    }
+                    gl_FragColor = col * qt_Opacity;
+                    return;
+                }
+            "
+        }
     }
 
     Image {

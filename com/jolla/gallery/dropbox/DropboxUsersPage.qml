@@ -6,6 +6,7 @@ import com.jolla.gallery.extensions 1.0
 
 UsersPage {
     id: root
+
     socialNetwork: SocialSync.Dropbox
     dataType: SocialSync.Images
     usersModel: DropboxImageCacheModel {
@@ -30,9 +31,8 @@ UsersPage {
             downloader: DropboxImageDownloader
         }
         onClicked: {
-            window.pageStack.push(Qt.resolvedUrl("DropboxAlbumsPage.qml"),
-                                  {"userId": delegateItem.userId,
-                                   "title": root.title})
+            window.pageStack.animatorPush(Qt.resolvedUrl("DropboxAlbumsPage.qml"),
+                                          { "userId": delegateItem.userId, "title": root.title })
         }
     }
 }

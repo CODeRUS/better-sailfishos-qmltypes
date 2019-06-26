@@ -1,7 +1,7 @@
 import QtQuick 2.0
-import Sailfish.Pickers 1.0 as Pickers
+import Sailfish.Pickers.private 1.0 as PickersPrivate
 
-Pickers.AvatarPickerPage {
+PickersPrivate.AvatarPickerPage {
     id: root
 
     signal avatarUrlChanged(string avatarUrl)

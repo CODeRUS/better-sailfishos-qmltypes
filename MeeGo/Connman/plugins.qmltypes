@@ -102,10 +102,12 @@ Module {
         Property { name: "state"; type: "string"; isReadonly: true }
         Property { name: "offlineMode"; type: "bool" }
         Property { name: "defaultRoute"; type: "NetworkService"; isReadonly: true; isPointer: true }
+        Property { name: "connectedWifi"; type: "NetworkService"; isReadonly: true; isPointer: true }
         Property { name: "sessionMode"; type: "bool" }
         Property { name: "inputRequestTimeout"; type: "uint"; isReadonly: true }
         Property { name: "servicesEnabled"; type: "bool" }
         Property { name: "technologiesEnabled"; type: "bool" }
+        Property { name: "valid"; type: "bool"; isReadonly: true }
         Property { name: "WifiTechnology"; type: "string"; isReadonly: true }
         Property { name: "CellularTechnology"; type: "string"; isReadonly: true }
         Property { name: "BluetoothTechnology"; type: "string"; isReadonly: true }
@@ -125,6 +127,9 @@ Module {
         Signal { name: "technologiesChanged" }
         Signal { name: "servicesChanged" }
         Signal { name: "savedServicesChanged" }
+        Signal { name: "wifiServicesChanged" }
+        Signal { name: "cellularServicesChanged" }
+        Signal { name: "availableServicesChanged" }
         Signal {
             name: "defaultRouteChanged"
             Parameter { name: "defaultRoute"; type: "NetworkService"; isPointer: true }
@@ -310,6 +315,7 @@ Module {
                 "EapTLS": 3
             }
         }
+        Property { name: "valid"; type: "bool"; isReadonly: true }
         Property { name: "name"; type: "string"; isReadonly: true }
         Property { name: "state"; type: "string"; isReadonly: true }
         Property { name: "type"; type: "string"; isReadonly: true }

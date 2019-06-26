@@ -1,3 +1,2 @@
 module org.nemomobile.transferengine
-plugin declarativetransferengine
-
+typeinfo plugins.qmltypes

@@ -54,7 +54,7 @@ Column {
     property real leftMargin: Theme.paddingMedium
     property real rightMargin: Theme.paddingMedium
 
-    property int animationDuration: _initialized ? 200 : 0
+    property int animationDuration: 200
     property bool animateToExpandedSection: true
 
     property bool _updating
@@ -62,9 +62,14 @@ Column {
     property bool _retriedInitialize
     property Item _currentSection
     property Item _flickable
+    property bool _revertFlickableContentY
+    property real _flickableContentYAtOpen
     property int __silica_expandingsectiongroup
 
     function indexOfSection(section) {
+        if (!section) {
+            return -1
+        }
         var sectionIdx = 0
         for (var i=0; i<children.length; i++) {
             var child = _findSection(children[i])
@@ -104,6 +109,7 @@ Column {
         for (var i=0; i<children.length; i++) {
             var section = _findSection(children[i])
             if (section) {
+                _initialized = true
                 section.expanded = (sectionIdx == currentIndex)
                 if (section.expanded) {
                     newCurrentSection = section
@@ -120,11 +126,10 @@ Column {
                 delayedInitialize.start()
             }
         } else {
-            if (newCurrentSection && animateToExpandedSection) {
+            if (animateToExpandedSection) {
                 _updateFlickableContentY(_currentSection, newCurrentSection)
             }
             _currentSection = newCurrentSection
-            _initialized = true
         }
         _updating = false
     }
@@ -136,12 +141,36 @@ Column {
         if (!_flickable) {
             return
         }
-        var sectionEndY = newSection.mapToItem(_flickable.contentItem, 0, newSection.content.y).y + newSection.buttonHeight + newSection.content.height
-        if (sectionEndY > _flickable.contentY + _flickable.height) {
-            var maxContentY = _flickable.contentHeight + newSection.content.height - _flickable.height - (oldSection ? oldSection.content.height : 0)
-            var newContentY = Math.max(Math.min(sectionEndY - _flickable.height, maxContentY), 0)
+        var newContentY
+        if (newSection) {
+            // Opening a new section: show as much of it as possible, while also showing as much
+            // of the previous sections' titles as possible, as a contextual cue.
+            var oldSectionIndex = indexOfSection(oldSection)
+            var removedSectionAbove = oldSectionIndex >= 0 && oldSectionIndex < currentIndex ? oldSection.content.height : 0
+            var newSectionY = newSection.mapToItem(_flickable.contentItem, 0, newSection.content.y).y
+                    + newSection.buttonHeight + newSection.content.height
+                    - _flickable.height - removedSectionAbove
+            var top = root.mapToItem(_flickable.contentItem, 0, 0).y
+            newContentY = Math.max(newSectionY, Math.min(top, _flickable.contentY))
+            _flickableContentYAtOpen = _flickable.contentY
+            _revertFlickableContentY = true
+        } else if (_revertFlickableContentY) {
+            // Section was opened then closed without any flicking/moving: revert to the contentY
+            // at the time of opening.
+            newContentY = _flickableContentYAtOpen
+            _revertFlickableContentY = false
+        } else if (oldSection) {
+            // Closing a section without moving to a new section: animate to the max contentY so
+            // that this animates concurrently with the section height change.
+            var maxContentY = (_flickable.contentHeight - oldSection.content.height) - _flickable.height
+            if (_flickable.contentY > maxContentY) {
+                newContentY = maxContentY
+            }
+        }
+
+        if (newContentY !== undefined && _initialized) {
             contentYAnimation.to = newContentY
-            contentYAnimation.start()
+            contentYAnimation.restart()
         }
     }
 
@@ -183,5 +212,14 @@ Column {
         target: _flickable
         property: "contentY"
         duration: root.animationDuration
+    }
+
+    Connections {
+        target: _flickable
+        onMovingChanged: {
+            if (_flickable.moving) {
+                root._revertFlickableContentY = false
+            }
+        }
     }
 }

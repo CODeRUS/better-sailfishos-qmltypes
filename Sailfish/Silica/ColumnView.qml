@@ -49,6 +49,9 @@ Item {
 
     property Flickable flickable
 
+    property alias currentItem: resultsView.currentItem
+    property alias currentIndex: resultsView.currentIndex
+
     property bool menuOpen: resultsView.__silica_contextmenu_instance && resultsView.__silica_contextmenu_instance._open
 
     function _listStartPosition() {
@@ -80,7 +83,9 @@ Item {
         property int __silica_hidden_flickable
 
         property Item __silica_contextmenu_instance
-        property real _menuHeight: __silica_contextmenu_instance ? __silica_contextmenu_instance.height : 0
+        property real _menuHeight: __silica_contextmenu_instance && __silica_contextmenu_instance._open
+                  ? __silica_contextmenu_instance._displayHeight
+                  : 0
 
         // We have to calculate our own contentHeight, as changing contentY causes contentHeight
         // to change when the ListView is estimating contentHeight (which occurs when the context
@@ -97,7 +102,7 @@ Item {
         currentIndex: -1
         interactive: false
         clip: true
-        cacheBuffer: resultsList.itemHeight * 6
+        cacheBuffer: Math.max(0, resultsList.itemHeight * 6)
     }
 }
 

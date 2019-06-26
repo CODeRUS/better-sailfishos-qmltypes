@@ -5,6 +5,7 @@ import Sailfish.Weather 1.0
 Column {
     width: parent.width
     anchors.centerIn: parent
+    property bool highlighted
     Label {
         property bool truncate: implicitWidth > parent.width - Theme.paddingSmall
 

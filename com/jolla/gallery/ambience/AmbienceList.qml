@@ -7,6 +7,9 @@ import org.nemomobile.thumbnailer 1.0
 SilicaListView {
     id: ambienceList
 
+    property bool initialized
+    onCountChanged: if (count > 0) initialized = true
+
     property real itemHeight: Screen.sizeCategory >= Screen.Large
         ? Theme.itemSizeExtraLarge + (2 * Theme.paddingLarge)
         : Screen.height / 5
@@ -56,16 +59,17 @@ SilicaListView {
                 id: contextMenu
 
                 MenuItem {
+                    enabled: !listItem.active
                     // Defined in AmbienceSettingsPage.qml
                     text: qsTrId("jolla-gallery-ambience-me-set_ambience")
                     onClicked: ambienceList.model.makeCurrent(model.index)
                 }
                 MenuItem {
                     text: favorite
-                            //% "Remove from Top menu"
-                            ? qsTrId("jolla-gallery-ambience-me-remove_from_top")
-                            //% "Add to Top menu"
-                            : qsTrId("jolla-gallery-ambience-me-add_to_top")
+                            //% "Remove from favorites"
+                            ? qsTrId("jolla-gallery-ambience-me-remove_from_favorites")
+                            //% "Add to favorites"
+                            : qsTrId("jolla-gallery-ambience-me-add_to_favorites")
                     onClicked: ambienceList.model.setProperty(model.index, "favorite", !favorite)
                 }
                 MenuItem {
@@ -97,10 +101,10 @@ SilicaListView {
                 properties: "height"
                 from: 0
                 to: listItem.contentHeight
-                duration: 200
+                duration: initialized ? 200 : 0
                 easing.type: Easing.InOutQuad
             }
-            FadeAnimation { target: listItem; to: 1; duration: 200 }
+            FadeAnimation { target: listItem; to: 1; duration: initialized ? 200 : 0 }
         }
 
         Thumbnail {
@@ -157,7 +161,9 @@ SilicaListView {
         Image {
             id: favoriteIcon
 
-            source: favorite ? "image://theme/icon-m-favorite-selected" : "image://theme/icon-m-favorite"
+            source: (favorite ? "image://theme/icon-m-favorite-selected?"
+                              : "image://theme/icon-m-favorite?")
+                    + (colorScheme === Theme.DarkOnLight ? Theme.darkPrimaryColor : Theme.lightPrimaryColor)
             anchors {
                 right: parent.right
                 rightMargin: Theme.paddingLarge
@@ -208,7 +214,8 @@ SilicaListView {
                 horizontalCenter: parent.left
             }
 
-            color: Theme.primaryColor
+            color: Theme.lightPrimaryColor
+            backgroundColor: Theme.backgroundGlowColor
             radius: 0.22
             falloffRadius: 0.18
             clip: true

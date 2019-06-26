@@ -7,19 +7,7 @@ import QtQuick.tooling 1.2
 // 'qmlplugindump -nonrelocatable -noinstantiate Sailfish.TransferEngine 1.0'
 
 Module {
-    dependencies: [
-        "QtQuick 2.6",
-        "QtQuick.Window 2.1",
-        "QtWebKit 3.0",
-        "QtWebKit.experimental 1.0",
-        "Sailfish.Silica 1.0",
-        "Sailfish.Silica.private 1.0",
-        "org.nemomobile.configuration 1.0",
-        "org.nemomobile.contentaction 1.0",
-        "org.nemomobile.notifications 1.0",
-        "org.nemomobile.thumbnailer 1.0",
-        "org.nemomobile.transferengine 1.0"
-    ]
+    dependencies: []
     Component {
         name: "DeclarativeShare"
         defaultProperty: "data"
@@ -142,77 +130,6 @@ Module {
             name: "findMethod"
             type: "int"
             Parameter { name: "methodId"; type: "string" }
-        }
-    }
-    Component {
-        name: "DeclarativeTransferModel"
-        prototype: "QAbstractListModel"
-        exports: ["Sailfish.TransferEngine/SailfishTransferModel 1.0"]
-        exportMetaObjectRevisions: [0]
-        Enum {
-            name: "TransferStatus"
-            values: {
-                "NotStarted": 1,
-                "TransferStarted": 2,
-                "TransferCanceled": 3,
-                "TransferFinished": 4,
-                "TransferInterrupted": 5
-            }
-        }
-        Enum {
-            name: "TransferType"
-            values: {
-                "Upload": 1,
-                "Download": 2,
-                "Sync": 3
-            }
-        }
-        Property { name: "count"; type: "int"; isReadonly: true }
-        Property { name: "transfersInProgress"; type: "int"; isReadonly: true }
-        Signal { name: "rowCountChanged" }
-        Signal {
-            name: "transferStatusChanged"
-            Parameter { name: "index"; type: "int" }
-            Parameter { name: "status"; type: "int" }
-        }
-        Method { name: "clearTransfers" }
-        Method {
-            name: "get"
-            type: "QVariantMap"
-            Parameter { name: "index"; type: "int" }
-        }
-    }
-    Component {
-        prototype: "QObject"
-        name: "Remorse 1.0"
-        exports: ["Remorse 1.0"]
-        exportMetaObjectRevisions: [0]
-        isComposite: true
-        isCreatable: false
-        isSingleton: true
-        Property { name: "_itemComponent"; type: "QQmlComponent"; isPointer: true }
-        Property { name: "_popupComponent"; type: "QQmlComponent"; isPointer: true }
-        Method {
-            name: "_create"
-            type: "QVariant"
-            Parameter { name: "component"; type: "QVariant" }
-            Parameter { name: "parent"; type: "QVariant" }
-        }
-        Method {
-            name: "itemAction"
-            type: "QVariant"
-            Parameter { name: "item"; type: "QVariant" }
-            Parameter { name: "text"; type: "QVariant" }
-            Parameter { name: "action"; type: "QVariant" }
-            Parameter { name: "timeout"; type: "QVariant" }
-        }
-        Method {
-            name: "popupAction"
-            type: "QVariant"
-            Parameter { name: "page"; type: "QVariant" }
-            Parameter { name: "text"; type: "QVariant" }
-            Parameter { name: "action"; type: "QVariant" }
-            Parameter { name: "timeout"; type: "QVariant" }
         }
     }
 }

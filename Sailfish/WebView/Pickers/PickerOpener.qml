@@ -41,7 +41,7 @@ QtObject {
         var winid = data.winid
         switch (topic) {
         case "embed:selectasync": {
-            pageStack.push(data.multiple ? _multiSelectComponentUrl : _singleSelectComponentUrl,
+            pageStack.animatorPush(data.multiple ? _multiSelectComponentUrl : _singleSelectComponentUrl,
                                            { "options": data.options, "contentItem": contentItem })
             break
         }

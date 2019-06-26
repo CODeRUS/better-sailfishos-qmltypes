@@ -40,7 +40,7 @@ TextField {
 
     implicitWidth: _editor.implicitWidth + Theme.paddingSmall
                    + Theme.itemSizeSmall*2  // width of two icons
-    height: Math.max(Theme.itemSizeMedium, _editor.height + Theme.paddingMedium + Theme.paddingSmall)
+    implicitHeight: Math.max(Theme.itemSizeMedium, _editor.height + Theme.paddingMedium + Theme.paddingSmall)  + (labelVisible ? _labelItem.height : 0)
 
     focusOutBehavior: FocusBehavior.ClearPageFocus
     font {
@@ -98,10 +98,7 @@ TextField {
                 FadeAnimation {}
             }
 
-            onClicked: {
-                searchField.text = ""
-                searchField._editor.forceActiveFocus()
-            }
+            onClicked: searchField.text = ""
         }
     }
 }

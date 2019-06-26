@@ -1,8 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Lipstick 1.0
 
-Image {
+HighlightImage {
     property string icon
     property bool pressed
     property real size: Theme.iconSizeLauncher
@@ -11,8 +10,10 @@ Image {
     sourceSize.height: size
     width: size
     height: size
-    layer.effect: PressEffect {}
-    layer.enabled: pressed
+    highlighted: pressed
+
+    monochromeWeight: colorWeight
+    highlightColor: Theme.highlightBackgroundColor
 
     source: {
         if (icon.indexOf(':/') !== -1 || icon.indexOf("data:image/png;base64") === 0) {

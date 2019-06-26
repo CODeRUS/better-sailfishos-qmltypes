@@ -11,6 +11,7 @@ Item {
     property bool selected
     property int requiredProperty
     property alias highlighted: backgroundItem.highlighted
+    property bool promptSimSelection: Telephony.voiceSimUsageMode === Telephony.AlwaysAskSim
 
     signal clicked(variant property, string propertyType)
     signal pressed
@@ -36,7 +37,7 @@ Item {
             _contextMenu = contextMenuComponent.createObject(favoriteItem, {"person": person})
         }
         _contextMenu.x = Qt.binding(function () { return -x - parent.x })
-        _contextMenu.show(favoriteItem)
+        _contextMenu.open(favoriteItem)
     }
 
     function _openPropertyMenu(addresses) {
@@ -45,7 +46,7 @@ Item {
         }
         _propertyMenu.addressesModel.setAddresses(addresses)
         _propertyMenu.x = Qt.binding(function () { return -x - parent.x })
-        _propertyMenu.show(favoriteItem)
+        _propertyMenu.open(favoriteItem)
     }
 
     function remove(contactIdCheck) {
@@ -104,7 +105,7 @@ Item {
                 selectedProperty = properties[0]
             }
 
-            if (selectedProperty.propertyType == 'phoneNumber' && Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
+            if (selectedProperty.propertyType == 'phoneNumber' && favoriteItem.promptSimSelection) {
                 // Select a SIM via menu
                 _openPropertyMenu(properties)
                 _propertyMenu.property = selectedProperty.property
@@ -226,7 +227,7 @@ Item {
                     MenuItem {
                         text: displayLabel
                         onClicked: {
-                            if (type == 'phoneNumber' && Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
+                            if (type == 'phoneNumber' && favoriteItem.promptSimSelection) {
                                 contextMenu.property = property
                                 contextMenu.type = type
                                 simPicker.active = true

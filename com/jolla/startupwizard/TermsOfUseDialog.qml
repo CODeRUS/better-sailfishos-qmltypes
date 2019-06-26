@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import com.jolla.startupwizard 1.0
 import com.jolla.settings.accounts 1.0
+import com.jolla.settings.system 1.0
 
 Dialog {
     id: root
@@ -13,6 +14,7 @@ Dialog {
 
     property string localeName
     property StartupWizardManager startupWizardManager
+    property TermsOfUseManager termsOfUseManager
 
     property int party: StartupWizardManager.SailfishOS
 
@@ -27,6 +29,9 @@ Dialog {
 
     signal shutdown()
 
+    function loadFullTermsOfUse(localeName) {
+        return termsOfUseManager.platformTermsOfUse(localeName)
+    }
 
     Flickable {
         id: flickable
@@ -86,13 +91,13 @@ Dialog {
                             .arg("</font></u>")
 
                 onClicked: {
-                    var translatedText = startupWizardManager.termsOfUse(root.localeName, root.party)
+                    var translatedText = root.loadFullTermsOfUse(root.localeName)
                     if (translatedText.length === 2) {
                         var props = {
                             "headingText": translatedText[0],
                             "bodyText": translatedText[1]
                         }
-                        pageStack.push(fullTermsComponent, props)
+                        pageStack.animatorPush(fullTermsComponent, props)
                     }
                 }
             }
@@ -122,7 +127,7 @@ Dialog {
                     .arg("</font></u>")
 
             onClicked: {
-                pageStack.push(rejectDialogComponent)
+                pageStack.animatorPush(rejectDialogComponent)
             }
         }
     }
@@ -130,47 +135,8 @@ Dialog {
     Component {
         id: fullTermsComponent
 
-        Dialog {
-            id: fullTermsDialog
-
-            property string headingText
-            property string bodyText
-
-            forwardNavigation: false
-
-            SilicaFlickable {
-                anchors.fill: parent
-                contentHeight: header.height + termsTextColumn.height + Theme.paddingLarge*2
-
-                WizardDialogHeader {
-                    id: header
-                    acceptText: ""
-                    title: fullTermsDialog.headingText
-                }
-
-                Column {
-                    id: termsTextColumn
-                    anchors {
-                        top: header.bottom
-                        left: parent.left
-                        leftMargin: Theme.horizontalPageMargin
-                        right: parent.right
-                        rightMargin: Theme.horizontalPageMargin
-                    }
-                    spacing: Theme.paddingLarge
-
-                    Label {
-                        width: parent.width
-                        height: implicitHeight + Theme.paddingLarge
-                        wrapMode: Text.Wrap
-                        font.pixelSize: Theme.fontSizeExtraSmall
-                        color: startupWizardManager.defaultHighlightColor()
-                        text: fullTermsDialog.bodyText
-                    }
-                }
-
-                VerticalScrollDecorator {}
-            }
+        FullTermsDialog {
+            bodyTextColor: startupWizardManager.defaultHighlightColor()
         }
     }
 

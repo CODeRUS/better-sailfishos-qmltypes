@@ -47,7 +47,7 @@ Text {
     color: Theme.highlightColor
     linkColor: Theme.primaryColor
     font.pixelSize: Theme.fontSizeMedium
-    text: parser.linkedText.replace(/\n/g, '<br>');
+    text: parser.linkedText.replace(/\n/g, '<br>')
     textFormat: Text.StyledText
     wrapMode: Text.Wrap
 

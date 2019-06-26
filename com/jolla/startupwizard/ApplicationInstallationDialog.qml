@@ -21,10 +21,6 @@ Dialog {
         applicationList.installSelectedApps()
     }
 
-    property bool skipDialog: status == PageStatus.Active && root.applicationModel.populated
-                              && applicationModel.count === 0
-    onSkipDialogChanged: if (skipDialog) accept()
-
     ApplicationList {
         id: applicationList
     }
@@ -32,12 +28,11 @@ Dialog {
     ApplicationsGridView {
         id: appGrid
 
-        property real contentOffset: (root.width - (cellWidth * columnCount)) / 2
+        property real contentOffset: -(root.width - appGrid.width)/2
 
         minimumDelegateSize: Screen.sizeCategory >= Screen.Large
                              ? Theme.iconSizeLauncher
                              : initialCellWidth
-        width: parent.width
         model: applicationModel
 
         Component.onCompleted: {
@@ -53,18 +48,19 @@ Dialog {
                 //: Heading for page that allows the user to install applications
                 //% "Select your apps"
                 title: qsTrId("startupwizard-he-select_your_apps")
+                x: appGrid.contentOffset
             }
 
             Label {
                 id: introLabel
-                x: Theme.horizontalPageMargin
+                x: Theme.horizontalPageMargin + appGrid.contentOffset
                 height: implicitHeight + (Screen.sizeCategory >= Screen.Large ? Theme.paddingLarge*2 : Theme.paddingLarge)
-                width: parent.width - x*2
+                width: parent.width - 2 * Theme.horizontalPageMargin
                 wrapMode: Text.Wrap
                 color: Theme.highlightColor
                 font.pixelSize: Theme.fontSizeExtraSmall
 
-                //% "Selected apps will be downloaded from the Jolla store and installed to your Jolla."
+                //% "Selected apps will be downloaded from the Jolla store and installed to your device."
                 text: qsTrId("startupwizard-la-selected_apps_will_be_downloaded_and_installed")
             }
         }
@@ -102,10 +98,7 @@ Dialog {
 
             LauncherGridItem {
                 id: appDisplay
-                anchors {
-                    centerIn: parent
-                    horizontalCenterOffset: appGrid.contentOffset
-                }
+                anchors.centerIn: parent
                 width: Math.min(appGrid.cellWidth, Theme.itemSizeExtraLarge
                             + (Screen.sizeCategory >= Screen.Large ? Theme.paddingSmall * 2 : 0))
                 height: Theme.itemSizeExtraLarge + Theme.paddingSmall

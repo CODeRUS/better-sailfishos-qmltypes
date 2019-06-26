@@ -9,7 +9,7 @@ OverlayAnchor {
 
     enabled: !anchorContainer.visible || overlay._captureButtonLocation != index
     parent: overlay._captureButtonLocation == index
-                ? (anchorContainer.visible ? settingsOverlay : container)
+                ? (anchorContainer.visible ? overlay : container)
                 : anchorContainer
 
     MouseArea {
@@ -33,7 +33,8 @@ OverlayAnchor {
         anchors.centerIn: parent
 
         border {
-            color: Theme.highlightColor
+            color: Theme.colorScheme == Theme.LightOnDark
+                   ? Theme.highlightColor : Theme.highlightFromColor(Theme.highlightColor, Theme.LightOnDark)
             width: 5
         }
         z: 1

@@ -153,7 +153,7 @@ SilicaFlickable {
                     _updateAvatarUrl(avatarUrl)
                     picker.destroy()
                 })
-                pageStack.push(picker)
+                pageStack.animatorPush(picker)
             } else {
                 console.log('Unable to load avatar picker - error:', pickerPageComponent.errorString())
             }
@@ -198,10 +198,10 @@ SilicaFlickable {
 
         delegate: Loader {
             width: parent.width
-            sourceComponent: detailsType == "activity" ? activityDelegate : detailDelegate
+            sourceComponent: detailsType == "activity" ? activityDelegateComponent : detailDelegateComponent
 
             Component {
-                id: detailDelegate
+                id: detailDelegateComponent
 
                 ContactDetailDelegate {
                     id: detailDelegate
@@ -239,7 +239,7 @@ SilicaFlickable {
                     }
 
                     onEmailClicked: {
-                        pageStack.push(Qt.resolvedUrl("EmailComposer.qml"), { emailTo: email })
+                        pageStack.animatorPush(Qt.resolvedUrl("EmailComposer.qml"), { emailTo: email })
                     }
 
                     onImClicked: {
@@ -294,7 +294,7 @@ SilicaFlickable {
             }
 
             Component {
-                id: activityDelegate
+                id: activityDelegateComponent
 
                 ExpandingDelegate {
                     id: activityDelegate

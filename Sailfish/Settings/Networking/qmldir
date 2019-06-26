@@ -1,0 +1,14 @@
+module Sailfish.Settings.Networking
+AddNetworkNotifications 1.0 AddNetworkNotifications.qml
+EncryptionComboBox 1.0 EncryptionComboBox.qml
+HiddenSwitch 1.0 HiddenSwitch.qml
+IdentityField 1.0 IdentityField.qml
+NetworkingMobileDataConnection 1.0 NetworkingMobileDataConnection.qml
+NetworkAddressField 1.0 NetworkAddressField.qml
+NetworkField 1.0 NetworkField.qml
+NetworkConfig 1.0 NetworkConfig.qml
+PassphraseField 1.0 PassphraseField.qml
+SsidField 1.0 SsidField.qml
+WlanUtils 1.0 WlanUtils.js
+SimDependentSettingsToggle 1.0 SimDependentSettingsToggle.qml
+typeinfo plugins.qmltypes

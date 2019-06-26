@@ -8,7 +8,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Item {
+FocusScope {
     id: layout
 
     default property alias _data: content.data
@@ -20,18 +20,13 @@ Item {
 
     anchors.fill: parent
 
-    Rectangle {
-        id: background
+    MouseArea {
+        id: blocker
+
+        objectName: "SystemDialogLayout_blocker"
+        // block events passing beneath the layout
         anchors.fill: content
         anchors.bottomMargin: -bottomPadding
-        color: Theme.overlayBackgroundColor
-        opacity: 0.9
-
-        MouseArea {
-            objectName: "SystemDialogLayout_blocker"
-            // block events passing beneath the layout
-            anchors.fill: parent
-        }
     }
 
     Item {
@@ -41,7 +36,7 @@ Item {
 
     MouseArea {
         width: parent.width
-        anchors.top: background.bottom
+        anchors.top: blocker.bottom
         anchors.bottom: parent.bottom
         onClicked: layout.dismiss()
 

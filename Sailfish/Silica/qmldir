@@ -17,6 +17,7 @@ DetailItem 1.0 DetailItem.qml
 Drawer 1.0 Drawer.qml
 FadeAnimation 1.0 FadeAnimation.qml
 FadeAnimator 1.0 FadeAnimator.qml
+FullscreenContentPage 1.0 FullscreenContentPage.qml
 FirstTimeUseCounter 1.0 FirstTimeUseCounter.qml
 HighlightBar 1.0 HighlightBar.qml
 IconButton 1.0 IconButton.qml
@@ -74,4 +75,6 @@ NestedGridView 1.0 NestedGridView.qml
 PasswordField 1.0 PasswordField.qml
 ExpandingSection 1.0 ExpandingSection.qml
 ExpandingSectionGroup 1.0 ExpandingSectionGroup.qml
+HighlightImage 1.0 HighlightImage.qml
 singleton Remorse 1.0 Remorse.qml
+typeinfo plugins.qmltypes

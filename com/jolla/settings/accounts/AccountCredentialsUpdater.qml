@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
+import MeeGo.Connman 0.2
 import com.jolla.settings.accounts 1.0
 
 Item {
@@ -29,21 +30,21 @@ Item {
             root.running = false
         })
         credentialsPromptDialog.credentialsUpdated.connect(credentialsUpdated)
-        pageStack.push(credentialsPromptDialog)
+        pageStack.animatorPush(credentialsPromptDialog)
         root.running = true
     }
 
-    function pushCredentialsUpdatePage(accountId) {
-        _showCredentialsUpdatePage(accountId, PageStackAction.Push)
+    function pushCredentialsUpdatePage(accountId, userName) {
+        _showCredentialsUpdatePage(accountId, userName, PageStackAction.Push)
     }
     function replaceWithCredentialsUpdatePage(accountId) {
-        _showCredentialsUpdatePage(accountId, PageStackAction.Replace)
+        _showCredentialsUpdatePage(accountId, "", PageStackAction.Replace)
     }
 
-    function _showCredentialsUpdatePage(accountId, pageStackAction) {
+    function _showCredentialsUpdatePage(accountId, userName, pageStackAction) {
         var currentPage = pageStack.currentPage
         var replaceTarget = PageStackAction.Replace ? pageStack.previousPage(currentPage) : undefined
-        var credentialsUpdater = _newCredentialsUpdater()
+        var credentialsUpdater = _newCredentialsUpdater(userName)
         _trackedObjects[credentialsUpdater] = undefined
         credentialsUpdater.finished.connect(function() {
             delete _trackedObjects[credentialsUpdater]
@@ -57,14 +58,14 @@ Item {
                 credentialsAgent.endDestinationAction = PageStackAction.Pop
                 credentialsAgent.endDestinationProperties = {}
                 credentialsAgent.endDestinationReplaceTarget = undefined
-                pageStack.push(credentialsAgent.initialPage)
+                pageStack.animatorPush(credentialsAgent.initialPage)
                 break
             case PageStackAction.Replace:
                 credentialsAgent.endDestination = currentPage
                 credentialsAgent.endDestinationAction = PageStackAction.Replace
                 credentialsAgent.endDestinationProperties = {}
                 credentialsAgent.endDestinationReplaceTarget = replaceTarget
-                pageStack.replaceAbove(replaceTarget, credentialsAgent.initialPage)
+                pageStack.animatorReplaceAbove(replaceTarget, credentialsAgent.initialPage)
                 break
             default:
                 throw new Error("AccountCredentialsManager: unsupported pageStackAction!", pageStackAction)
@@ -74,17 +75,20 @@ Item {
         root.running = true
     }
 
-    function _newCredentialsUpdater() {
-        var updater = credentialsUpdateComponent.createObject(root)
+    function _newCredentialsUpdater(userName) {
+        var updater = credentialsUpdateComponent.createObject(root, { "userName": userName })
         updater.credentialsUpdated.connect(root.credentialsUpdated)
         updater.credentialsUpdateError.connect(root.credentialsUpdateError)
         return updater
     }
 
+    property NetworkManager _networkManager: NetworkManager {}
+
     Component {
         id: credentialsUpdateComponent
         Account {
             property bool hasFinished
+            property string userName
 
             property var _credentialsAgentRunner
             property bool _saving
@@ -148,7 +152,8 @@ Item {
                 }
                 var agentProperties = {
                     "accountManager": accountManager,
-                    "accountProvider": accountManager.provider(providerName)
+                    "accountProvider": accountManager.provider(providerName),
+                    "userName": userName
                 }
                 if (agentProperties["accountProvider"] == null) {
                     throw new Error("Unable to obtain provider with name: " + providerName)
@@ -245,7 +250,7 @@ Item {
                 credentialsAgent.endDestinationProperties = {}
                 credentialsAgent.endDestinationReplaceTarget = endDestinationReplaceTarget
 
-                if (accountFactory.haveNetworkConnectivity()) {
+                if (_networkManager.state == "online") {
                     acceptDestination = credentialsAgent.initialPage
                 } else {
                     acceptDestination = networkCheckComponent
@@ -266,10 +271,6 @@ Item {
                 _credentialsUpdater.finished.connect(_checkFinished)
                 _credentialsUpdater.credentialsAgentReady.connect(_credentialsAgentReady)
                 _credentialsUpdater.start(accountId)
-            }
-
-            AccountFactory {
-                id: accountFactory
             }
 
             DialogHeader {
@@ -350,6 +351,8 @@ Item {
 
     Component {
         id: networkCheckComponent
-        NetworkCheckDialog { }
+        NetworkCheckDialog {
+            networkManager: root._networkManager
+        }
     }
 }

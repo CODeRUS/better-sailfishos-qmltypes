@@ -81,7 +81,9 @@ Item {
         property int __silica_hidden_flickable
 
         property Item __silica_contextmenu_instance
-        property real _menuHeight: __silica_contextmenu_instance ? __silica_contextmenu_instance.height : 0
+        property real _menuHeight: __silica_contextmenu_instance && __silica_contextmenu_instance._open
+                  ? __silica_contextmenu_instance._displayHeight
+                  : 0
 
         // menuIndex is the index of the item displaying the context menu
         property int menuIndex: 0

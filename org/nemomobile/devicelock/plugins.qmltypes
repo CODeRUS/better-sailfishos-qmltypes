@@ -24,25 +24,26 @@ Module {
         Enum {
             name: "Feedback"
             values: {
-                "EnterSecurityCode": 0,
-                "EnterNewSecurityCode": 1,
-                "RepeatNewSecurityCode": 2,
-                "SuggestSecurityCode": 3,
-                "SecurityCodesDoNotMatch": 4,
-                "SecurityCodeInHistory": 5,
-                "SecurityCodeExpired": 6,
-                "SecurityCodeDueToExpire": 7,
-                "PartialPrint": 8,
-                "PrintIsUnclear": 9,
-                "SensorIsDirty": 10,
-                "SwipeFaster": 11,
-                "SwipeSlower": 12,
-                "UnrecognizedFinger": 13,
-                "IncorrectSecurityCode": 14,
-                "ContactSupport": 15,
-                "TemporarilyLocked": 16,
-                "PermanentlyLocked": 17,
-                "UnlockToPerformOperation": 18
+                "Authorize": 0,
+                "EnterSecurityCode": 1,
+                "EnterNewSecurityCode": 2,
+                "RepeatNewSecurityCode": 3,
+                "SuggestSecurityCode": 4,
+                "SecurityCodesDoNotMatch": 5,
+                "SecurityCodeInHistory": 6,
+                "SecurityCodeExpired": 7,
+                "SecurityCodeDueToExpire": 8,
+                "PartialPrint": 9,
+                "PrintIsUnclear": 10,
+                "SensorIsDirty": 11,
+                "SwipeFaster": 12,
+                "SwipeSlower": 13,
+                "UnrecognizedFinger": 14,
+                "IncorrectSecurityCode": 15,
+                "ContactSupport": 16,
+                "TemporarilyLocked": 17,
+                "PermanentlyLocked": 18,
+                "UnlockToPerformOperation": 19
             }
         }
         Enum {
@@ -74,7 +75,7 @@ Module {
         }
         Property { name: "utilizedMethods"; type: "Authenticator::Methods"; isReadonly: true }
         Property { name: "status"; type: "Status"; isReadonly: true }
-        Property { name: "authenticatingProcess"; type: "bool"; isReadonly: true }
+        Property { name: "authenticatingProcess"; type: "int"; isReadonly: true }
         Property { name: "active"; type: "bool" }
         Property { name: "registered"; type: "bool" }
         Property { name: "minimumCodeLength"; type: "int"; isReadonly: true }
@@ -88,7 +89,7 @@ Module {
         Signal {
             name: "authenticationStarted"
             Parameter { name: "feedback"; type: "Feedback" }
-            Parameter { name: "data"; type: "QVariant" }
+            Parameter { name: "data"; type: "QVariantMap" }
         }
         Signal {
             name: "authenticationUnavailable"
@@ -118,6 +119,7 @@ Module {
             Parameter { name: "code"; type: "string" }
         }
         Method { name: "requestSecurityCode" }
+        Method { name: "authorize" }
         Method { name: "cancel" }
     }
     Component {
@@ -130,7 +132,9 @@ Module {
             values: {
                 "NoAuthentication": 0,
                 "SecurityCode": 1,
-                "Fingerprint": 2
+                "Fingerprint": 2,
+                "Confirmation": 4096,
+                "AllAvailable": 4099
             }
         }
         Enum {
@@ -138,7 +142,9 @@ Module {
             values: {
                 "NoAuthentication": 0,
                 "SecurityCode": 1,
-                "Fingerprint": 2
+                "Fingerprint": 2,
+                "Confirmation": 4096,
+                "AllAvailable": 4099
             }
         }
         Property { name: "availableMethods"; type: "Methods"; isReadonly: true }
@@ -146,6 +152,10 @@ Module {
         Signal {
             name: "authenticated"
             Parameter { name: "authenticationToken"; type: "QVariant" }
+        }
+        Signal {
+            name: "permissionGranted"
+            Parameter { name: "method"; type: "Method" }
         }
         Signal { name: "aborted" }
         Method {
@@ -156,6 +166,17 @@ Module {
         Method {
             name: "authenticate"
             Parameter { name: "challengeCode"; type: "QVariant" }
+        }
+        Method {
+            name: "requestPermission"
+            Parameter { name: "message"; type: "string" }
+            Parameter { name: "properties"; type: "QVariantMap" }
+            Parameter { name: "methods"; type: "Methods" }
+        }
+        Method {
+            name: "requestPermission"
+            Parameter { name: "message"; type: "string" }
+            Parameter { name: "properties"; type: "QVariantMap" }
         }
         Method { name: "cancel" }
     }

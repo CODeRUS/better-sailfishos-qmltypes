@@ -17,13 +17,13 @@ Item {
         sourceSize.width: width
         sourceSize.height: width
         fillMode: Image.PreserveAspectFit
-    }
 
-    OpacityRampEffect {
-        enabled: coverImage.status === Image.Ready
-        offset: 0.0
-        slope: 1.0
-        direction: isLandscape ? OpacityRamp.TopToBottom : OpacityRamp.BottomToTop
-        sourceItem: coverImage
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.5) }
+                GradientStop { position: 0.3; color: "transparent" }
+            }
+        }
     }
 }

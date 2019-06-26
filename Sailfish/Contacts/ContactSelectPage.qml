@@ -18,6 +18,7 @@ Page {
     property alias recentContactsCategoryMask: contactBrowser.recentContactsCategoryMask
     property alias searchEnabled: contactBrowser.searchEnabled
     property bool searchMenuEnabled
+    property alias promptSimSelection: contactBrowser.promptSimSelection
 
     property string title: requiredProperty == PeopleModel.PhoneNumberRequired ?
                            //: Page title of contact phone number selector

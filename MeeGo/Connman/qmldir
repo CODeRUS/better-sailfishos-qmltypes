@@ -1,2 +1,2 @@
 module MeeGo.Connman
-plugin ConnmanQtDeclarative
+typeinfo plugins.qmltypes

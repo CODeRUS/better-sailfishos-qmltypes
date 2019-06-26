@@ -40,21 +40,26 @@ Label {
     property bool down
     property bool highlighted
 
+    signal earlyClick
     signal clicked
+    signal delayedClick
 
     property int __silica_menuitem
     property int _duration: 50
+    property color _enabledColor: (down || highlighted) ^ _invertColors ? Theme.highlightColor : Theme.primaryColor
+    property color _disabledColor: Theme.rgba(Theme.secondaryColor, 0.4)
     property bool _invertColors
     on_InvertColorsChanged: _duration = 200
 
     x: Theme.horizontalPageMargin
-    width: parent ? parent.width-2*Theme.horizontalPageMargin : Screen.width
+    width: parent ? parent.width - 2*Theme.horizontalPageMargin : Screen.width
     // Reduce height if inside pulley menu content item on smaller screens
-    height: screen.sizeCategory <= Screen.Medium && parent && parent.hasOwnProperty('__silica_pulleymenu_content') ? Theme.itemSizeExtraSmall : Theme.itemSizeSmall
-    horizontalAlignment: implicitWidth > width && truncationMode != TruncationMode.None ? Text.AlignLeft : Text.AlignHCenter
+    height: screen.sizeCategory <= Screen.Medium && parent && parent.hasOwnProperty('__silica_pulleymenu_content')
+            ? Theme.itemSizeExtraSmall : Theme.itemSizeSmall
+    horizontalAlignment: implicitWidth > width && truncationMode != TruncationMode.None
+                         ? Text.AlignLeft : Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter
-    color: enabled ? ((down || highlighted) ^ _invertColors ? Theme.highlightColor : Theme.primaryColor)
-                   : Theme.rgba(Theme.secondaryColor, 0.4)
+    color: enabled ? _enabledColor : _disabledColor
 
     // Descriptive labels like a label defining a menu item action should not truncate.
     // If there absolutely is no space left to fit the translation just limit the font size.

@@ -5,11 +5,21 @@ import com.jolla.startupwizard 1.0
 TermsOfUseDialog {
     id: root
 
-    readonly property variant strings: startupWizardManager.vendorTermsSummary(localeName)
+    readonly property variant strings: termsOfUseManager.vendorTermsSummary(localeName)
 
     party: StartupWizardManager.Vendor
 
-    function _string(index) { return strings && strings.length > index ? strings[index] : "" }
+    function _string(index) {
+        if (strings && strings.length > index) {
+            return strings[index]
+        }
+        console.log("index", index, "exceeds terms string list length", strings.length)
+        return ""
+    }
+
+    function loadFullTermsOfUse(localeName) {
+        return termsOfUseManager.vendorTermsOfUse(localeName)
+    }
 
     headerText: _string(0)
     summaryText: _string(1)

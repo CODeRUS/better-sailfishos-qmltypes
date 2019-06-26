@@ -53,9 +53,13 @@ Transition {
             target: targetPage
             properties: '_wallpaperOrientation'
         }
-        FadeAnimation {
+        NumberAnimation {
             id: fadeOutAnimation
-            target: __silica_applicationwindow_instance.contentItem
+            target: __silica_applicationwindow_instance._backgroundVisible
+                    ? __silica_applicationwindow_instance
+                    : __silica_applicationwindow_instance.contentItem
+            property: '_windowOpacity'
+            easing.type: Easing.InOutQuad
             to: 0
             duration: 150
         }
@@ -70,8 +74,10 @@ Transition {
                 targetPage._defaultTransition = true
             }
         }
-        FadeAnimation {
+        NumberAnimation {
             target: fadeOutAnimation.target
+            property: '_windowOpacity'
+            easing.type: Easing.InOutQuad
             to: 1
             duration: 150
         }

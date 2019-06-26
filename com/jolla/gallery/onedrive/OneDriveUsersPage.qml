@@ -6,6 +6,7 @@ import com.jolla.gallery.extensions 1.0
 
 UsersPage {
     id: root
+
     socialNetwork: SocialSync.OneDrive
     dataType: SocialSync.Images
     usersModel: OneDriveImageCacheModel {
@@ -29,9 +30,8 @@ UsersPage {
             downloader: OneDriveImageDownloader
         }
         onClicked: {
-            window.pageStack.push(Qt.resolvedUrl("OneDriveAlbumsPage.qml"),
-                                  {"userId": delegateItem.userId,
-                                   "title": root.title})
+            window.pageStack.animatorPush(Qt.resolvedUrl("OneDriveAlbumsPage.qml"),
+                                  { "userId": delegateItem.userId, "title": root.title })
         }
     }
 }

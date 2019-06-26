@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013-2016 Jolla Ltd.
+** Copyright (C) 2013-2017 Jolla Ltd.
 ** Contact: Raine Mäkeläinen <raine.makelainen@jollamobile.com>
 **
 ****************************************************************************/
@@ -12,11 +12,9 @@ ListModel {
         var row = _indexInModel(contentItem)
         if (row >= 0) {
             remove(row)
-            return false
+        } else {
+            append(contentItem)
         }
-
-        append(contentItem)
-        return true
     }
 
     function selected(filePath) {
@@ -26,16 +24,6 @@ ListModel {
             }
         }
         return false
-    }
-
-    function selectedCount(contentType) {
-        var tmpCount = 0
-        for (var row = 0; row < count; row++) {
-            if (get(row).contentType === contentType) {
-                ++tmpCount
-            }
-        }
-        return tmpCount
     }
 
     function _indexInModel(contentItem) {

@@ -12,7 +12,6 @@ Page {
                                || orientation === Orientation.PortraitInverted
 
     SilicaListView {
-        id: view
         anchors.fill: parent
         header: PageHeader { title: root.title }
         cacheBuffer: screen.height
@@ -23,10 +22,10 @@ Page {
 
             onClicked: {
                 imagesModel.loadImages()
-                window.pageStack.push(Qt.resolvedUrl("PhotoGridPage.qml"),
-                                      {"albumName": albumName,
-                                       "albumIdentifier": albumIdentifier,
-                                       "model": imagesModel})
+                window.pageStack.animatorPush(Qt.resolvedUrl("PhotoGridPage.qml"),
+                                              {"albumName": albumName,
+                                                  "albumIdentifier": albumIdentifier,
+                                                  "model": imagesModel})
             }
         }
 

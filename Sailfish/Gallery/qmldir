@@ -1,13 +1,12 @@
 module Sailfish.Gallery
-plugin sailfishgalleryplugin
 DetailsPage 1.0 DetailsPage.qml
+GalleryMediaPlayer 1.0 GalleryMediaPlayer.qml
+GalleryOverlay 1.0 GalleryOverlay.qml
 HighlightItem 1.0 HighlightItem.qml
-ImageEditPage 1.0 ImageEditPage.qml
+ImageEditDialog 1.0 ImageEditDialog.qml
 ImageGridView 1.0 ImageGridView.qml
 ImageViewer 1.0 ImageViewer.qml
-SplitViewPage 1.0 SplitViewPage.qml
-SplitViewDialog 1.0 SplitViewDialog.qml
 ThumbnailImage 1.0 ThumbnailImage.qml
 ThumbnailVideo 1.0 ThumbnailVideo.qml
-ThumbnailCustom 1.0 ThumbnailCustom.qml
 VideoPoster 1.0 VideoPoster.qml
+typeinfo plugins.qmltypes

@@ -92,7 +92,7 @@ With labelVisible: false
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
-import "TextAutoScroller.js" as TextAutoScroller
+import "Util.js" as Util
 
 TextBaseItem {
     id: textBase
@@ -117,10 +117,10 @@ TextBaseItem {
     property Component background: Separator {
         x: textLeftMargin
         anchors {
-            bottom: contentItem.bottom
+            bottom: contentContainer.bottom
             bottomMargin: -Theme.paddingSmall/2
         }
-        width: contentItem.width
+        width: contentContainer.width
         color: labelItem.color
         horizontalAlignment: placeholderTextLabel.horizontalAlignment
     }
@@ -134,19 +134,25 @@ TextBaseItem {
     property Item _backgroundItem
     property QtObject _feedbackEffect
     property var _appWindow: __silica_applicationwindow_instance
+    property Item _flickable
 
     property alias _flickableDirection: flickable.flickableDirection
+    property rect _autoScrollCursorRect: Qt.rect(0, 0, 0, 0)
 
     property Item _editor
+    property Item _scopeItem: textBase
     property alias editor: textBase._editor  //XXX Deprecated
     property bool labelVisible: true
 
-    default property alias _children: contentItem.data
-    property alias _contentItem: contentItem
+    default property alias _children: contentContainer.data
+    property alias _contentItem: contentContainer
     property alias _labelItem: labelItem
     property alias _placeholderTextLabel: placeholderTextLabel
     property bool focusOnClick: !readOnly
     property bool _singleLine
+    readonly property real _bottomMargin: Theme.paddingSmall + (labelVisible
+            ? labelItem.height + labelItem.anchors.bottomMargin
+            : Theme.paddingSmall)
 
     function forceActiveFocus() { _editor.forceActiveFocus() }
     function cut() { _editor.cut() }
@@ -165,7 +171,13 @@ TextBaseItem {
         var translatedPos = mapFromItem(_editor, rect.x, rect.y)
         rect.x = translatedPos.x
         rect.y = translatedPos.y
-        return rect;
+        return rect
+    }
+
+    function _fixupScrollPosition() {
+        scrollProxy.HorizontalAutoScroll.fixup()
+        scrollProxy.VerticalAutoScroll.fixup()
+        VerticalAutoScroll.fixup()
     }
 
     onHorizontalAlignmentChanged: {
@@ -195,17 +207,24 @@ TextBaseItem {
         }
     }
 
-    function _updateFlickables() {
-        if (autoScrollEnabled) {
-            TextAutoScroller.autoScroller.updateFlickables()
-        } else {
-            TextAutoScroller.autoScroller.editor = null
+    VerticalAutoScroll.keepVisible: activeFocus && autoScrollEnabled
+
+    // If the TextArea/Field has an implicit height we may need to scroll an external flickable to
+    // keep the cursor in view.
+    VerticalAutoScroll.cursorRectangle: {
+        if (!autoScrollEnabled || !activeFocus) {
+            return undefined
         }
+        var cursor = _editor.cursorRectangle
+        var x = Math.max(0, Math.min(width - cursor.width, contentContainer.x + _editor.x + cursor.x))
+        var y = Math.max(0, Math.min(height - cursor.height, contentContainer.y + _editor.y + cursor.y))
+        return Qt.rect(x, y - Theme.paddingLarge / 2, cursor.width, cursor.height + Theme.paddingLarge)
     }
 
     signal clicked(variant mouse)
     signal pressAndHold(variant mouse)
 
+    opacity: enabled ? 1.0 : 0.4
     implicitHeight: _editor.height + Theme.paddingMedium + textTopMargin + (labelVisible ? labelItem.height : 0) + Theme.paddingSmall
 
     onBackgroundChanged: _updateBackground()
@@ -215,7 +234,7 @@ TextBaseItem {
         }
         // Avoid hard dependency to feedback - NOTE: Qt5Feedback doesn't support TextSelection effect
         _feedbackEffect = Qt.createQmlObject("import QtQuick 2.0; import QtFeedback 5.0; ThemeEffect { effect: ThemeEffect.PressWeak }",
-                           textBase, 'ThemeEffect');
+                                             textBase, 'ThemeEffect')
 
         // calling ThemeEffect.supported initializes the feedback backend,
         // without the initialization here the first playback drops few frames
@@ -226,29 +245,21 @@ TextBaseItem {
 
     // This is the container item for the editor.  It is not the flickable because we want mouse
     // interaction to extend to the full bounds of the item but painting to be clipped so that
-    // it doesn't exceed the margins or overlap with the label text.  So we have this item which
-    // looks like a flickable to TextAutoScroller but occupies less space than the actual flickable.
+    // it doesn't exceed the margins or overlap with the label text.
     Item {
-        id: contentItem
+        id: contentContainer
 
-        property real maximumFlickVelocity: 1
-        property alias originX: flickable.originX
-        property alias originY: flickable.originY
         property alias contentX: flickable.contentX
         property alias contentY: flickable.contentY
-        property alias flickableDirection: flickable.flickableDirection
-        property alias interactive: flickable.interactive
-        property real contentWidth: _editor.width + Theme.paddingSmall
-        property real contentHeight: _editor.height + Theme.paddingSmall
 
         clip: flickable.interactive
 
         anchors {
-            left: parent.left; top: parent.top;
+            left: parent.left; top: parent.top
             right: parent.right; bottom: parent.bottom
             leftMargin: textLeftMargin; topMargin: textTopMargin
             rightMargin: textRightMargin
-            bottomMargin: (labelVisible ? labelItem.height + labelItem.anchors.bottomMargin : Theme.paddingSmall) + Theme.paddingSmall
+            bottomMargin: textBase._bottomMargin
         }
     }
 
@@ -256,7 +267,7 @@ TextBaseItem {
         id: placeholderTextLabel
 
         color: textBase.errorHighlight
-               ? "#ff4d4d"
+               ? Theme.errorColor
                : (textBase.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor)
 
         opacity: (textBase.text.length === 0 && !_editor.inputMethodComposing) ? 1.0 : 0.0
@@ -279,7 +290,7 @@ TextBaseItem {
         }
         visible: labelVisible
         color: textBase.errorHighlight
-               ? "#ff4d4d"
+               ? Theme.errorColor
                : (textBase.highlighted ? Theme.highlightColor : Theme.primaryColor)
         opacity: (textBase.errorHighlight || textBase.highlighted ? 1.0 : 0.6) * (1 - placeholderTextLabel.opacity)
         truncationMode: TruncationMode.Fade
@@ -290,17 +301,36 @@ TextBaseItem {
         id: flickable
 
         anchors {
-            left: parent.left; top: parent.top;
+            left: parent.left; top: parent.top
             right: parent.right; bottom: parent.bottom
             leftMargin: textLeftMargin; topMargin: textTopMargin
             rightMargin: textRightMargin
         }
 
         pixelAligned: true
-        contentHeight: _editor.height + parent.height - contentItem.height
-        contentWidth: _editor.width + Theme.paddingSmall
-        interactive: _editor.height > contentItem.height || _editor.width > contentItem.width
+        contentHeight: scrollProxy.height
+        contentWidth: scrollProxy.width
+        interactive: _editor.height > contentContainer.height || _editor.width > contentContainer.width
         boundsBehavior: Flickable.StopAtBounds
+
+        Item {
+            id: scrollProxy
+            width: textBase._editor.width + Theme.paddingSmall
+            height: textBase._editor.height + textBase._bottomMargin
+
+            HorizontalAutoScroll.animated: false
+            HorizontalAutoScroll.cursorRectangle: textBase._editor.activeFocus && autoScrollEnabled
+                                                  ? textBase._editor.cursorRectangle
+                                                  : undefined
+            HorizontalAutoScroll.leftMargin: Theme.paddingLarge + Theme.paddingSmall
+            HorizontalAutoScroll.rightMargin: Theme.paddingLarge + Theme.paddingSmall
+            VerticalAutoScroll.animated: false
+            VerticalAutoScroll.cursorRectangle: textBase._editor.activeFocus && autoScrollEnabled
+                                                ? textBase._editor.cursorRectangle
+                                                : undefined
+            VerticalAutoScroll.topMargin: Theme.paddingLarge / 2
+            VerticalAutoScroll.bottomMargin: textBase._bottomMargin + Theme.paddingLarge / 2
+        }
     }
 
     MouseArea {
@@ -358,7 +388,7 @@ TextBaseItem {
 
                 var cursorPos = _editor.mapToItem(_appWindow._rotatingItem, cursorRect.x, cursorRect.y)
 
-                var originX = mouseArea.mapToItem(_appWindow._rotatingItem, mouseX, 0).x;
+                var originX = mouseArea.mapToItem(_appWindow._rotatingItem, mouseX, 0).x
                 var originY = 0
                 if (reset) {
                     originY = (cursorPos.y < (scaleFactor - 1) * cursorRect.height + scaleOffset + scaleTopMargin)
@@ -367,7 +397,7 @@ TextBaseItem {
                 } else {
                     var mappedOrigin = _appWindow.contentItem.mapToItem(_appWindow._rotatingItem,
                                                                         _appWindow._contentScale.origin.x,
-                                                                        _appWindow._contentScale.origin.y);
+                                                                        _appWindow._contentScale.origin.y)
                     var scaledCursorHeight = cursorRect.height * scaleFactor / (scaleFactor - 1)
                     if (cursorPos.y < scaleTopMargin) {
                         originY = Math.max(0, mappedOrigin.y - scaledCursorHeight)
@@ -378,7 +408,7 @@ TextBaseItem {
                     }
                 }
 
-                var mappedPos = _appWindow._rotatingItem.mapToItem(_appWindow.contentItem, originX, originY);
+                var mappedPos = _appWindow._rotatingItem.mapToItem(_appWindow.contentItem, originX, originY)
                 _appWindow._contentScale.origin.x = mappedPos.x
                 _appWindow._contentScale.origin.y = mappedPos.y
             }
@@ -654,9 +684,6 @@ TextBaseItem {
         target: _editor
         onActiveFocusChanged: {
             if (_editor.activeFocus) {
-                if (textBase.autoScrollEnabled) {
-                    TextAutoScroller.create(_editor)
-                }
                 if (textBase.softwareInputPanelEnabled) {
                     Qt.inputMethod.show()
                 }

@@ -1,14 +1,14 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import MeeGo.QOfono 0.2
 import org.nemomobile.lipstick 0.1
 import org.nemomobile.ofono 1.0
 
-Item {
+FocusScope {
     id: root
 
     // read-only
-    property string enteredPin
+    property alias enteredPin: pinInput.text
     property bool emergency
     property bool enteringNewPin
 
@@ -32,15 +32,21 @@ Item {
     property color titleColor: Theme.secondaryHighlightColor
     property string subTitleText
     property string warningText
+    property string transientWarningText
     property color warningTextColor: _inputOrCancelEnabled ? Theme.primaryColor : Theme.secondaryHighlightColor
     property bool highlightTitle: !_inputOrCancelEnabled && !emergency
     property color pinDisplayColor: Theme.highlightColor
     property color keypadTextColor: Theme.primaryColor
+    property alias optionButtonColor: option1Button.primaryColor
     property bool dimmerBackspace
     property color emergencyTextColor: "red"
 
-    property string _passwordCharacter: "\u2022"
-    property string _displayedPin
+    property int inputMethodHints: showDigitPad ? Qt.ImhDigitsOnly : Qt.ImhNone
+    property int echoMode: TextInput.Password
+    property alias passwordMaskDelay: pinInput.passwordMaskDelay
+
+    property alias _passwordCharacter: pinInput.passwordCharacter
+    property alias _displayedPin: pinInput.displayText
     property string _oldPin
     property string _newPin
 
@@ -49,15 +55,17 @@ Item {
     property string _pinConfirmTitleText
     property string _badPinWarning
     property string _overridingTitleText
-    property string _overridingWarningText
     property string _emergencyWarningText
     property bool lastChance
 
-    property bool _showSuggestedPin
     property bool suggestionsEnabled
     property bool suggestionsEnforced
-    readonly property bool _showSuggestionButton: !emergency
-            && ((_showSuggestedPin && suggestionsEnforced) || (suggestionsEnabled && enteredPin === ""))
+    readonly property bool _showSuggestionButton: suggestionsEnabled
+                && (suggestionsEnforced || pinInput.length === 0 || suggestionVisible)
+    readonly property bool suggestionVisible: pinInput.length > 0
+                && pinInput.selectionStart !== pinInput.selectionEnd
+
+    property bool requirePin: true
 
     property bool showEmergencyButton: true
 
@@ -78,17 +86,34 @@ Item {
     //% "The new PIN cannot be the same as the current PIN."
     property string pinUnchangedText: qsTrId("settings_pin-he-new_pin_same_as_old")
 
+    readonly property string _pinValidationWarningText: {
+        if (enteredPin === "") {
+            return ""
+        } else if (enteringNewPin && _oldPin === enteredPin) {
+            return pinUnchangedText
+        } else if (_pinMismatch) {
+            return pinMismatchText
+        } else if (pinInput.length < minimumLength) {
+            return pinShortLengthWarning
+        } else if (maximumLength > 0 && pinInput.length > maximumLength) {
+            return pinLengthWarning
+        } else {
+            return ""
+        }
+    }
+
     property QtObject _feedbackEffect
     property QtObject _voiceCallManager
 
     property bool showDigitPad: true
     property bool inputEnabled: true
-    property bool _showDigitPad: (showDigitPad && _inputOrCancelEnabled)
-            || emergency
-            || (root._showSuggestedPin && root.suggestionsEnforced)
-    property bool visibleInDashboard
+    property bool _showDigitPad: pinInput.inputMethodHints & (Qt.ImhDigitsOnly | Qt.ImhDialableCharactersOnly)
 
+    readonly property bool _pinMismatch: (enteringNewPin && pinInput.length >= minimumLength && _newPin !== "" && _newPin !== enteredPin)
     readonly property bool _inputOrCancelEnabled: inputEnabled || (showCancelButton && cancelText !== "")
+    // Height rule an approximation without all margins exactly. Should cover currently used device set.
+    readonly property bool _twoColumnMode: pageStack.currentPage.isLandscape && keypad.visible
+                                           && height < (keypad.height + headingColumn.height + pinInput.height + Theme.itemSizeSmall)
 
     signal pinConfirmed()
     signal pinEntryCanceled()
@@ -98,29 +123,20 @@ Item {
         inputEnabled = true
         lastChance = false
         suggestionsEnabled = false
-        _showSuggestedPin = false
-        _displayedPin = ""
         enteredPin = ""
 
         // Change status messages here and not when confirm button is clicked, else they may update
         // while the page is undergoing a pop transition when the PIN is confirmed.
         _overridingTitleText = _pinConfirmTitleText
-        _overridingWarningText = _badPinWarning
+        transientWarningText = _badPinWarning
         if (enteringNewPin && _pinConfirmTitleText === "") {
             enteringNewPin = false
         }
     }
 
     function suggestPin(pin) {
-        _showSuggestedPin = true
         enteredPin = pin
-        _displayedPin = pin
-    }
-
-    function clearSuggestedPin() {
-        _showSuggestedPin = false
-        enteredPin = ""
-        _displayedPin = ""
+        pinInput.selectAll()
     }
 
     // Delays emission of pinConfirmed() until the same PIN has been entered twice.
@@ -133,8 +149,18 @@ Item {
         clear()
     }
 
+    function focusIn() {
+        // Just ensure local focus.
+        pinInput.focus = true
+        focus = true
+    }
+
     function _clickedConfirmButton() {
         if (enteringNewPin) {
+            // extra protection for hw keyboard enter
+            if (enteredPin.length < minimumLength)
+                return
+
             if (_newPin === "") {
                 _pinConfirmTitleText = confirmNewPinText
                 _badPinWarning = ""
@@ -158,91 +184,56 @@ Item {
         }
     }
 
-    function _pushPinDigit(digit) {
-        if (emergency) {
-            obfuscateLastDigit.stop()
-            if (enteredPin.length > 100) {
-                return
-            }
-            _displayedPin += digit
-            enteredPin += digit
+    function _popPinDigit() {
+        if (suggestionVisible) {
+            pinInput.remove(pinInput.selectionStart, pinInput.selectionEnd)
         } else {
-            if (_showSuggestedPin) {
-                clearSuggestedPin()
-            }
-
-            if (maximumLength > 0 && enteredPin.length >= maximumLength) {
-                _overridingWarningText = pinLengthWarning
-                return
-            }
-            obfuscateLastDigit.stop()
-            _displayedPin = _passwordString(_displayedPin.length) + digit
-            enteredPin += digit
-            obfuscateLastDigit.start()
-            if (minimumLength > enteredPin.length) {
-                _overridingWarningText = pinShortLengthWarning
-            } else if (minimumLength === enteredPin.length) {
-                _overridingWarningText = ""
-            }
-            _checkEnteredPin()
+            pinInput.remove(pinInput.length - 1, pinInput.length)
         }
     }
 
-    function _popPinDigit(digit) {
+    function _handleNumberPress(number) {
+        if (root.suggestionVisible && !root.emergency) {
+            pinInput.remove(pinInput.selectionStart, pinInput.selectionEnd)
+        }
+        pinInput.cursorPosition = pinInput.length
+        pinInput.insert(pinInput.cursorPosition, number)
+    }
+
+    function _handleCancelPress() {
+        if (root.emergency) {
+            root._resetView()
+        } else {
+            root.pinEntryCanceled()
+        }
+    }
+
+    function _feedback() {
         if (_feedbackEffect) {
             _feedbackEffect.play()
         }
-        if (_showSuggestedPin) {
-            clearSuggestedPin()
-            return
-        }
-        obfuscateLastDigit.stop()
-        if (_overridingWarningText === pinLengthWarning) {
-            _overridingWarningText = ""
-        }
-        _displayedPin = _displayedPin.slice(0, _displayedPin.length-1)
-        enteredPin = enteredPin.slice(0, enteredPin.length-1)
-        if (enteredPin.length === 0) {
-            _overridingWarningText = ""
-        } else if (minimumLength > enteredPin.length) {
-            _overridingWarningText = pinShortLengthWarning
-        }
-        _checkEnteredPin()
-    }
-
-    function _changedPinValid() {
-        if (!enteringNewPin || _oldPin == "") {
-            return true
-        }
-        return _oldPin != enteredPin
-    }
-
-    function _checkEnteredPin() {
-        if (_changedPinValid()) {
-            _overridingWarningText = ""
-        } else {
-            _overridingWarningText = pinUnchangedText
-        }
-    }
-
-    function _passwordString(len) {
-        var s = ""
-        for (var i=0; i<len; i++) {
-            s = s + _passwordCharacter
-        }
-        return s
     }
 
     width: parent.width
     height: parent.height
 
+    focus: true
+
     onEmergencyChanged: {
         if (!emergency) {
             _emergencyWarningText = ""
-        } else if (_showSuggestedPin) {
-            clearSuggestedPin()
+            pinInput.forceActiveFocus()
         }
     }
+
+    onVisibleChanged: {
+        if (!visible) {
+            // Hiding the keyboard will remove focus from the pinInput.  Fixup the internal
+            // state when the hidden so the keyboard comes back when shown again.
+            pinInput.focus = true
+        }
+    }
+
 
     Rectangle {
         // emergency background
@@ -252,19 +243,9 @@ Item {
         Behavior on opacity { FadeAnimation {} }
     }
 
-    Timer {
-        id: obfuscateLastDigit
-        interval: 1000
-        onTriggered: {
-            if (!root.emergency && !root._showSuggestedPin) {
-                _displayedPin = _passwordString(_displayedPin.length)
-            }
-        }
-    }
-
     Image {
         anchors {
-            horizontalCenter: root.horizontalCenter
+            horizontalCenter: headingColumn.horizontalCenter
             bottom: headingColumn.top
             bottomMargin: Theme.paddingLarge
         }
@@ -276,13 +257,14 @@ Item {
     Column {
         id: headingColumn
 
-        property int availableSpace: pinInputDisplay.y
+        property int availableSpace: pinInput.y
 
         y: root._inputOrCancelEnabled || root.emergency
-                ? Math.min(availableSpace/4 + headingVerticalOffset, availableSpace - height - Theme.paddingMedium)
-                : (parent.height / 2) - headingLabel.height - subHeadingLabel.height
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width - Theme.horizontalPageMargin * 2
+           ? Math.min(availableSpace/4 + headingVerticalOffset, availableSpace - height - Theme.paddingMedium)
+           : (parent.height / 2) - headingLabel.height - subHeadingLabel.height
+        width: (root._twoColumnMode ? parent.width / 2 : parent.width)
+               - x - (root._twoColumnMode ? Theme.paddingLarge : x)
+        x: Theme.horizontalPageMargin
         spacing: Theme.paddingMedium
 
         Label {
@@ -306,12 +288,14 @@ Item {
         }
 
         Label {
+            id: subHeadingLabel
+
             width: parent.width
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
             color: headingLabel.color
             visible: root._inputOrCancelEnabled || root.emergency
-            font.pixelSize: Theme.fontSizeExtraLarge
+            font.pixelSize: Theme.fontSizeLarge
             text: root.subTitleText
         }
 
@@ -325,8 +309,10 @@ Item {
             text: {
                 if (root.emergency) {
                     return root._emergencyWarningText
-                } else if (root._overridingWarningText !== "") {
-                    return root._overridingWarningText
+                } else if (root.transientWarningText !== "") {
+                    return root.transientWarningText
+                } else if (root._pinValidationWarningText !== "") {
+                    return root._pinValidationWarningText
                 } else {
                     return root.warningText
                 }
@@ -334,12 +320,107 @@ Item {
         }
     }
 
-    BackgroundItem {
-        anchors.centerIn: emergencyButton
-        width: emergencyButton.width
-        height: width
-        down: emergencyButton.down
-        visible: down
+    TextInput {
+        id: pinInput
+
+        readonly property bool interactive: root.emergency || (root.inputEnabled
+                && root.requirePin
+                && !(root.suggestionsEnabled && root.suggestionsEnforced && root.suggestionVisible))
+
+        x: Theme.horizontalPageMargin
+        y: root._twoColumnMode ? Math.round(parent.height * 0.75) - height
+                               : Math.min(keypad.y, root.height - Theme.itemSizeSmall) - height - (Theme.itemSizeSmall / 2)
+
+        width: backspace.x - x - Theme.paddingSmall
+
+        horizontalAlignment: Text.AlignRight
+
+        focus: true
+        // avoid virtual keyboard
+        readOnly: inputMethodHints & (Qt.ImhDigitsOnly | Qt.ImhDialableCharactersOnly)
+        enabled: interactive
+
+        echoMode: root.emergency || (root.suggestionsEnabled && root.suggestionVisible)
+                  ? TextInput.Normal
+                  : TextInput.Password
+        passwordCharacter: "\u2022"
+        passwordMaskDelay: 1000
+        cursorDelegate: Item {}
+
+        selectionColor: "transparent"
+        selectedTextColor: color
+
+        persistentSelection: true
+
+        color: root.emergency ? "white" : root.pinDisplayColor
+        font.pixelSize: Theme.fontSizeHuge * 1.5
+
+        inputMethodHints: {
+            var hints = Qt.ImhNoPredictiveText
+                    | Qt.ImhSensitiveData
+                    | Qt.ImhNoAutoUppercase
+                    | Qt.ImhHiddenText
+                    | Qt.ImhMultiLine // This stops the text input hiding the keyboard when enter is pressed.
+            if (root.emergency
+                    || (root.inputEnabled && root.suggestionsEnabled && root.suggestionsEnforced && root.suggestionVisible)
+                    || (!root.inputEnabled && root.showCancelButton && root.cancelText !== "")) {
+                hints |= Qt.ImhDigitsOnly
+            } else if (root.inputEnabled) {
+                hints |= root.inputMethodHints
+            }
+            return hints
+        }
+
+        EnterKey.enabled: length >= minimumLength
+        EnterKey.iconSource: "image://theme/icon-m-enter-accept"
+
+        onTextChanged: root.transientWarningText = ""
+
+        onAccepted: root._clickedConfirmButton()
+
+        validator: RegExpValidator {
+            regExp: {
+                if (pinInput.inputMethodHints & Qt.ImhDigitsOnly) {
+                    return /[0-9]*/
+                } else if (pinInput.inputMethodHints & Qt.ImhLatinOnly) {
+                    return /[ -~¡-ÿ]*/
+                } else {
+                    return  /.*/
+                }
+            }
+        }
+
+        // readOnly property disables all key handling except return for accepting.
+        // have some explicit handling here. also disallows moving the invisible cursor which is nice.
+        Keys.onPressed: {
+            if (!readOnly) {
+                return
+            }
+
+            var text = event.text
+            if (text.length == 1 && "0123456789".indexOf(text) >= 0) {
+                _handleNumberPress(text)
+            } else if (event.key == Qt.Key_Escape) {
+                _handleCancelPress()
+            } else if (event.key == Qt.Key_Backspace) {
+                _popPinDigit()
+            }
+        }
+
+        MouseArea {
+            anchors.fill: pinInput
+            onClicked: pinInput.forceActiveFocus()
+        }
+    }
+
+    OpacityRampEffect {
+        sourceItem: pinInput
+
+        enabled: pinInput.contentWidth > pinInput.width - (offset * pinInput.width)
+
+        direction:  OpacityRamp.RightToLeft
+        slope: 1 + 6 * pinInput.width / Screen.width
+        offset: 1 - 1 / slope
     }
 
     IconButton {
@@ -347,10 +428,10 @@ Item {
 
         anchors {
             horizontalCenter: root._inputOrCancelEnabled
-                    ? option1Button.horizontalCenter
-                    : root.horizontalCenter
+                              ? option1Button.horizontalCenter
+                              : root.horizontalCenter
             verticalCenter: root._inputOrCancelEnabled
-                    ? pinInputDisplay.verticalCenter
+                    ? pinInput.verticalCenter
                     : keypad.bottom
             verticalCenterOffset: {
                 if (root._inputOrCancelEnabled) {
@@ -362,26 +443,33 @@ Item {
                 }
             }
         }
-        enabled: showEmergencyButton && !root.emergency && root.enteredPin.length < 5
+        states: State {
+            when: root._twoColumnMode && root._inputOrCancelEnabled
+            AnchorChanges {
+                target: emergencyButton
+                anchors.left: headingColumn.left
+                anchors.horizontalCenter: undefined
+            }
+        }
+
+        enabled: showEmergencyButton && !root.emergency && pinInput.length < 5
         opacity: enabled ? 1 : 0
         icon.source: "image://theme/icon-lockscreen-emergency-call"
 
-        Behavior on opacity { FadeAnimation {} }
+        Behavior on opacity { FadeAnimator {} }
 
         onClicked: {
-            root._displayedPin = ""
             root.enteredPin = ""
             root.emergency = !root.emergency
-            if (_feedbackEffect) {
-                _feedbackEffect.play()
-            }
+            root._feedback()
         }
     }
+
     IconButton {
         x: Theme.itemSizeSmall
-        anchors.verticalCenter: pinInputDisplay.verticalCenter
-        height: pinInputDisplay.height + pinInputDisplay.anchors.bottomMargin
-        enabled: !showEmergencyButton && !_showDigitPad && root.enteredPin.length < 5
+        anchors.verticalCenter: pinInput.verticalCenter
+        height: pinInput.height + pinInput.anchors.bottomMargin
+        enabled: !showEmergencyButton && !_showDigitPad && pinInput.length < 5
         opacity: enabled ? 1 : 0
         icon.source: "image://theme/icon-m-close"
 
@@ -395,36 +483,40 @@ Item {
         }
     }
 
-    Label {
-        id: pinInputDisplay
-        anchors {
-            left: parent.left
-            leftMargin: Theme.horizontalPageMargin
-            right: backspace.left
-            rightMargin: Theme.paddingSmall
-            bottom: showEmergencyButton || keypad.visible ? keypad.top : alphanumProxy.bottom
-            bottomMargin: Theme.itemSizeSmall / 2
-        }
-        horizontalAlignment: Text.AlignRight
-        truncationMode: TruncationMode.Fade
-
-        color: root.emergency ? "white" : root.pinDisplayColor
-        font.pixelSize: Theme.fontSizeHuge * 1.5
-        text: root._displayedPin
-    }
-
     IconButton {
         id: backspace
+
         anchors {
             horizontalCenter: option2Button.horizontalCenter
-            verticalCenter: pinInputDisplay.verticalCenter
+            verticalCenter: pinInput.verticalCenter
         }
-        height: pinInputDisplay.height + pinInputDisplay.anchors.bottomMargin // increase reactive area
-        icon.source: root._showSuggestionButton
+        states: State {
+            when: root._twoColumnMode
+            AnchorChanges {
+                target: backspace
+                anchors.right: headingColumn.right
+                anchors.horizontalCenter: undefined
+            }
+        }
+
+        height: pinInput.height + Theme.paddingMedium // increase reactive area
+        icon {
+            source: root._showSuggestionButton
                 ? "image://theme/icon-m-reload"
-                : ("image://theme/icon-m-backspace" + (root.dimmerBackspace && !root.emergency
-                    ? "?" + Theme.highlightDimmerColor
-                    : ""))
+                : "image://theme/icon-m-backspace"
+            color: {
+                if (root.emergency) {
+                    return root.emergencyTextColor
+                } else if (!root.dimmerBackspace) {
+                    return Theme.primaryColor
+                } else if (Theme.colorScheme == Theme.LightOnDark) {
+                    return Theme.highlightDimmerColor
+                } else {
+                    return Theme.lightPrimaryColor
+                }
+            }
+            highlightColor: root.emergency ? Theme.lightPrimaryColor : Theme.highlightColor
+        }
 
         opacity: root.enteredPin === "" && !root._showSuggestionButton ? 0 : 1
         enabled: opacity
@@ -443,7 +535,7 @@ Item {
                 return
             }
             root._popPinDigit()
-            if (root._displayedPin.length > 0) {
+            if (pinInput.length > 0) {
                 backspaceRepeat.start()
             }
         }
@@ -466,7 +558,7 @@ Item {
 
         onTriggered: {
             root._popPinDigit()
-            if (root._displayedPin.length === 0) {
+            if (pinInput.length === 0) {
                 stop()
             }
         }
@@ -474,32 +566,35 @@ Item {
 
     Keypad {
         id: keypad
-        readonly property bool interactive: root.emergency
-                    || (root.inputEnabled && !(root._showSuggestedPin && root.suggestionsEnforced))
-        anchors {
-            bottom: parent.bottom
-            bottomMargin: screen.sizeCategory > Screen.Medium && pageStack.currentPage.isPortrait ? 2*Theme.paddingLarge
-                                                                                                  : Theme.paddingLarge
-        }
-        symbolsVisible: false
+
+        y: root.height + pageStack.panelSize - height - (Screen.sizeCategory > Screen.Medium && pageStack.currentPage.isPortrait
+                            ? 2 * Theme.paddingLarge
+                            : Theme.paddingLarge)
+        anchors.right: parent.right
+        width: root._twoColumnMode ? parent.width / 2 : parent.width
+
+        symbolsVisible: pinInput.inputMethodHints & Qt.ImhDialableCharactersOnly
         visible: opacity > 0
-        opacity: _showDigitPad
+        opacity: pinInput.inputMethodHints & (Qt.ImhDigitsOnly | Qt.ImhDialableCharactersOnly) ? 1 : 0
         textColor: {
             if (root.emergency) {
                 return root.emergencyTextColor
-            } else if (interactive) {
+            } else if (pinInput.interactive) {
                 return root.keypadTextColor
             } else {
                 return Theme.highlightColor
             }
         }
 
-        pressedTextColor: root.emergency ? "black" : Theme.highlightColor
+        pressedTextColor: root.emergency ? "black" : (Theme.colorScheme === Theme.LightOnDark ? Theme.highlightColor : Theme.highlightDimmerColor)
         pressedButtonColor: root.emergency
                             ? "white"
                             : Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
-        enabled: interactive
-        onPressed: root._pushPinDigit(number + "")
+        enabled: pinInput.activeFocus
+        onPressed:  {
+            root._feedback()
+            _handleNumberPress(number)
+        }
     }
 
     PinInputOptionButton {
@@ -507,7 +602,7 @@ Item {
         visible: keypad.visible && text !== "" && showCancelButton
 
         anchors {
-            left: parent.left
+            left: keypad.left
             leftMargin: keypad._horizontalPadding
             bottom: keypad.bottom
             bottomMargin: (keypad._buttonHeight - height) / 2
@@ -522,81 +617,48 @@ Item {
               : root.cancelText
 
         onClicked: {
-            if (_feedbackEffect) {
-                _feedbackEffect.play()
-            }
-            if (root.emergency) {
-                root._resetView()
-            } else {
-                root.pinEntryCanceled()
-            }
+            root._feedback()
+            _handleCancelPress()
         }
     }
 
     PinInputOptionButton {
         id: option2Button
 
+        primaryColor: option1Button.primaryColor
         visible: keypad.visible && text !== "" && ((root.showOkButton && root.inputEnabled) || root.emergency)
 
         anchors {
-            right: parent.right
+            right: keypad.right
             rightMargin: keypad._horizontalPadding
             bottom: option1Button.bottom
         }
         width: option1Button.width
         height: option1Button.height
         emergency: root.emergency
-        text: root.emergency
-        //: Starts the phone call
-        //% "Call"
-              ? qsTrId("settings_pin-bt-start_call")
-              : (root.enteredPin.length < minimumLength || !root._changedPinValid() ? "" : root.okText)
+        text: {
+            if (root.emergency) {
+                //: Starts the phone call
+                //% "Call"
+                return qsTrId("settings_pin-bt-start_call")
+            } else if (pinInput.length < minimumLength
+                       || _pinMismatch
+                       || (root.enteringNewPin && root._oldPin !== "" && root._oldPin === root.enteredPin)) {
+                return ""
+            } else {
+                return root.okText
+            }
+        }
         showWhiteBackgroundByDefault: root.emergency
 
         onClicked: {
-            if (_feedbackEffect) {
-                _feedbackEffect.play()
-            }
+            root._feedback()
             if (root.emergency) {
                 root._dialEmergencyNumber()
             } else {
                 root._clickedConfirmButton()
             }
         }
-    }
-
-    TextInput {
-        id: alphanumProxy
-        width: parent.width
-        visible: !keypad.visible
-        y: Qt.inputMethod.keyboardRectangle.y - Theme.itemSizeSmall
-
-        horizontalAlignment: TextInput.AlignHCenter
-        inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhSensitiveData | Qt.ImhNoAutoUppercase | Qt.ImhHiddenText
-        enabled: root.inputEnabled && !(root._showSuggestedPin && root.suggestionsEnforced)
-        focus: !keypad.visible
-        color: root.keypadTextColor
-        onCursorVisibleChanged: if (cursorVisible) cursorVisible = false
-        font.pixelSize: Theme.fontSizeSmall
-        onFocusChanged: {
-            if (!focus && !_showDigitPad) {
-                root.pinEntryCanceled()
-                if (showEmergencyButton && visibleInDashboard) {
-                    alphanumProxy.forceActiveFocus()
-                }
-            }
-        }
-        onTextChanged: {
-            if (text.length) root._pushPinDigit(text + "")
-            text = ""
-        }
-        Keys.onPressed: {
-            if (event.key == Qt.Key_Backspace) root._popPinDigit()
-            else if (event.key == Qt.Key_Enter) root._clickedConfirmButton()
-            else if (event.key == Qt.Key_Return) root._clickedConfirmButton()
-        }
-        EnterKey.enabled: root.enteredPin.length >= minimumLength
-        EnterKey.iconSource: "image://theme/icon-m-enter-accept"
     }
 
     OfonoModemManager { id: modemManager }
@@ -648,7 +710,6 @@ Item {
     }
 
     function _resetView() {
-        _displayedPin = ""
         enteredPin = ""
         emergency = false
     }
@@ -669,18 +730,6 @@ Item {
         id: delayReset
         interval: 250
         onTriggered: root._resetView()
-    }
-
-    on_ShowDigitPadChanged: {
-        if (!_showDigitPad && inputEnabled) {
-            alphanumProxy.forceActiveFocus()
-        }
-    }
-
-    onVisibleInDashboardChanged: {
-        if (!_showDigitPad && visibleInDashboard && enabled && inputEnabled) {
-            alphanumProxy.forceActiveFocus()
-        }
     }
 
     Component.onCompleted: {

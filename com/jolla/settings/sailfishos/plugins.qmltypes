@@ -49,6 +49,7 @@ Module {
         Property { name: "lastChecked"; type: "QDateTime"; isReadonly: true }
         Property { name: "accountStatus"; type: "AccountStatus"; isReadonly: true }
         Property { name: "sufficientSpaceForDownload"; type: "bool"; isReadonly: true }
+        Property { name: "sufficientBatteryForDownload"; type: "bool"; isReadonly: true }
         Property { name: "sufficientSpaceForInstall"; type: "bool"; isReadonly: true }
         Property { name: "sufficientBatteryForInstall"; type: "bool"; isReadonly: true }
         Property { name: "batteryChargerConnected"; type: "bool"; isReadonly: true }

@@ -40,9 +40,6 @@ Column {
             width: parent.width
             height: childrenRect.height
 
-            // Opacity must be controlled here, as truncation/fade will override it inside the label
-            opacity: active ? 1.0 : 0.5
-
             Label {
                 id: contactDetailType
                 color: parent.active ? Theme.highlightColor : Theme.primaryColor
@@ -60,7 +57,7 @@ Column {
                 id: contactDetailValue
                 color: parent.active ? Theme.highlightColor : Theme.primaryColor
                 font.pixelSize: Theme.fontSizeExtraSmall
-                y: contactDetailType.y + contactDetailType.height - 6  // TODO: Stupid font marginals.
+                y: contactDetailType.y + contactDetailType.height - Theme.paddingSmall // TODO: Stupid font marginals.
                 width: parent.width - 2*Theme.paddingSmall
                 x: Theme.paddingSmall
                 horizontalAlignment: Text.AlignHCenter

@@ -24,3 +24,4 @@ TrackerHelpers 1.0 TrackerHelpers.js
 RegExpHelpers 1.0 RegExpHelpers.js
 PlaylistTrackerHelpers 1.0 PlaylistTrackerHelpers.js
 AudioTrackerHelpers 1.0 AudioTrackerHelpers.js
+typeinfo plugins.qmltypes

@@ -1,0 +1,2 @@
+module Nemo.Time
+typeinfo plugins.qmltypes

@@ -27,7 +27,7 @@ Dialog {
             width: root.width - Theme.horizontalPageMargin*2
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
-            color: Theme.rgba(Theme.highlightColor, 0.6)
+            color: Theme.secondaryHighlightColor
         }
 
         BusyIndicator {

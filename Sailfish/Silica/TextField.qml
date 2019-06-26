@@ -32,7 +32,7 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 import "private"
@@ -53,7 +53,9 @@ TextBase {
     property alias selectionEnd: textInput.selectionEnd
     property alias acceptableInput: textInput.acceptableInput
     property alias passwordCharacter: textInput.passwordCharacter
+    property alias passwordMaskDelay: textInput.passwordMaskDelay
     property alias maximumLength: textInput.maximumLength
+    property alias length: textInput.length
 
     property real _minimumWidth: textField.width - Theme.paddingSmall - textField.textLeftMargin - textField.textRightMargin
 
@@ -86,7 +88,6 @@ TextBase {
         // Workaround for cursor delegate unable to reference directly to "textField"
         // Should be fixed in Qt5. To be verified...
         property alias cursorColor: textField.cursorColor
-        property alias _preeditText: preeditText // for TextAutoScroller
 
         onHorizontalAlignmentChanged: textField.setImplicitHorizontalAlignment(horizontalAlignment)
 
@@ -108,6 +109,8 @@ TextBase {
 
         PreeditText {
             id: preeditText
+
+            onTextChanged: textField._fixupScrollPosition()
         }
     }
 }

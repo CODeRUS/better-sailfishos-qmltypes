@@ -41,9 +41,8 @@ FingerEnrollmentPage {
                     // The page is part of a larger wizard, cancelling a step within the
                     // enrollment progress should return to this page and allow the option
                     // to skip or restart.
-                    pageStack.push(
-                                Qt.resolvedUrl("FingerEnrollmentSkipPage.qml"),
-                                page.acceptDestinationProperties)
+                    pageStack.animatorPush(Qt.resolvedUrl("FingerEnrollmentSkipPage.qml"),
+                                           page.acceptDestinationProperties)
                 } else {
                     // The page is the start of explicit request to enroll a finger. Cancelling
                     // a step should exit the wizard.

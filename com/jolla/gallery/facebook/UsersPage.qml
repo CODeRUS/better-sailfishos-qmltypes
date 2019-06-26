@@ -2,13 +2,13 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import com.jolla.gallery 1.0
 import org.nemomobile.socialcache 1.0
+import com.jolla.gallery.extensions 1.0
 
 Page {
     id: root
     allowedOrientations: window.allowedOrientations
 
     SilicaListView {
-        id: view
         anchors.fill: parent
         header: PageHeader {}
         model: FacebookImageCacheModel {
@@ -33,7 +33,6 @@ Page {
             height: thumbnail.height
 
             Label {
-                id: titleLabel
                 elide: Text.ElideRight
                 font.pixelSize: Theme.fontSizeLarge
                 text: model.title
@@ -47,10 +46,10 @@ Page {
 
             SlideshowIcon {
                 id: thumbnail
-                // Between 7 and 14 s, it is funnier when it is random
-                timerInterval: 7000 +  Math.floor((Math.random() * 7000));
                 anchors.left: parent.horizontalCenter
                 opacity: delegateItem.down ? 0.5 : 1
+                highlighted: delegateItem.highlighted
+                serviceIcon: "image://theme/graphic-service-facebook"
                 model: FacebookImageCacheModel {
                     Component.onCompleted: refresh()
                     type: FacebookImageCacheModel.Images
@@ -60,7 +59,6 @@ Page {
             }
 
             Label {
-                id: countLabel
                 anchors {
                     right: parent.right
                     leftMargin: Theme.horizontalPageMargin
@@ -73,8 +71,8 @@ Page {
             }
 
             onClicked: {
-                window.pageStack.push(Qt.resolvedUrl("AlbumsPage.qml"),
-                                      {"userId": delegateItem.userId})
+                window.pageStack.animatorPush(Qt.resolvedUrl("AlbumsPage.qml"),
+                                              { "userId": delegateItem.userId })
             }
         }
 

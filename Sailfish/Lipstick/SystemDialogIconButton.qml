@@ -5,7 +5,7 @@ BackgroundItem {
     id: root
 
     property alias text: label.text
-    property string iconSource
+    property alias iconSource: icon.source
     property bool contentHighlighted
     property real topPadding: Theme.paddingLarge
     property real bottomPadding: 2*Theme.paddingLarge
@@ -13,6 +13,8 @@ BackgroundItem {
 
     implicitHeight: content.height + topPadding + bottomPadding
     width: label.implicitWidth + 2*Theme.paddingMedium
+
+    opacity: enabled ? 1.0 : 0.6
 
     Column {
         id: content
@@ -22,10 +24,10 @@ BackgroundItem {
         width: parent.width
         spacing: Theme.paddingSmall
 
-        Image {
+        HighlightImage {
+            id: icon
             anchors.horizontalCenter: parent.horizontalCenter
-            source: root.iconSource + "?" + (root.down || root.contentHighlighted ? Theme.highlightColor
-                                                                                  : Theme.primaryColor)
+            highlighted: root.down || root.contentHighlighted
         }
 
         Label {

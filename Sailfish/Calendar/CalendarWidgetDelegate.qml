@@ -7,7 +7,6 @@
 
 import QtQuick 2.4
 import Sailfish.Silica 1.0
-import Sailfish.Calendar 1.0
 import org.nemomobile.calendar.lightweight 1.0
 
 BackgroundItem {
@@ -52,9 +51,16 @@ BackgroundItem {
         }
         color: highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
         font.pixelSize: dateLabelPixelSize
-        //% "Today"
-        text: isToday ? qsTrId("sailfish_calendar-la-today")
-                      : Format.formatDate(startTime, Formatter.WeekdayNameStandalone)
+        text: {
+            if (isToday) {
+                //% "Today"
+                return qsTrId("sailfish_calendar-la-today")
+            } else {
+                var weekday = Format.formatDate(startTime, Formatter.WeekdayNameStandalone)
+                return weekday.charAt(0).toUpperCase() + weekday.substr(1)
+            }
+        }
+
         horizontalAlignment: Text.AlignRight
     }
 

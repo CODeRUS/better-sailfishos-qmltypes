@@ -31,7 +31,7 @@ Page {
                 //: Menu label for adding a new playlist
                 //% "New playlist"
                 text: qsTrId("mediaplayer-me-new-playlist")
-                onClicked: pageStack.push("com.jolla.mediaplayer.NewPlaylistDialog", {media: page.media, pageToPop: pageStack.previousPage()})
+                onClicked: pageStack.animatorPush("com.jolla.mediaplayer.NewPlaylistDialog", {media: page.media, pageToPop: pageStack.previousPage()})
             }
 
             MenuItem {

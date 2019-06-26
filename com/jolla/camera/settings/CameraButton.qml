@@ -20,8 +20,7 @@ MouseArea {
 
         anchors.centerIn: parent
 
-        opacity: 0.6
-        color: Theme.highlightColor
+        color: Theme.secondaryHighlightColor
     }
 
     Image {

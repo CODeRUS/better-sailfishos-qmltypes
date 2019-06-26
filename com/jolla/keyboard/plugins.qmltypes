@@ -49,7 +49,7 @@ Module {
         Method {
             name: "getLayoutIndex"
             type: "int"
-            Parameter { name: "name"; type: "string" }
+            Parameter { name: "filename"; type: "string" }
         }
         Method {
             name: "get"
@@ -160,5 +160,29 @@ Module {
                 "LockedShift": 3
             }
         }
+    }
+    Component {
+        name: "SwipeGestureArea"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        exports: ["com.jolla.keyboard/SwipeGestureArea 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Direction"
+            values: {
+                "DirectionLeft": 1,
+                "DirectionRight": 2,
+                "DirectionUp": 4,
+                "DirectionDown": 8
+            }
+        }
+        Property { name: "swipeEnabled"; type: "bool" }
+        Property { name: "thresholdX"; type: "int" }
+        Property { name: "thresholdY"; type: "int" }
+        Property { name: "swipeAmount"; type: "int"; isReadonly: true }
+        Property { name: "gestureInProgress"; type: "bool"; isReadonly: true }
+        Property { name: "direction"; type: "Direction"; isReadonly: true }
+        Property { name: "allowedDirections"; type: "int" }
+        Method { name: "cancelGesture" }
     }
 }

@@ -1,2 +1,2 @@
 module org.nemomobile.accounts
-plugin nemoaccounts
+typeinfo plugins.qmltypes

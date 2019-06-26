@@ -1,7 +1,16 @@
 module Sailfish.Silica.private
-plugin sailfishsilicaplugin
+DismissAnimation 1.0 DismissAnimation.qml
+DismissButton 1.0 DismissButton.qml
+Expander 1.0 Expander.qml
+FadeBlocker 1.0 FadeBlocker.qml
+FramerateMonitor 1.0 FramerateMonitor.qml
 GlassBackground 1.0 GlassBackground.qml
+IconGridViewBase 1.0 IconGridViewBase.qml
+OverlayGradient 1.0 OverlayGradient.qml
 PageOrientationTransition 1.0 PageOrientationTransition.qml
+SliderBase 1.0 SliderBase.qml
+SliderValueLabel 1.0 SliderValueLabel.qml
 VirtualKeyboardObserver 1.0 VirtualKeyboardObserver.qml
 Wallpaper 1.0 Wallpaper.qml
 WindowGestureOverride 1.0 WindowGestureOverride.qml
+typeinfo plugins.qmltypes

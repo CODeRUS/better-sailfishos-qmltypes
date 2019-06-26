@@ -16,22 +16,21 @@ ImagePickerPage {
     // Readonly
     property url avatarSource
     // Readonly
-    property bool cropping: _cropDialog ? _cropDialog.cropping : false
+    property bool cropping: _cropDialog && _cropDialog.editInProgress
     property Page _cropDialog
 
     function _customSelectionHandler(model, index, selected) {
         model.updateSelected(index, selected)
         var selectedContentProperties = model.get(index)
         var target = StandardPaths.genericData + "/data/avatars/" + selectedContentProperties.fileName
-        _cropDialog = imageEditPage.createObject(root, {
+        _cropDialog = cropDialog.createObject(root, {
            acceptDestination: pageStack.previousPage(root),
            acceptDestinationAction: PageStackAction.Pop,
            source: selectedContentProperties.url,
            target: target,
-           selectedContentProperties: selectedContentProperties,
-           imageOrientation: selectedContentProperties.orientation
+           selectedContentProperties: selectedContentProperties
        })
-       pageStack.push(_cropDialog)
+       pageStack.animatorPush(_cropDialog)
     }
 
     //: Title for avatar picker for selecting avatar
@@ -39,32 +38,11 @@ ImagePickerPage {
     title: qsTrId("components_pickers-he-avatar_picker_title")
 
     Component {
-        id: imageEditPage
+        id: cropDialog
 
-        CropDialog {
-            id: avatarCropDialog
-
-            property alias source: imageEditPreview.source
-            property alias target: imageEditPreview.target
-            property alias cropping: imageEditPreview.editInProgress
+        AvatarCropDialog {
             property var selectedContentProperties
-            property alias imageOrientation: imageEditPreview.orientation
-
             allowedOrientations: root.allowedOrientations
-            splitOpen: false
-            avatarCrop: true
-            foreground: ImageEditPreview {
-                id: imageEditPreview
-
-                editOperation: ImageEditor.Crop
-                isPortrait: splitView.isPortrait
-                aspectRatio: 1.0
-                splitView: avatarCropDialog
-                anchors.fill: parent
-                active: !splitView.splitOpen
-                explicitWidth: root.width
-                explicitHeight: root.height
-            }
 
             onEdited: {
                 root.selectedContentProperties = selectedContentProperties
@@ -72,8 +50,6 @@ ImagePickerPage {
                 root.avatarSource = target
                 root._cropDialog = null
             }
-
-            onCropRequested: imageEditPreview.crop()
         }
     }
 }

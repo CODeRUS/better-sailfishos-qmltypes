@@ -14,7 +14,8 @@ ExpandingMenu {
         Label {
             anchors.verticalCenter: parent.verticalCenter
             x: alignment === Qt.AlignLeft ? parent.width + Theme.paddingLarge : -width - Theme.paddingLarge
-            color: Theme.highlightColor
+            color: Theme.colorScheme == Theme.LightOnDark
+                   ? Theme.highlightColor : Theme.highlightFromColor(Theme.highlightColor, Theme.LightOnDark)
             text: Settings.whiteBalanceText(modelData)
             font.bold: true
             opacity: selected && open ? 1.0 : 0.0

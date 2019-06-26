@@ -337,6 +337,7 @@ Lesson {
             property bool wasLocked
             property bool userAttempt
 
+            colorScheme: Theme.LightOnDark
             highlightColor: tutorialTheme.highlightColor
             backgroundColor: tutorialTheme.highlightBackgroundColor
 

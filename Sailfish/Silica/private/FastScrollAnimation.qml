@@ -112,14 +112,14 @@ Item {
             SmoothedAnimation {
                 id: shortScrollContentYAnimation
                 target: flickable
-                property: "contentY";
+                property: "contentY"
                 velocity: 4000
                 maximumEasingTime: 100
                 easing.type: Easing.InOutExpo
             }
             SmoothedAnimation {
                 target: flickable
-                property: "opacity";
+                property: "opacity"
                 velocity: 4000
                 to: 1.0
                 maximumEasingTime: 100

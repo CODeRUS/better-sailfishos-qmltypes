@@ -84,7 +84,7 @@ function incubateCover(component, parent, callback) {
 }
 
 function load(source, parent, callback) {
-    cleanup();
+    cleanup()
     if (!source) {
         object = null
     } else if (typeof source === "string") { // test for url

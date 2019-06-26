@@ -32,7 +32,7 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 
 Text {
@@ -45,7 +45,7 @@ Text {
     elide: _elideText ? (horizontalAlignment == Text.AlignLeft ? Text.ElideRight
                                                                : (horizontalAlignment == Text.AlignRight ? Text.ElideLeft
                                                                                                          : Text.ElideMiddle))
-                          : Text.ElideNone
+                      : Text.ElideNone
 
     color: Theme.primaryColor
     font.pixelSize: Theme.fontSizeMedium
@@ -68,10 +68,9 @@ Text {
             id: rampEffect
             direction: horizontalAlignment == Text.AlignRight ? OpacityRamp.RightToLeft
                                                               : OpacityRamp.LeftToRight
-            source: root;
+            source: root
             slope: 1 + 6 * root.width / Screen.width
             offset: 1 - 1 / slope
         }
     }
-
 }

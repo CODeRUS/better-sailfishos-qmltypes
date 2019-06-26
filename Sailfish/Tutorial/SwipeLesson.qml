@@ -23,11 +23,8 @@ Lesson {
             script: {
                 fader.opacity = 0.8
 
-                appInfo.text = androidLauncher
-                        //% "Here is a running app"
-                        ? qsTrId("tutorial-la-running_app")
-                        //% "Here is the minimized People app"
-                        : qsTrId("tutorial-la-people_app")
+                //% "Here is the minimized People app"
+                appInfo.text = qsTrId("tutorial-la-people_app")
                 appInfo.opacity = 1.0
                 peopleApp.enabled = true
             }
@@ -120,6 +117,7 @@ Lesson {
                 interactive: false
 
                 PullDownMenu {
+                    colorScheme: Theme.LightOnDark
                     highlightColor: tutorialTheme.highlightColor
                     backgroundColor: tutorialTheme.highlightBackgroundColor
                 }

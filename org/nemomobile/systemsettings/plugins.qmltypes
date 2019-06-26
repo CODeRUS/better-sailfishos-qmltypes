@@ -16,6 +16,7 @@ Module {
         Property { name: "wlanMacAddress"; type: "string"; isReadonly: true }
         Property { name: "imei"; type: "string"; isReadonly: true }
         Property { name: "serial"; type: "string"; isReadonly: true }
+        Property { name: "operatingSystemName"; type: "string"; isReadonly: true }
         Property { name: "softwareVersion"; type: "string"; isReadonly: true }
         Property { name: "softwareVersionId"; type: "string"; isReadonly: true }
         Property { name: "adaptationVersion"; type: "string"; isReadonly: true }
@@ -140,30 +141,20 @@ Module {
             name: "Status"
             values: {
                 "Idle": 0,
-                "CheckingStatus": 1,
-                "Installing": 2,
-                "Removing": 3,
-                "Success": 4,
-                "Failure": 5
+                "Preparing": 1,
+                "DownloadingPackages": 2,
+                "InstallingPackages": 3,
+                "RemovingPackages": 4
             }
         }
         Property { name: "wlanIpAddress"; type: "string"; isReadonly: true }
         Property { name: "usbIpAddress"; type: "string"; isReadonly: true }
         Property { name: "username"; type: "string"; isReadonly: true }
         Property { name: "developerModeEnabled"; type: "bool"; isReadonly: true }
-        Property { name: "remoteLoginEnabled"; type: "bool"; isReadonly: true }
-        Property { name: "workerWorking"; type: "bool"; isReadonly: true }
-        Property { name: "workerStatus"; type: "DeveloperModeSettings::Status"; isReadonly: true }
-        Property { name: "workerProgress"; type: "int"; isReadonly: true }
-        Signal { name: "workerRetrieveDeveloperModeStatus" }
-        Signal { name: "workerEnableDeveloperMode" }
-        Signal { name: "workerDisableDeveloperMode" }
+        Property { name: "workStatus"; type: "DeveloperModeSettings::Status"; isReadonly: true }
+        Property { name: "workProgress"; type: "int"; isReadonly: true }
         Method {
             name: "setDeveloperMode"
-            Parameter { name: "enabled"; type: "bool" }
-        }
-        Method {
-            name: "setRemoteLogin"
             Parameter { name: "enabled"; type: "bool" }
         }
         Method {
@@ -171,6 +162,75 @@ Module {
             Parameter { name: "usbIpAddress"; type: "string" }
         }
         Method { name: "refresh" }
+    }
+    Component {
+        name: "DeviceInfo"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/DeviceInfo 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Feature"
+            values: {
+                "FeatureInvalid": 0,
+                "FeatureMicrophone1": 1,
+                "FeatureMicrophone2": 2,
+                "FeatureBackCamera": 3,
+                "FeatureBackCameraFlashlight": 4,
+                "FeatureDisplayBacklight": 5,
+                "FeatureBattery": 6,
+                "FeatureBluetooth": 7,
+                "FeatureCellularData": 8,
+                "FeatureCellularVoice": 9,
+                "FeatureCompassSensor": 10,
+                "FeatureFMRadioReceiver": 11,
+                "FeatureFrontCamera": 12,
+                "FeatureFrontCameraFlashlight": 13,
+                "FeatureGPS": 14,
+                "FeatureCellInfo": 15,
+                "FeatureAccelerationSensor": 16,
+                "FeatureGyroSensor": 17,
+                "FeatureCoverSensor": 18,
+                "FeatureFingerprintSensor": 19,
+                "FeatureHeadset": 20,
+                "FeatureHardwareKeys": 21,
+                "FeatureDisplay": 22,
+                "FeatureNotificationLED": 23,
+                "FeatureButtonBacklight": 24,
+                "FeatureLightSensor": 25,
+                "FeatureLoudspeaker": 26,
+                "FeatureTheOtherHalf": 27,
+                "FeatureProximitySensor": 28,
+                "FeatureAudioPlayback": 29,
+                "FeatureMemoryCardSlot": 30,
+                "FeatureSIMCardSlot": 31,
+                "FeatureStereoLoudspeaker": 32,
+                "FeatureTouchScreen": 33,
+                "FeatureTouchScreenSelfTest": 34,
+                "FeatureUSBCharging": 35,
+                "FeatureUSBOTG": 36,
+                "FeatureVibrator": 37,
+                "FeatureWLAN": 38,
+                "FeatureNFC": 39,
+                "FeatureVideoPlayback": 40,
+                "FeatureSuspend": 41,
+                "FeatureReboot": 42
+            }
+        }
+        Property { name: "model"; type: "string"; isReadonly: true }
+        Property { name: "baseModel"; type: "string"; isReadonly: true }
+        Property { name: "designation"; type: "string"; isReadonly: true }
+        Property { name: "manufacturer"; type: "string"; isReadonly: true }
+        Property { name: "prettyName"; type: "string"; isReadonly: true }
+        Method {
+            name: "hasFeature"
+            type: "bool"
+            Parameter { name: "feature"; type: "DeviceInfo::Feature" }
+        }
+        Method {
+            name: "hasHardwareKey"
+            type: "bool"
+            Parameter { name: "key"; type: "Qt::Key" }
+        }
     }
     Component {
         name: "DiskUsage"
@@ -228,6 +288,10 @@ Module {
         Property { name: "lidSensorEnabled"; type: "bool" }
         Property { name: "lidSensorFilteringEnabled"; type: "bool" }
         Property { name: "flipoverGestureEnabled"; type: "bool" }
+        Property { name: "powerSaveModeForced"; type: "bool" }
+        Property { name: "powerSaveModeEnabled"; type: "bool" }
+        Property { name: "powerSaveModeThreshold"; type: "int" }
+        Property { name: "populated"; type: "bool"; isReadonly: true }
     }
     Component {
         name: "LanguageModel"
@@ -271,6 +335,33 @@ Module {
                 "OnlineAGpsEnabled": 2
             }
         }
+        Enum {
+            name: "LocationMode"
+            values: {
+                "HighAccuracyMode": 0,
+                "BatterySavingMode": 1,
+                "DeviceOnlyMode": 2,
+                "CustomMode": 3
+            }
+        }
+        Enum {
+            name: "DataSources"
+            values: {
+                "NoDataSources": 0,
+                "OnlineDataSources": 1,
+                "DeviceSensorsData": 32,
+                "BluetoothData": 1024,
+                "WlanData": 32768,
+                "CellTowerData": 1048576,
+                "GpsData": 33554432,
+                "GlonassData": 67108864,
+                "BeidouData": 134217728,
+                "GalileoData": 268435456,
+                "QzssData": 536870912,
+                "SbasData": 1073741824,
+                "LastDataSource": -2147483648
+            }
+        }
         Property { name: "locationEnabled"; type: "bool" }
         Property { name: "gpsEnabled"; type: "bool" }
         Property { name: "gpsFlightMode"; type: "bool" }
@@ -280,6 +371,8 @@ Module {
         Property { name: "mlsEnabled"; type: "bool" }
         Property { name: "mlsOnlineState"; type: "OnlineAGpsState" }
         Property { name: "mlsAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "locationMode"; type: "LocationMode" }
+        Property { name: "allowedDataSources"; type: "DataSources" }
     }
     Component {
         name: "ObjectListModel"
@@ -335,7 +428,13 @@ Module {
                 "Unmounted": 0,
                 "Mounting": 1,
                 "Mounted": 2,
-                "Unmounting": 3
+                "Unmounting": 3,
+                "Formatting": 4,
+                "Formatted": 5,
+                "Unlocking": 6,
+                "Unlocked": 7,
+                "Locking": 8,
+                "Locked": 9
             }
         }
         Enum {
@@ -364,12 +463,94 @@ Module {
                 "Any": 15
             }
         }
+        Enum {
+            name: "ConnectionBus"
+            values: {
+                "SDIO": 0,
+                "USB": 1,
+                "IEEE1394": 2,
+                "UnknownBus": 3
+            }
+        }
+        Enum {
+            name: "Error"
+            values: {
+                "ErrorFailed": 0,
+                "ErrorCancelled": 1,
+                "ErrorAlreadyCancelled": 2,
+                "ErrorNotAuthorized": 3,
+                "ErrorNotAuthorizedCanObtain": 4,
+                "ErrorNotAuthorizedDismissed": 5,
+                "ErrorAlreadyMounted": 6,
+                "ErrorNotMounted": 7,
+                "ErrorOptionNotPermitted": 8,
+                "ErrorMountedByOtherUser": 9,
+                "ErrorAlreadyUnmounting": 10,
+                "ErrorNotSupported": 11,
+                "ErrorTimedout": 12,
+                "ErrorWouldWakeup": 13,
+                "ErrorDeviceBusy": 14
+            }
+        }
         Property { name: "count"; type: "int"; isReadonly: true }
         Property { name: "storageTypes"; type: "StorageTypes" }
+        Property { name: "supportedFormatTypes"; type: "QStringList"; isReadonly: true }
+        Signal {
+            name: "errorMessage"
+            Parameter { name: "objectPath"; type: "string" }
+            Parameter { name: "errorName"; type: "string" }
+        }
+        Signal {
+            name: "lockError"
+            Parameter { name: "error"; type: "Error" }
+        }
+        Signal {
+            name: "unlockError"
+            Parameter { name: "error"; type: "Error" }
+        }
+        Signal {
+            name: "mountError"
+            Parameter { name: "error"; type: "Error" }
+        }
+        Signal {
+            name: "unmountError"
+            Parameter { name: "error"; type: "Error" }
+        }
+        Signal {
+            name: "formatError"
+            Parameter { name: "error"; type: "Error" }
+        }
         Method { name: "refresh" }
         Method {
             name: "refresh"
             Parameter { name: "index"; type: "int" }
+        }
+        Method {
+            name: "lock"
+            Parameter { name: "devicePath"; type: "string" }
+        }
+        Method {
+            name: "unlock"
+            Parameter { name: "devicePath"; type: "string" }
+            Parameter { name: "passphrase"; type: "string" }
+        }
+        Method {
+            name: "mount"
+            Parameter { name: "devicePath"; type: "string" }
+        }
+        Method {
+            name: "unmount"
+            Parameter { name: "devicePath"; type: "string" }
+        }
+        Method {
+            name: "format"
+            Parameter { name: "devicePath"; type: "string" }
+            Parameter { name: "arguments"; type: "QVariantMap" }
+        }
+        Method {
+            name: "objectPath"
+            type: "string"
+            Parameter { name: "devicePath"; type: "string" }
         }
     }
     Component {
@@ -419,6 +600,11 @@ Module {
         Property { name: "DATA_IN_USE"; type: "string"; isReadonly: true }
         Property { name: "USB_DISCONNECTED"; type: "string"; isReadonly: true }
         Property { name: "USB_CONNECTED_DIALOG_SHOW"; type: "string"; isReadonly: true }
+        Property { name: "USB_PRE_UNMOUNT"; type: "string"; isReadonly: true }
+        Property { name: "RE_MOUNT_FAILED"; type: "string"; isReadonly: true }
+        Property { name: "MODE_SETTING_FAILED"; type: "string"; isReadonly: true }
+        Property { name: "CHARGER_CONNECTED"; type: "string"; isReadonly: true }
+        Property { name: "CHARGER_DISCONNECTED"; type: "string"; isReadonly: true }
         Property { name: "MODE_UNDEFINED"; type: "string"; isReadonly: true }
         Property { name: "MODE_ASK"; type: "string"; isReadonly: true }
         Property { name: "MODE_MASS_STORAGE"; type: "string"; isReadonly: true }
@@ -431,6 +617,38 @@ Module {
         Property { name: "MODE_PC_SUITE"; type: "string"; isReadonly: true }
         Property { name: "MODE_CHARGING"; type: "string"; isReadonly: true }
         Property { name: "MODE_CHARGER"; type: "string"; isReadonly: true }
+        Property { name: "MODE_CHARGING_FALLBACK"; type: "string"; isReadonly: true }
+        Property { name: "MODE_BUSY"; type: "string"; isReadonly: true }
+        Method {
+            name: "isEvent"
+            type: "bool"
+            Parameter { name: "modeName"; type: "string" }
+        }
+        Method {
+            name: "isState"
+            type: "bool"
+            Parameter { name: "modeName"; type: "string" }
+        }
+        Method {
+            name: "isWaitingState"
+            type: "bool"
+            Parameter { name: "modeName"; type: "string" }
+        }
+        Method {
+            name: "isFinalState"
+            type: "bool"
+            Parameter { name: "modeName"; type: "string" }
+        }
+        Method {
+            name: "isConnected"
+            type: "bool"
+            Parameter { name: "modeName"; type: "string" }
+        }
+        Method {
+            name: "isDisconnected"
+            type: "bool"
+            Parameter { name: "modeName"; type: "string" }
+        }
     }
     Component {
         name: "QUsbModed"
@@ -442,7 +660,12 @@ Module {
         Property { name: "availableModes"; type: "QStringList"; isReadonly: true }
         Property { name: "hiddenModes"; type: "QStringList"; isReadonly: true }
         Property { name: "currentMode"; type: "string" }
+        Property { name: "targetMode"; type: "string"; isReadonly: true }
         Property { name: "configMode"; type: "string" }
+        Signal {
+            name: "eventReceived"
+            Parameter { name: "event"; type: "string" }
+        }
         Signal {
             name: "usbStateError"
             Parameter { name: "error"; type: "string" }
@@ -483,16 +706,6 @@ Module {
                 "Disconnect": 4
             }
         }
-        Enum {
-            name: "ConnectionType"
-            values: {
-                "OpenVPN": 0,
-                "OpenConnect": 1,
-                "VPNC": 2,
-                "L2TP": 3,
-                "PPTP": 4
-            }
-        }
         Property { name: "bestState"; type: "int"; isReadonly: true }
         Signal {
             name: "connectionStateChanged"
@@ -519,11 +732,6 @@ Module {
         Method {
             name: "deactivateConnection"
             Parameter { name: "path"; type: "string" }
-        }
-        Method {
-            name: "setAutomaticConnection"
-            Parameter { name: "path"; type: "string" }
-            Parameter { name: "enabled"; type: "bool" }
         }
         Method {
             name: "connectionCredentials"
@@ -553,7 +761,7 @@ Module {
             name: "processProvisioningFile"
             type: "QVariantMap"
             Parameter { name: "path"; type: "string" }
-            Parameter { name: "type"; type: "ConnectionType" }
+            Parameter { name: "type"; type: "string" }
         }
     }
 }

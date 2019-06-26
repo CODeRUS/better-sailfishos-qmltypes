@@ -9,6 +9,8 @@ Item {
     property int valueCount_: Settings.global.exposureCompensationValues.length
     property real divisionSize_: (height - handle.height)/(valueCount_-1)
     property int value: Settings.global.exposureCompensation
+    property color highlightColor: Theme.colorScheme == Theme.LightOnDark
+                                   ? Theme.highlightColor : Theme.highlightFromColor(Theme.highlightColor, Theme.LightOnDark)
 
     onValueChanged: {
         if (!mouseArea.drag.active) {
@@ -94,7 +96,7 @@ Item {
         Image {
             id: icon
             anchors.centerIn: parent
-            source: "image://theme/icon-camera-exposure-compensation" + (mouseArea.pressed ? "?" + Theme.highlightColor : "")
+            source: "image://theme/icon-camera-exposure-compensation" + (mouseArea.pressed ? "?" + highlightColor : "")
         }
     }
 
@@ -113,7 +115,7 @@ Item {
                 Label {
                     anchors.verticalCenter: parent.verticalCenter
                     x: alignment === Qt.AlignLeft ? 0 : parent.width - width
-                    color: Theme.highlightColor
+                    color: highlightColor
                     text: Settings.exposureText(modelData)
                     font.bold: true
                 }

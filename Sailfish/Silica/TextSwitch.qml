@@ -35,12 +35,14 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
+import "private"
 
 MouseArea {
     id: root
 
     property alias text: label.text
     property alias description: desc.text
+    property alias _label: label
 
     property bool checked
     property bool automaticCheck: true
@@ -68,11 +70,12 @@ MouseArea {
 
         GlassItem {
             id: indicator
+
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             opacity: root.enabled ? 1.0 : 0.4
             dimmed: !checked
-            falloffRadius: checked ? defaultFalloffRadius : 0.075
+            falloffRadius: checked ? defaultFalloffRadius : (Theme.colorScheme === Theme.LightOnDark ? 0.075 : 0.1)
             Behavior on falloffRadius {
                 NumberAnimation { duration: busy ? 450 : 50; easing.type: Easing.InOutQuad }
             }
@@ -83,7 +86,10 @@ MouseArea {
             Behavior on brightness {
                 NumberAnimation { duration: busy ? 450 : 50; easing.type: Easing.InOutQuad }
             }
-            color: highlighted ? Theme.highlightColor : Theme.primaryColor
+            color: highlighted ? Theme.highlightColor
+                               : dimmed ? Theme.primaryColor
+                                        : Theme.lightPrimaryColor
+            backgroundColor: checked || busy ? Theme.backgroundGlowColor : "transparent"
         }
         states: State {
             when: root.busy
@@ -115,6 +121,7 @@ MouseArea {
             // center on the first line if there are multiple lines
             verticalCenterOffset: lineCount > 1 ? (lineCount-1)*height/lineCount/2 : 0
             left: toggle.right
+            leftMargin: Theme.colorScheme === Theme.DarkOnLight ? Theme.paddingMedium : 0
         }
         wrapMode: Text.Wrap
         color: highlighted ? Theme.highlightColor : Theme.primaryColor

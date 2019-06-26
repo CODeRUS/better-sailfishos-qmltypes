@@ -98,7 +98,12 @@ Container {
 
         // If it's the current item then we try to play the next one:
         if (index == playModel.currentIndex) {
-            audio.playNext()
+            if (repeat || index !== playModel.count - 1) {
+                audio.playNext()
+            } else {
+                stop()
+                audio.model.currentIndex = 0
+            }
 
             if (state != Audio.Playing) {
                 stop()
@@ -137,6 +142,8 @@ Container {
     function _play() {
         if (_seeking) {
             _resume = true
+        } else if (audio.isEndOfMedia()) {
+            audio.playNext()
         } else {
             audio.play()
         }
@@ -233,18 +240,14 @@ Container {
         onEndOfMedia: {
             if (repeatOne) {
                 audio.playCurrent()
-            } else {
+            } else if (repeat || model.currentIndex + 1 < model.count) {
                 audio.playNext()
+            } else {
+                stop()
+                playbackState = Audio.Stopped
             }
         }
-        model.currentIndex: audio.model.currentIndex
         model.onShuffledChanged: if (player.shuffle != model.shuffled) player.shuffle = !player.shuffle
-
-        model.onCurrentIndexChanged: {
-            if (model.currentIndex == -1) {
-                audio.model.currentIndex = -1
-            }
-        }
 
         onCurrentItemChanged: {
             player._seekOffset = 0
@@ -294,17 +297,10 @@ Container {
         }
 
         function playNext() {
-            var index = model.currentIndex + 1
-            if (index >= model.count) {
-                if (!repeat) {
-                    playbackState = state
-                    return
-                }
-                index = 0
-            }
-
             changingItem = true
-            model.currentIndex = index
+            model.currentIndex = model.currentIndex < model.count - 1
+                    ? model.currentIndex + 1
+                    : 0
             play()
             changingItem = false
             playbackState = state
@@ -313,17 +309,15 @@ Container {
         function playPrevious() {
             // We play previous if less than 5 seconds have elapsed.
             // otherwise we rewind the playing song
-            if (audio.position >= 5000) {
+            if (playModel.count === 1 || audio.position >= 5000) {
                 player.setPosition(0)
                 return
             }
 
-            if (model.currentIndex < 1) {
-                return
-            }
-
             changingItem = true
-            model.currentIndex -= 1
+            model.currentIndex = model.currentIndex >= 1
+                    ? model.currentIndex - 1
+                    : model.count - 1
             play()
             changingItem = false
             playbackState = state

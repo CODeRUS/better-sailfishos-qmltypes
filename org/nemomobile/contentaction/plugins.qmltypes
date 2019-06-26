@@ -21,11 +21,13 @@ Module {
                 "NoError": 0,
                 "FileTypeNotSupported": 1,
                 "FileDoesNotExist": 2,
-                "UrlSchemeNotSupported": 3,
-                "InvalidUrl": 4
+                "FileIsEmpty": 3,
+                "UrlSchemeNotSupported": 4,
+                "InvalidUrl": 5
             }
         }
         Property { name: "error"; type: "Error"; isReadonly: true }
+        Property { name: "mimeType"; type: "string"; isReadonly: true }
         Method {
             name: "trigger"
             type: "bool"

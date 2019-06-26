@@ -79,7 +79,7 @@ ListView {
             if (root._contextMenu === null)
                 root._contextMenu = contextMenuComponent.createObject(root)
             root._selectedYear = model.year
-            root._contextMenu.show(delegateItem)
+            root._contextMenu.open(delegateItem)
         }
 
         Label {
@@ -122,7 +122,7 @@ ListView {
                         height: Theme.itemSizeHuge
 
                         onClicked: {
-                            root._contextMenu.hide()
+                            root._contextMenu.close()
                             root.monthActivated(model.index + 1, root._clickedYear)
                         }
 
@@ -135,7 +135,7 @@ ListView {
                             }
                             font.pixelSize: Theme.fontSizeHuge
                             text: (model.index >= 9 ? "" : "0") + (model.index + 1)
-                            color: Theme.rgba(Theme.highlightColor, 0.6)
+                            color: Theme.secondaryHighlightColor
                         }
                         Label {
                             id: monthNameLabel
@@ -148,7 +148,7 @@ ListView {
                             fontSizeMode: Text.HorizontalFit
                             font.pixelSize: Theme.fontSizeMedium
                             text: model.name
-                            color: Theme.rgba(Theme.highlightColor, 0.6)
+                            color: Theme.secondaryHighlightColor
                         }
                     }
                 }

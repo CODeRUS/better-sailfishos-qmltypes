@@ -77,6 +77,7 @@ Page {
 
     signal accepted
     signal rejected
+    signal acceptBlocked
 
     // Private signals, although we can't prefix with _
     // Custom dialogs can create handlers for these to be notified
@@ -87,9 +88,9 @@ Page {
     // Public functions
     function open(replace, operationType) {
         if (replace) {
-            pageStack.replace(dialog, undefined, operationType)
+            pageStack.animatorReplace(dialog, undefined, operationType)
         } else {
-            pageStack.push(dialog, undefined, operationType)
+            pageStack.animatorPush(dialog, undefined, operationType)
         }
     }
 
@@ -150,7 +151,7 @@ Page {
             }
         } else {
             // Emit done if we haven't previously
-            if (result == DialogResult.None && _navigation == PageNavigation.None) {
+            if (result == DialogResult.None && _navigation == PageNavigation.NoNavigation) {
                 done()
             }
 

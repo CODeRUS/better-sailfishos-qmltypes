@@ -17,6 +17,7 @@ DockedPanel {
     property int duration
     property int position
     property int durationScalar: 1
+    property alias forwardEnabled: forwardButton.enabled
 
     property bool _isLandscape: pageStack && pageStack.currentPage && pageStack.currentPage.isLandscape
 
@@ -106,11 +107,12 @@ DockedPanel {
 
             IconButton {
                 width: parent.width / 3
-                icon.source: panel.playing ? "image://theme/icon-m-pause?" + Theme.highlightColor : "image://theme/icon-m-play"
+                icon.source: panel.playing ? "image://theme/icon-m-pause" : "image://theme/icon-m-play"
                 onClicked: panel.playPauseClicked()
             }
 
             IconButton {
+                id: forwardButton
                 width: parent.width / 3
                 icon.source: "image://theme/icon-m-next"
                 anchors.verticalCenter: parent.verticalCenter

@@ -79,21 +79,10 @@ QtObject {
                 for (var propIndex in contentModel.properties) {
                     var prop = contentModel.properties[propIndex]
                     var value = filteredContent[index][prop]
-                    // Read always valueOf from the value returned from DocumentGalleryModel.
-                    // ListModel::setProperty doesn't allow setting "complex" types, e.g. setting type date (datetime).
-                    // For date valueOf() returns number format that can be used when creating Date instances.
-                    value = value && value.valueOf()
                     model.setProperty(index, prop, value)
                 }
             } else {
                 var row = filteredContent[index]
-                // Append datetime properties as numbers.
-                if (row.lastModified) {
-                    row.lastModified = row.lastModified.valueOf()
-                } else if (row.lastAccessed) {
-                    row.lastAccessed = row.lastAccessed.valueOf()
-                }
-
                 model.append(row)
             }
         }

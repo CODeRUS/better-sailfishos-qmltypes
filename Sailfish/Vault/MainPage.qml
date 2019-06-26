@@ -31,18 +31,20 @@ Page {
 
     function showDialog(parameters) {
         parameters.unitListModel = root._unitListModel
-        var dialog = pageStack.push(Qt.resolvedUrl("NewBackupRestoreDialog.qml"), parameters)
-        dialog.operationFinished.connect(function(successful) {
-            if (successful) {
-                // if accounts were restored, the available storages will have changed
+        var obj = pageStack.animatorPush(Qt.resolvedUrl("NewBackupRestoreDialog.qml"), parameters)
+        obj.pageCompleted.connect(function(dialog) {
+            dialog.operationFinished.connect(function(successful) {
+                if (successful) {
+                    // if accounts were restored, the available storages will have changed
 
-                // If a backup was done, need to update the last created backup info display;
-                // if a restore was done, the accounts will have changed.
-                contentLoader.item.refreshStoragePickers()
-                if (!dialog.backupMode) {
-                    _storageListModel.refresh()
+                    // If a backup was done, need to update the last created backup info display;
+                    // if a restore was done, the accounts will have changed.
+                    contentLoader.item.refreshStoragePickers()
+                    if (!dialog.backupMode) {
+                        _storageListModel.refresh()
+                    }
                 }
-            }
+            })
         })
     }
 
@@ -70,17 +72,19 @@ Page {
             "vault": _vault,
             "unitListModel": _unitListModel
         }
-        var dlg = pageStack.push(Qt.resolvedUrl("BackupMigrationDialog.qml"), props)
-        dlg.statusChanged.connect(function() {
-            if (dlg.status == PageStatus.Active) {
-                root._checkMigrationNeeded = false
-            }
-        })
-        dlg.operationFinished.connect(function(successful) {
-            if (successful) {
-                contentLoader.item.refreshStoragePickers()
-                _vault.removeAllSnapshots()
-            }
+        var obj = pageStack.animatorPush(Qt.resolvedUrl("BackupMigrationDialog.qml"), props)
+        obj.pageCompleted.connect(function(dialog) {
+            dialog.statusChanged.connect(function() {
+                if (dialog.status == PageStatus.Active) {
+                    root._checkMigrationNeeded = false
+                }
+            })
+            dialog.operationFinished.connect(function(successful) {
+                if (successful) {
+                    contentLoader.item.refreshStoragePickers()
+                    _vault.removeAllSnapshots()
+                }
+            })
         })
     }
 
@@ -197,7 +201,7 @@ Page {
             opacity: 1 - pageBusy.opacity
             anchors.top: header.bottom
             width: parent.width
-            sourceComponent: _vault.connected
+            sourceComponent: _vault.connected && root._storageListModel.ready
                              ? (root._storageListModel.count > 0 ? mainContentComponent : placeholderContentComponent)
                              : null
         }

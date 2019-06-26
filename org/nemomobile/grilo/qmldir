@@ -1,2 +1,2 @@
 module org.nemomobile.grilo
-plugin grilo-qt5-qml-plugin
+typeinfo plugins.qmltypes

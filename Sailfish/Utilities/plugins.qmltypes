@@ -8,7 +8,7 @@ import QtQuick.tooling 1.2
 
 Module {
     dependencies: [
-        "QtQuick 2.5",
+        "QtQuick 2.6",
         "QtQuick.Window 2.1",
         "QtWebKit 3.0",
         "QtWebKit.experimental 1.0",
@@ -45,16 +45,6 @@ Module {
         }
         Method { name: "cleanRpmDb" }
         Method {
-            name: "restartKeyboard"
-            Parameter { name: "successCallback"; type: "QJSValue" }
-            Parameter { name: "errorCallback"; type: "QJSValue" }
-        }
-        Method {
-            name: "restartKeyboard"
-            Parameter { name: "successCallback"; type: "QJSValue" }
-        }
-        Method { name: "restartKeyboard" }
-        Method {
             name: "cleanTrackerDb"
             Parameter { name: "successCallback"; type: "QJSValue" }
             Parameter { name: "errorCallback"; type: "QJSValue" }
@@ -84,16 +74,6 @@ Module {
             Parameter { name: "successCallback"; type: "QJSValue" }
         }
         Method { name: "restartLipstick" }
-        Method {
-            name: "restartDevice"
-            Parameter { name: "successCallback"; type: "QJSValue" }
-            Parameter { name: "errorCallback"; type: "QJSValue" }
-        }
-        Method {
-            name: "restartDevice"
-            Parameter { name: "successCallback"; type: "QJSValue" }
-        }
-        Method { name: "restartDevice" }
     }
     Component {
         prototype: "QObject"

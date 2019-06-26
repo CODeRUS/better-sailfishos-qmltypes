@@ -1,2 +1,2 @@
 module org.nemomobile.notifications
-plugin nemonotifications
+typeinfo plugins.qmltypes

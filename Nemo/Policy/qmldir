@@ -1,0 +1,2 @@
+module Nemo.Policy
+typeinfo plugins.qmltypes

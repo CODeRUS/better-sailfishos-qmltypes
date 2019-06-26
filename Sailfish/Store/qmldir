@@ -1,2 +1,2 @@
 module Sailfish.Store
-plugin sailfishstoreplugin
+typeinfo plugins.qmltypes

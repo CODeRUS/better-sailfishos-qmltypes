@@ -21,6 +21,7 @@ import Sailfish.Accounts 1.0
 Item {
     // Provided for convenience; these will be set to valid values on construction
     property int accountId
+    property string userName
     property Provider accountProvider
     property AccountManager accountManager
 
@@ -51,16 +52,16 @@ Item {
     function goToEndDestination() {
         switch (endDestinationAction) {
         case PageStackAction.Push:
-            pageStack.push(endDestination, endDestinationProperties)
+            pageStack.animatorPush(endDestination, endDestinationProperties)
             break
         case PageStackAction.Pop:
             pageStack.pop(endDestination)
             break
         case PageStackAction.Replace:
             if (endDestinationReplaceTarget === undefined) {    // use === as target=null is still valid for replaceAbove()
-                pageStack.replace(endDestination, endDestinationProperties)
+                pageStack.animatorReplace(endDestination, endDestinationProperties)
             } else {
-                pageStack.replaceAbove(endDestinationReplaceTarget, endDestination, endDestinationProperties)
+                pageStack.animatorReplaceAbove(endDestinationReplaceTarget, endDestination, endDestinationProperties)
             }
             break
         }

@@ -7,6 +7,7 @@ ApplicationInstallationDialog 1.0 ApplicationInstallationDialog.qml
 AndroidInstallationDialog 1.0 AndroidInstallationDialog.qml
 PlatformTermsOfUseDialog 1.0 PlatformTermsOfUseDialog.qml
 VendorTermsOfUseDialog 1.0 VendorTermsOfUseDialog.qml
+FullTermsDialog 1.0 FullTermsDialog.qml
 WizardSimPinQuery 1.0 WizardSimPinQuery.qml
 WizardClickableLabel 1.0 WizardClickableLabel.qml
 WizardDialogHeader 1.0 WizardDialogHeader.qml
@@ -14,3 +15,4 @@ PersonalizedNamingSetup 1.0 PersonalizedNamingSetup.qml
 LoadingPlaceholder 1.0 LoadingPlaceholder.qml
 AndroidApplicationDelegate 1.0 AndroidApplicationDelegate.qml
 WizardPostAccountCreationDialog 1.0 WizardPostAccountCreationDialog.qml
+typeinfo plugins.qmltypes

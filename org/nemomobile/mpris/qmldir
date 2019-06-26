@@ -1,2 +1,2 @@
 module org.nemomobile.mpris
-plugin mpris-qt5-qml-plugin
+typeinfo plugins.qmltypes

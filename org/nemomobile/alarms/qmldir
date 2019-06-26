@@ -1,2 +1,2 @@
 module org.nemomobile.alarms
-plugin nemoalarms
+typeinfo plugins.qmltypes

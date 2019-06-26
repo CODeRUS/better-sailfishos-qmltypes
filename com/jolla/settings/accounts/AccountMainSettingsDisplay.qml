@@ -96,7 +96,7 @@ Item {
                     return qsTrId("settings-accounts-la-account_disabled_by_mdm")
                 }
             } else {
-                return "";
+                return ""
             }
         }
 

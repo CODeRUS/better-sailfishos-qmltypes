@@ -54,23 +54,23 @@ Item {
     height: !root.currentPage || root.currentPage.isPortrait ? Theme.itemSizeLarge : Theme.itemSizeSmall
     width: pageStack.verticalOrientation ? parent.width : parent.height
 
-    property int direction: PageNavigation.None
-    property real currentLateralOffset: root._currentContainer ? root._currentContainer.lateralOffset : 0
+    property int currentNavigation: PageNavigation.NoNavigation
+    property real currentLateralOffset: root._currentContainer && root._currentContainer.horizontalNavigationStyle ? root._currentContainer.dragOffset : 0
     property bool busy: root.busy
     onBusyChanged: {
         if (!busy) {
-            direction = PageNavigation.None
+            currentNavigation = PageNavigation.NoNavigation
             partnerPageIndicator.x = -itemWidth/2
         }
     }
 
     onCurrentLateralOffsetChanged: {
         if (currentLateralOffset < 0) {
-            direction = PageNavigation.Forward
+            currentNavigation = PageNavigation.Forward
         } else if (currentLateralOffset > 0) {
-            direction = PageNavigation.Back
+            currentNavigation = PageNavigation.Back
         } else {
-            direction = PageNavigation.None
+            currentNavigation = PageNavigation.NoNavigation
         }
     }
 
@@ -79,13 +79,13 @@ Item {
         property Item container: root._currentContainer ? root._currentContainer.transitionPartner : null
         property bool forwardNavigation: container && (container.page && container.page.forwardNavigation || container.attachedContainer)
         property bool canNavigateForward: container && (container.page && container.page.canNavigateForward || container.attachedContainer)
-        property bool backNavigation: container && container.page && container.page.backNavigation && container.pageStackIndex !== 0
-        property real lateralOffset: container ? container.lateralOffset : 0
+        property bool backNavigation: container && container.page && container.page.backNavigation && container.page._horizontalNavigationStyle && container.pageStackIndex !== 0
+        property real lateralOffset: container && container.horizontalNavigationStyle ? container.dragOffset : 0
 
         onLateralOffsetChanged: {
-            if (direction == PageNavigation.Forward) {
+            if (currentNavigation == PageNavigation.Forward) {
                 x = lateralOffset-itemWidth/2 + indicators.width
-            } else if (direction == PageNavigation.Back) {
+            } else if (currentNavigation == PageNavigation.Back) {
                 x = lateralOffset-itemWidth/2
             } else {
                 x = -itemWidth/2
@@ -96,9 +96,9 @@ Item {
         width: itemWidth
 
         visible: container && container.visible
-        opacity: backNavigation && direction == PageNavigation.Back
+        opacity: backNavigation && horizontalNavigationStyle && currentNavigation == PageNavigation.Back
                  ? 1.0
-                 : (forwardNavigation && direction == PageNavigation.Forward ? (canNavigateForward ? 1.0 : 0.6) : 0.0)
+                 : (forwardNavigation && currentNavigation == PageNavigation.Forward ? (canNavigateForward ? 1.0 : 0.6) : 0.0)
 
         PageStackGlassIndicator { }
     }
@@ -108,7 +108,7 @@ Item {
 
         property Item container: root._currentContainer
         property bool backNavigation: container && container.page
-                                      && container.page.backNavigation && container.pageStackIndex !== 0
+                                      && container.page.backNavigation && container.page._horizontalNavigationStyle && container.pageStackIndex !== 0
 
         x: currentLateralOffset - itemWidth/2
         height: indicators.height
@@ -130,7 +130,7 @@ Item {
 
         PageStackGlassIndicator {
             opacity: indicators.clickablePageIndicators ? 1.0 : 0.6
-            color: backIndicatorHighlighted ? Theme.highlightColor : Theme.primaryColor
+            color: backIndicatorHighlighted ? Theme.highlightColor : Theme.lightPrimaryColor
         }
     }
 
@@ -181,7 +181,7 @@ Item {
 
         PageStackGlassIndicator {
             opacity: indicators.clickablePageIndicators ? 1.0 : 0.6
-            color: forwardIndicatorHighlighted ? Theme.highlightColor : Theme.primaryColor
+            color: forwardIndicatorHighlighted ? Theme.highlightColor : Theme.lightPrimaryColor
         }
     }
 

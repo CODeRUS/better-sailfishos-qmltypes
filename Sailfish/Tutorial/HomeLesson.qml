@@ -2,7 +2,6 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Lipstick 1.0
 import Sailfish.Tutorial 1.0
-import org.nemomobile.configuration 1.0
 import "private"
 
 Lesson {
@@ -258,14 +257,21 @@ Lesson {
     Connections {
         target: background
 
-        onMovingChanged: {
+        onPanningChanged: {
             if (targetItem) {
-                if (!background.moving && background.currentItem === targetItem) {
+                if (!background.panning && background.currentItem === targetItem) {
                     background.allowPanLeft = false
                     background.allowPanRight = false
                     targetItem = null
                     timelineCounter++
-                } else {
+                }
+            }
+        }
+
+        // TODO: Moving doesn't have time to change to false if you just keep flicking quickly. See JB##39789
+        onMovingChanged: {
+            if (targetItem) {
+                if (background.moving || background.currentItem !== targetItem) {
                     hintLabel.opacity = background.moving ? 0.0 : 1.0
 
                     if (background.moving)

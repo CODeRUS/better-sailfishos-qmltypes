@@ -185,6 +185,7 @@ Lesson {
 
             highlightColor: "#80ff91"
             backgroundColor: "#19ff38"
+            colorScheme: Theme.LightOnDark
             quickSelect: true
 
             MenuItem {
@@ -214,6 +215,7 @@ Lesson {
 
             highlightColor: "#ff8084"
             backgroundColor: "#ff1a22"
+            colorScheme: Theme.LightOnDark
             quickSelect: true
 
             Item {

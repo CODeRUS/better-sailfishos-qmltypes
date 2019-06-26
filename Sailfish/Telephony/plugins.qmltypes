@@ -61,6 +61,16 @@ Module {
         Property { name: "promptForVoiceSim"; type: "bool"; isReadonly: true }
         Property { name: "promptForMessageSim"; type: "bool"; isReadonly: true }
         Property { name: "multiSimSupported"; type: "bool"; isReadonly: true }
+        Method {
+            name: "shortSimDescription"
+            type: "string"
+            Parameter { name: "slot"; type: "int" }
+        }
+        Method {
+            name: "longSimDescription"
+            type: "string"
+            Parameter { name: "slot"; type: "int" }
+        }
     }
     Component {
         prototype: "QObject"

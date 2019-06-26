@@ -12,6 +12,7 @@ MouseArea {
     property alias lightness: rainbow.lightness
     property alias saturation: rainbow.saturation
     property alias alpha: rainbow.alpha
+    property color secondaryColor: Theme.secondaryColor
     property color highlightColor: Theme.highlightColor
     readonly property real sliderValue: Math.max(minimumValue, Math.min(maximumValue, hue))
     property bool handleVisible: true
@@ -160,15 +161,15 @@ MouseArea {
                 uniform lowp float alpha;
 
                 void main() {
-                    float r, g, b;
+                    lowp float r, g, b;
 
-                    float h = qt_TexCoord0.x * 360.0;
-                    float s = saturation;
-                    float l = lightness;
+                    highp float h = qt_TexCoord0.x * 360.0;
+                    lowp float s = saturation;
+                    lowp float l = lightness;
 
-                    float c = (1.0 - abs(2.0 * l - 1.0)) * s;
-                    float hh = h / 60.0;
-                    float x = c * (1.0 - abs(mod(hh, 2.0) - 1.0));
+                    lowp float c = (1.0 - abs(2.0 * l - 1.0)) * s;
+                    highp float hh = h / 60.0;
+                    lowp float x = c * (1.0 - abs(mod(hh, 2.0) - 1.0));
 
                     int i = int( hh );
 
@@ -188,7 +189,7 @@ MouseArea {
                         r = 0.0; g = 0.0; b = 0.0;
                     }
 
-                    float m = l - 0.5 * c;
+                    lowp float m = l - 0.5 * c;
 
                     lowp vec4 tex = texture2D(src, qt_TexCoord0);
                     gl_FragColor = vec4(r+m,g+m,b+m,alpha) * qt_Opacity;
@@ -223,7 +224,7 @@ MouseArea {
             verticalCenter: background.verticalCenter
         }
         visible: handleVisible
-        color: slider.highlighted ? slider.highlightColor : Theme.primaryColor
+        color: slider.highlighted ? slider.highlightColor : Theme.lightPrimaryColor
         Behavior on x {
             enabled: !_widthChanged
             SmoothedAnimation { velocity: 1500 }
@@ -234,7 +235,7 @@ MouseArea {
         id: labelText
         visible: text.length
         font.pixelSize: Theme.fontSizeSmall
-        color: slider.highlighted ? slider.highlightColor : Theme.secondaryColor
+        color: slider.highlighted ? slider.highlightColor : slider.secondaryColor
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: background.verticalCenter
         anchors.topMargin: Theme.paddingMedium

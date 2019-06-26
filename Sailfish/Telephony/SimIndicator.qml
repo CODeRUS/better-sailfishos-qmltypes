@@ -10,6 +10,7 @@ Column {
     property alias operator: operator.text
     property bool selected
     property bool valid
+    property int innerMargin: Theme.paddingLarge * 2
 
     readonly property bool leftAligned: horizontalAlignment === Text.AlignLeft
 
@@ -20,51 +21,45 @@ Column {
         right: parent.right
         top: parent.top
         topMargin: Theme.paddingMedium
-        leftMargin: leftAligned ? Theme.paddingLarge * 2 : Theme.paddingLarge
-        rightMargin: !leftAligned ? Theme.paddingLarge * 2 : Theme.paddingLarge
+        leftMargin: leftAligned ? innerMargin : Theme.paddingLarge
+        rightMargin: !leftAligned ? innerMargin : Theme.paddingLarge
     }
 
-    Column {
-        width: simText.width
+    Row {
+        id: simText
+
         spacing: Theme.paddingSmall
+        x: leftAligned ? 0 : root.width - width
 
-        anchors {
-            left: leftAligned ? root.left : undefined
-            right: !leftAligned ? root.right : undefined
+        Image {
+            id: simImage
+            source: "image://theme/graphic-simcard" + (root.highlighted ? "?" + Theme.highlightColor : "")
+            anchors.bottom: simDescription.baseline
         }
 
-        Row {
-            id: simText
-
-            spacing: Theme.paddingSmall
-
-            Image {
-                source: "image://theme/graphic-simcard" + (root.highlighted ? "?" + Theme.highlightColor : "")
-                anchors.bottom: simDescription.baseline
-            }
-
-            Label {
-                id: simDescription
-                anchors.bottom: parent.bottom
-                horizontalAlignment: root.horizontalAlignment
-                color: root.highlighted ? Theme.highlightColor : Theme.primaryColor
-            }
+        Label {
+            id: simDescription
+            anchors.bottom: parent.bottom
+            color: root.highlighted ? Theme.highlightColor : Theme.primaryColor
+            width: Math.min(implicitWidth, root.width - simImage.width - simText.spacing)
+            fontSizeMode: Text.HorizontalFit
         }
+    }
 
-        Rectangle {
-            width: parent.width
+    Rectangle {
+        anchors.left: simText.left
+        anchors.right: simText.right
 
-            // Same rounding as with presence indicator.
-            height: Theme.paddingSmall
-            radius: Math.round(height / 3)
+        // Same rounding as with presence indicator.
+        height: Theme.paddingSmall
+        radius: Math.round(height / 3)
 
-            color: root.selected ? Theme.presenceColor(Theme.PresenceAvailable) : "transparent"
-            Behavior on color { ColorAnimation { duration: 200 } }
+        color: root.selected ? Theme.presenceColor(Theme.PresenceAvailable) : "transparent"
+        Behavior on color { ColorAnimation { duration: 200 } }
 
-            border {
-                color: root.highlighted && !root.selected ? Theme.rgba(Theme.highlightColor, 0.8) : Theme.rgba(Theme.primaryColor, 0.4)
-                width: root.selected ? 0 : Math.round(Theme.paddingSmall / 4)
-            }
+        border {
+            color: root.highlighted && !root.selected ? Theme.rgba(Theme.highlightColor, 0.8) : Theme.rgba(Theme.primaryColor, 0.4)
+            width: root.selected ? 0 : Math.round(Theme.paddingSmall / 4)
         }
     }
 

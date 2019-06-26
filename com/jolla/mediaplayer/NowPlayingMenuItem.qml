@@ -6,24 +6,12 @@ import com.jolla.mediaplayer 1.0
 
 MenuItem {
     visible: visualAudioAppModel.active
-    text: nowPlayingText(visualAudioAppModel.metadata)
+    
+    //% "Play queue"
+    text: qsTrId("mediaplayer-he-play-queue")
 
     // Avoid font fitting that menu item does by default for too long labels
     fontSizeMode: Text.FixedSize
 
-    onClicked: pageStack.push(Qt.resolvedUrl("PlayQueuePage.qml"))
-
-    function nowPlayingText(metadata) {
-        if (!metadata) {
-            return ""
-        }
-
-        if (metadata.title !== "" && metadata.artist !== "") {
-            return metadata.artist + " - " + metadata.title
-        } else if (metadata.artist !== "") {
-            return metadata.artist
-        } else {
-            return metadata.title
-        }
-    }
+    onClicked: pageStack.animatorPush(Qt.resolvedUrl("PlayQueuePage.qml"))
 }

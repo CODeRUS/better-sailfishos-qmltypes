@@ -1,12 +1,16 @@
 module Sailfish.Pickers
 ContentPickerPage 1.0 ContentPickerPage.qml
 DocumentPickerPage 1.0 DocumentPickerPage.qml
+DownloadPickerPage 1.0 DownloadPickerPage.qml
 FilePickerPage 1.0 FilePickerPage.qml
 ImagePickerPage 1.0 ImagePickerPage.qml
 MultiDocumentPickerDialog 1.0 MultiDocumentPickerDialog.qml
+MultiDownloadPickerDialog 1.0 MultiDownloadPickerDialog.qml
 MultiContentPickerDialog 1.0 MultiContentPickerDialog.qml
+MultiFilePickerDialog 1.0 MultiFilePickerDialog.qml
 MultiImagePickerDialog 1.0 MultiImagePickerDialog.qml
 MultiMusicPickerDialog 1.0 MultiMusicPickerDialog.qml
 MultiVideoPickerDialog 1.0 MultiVideoPickerDialog.qml
 MusicPickerPage 1.0 MusicPickerPage.qml
 VideoPickerPage 1.0 VideoPickerPage.qml
+typeinfo plugins.qmltypes

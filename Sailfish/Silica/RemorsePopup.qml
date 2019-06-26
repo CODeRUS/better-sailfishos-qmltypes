@@ -34,7 +34,8 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import "private/RemorsePopup.js" as Remorse
+import Sailfish.Silica.private 1.0
+import "private/RemorsePopup.js" as RemorseJs
 import "private/Util.js" as Util
 
 BackgroundItem {
@@ -42,10 +43,11 @@ BackgroundItem {
     property string text
     property real leftMargin: Theme.horizontalPageMargin
     property real rightMargin: Theme.horizontalPageMargin
+    readonly property bool active: state === "active"
 
     function execute(title, callback, timeout) {
         remorsePopup.text = title
-        Remorse.callback = callback
+        RemorseJs.callback = callback
         _timeout = timeout === undefined ? 5000 : timeout
         _triggered = false
         _page = Util.findPage(remorsePopup)
@@ -58,6 +60,10 @@ BackgroundItem {
         _close()
         canceled()
     }
+    function trigger() {
+        _execute()
+        _close()
+    }
 
     function _close() {
         countdown.stop()
@@ -67,8 +73,8 @@ BackgroundItem {
         if (!_triggered) {
             _triggered = true
             triggered()
-            if (Remorse.callback !== undefined) {
-                Remorse.callback.call()
+            if (RemorseJs.callback !== undefined) {
+                RemorseJs.callback.call()
             }
         }
     }
@@ -83,6 +89,17 @@ BackgroundItem {
 
     signal canceled
     signal triggered
+
+    drag.minimumX: -width
+    drag.maximumX: width
+    drag.target: contentItem
+    drag.axis: Drag.XAxis
+    drag.onActiveChanged: if (!drag.active) dismissAnimation.animate(contentItem, 0, width)
+
+    DismissAnimation {
+        id: dismissAnimation
+        onCompleted: trigger()
+    }
 
     visible: false
     width: parent ? parent.width : Screen.width
@@ -156,7 +173,10 @@ BackgroundItem {
                     easing.type: Easing.OutQuad
                 }
                 ScriptAction {
-                    script: remorsePopup.state = ""
+                    script: {
+                        remorsePopup.state = ""
+                        dismissAnimation.reset()
+                    }
                 }
             }
         }
@@ -202,7 +222,7 @@ BackgroundItem {
             }
         }
     }
-    Image {
+    HighlightImage {
         id: promptIcon
 
         anchors {
@@ -211,10 +231,11 @@ BackgroundItem {
             left: row.left
             leftMargin: Theme.paddingMedium
         }
-        source: "image://theme/icon-m-clear" + (remorsePopup.highlighted ? "?" + Theme.highlightColor : "")
+        source: "image://theme/icon-m-clear"
         smooth: true
         fillMode: Image.PreserveAspectFit
         opacity: remorsePopup._contentOpacity
+        highlighted: remorsePopup.highlighted
     }
     Column {
         anchors {
@@ -230,12 +251,23 @@ BackgroundItem {
             textFormat: Text.PlainText
             maximumLineCount: 1
             opacity: remorsePopup._contentOpacity
-            //: Describes the remaining time to prevent action trigger
-            //% "in %n seconds"
-            text: remorsePopup.text + " " + qsTrId("components-la-in-n-seconds", remorsePopup._secsRemaining) +
-                  //: Prompts the user to cancel the pending action, appended to the description
-                  //% ", Tap to cancel"
-                  (screen.sizeCategory > Screen.Medium ? qsTrId("components-la-tap-to-cancel-appended") : "")
+            text: {
+                //: Describes the remaining time to prevent action trigger
+                //% "in %n seconds"
+                var text = remorsePopup.text + " " + qsTrId("components-la-in-n-seconds", remorsePopup._secsRemaining)
+                if (screen.sizeCategory > Screen.Medium) {
+                    if (drag.active || dismissAnimation.running) {
+                        //: Prompts the user to cancel the pending action, appended to the description
+                        //% ", Swipe to commit"
+                        text = text + qsTrId("components-la-swipe-to-commit-appended")
+                    } else {
+                        //: Prompts the user to cancel the pending action, appended to the description
+                        //% ", Tap to cancel"
+                        text = text + qsTrId("components-la-tap-to-cancel-appended")
+                    }
+                }
+                return text
+            }
         }
         Label {
             truncationMode: TruncationMode.Fade
@@ -244,9 +276,13 @@ BackgroundItem {
             textFormat: Text.PlainText
             maximumLineCount: 1
             opacity: remorsePopup._contentOpacity
-            //: Prompts the user to cancel the pending action
-            //% "Tap to cancel"
-            text: qsTrId("components-la-tap-to-cancel")
+            text: drag.active || dismissAnimation.running ?
+                      //% "Swipe to commit"
+                      qsTrId("components-la-swipe-to-commit")
+                    :
+                      //: Prompts the user to cancel the pending action
+                      //% "Tap to cancel"
+                      qsTrId("components-la-tap-to-cancel")
             visible: screen.sizeCategory <= Screen.Medium
         }
     }

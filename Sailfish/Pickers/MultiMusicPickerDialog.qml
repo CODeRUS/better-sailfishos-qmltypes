@@ -41,6 +41,8 @@ PickerDialog {
             model: musicModel
             contentType: ContentType.Music
             visible: active || musicModel.count > 0
+            selectedCount: _selectedCount
+            showBack: !_clearOnBackstep
             _glassOnly: musicPickerDialog._background
 
             onActiveFocusChanged: {

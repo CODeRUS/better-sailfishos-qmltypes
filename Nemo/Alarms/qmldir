@@ -1,0 +1,2 @@
+module Nemo.Alarms
+typeinfo plugins.qmltypes

@@ -38,7 +38,9 @@ import Sailfish.Silica 1.0
 Text {
     id: valueIndicator
 
-    color: slider.highlighted ? Theme.highlightColor : Theme.primaryColor
+    property QtObject slider
+
+    color: slider.highlighted ? slider.highlightColor : slider.valueLabelColor
     font.pixelSize: Theme.fontSizeHuge
 
     transformOrigin: Item.BottomLeft
@@ -48,10 +50,10 @@ Text {
 
     text: slider.valueText
 
-    property real _midOff: (scale * width - highlight.width)/2
+    property real _midOff: (scale * width - slider._highlightItem.width)/2
 
-    x: Math.min(Math.max(Theme.paddingMedium, highlight.x - _midOff), parent.width - scale * width - Theme.paddingMedium)
-    anchors.bottom: background.verticalCenter
+    x: Math.min(Math.max(Theme.paddingMedium, slider._highlightItem.x - _midOff), parent.width - scale * width - Theme.paddingMedium)
+    anchors.bottom: slider._backgroundItem.verticalCenter
     anchors.bottomMargin: Theme.paddingMedium + Theme.paddingSmall
     visible: text !== ""
 }

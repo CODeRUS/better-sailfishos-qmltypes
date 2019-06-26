@@ -7,6 +7,7 @@ Dialog {
     id: root
 
     property AccountManager accountManager
+    property alias userName: field_username.text
 
     // Required for compatibility with jolla-store implementation.
     property Provider accountProvider

@@ -1,2 +1,2 @@
 module com.jolla.signonuiservice
-plugin jollasignonuiserviceplugin
+typeinfo plugins.qmltypes

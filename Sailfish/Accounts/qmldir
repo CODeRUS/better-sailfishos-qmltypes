@@ -1,8 +1,8 @@
 module Sailfish.Accounts
-plugin sailfishaccountsplugin
 internal AccountProviderPickerDelegate AccountProviderPickerDelegate.qml
 AccountProviderPicker 1.0 AccountProviderPicker.qml
 AccountsListView 1.0 AccountsListView.qml
 AccountIcon 1.0 AccountIcon.qml
 AccountsListDelegate 1.0 AccountsListDelegate.qml
 AccountsFlowView 1.0 AccountsFlowView.qml
+typeinfo plugins.qmltypes

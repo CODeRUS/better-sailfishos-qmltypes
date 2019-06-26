@@ -39,7 +39,10 @@ BackgroundItem {
     id: listItem
     property var menu
     property bool menuOpen: _menuItem != null && _menuItem._open
-    property bool showMenuOnPressAndHold: true
+    property bool openMenuOnPressAndHold: true
+
+    // deprecated
+    property alias showMenuOnPressAndHold: listItem.openMenuOnPressAndHold
 
     property Item _menuItem
     property bool _menuItemCreated
@@ -50,7 +53,11 @@ BackgroundItem {
     onMenuOpenChanged: {
         var viewItem = listItem.ListView.view || listItem.GridView.view
         if (viewItem && ('__silica_contextmenu_instance' in viewItem)) {
-            viewItem.__silica_contextmenu_instance = menuOpen ? _menuItem : null
+            if (menuOpen) {
+                viewItem.__silica_contextmenu_instance = _menuItem
+            } else if (viewItem.__silica_contextmenu_instance === _menuItem) {
+                viewItem.__silica_contextmenu_instance = null
+            }
         }
     }
 
@@ -65,7 +72,7 @@ BackgroundItem {
         removeComponent.createObject(delegate, { "target": delegate })
     }
 
-    function showMenu(properties) {
+    function openMenu(properties) {
         if (menu == null) {
             return null
         }
@@ -74,14 +81,26 @@ BackgroundItem {
         } else {
             for (var prop in properties) {
                 if (prop in _menuItem) {
-                    _menuItem[prop] = properties[prop];
+                    _menuItem[prop] = properties[prop]
                 }
             }
         }
         if (_menuItem) {
-            _menuItem.show(listItem)
+            _menuItem.open(listItem)
         }
         return _menuItem
+    }
+
+    function closeMenu() {
+        if (_menuItem != null) {
+            _menuItem.close()
+        }
+    }
+
+    function showMenu(properties) {
+        console.warn("ListItem::showMenu is deprecated in Sailfish Silica package 0.25.6 (Dec 2017), use ListItem::openMenu instead.")
+        console.trace()
+        return openMenu(properties)
     }
 
     function _initMenuItem(properties) {
@@ -98,7 +117,7 @@ BackgroundItem {
             _menuItemCreated = false
             for (var prop in properties) {
                 if (prop in result) {
-                    result[prop] = properties[prop];
+                    result[prop] = properties[prop]
                 }
             }
         }
@@ -106,9 +125,9 @@ BackgroundItem {
     }
 
     function hideMenu() {
-        if (_menuItem != null) {
-            _menuItem.hide()
-        }
+        console.warn("ListItem::hideMenu is deprecated in Sailfish Silica package 0.25.6 (Dec 2017), use ListItem::closeMenu instead.")
+        console.trace()
+        closeMenu()
     }
 
     highlighted: down || menuOpen
@@ -125,13 +144,16 @@ BackgroundItem {
 
     function handlePressAndHold() {
         if (down)
-            showMenu()
+            openMenu()
     }
 
     onMenuChanged: {
-        if (menu != null && _menuItem != null && _menuItemCreated) {
-            // delete the previously created context menu instance
-            _menuItem.destroy()
+        if (menu != null && _menuItem != null) {
+            if (_menuItemCreated) {
+                // delete the previously created context menu instance
+                _menuItem.destroy()
+            }
+            _menuItem = null
         }
     }
 
@@ -144,7 +166,7 @@ BackgroundItem {
 
     Component.onDestruction: {
         if (_menuItem != null) {
-            _menuItem.hide()
+            _menuItem.close()
             _menuItem._parentDestroyed()
         }
     }

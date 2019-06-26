@@ -1,2 +1,2 @@
 module NemoMobile.Vault
-plugin vault-declarative
+typeinfo plugins.qmltypes

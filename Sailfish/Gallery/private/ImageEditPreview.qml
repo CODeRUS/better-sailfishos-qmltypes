@@ -11,137 +11,127 @@ import Sailfish.Gallery 1.0
 import Sailfish.Gallery.private 1.0
 
 Item {
-    id: preview
+    id: root
 
-    property Item splitView
-    property int editOperation
-    property real explicitWidth
-    property real explicitHeight
+    // Uncomment to debug
+    // FlickableDebugItem { Component.onCompleted: titleLabel.text = "" }
+
+    property bool cropOnly
+
     // Aspect ratio as width / height
-    property real aspectRatio
-    property string aspectRatioType: splitView.avatarCrop ? "avatar" : "original"
+    property real aspectRatio: -1.0
+    property string aspectRatioType: "none"
+
     property bool isPortrait: width < height
     property bool active
     property bool editInProgress
     property alias source: zoomableImage.source
     property alias target: editor.target
-    property int orientation
-    property alias previewRotation: zoomableImage.rotation
-    property alias previewRotationAnimEnabled: prevRotationBehavior.enabled
+    property int previewRotation: zoomableImage.imageRotation
     property alias previewBrightness: zoomableImage.brightness
     property alias previewContrast: zoomableImage.contrast
-    readonly property alias status: zoomableImage.status
+    property alias animatingBrightnessContrast: zoomableImage.animatingBrightnessContrast
+    readonly property alias longPressed: zoomableImage.longPressed
 
-    function crop()
-    {
-        editInProgress = true
-        editor.crop(Qt.size(editor.width, editor.height),
-                    Qt.size(zoomableImage.contentWidth, zoomableImage.contentHeight),
-                    Qt.point(zoomableImage.contentX, zoomableImage.contentY))
+    signal edited
+    signal failed
+
+    clip: true
+
+    function transposedSize(item) {
+        var transpose = (previewRotation % 180) != 0
+
+        var width = transpose ? item.height : item.width
+        var height = transpose ? item.width : item.height
+        return Qt.size(width, height)
     }
 
-    function rotateImage()
-    {
-        editInProgress = true
-        editor.rotate(preview.previewRotation)
+    function rotatePoint(x, y, cropSize, imageSize, rotation) {
+        var transpose = (rotation % 180) != 0
+        var invert = (rotation < 0 ? rotation + 360 : rotation) >= 180
+        var _x, _y
+        if (transpose) {
+            _x = invert ? imageSize.width - cropSize.width - y : y
+            _y = invert ? x : imageSize.height - cropSize.height - x
+        } else {
+            _x = invert ? imageSize.width - cropSize.width - x : x
+            _y = invert ? imageSize.height - cropSize.height - y : y
+        }
+
+        return Qt.point(_x, _y)
     }
 
-    function adjustLevels()
-    {
+    function crop() {
         editInProgress = true
-        editor.adjustLevels(preview.previewBrightness, preview.previewContrast)
+        var cropSize = transposedSize(editor)
+
+        var transpose = (zoomableImage.baseRotation % 180) != 0
+        var imageWidth = transpose ? zoomableImage.photo.height : zoomableImage.photo.width
+        var imageHeight = transpose ? zoomableImage.photo.width : zoomableImage.photo.height
+        var imageSize = Qt.size(imageWidth, imageHeight)
+        var position = rotatePoint(zoomableImage.contentX + zoomableImage.leftMargin,
+                                   zoomableImage.contentY + zoomableImage.topMargin,
+                                   cropSize,
+                                   imageSize,
+                                   previewRotation % 360)
+
+        editor.crop(cropSize, imageSize, position)
     }
 
-    function resetScale()
-    {
+    function rotateImage() {
+        editInProgress = true
+        editor.rotate(metadata.orientation + zoomableImage.imageRotation)
+    }
+
+    function adjustLevels() {
+        editInProgress = true
+        editor.adjustLevels(root.previewBrightness, root.previewContrast)
+    }
+
+    function resetScale() {
+        editor.setSize()
         zoomableImage.resetScale()
     }
 
-    onAspectRatioTypeChanged: zoomableImage.resetImagePosition()
+    function previewRotate(angle) {
+        zoomableImage.rotate(angle)
+        editor.setSize()
+    }
+
+    onAspectRatioTypeChanged: resetScale()
+
     onIsPortraitChanged: {
         // Reset back to original aspect ratio that needs to be calculated
         if (aspectRatioType == "original") {
             aspectRatio = -1.0
         }
 
-        zoomableImage.resetImagePosition()
+        delayedReset.restart()
     }
 
     // ImageMetadata is needed to track the real orientation
     // when the file is being edited.
     ImageMetadata {
         id: metadata
-        source: preview.source
-    }
-
-    Label {
-        id: header
-        function headerText(type)
-        {
-            switch(type) {
-            case ImageEditor.Crop:
-                //% "Crop"
-                return qsTrId("components_gallery-he-crop")
-            case ImageEditor.Rotate:
-                //% "Rotate"
-                return qsTrId("components_gallery-he-rotate")
-            case ImageEditor.AdjustLevels:
-                //% "Adjust levels"
-                return qsTrId("components_gallery-he-adjust_levels")
-            default:
-                return ""
-            }
-        }
-
-        text: headerText(preview.editOperation)
-        height: Theme.itemSizeLarge
-        color: Theme.highlightColor
-        verticalAlignment: Text.AlignVCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        opacity: active && !splitView.splitOpen ? 1.0 : 0.0
-        z: 1
-
-        font {
-            pixelSize: Theme.fontSizeLarge
-            family: Theme.fontFamilyHeading
-        }
-
-        Behavior on opacity { FadeAnimation {} }
+        source: root.source
     }
 
     ZoomableImage {
         id: zoomableImage
 
-        function resetImagePosition() {
-            if (status != Image.Ready) {
-                return
-            }
+        anchors.fill: parent
+        baseRotation: -metadata.orientation
+        photo.onStatusChanged: if (status === Image.Ready) delayedReset.restart()
+    }
 
-            editor.setSize()
-            resetScale()
-        }
-
-        orientation: metadata.orientation
-        boundsBehavior: Flickable.StopAtBounds
-        anchors.fill: editor
-        initialImageWidth: explicitWidth
-        initialImageHeight: explicitHeight
-        maximumWidth: imageWidth
-        maximumHeight: imageHeight
-        minimumWidth: editor.width
-        minimumHeight: editor.height
-        image.visible: editOperation != ImageEditor.AdjustLevels
-        imageWidth: metadata.width
-        imageHeight: metadata.height
-        interactive: active && editOperation == ImageEditor.Crop
-        onClicked: splitView.splitOpen = !splitView.splitOpen
-        onStatusChanged: resetImagePosition()
-        Behavior on rotation { id: prevRotationBehavior; enabled: false; SmoothedAnimation { duration: 200 } }
+    Timer {
+        id: delayedReset
+        running: true; interval: 10
+        onTriggered: root.resetScale()
     }
 
     Label {
-        visible: zoomableImage.status === Image.Error
+        visible: zoomableImage.error
         //: Image to be edited can't be opened
         //% "Oops, image error!"
         text: qsTrId("sailfish-components-gallery-la_image-loading-error")
@@ -155,87 +145,131 @@ Item {
     ImageEditor {
         id : editor
 
+        anchors.centerIn: parent
+        source: zoomableImage.source
+
+        function reset() {
+            zoomableImage.leftMargin = 0
+            zoomableImage.rightMargin = 0
+            zoomableImage.topMargin = 0
+            zoomableImage.bottomMargin = 0
+            zoomableImage.minimumScale = -1
+            zoomableImage.fittedScale = -1
+            zoomableImage.resetScale()
+        }
+
         // As a function to avoid binding loops
         function setSize() {
-            if (!aspectRatio || aspectRatio === -1.0) {
-                aspectRatio =  !zoomableImage._transpose
-                        ? metadata.width / metadata.height
-                        : metadata.height / metadata.width
+            if (root.width === 0 || root.height == 0 ) return
+
+            reset()
+            var realAspectRatio = !zoomableImage.transpose
+                    ? metadata.width / metadata.height
+                    : metadata.height / metadata.width
+
+            if (aspectRatio === -1.0) {
+                return
+            } else if (aspectRatio === 0.0) {
+                aspectRatio = realAspectRatio
             }
 
             if (isPortrait) {
-                var maxWidth = explicitWidth - Theme.itemSizeMedium
+                var maxWidth = root.width - Theme.itemSizeMedium
                 var tmpHeight = maxWidth / aspectRatio
-                var maxHeight = explicitHeight - header.height
+                var maxHeight = root.height - header.height
                 if (tmpHeight > maxHeight) {
                     maxWidth = maxHeight * aspectRatio
                 }
 
                 width = maxWidth
-                height = width / aspectRatio
+                height = Math.round(width / aspectRatio)
             } else {
-                maxHeight = explicitHeight
+                maxHeight = root.height - Theme.itemSizeSmall
                 var tmpWidth = aspectRatio * maxHeight
-                maxWidth = explicitWidth - Theme.itemSizeMedium
+                maxWidth = root.width - Theme.itemSizeMedium
                 if (tmpWidth > maxWidth) {
                     maxHeight = maxWidth / aspectRatio
                 }
                 height = maxHeight
-                width = aspectRatio * height
+                width =  Math.round(aspectRatio * height)
             }
-        }
 
-        anchors.centerIn: parent
-        source: zoomableImage.source
+            zoomableImage.leftMargin = Qt.binding( function () {
+                var photoSize = zoomableImage.transpose ? zoomableImage.photo.height : zoomableImage.photo.width
+                return Math.max(0, (Math.min(photoSize, root.width) - editor.width)/2)
+            })
+            zoomableImage.rightMargin = Qt.binding( function () { return zoomableImage.leftMargin } )
+            zoomableImage.topMargin = Qt.binding( function () {
+                var photoSize = zoomableImage.transpose ? zoomableImage.photo.width : zoomableImage.photo.height
+                return Math.max(0, (Math.min(photoSize, root.height) - editor.height)/2)
+            })
+            zoomableImage.bottomMargin = Qt.binding( function () { return zoomableImage.topMargin })
+
+            var contentHeight = Math.min(zoomableImage.transpose ? zoomableImage.photo.width : zoomableImage.photo.height, root.height)
+            var contentWidth = Math.min(zoomableImage.transpose ? zoomableImage.photo.height : zoomableImage.photo.width, root.width)
+
+            zoomableImage.minimumScale = zoomableImage._scale * Math.max(height/contentHeight, width/contentWidth)
+            if (realAspectRatio !== aspectRatio) {
+                zoomableImage.fittedScale = zoomableImage.minimumScale
+            }
+
+            zoomableImage.resetScale()
+        }
 
         onCropped: {
             editInProgress = false
             if (success) {
-                if (aspectRatioType !== "avatar") {
-                    preview.source = editor.target
-                }
-                zoomableImage.resetImagePosition()
-                splitView.edited()
+                root.source = target
+                root.edited()
+            } else {
+                root.failed()
             }
         }
 
         onRotated: {
             editInProgress = false
+            root.previewRotation = 0
             if (success) {
-                preview.source = editor.target
+                root.source = target
+                root.edited()
             } else {
                 console.log("Failed to rotate image!")
+                root.failed()
             }
-
-            preview.previewRotation = 0
         }
 
         onLevelsAdjusted: {
             editInProgress = false
+            root.previewBrightness = 0.0
+            root.previewContrast = 0.0
             if (success) {
-                preview.source = editor.target
+                root.source = target
+                root.edited()
             } else {
                 console.log("Failed to adjust image levels!")
+                root.failed()
             }
-
-            preview.previewBrightness = 0.0
-            preview.previewContrast = 0.0
         }
     }
 
     DimmedRegion {
         anchors.fill: parent
-        color: Theme.highlightDimmerColor
-        opacity: preview.editOperation == ImageEditor.Crop && active ? 0.5 : 0.0
-        target: preview
-        area: Qt.rect(0, 0, preview.width, preview.height)
-        exclude: [ editor ]
+        color: Theme.highlightDimmerFromColor(Theme.highlightDimmerColor, Theme.LightOnDark)
+        opacity: aspectRatioType !== "none" ? 0.5 : 0.0
+        visible: !longPressed
 
-        Behavior on opacity { FadeAnimation {} }
+
+        target: root
+        area: Qt.rect(0, 0, root.width, root.height)
+        exclude: [ editor ]
+        z: 1
+
+        Behavior on opacity { FadeAnimator {} }
     }
 
     BusyIndicator {
         anchors.centerIn: parent
-        running: editInProgress || zoomableImage.status != Image.Ready
+        size: BusyIndicatorSize.Large
+        running: editInProgress || zoomableImage.error
     }
 }

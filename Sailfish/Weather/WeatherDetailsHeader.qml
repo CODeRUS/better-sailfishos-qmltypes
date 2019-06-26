@@ -45,7 +45,7 @@ Item {
                 id: accumulatedPrecipitationLabel
                 color: Theme.highlightColor
                 font.pixelSize: Theme.fontSizeHuge
-                text: model ? model.accumulatedPrecipitation : ""
+                text: model ? parseFloat(model.accumulatedPrecipitation).toLocaleString(Qt.locale(), 'f', 1) : ""
                 anchors {
                     verticalCenter: windDirectionIcon.verticalCenter
                     left: Screen.sizeCategory >= Screen.Large ? undefined : parent.left
@@ -150,50 +150,55 @@ Item {
         Label {
             color: Theme.highlightColor
             anchors.horizontalCenter: parent.horizontalCenter
-            width: Screen.sizeCategory >= Screen.Large ? Screen.width/2
-                                                       : parent.width - 2*Theme.horizontalPageMargin
+            width: Screen.sizeCategory >= Screen.Large && isPortrait ? Screen.width/2
+                                                                     : parent.width - 2*Theme.horizontalPageMargin
             wrapMode: Text.Wrap
             font.pixelSize: Theme.fontSizeLarge
             horizontalAlignment: Text.AlignHCenter
             text: model ? model.description : ""
-            height: lineCount === 1 ? 2*implicitHeight : implicitHeight
+            height: lineCount === 1 && isPortrait ? 2*implicitHeight : implicitHeight
         }
         Item { width: 1; height: Theme.paddingMedium }
-        DetailItem {
-            //% "Weather station"
-            label: qsTrId("weather-la-weather_station")
-            //: Order of weather location string, "State, Country", e.g. "Finland, Helsinki"
-            //% "%0, %1"
-            value: weather ? (weather.state.length > 0 ? qsTrId("weather-la-weather_station_order")
-                                                         .arg(weather.state).arg(weather.country)
-                                                       : weather.country) : ""
-        }
-        DetailItem {
-            //% "Date"
-            label: qsTrId("weather-la-weather_date")
-            value: {
-                if (model) {
-                    var dateString = Format.formatDate(model.timestamp, Format.DateLong)
-                    return dateString.charAt(0).toUpperCase() + dateString.substr(1)
+        Grid {
+            width: parent.width
+            columns: isPortrait ? 1 : 2
+            WeatherDetailItem {
+                //% "Weather station"
+                label: qsTrId("weather-la-weather_station")
+                //: Order of weather location string, "State, Country", e.g. "Finland, Helsinki"
+                //% "%0, %1"
+                value: weather ? (weather.state.length > 0 ? qsTrId("weather-la-weather_station_order")
+                                                             .arg(weather.state).arg(weather.country)
+                                                           : weather.country) : ""
+            }
+            WeatherDetailItem {
+                //% "Date"
+                label: qsTrId("weather-la-weather_date")
+                value: {
+                    if (model) {
+                        var dateString = Format.formatDate(model.timestamp, Format.DateLong)
+                        return dateString.charAt(0).toUpperCase() + dateString.substr(1)
+                    }
+                    return ""
                 }
-                return ""
+            }
+            WeatherDetailItem {
+                //% "Cloudiness"
+                label: qsTrId("weather-la-cloudiness")
+                value: model ? model.cloudiness + Qt.locale().percent : ""
+            }
+            WeatherDetailItem {
+                //% "Precipitation rate"
+                label: qsTrId("weather-la-precipitationrate")
+                value: model ? model.precipitationRate : ""
+            }
+            WeatherDetailItem {
+                //% "Precipitation type"
+                label: qsTrId("weather-la-precipitationtype")
+                value: model ? model.precipitationType : ""
             }
         }
-        DetailItem {
-            //% "Cloudiness"
-            label: qsTrId("weather-la-cloudiness")
-            value: model ? model.cloudiness + Qt.locale().percent : ""
-        }
-        DetailItem {
-            //% "Precipitation rate"
-            label: qsTrId("weather-la-precipitationrate")
-            value: model ? model.precipitationRate : ""
-        }
-        DetailItem {
-            //% "Precipitation type"
-            label: qsTrId("weather-la-precipitationtype")
-            value: model ? model.precipitationType : ""
-        }
+
         ProviderDisclaimer {
             weather: root.weather
             topMargin: Theme.paddingMedium

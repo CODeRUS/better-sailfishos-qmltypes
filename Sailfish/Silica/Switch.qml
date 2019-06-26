@@ -63,15 +63,19 @@ MouseArea {
     Column {
         id: column
 
-        spacing: -Theme.paddingLarge
+        spacing: Theme.colorScheme === Theme.DarkOnLight ? Theme.paddingMedium : -Theme.paddingLarge
         anchors.centerIn: parent
+
         GlassItem {
             id: indicator
             opacity: switchItem.enabled ? 1.0 : 0.4
-            color: highlighted ? Theme.highlightColor : Theme.primaryColor
+            color: highlighted ? Theme.highlightColor
+                               : dimmed ? Theme.primaryColor
+                                        : Theme.lightPrimaryColor
+            backgroundColor: checked || busy ? Theme.backgroundGlowColor : "transparent"
             anchors.horizontalCenter: parent.horizontalCenter
             dimmed: !checked
-            falloffRadius: checked ? defaultFalloffRadius : 0.075
+            falloffRadius: checked ? defaultFalloffRadius : (Theme.colorScheme === Theme.LightOnDark ? 0.075 : 0.1)
             Behavior on falloffRadius {
                 NumberAnimation { duration: busy ? 450 : 50; easing.type: Easing.InOutQuad }
             }

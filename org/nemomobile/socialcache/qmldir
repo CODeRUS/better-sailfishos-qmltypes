@@ -1,2 +1,2 @@
 module org.nemomobile.socialcache
-plugin socialcacheqml
+typeinfo plugins.qmltypes

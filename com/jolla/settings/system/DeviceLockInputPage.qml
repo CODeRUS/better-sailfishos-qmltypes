@@ -16,10 +16,6 @@ Page {
     property alias okText: devicelockinput.okText
     property alias cancelText: devicelockinput.cancelText
 
-    function displayError(error) {
-        devicelockinput.displayError(error)
-    }
-
     DeviceLockInput {
         id: devicelockinput
 
@@ -29,19 +25,19 @@ Page {
             active: true
             registered: true
 
+            signal reset()
+
             onAuthenticationStarted: {
-                devicelockinput._badPinWarning = ""
-                devicelockinput.displayFeedback(feedback, data)
+                reset()
+                authentication.feedback(feedback, data)
             }
-            onAuthenticationUnavailable: devicelockinput.displayError(error)
+            onAuthenticationUnavailable: {
+                reset()
+                authentication.error(error, data)
+            }
         }
 
-        //% "Confirm with security code"
-        titleText: qsTrId("settings_devicelock-he-security_code_confirm_title")
-        //% "Confirm"
-        okText: qsTrId("settings_devicelock-bt-devicelock_confirm")
-
-        showOkButton: authentication.status == AuthenticationInput.Authenticating
+        showOkButton: authentication.status === AuthenticationInput.Authenticating
         showEmergencyButton: false
     }
 }

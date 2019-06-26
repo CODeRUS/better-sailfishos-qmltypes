@@ -20,6 +20,7 @@ MediaPlayerControlsPanel {
     shuffle: AudioPlayer.shuffle ? MediaPlayerControls.ShuffleTracks
                                  : MediaPlayerControls.NoShuffle
     showAddToPlaylist: addToPlaylistPage == null
+    forwardEnabled: AudioPlayer.playModel.count > 1 // there needs to be something to forward to
 
     onPreviousClicked: AudioPlayer.playPrevious(true)
     onPlayPauseClicked: AudioPlayer.playPause()
@@ -35,16 +36,14 @@ MediaPlayerControlsPanel {
     onShuffleClicked: AudioPlayer.shuffle = !AudioPlayer.shuffle
     onAddToPlaylist: {
         hideMenu()
-        addToPlaylistPage = pageStack.push(Qt.resolvedUrl("AddToPlaylistPage.qml"), { media: AudioPlayer.currentItem })
+        var obj = pageStack.animatorPush(Qt.resolvedUrl("AddToPlaylistPage.qml"), { media: AudioPlayer.currentItem })
+        obj.pageCompleted.connect(function(page) {
+            addToPlaylistPage = page
+        })
     }
 
     onOpenChanged: if (!open) AudioPlayer.pause()
     onSliderReleased: AudioPlayer.setPosition(value * 1000)
-
-    Connections {
-        target: AudioPlayer
-        onTryingToPlay: showControls()
-    }
 
     Column {
         parent: extraContentItem

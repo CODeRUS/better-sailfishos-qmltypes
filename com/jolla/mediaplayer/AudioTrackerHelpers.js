@@ -11,7 +11,7 @@ var songsSimpleSelect = "" +
         "nfo:duration(?urn) AS ?duration " +
         "tracker:coalesce(nmm:artistName(nmm:performer(?urn)), \"%11\") AS ?author " +
         "tracker:coalesce(nie:title(?urn), tracker:string-from-filename(nfo:fileName(?urn))) AS ?title " +
-        "tracker:coalesce(nmm:albumTitle(nmm:musicAlbum(?urn)), \"%12\") AS ?album "
+        "tracker:coalesce(nie:title(nmm:musicAlbum(?urn)), \"%12\") AS ?album "
 
 var songsSearchSelect = "" +
     "SELECT " +
@@ -21,7 +21,7 @@ var songsSearchSelect = "" +
         "nfo:duration(?urn) AS ?duration " +
         "tracker:coalesce(nmm:artistName(nmm:performer(?urn)), \"%11\") AS ?author " +
         "?title " +
-        "tracker:coalesce(nmm:albumTitle(nmm:musicAlbum(?urn)), \"%12\") AS ?album " +
+        "tracker:coalesce(nie:title(nmm:musicAlbum(?urn)), \"%12\") AS ?album " +
     "WHERE { " +
         "{ SELECT " +
             "?urn " +
@@ -70,7 +70,7 @@ var albumsSimpleSelect = "" +
     "SELECT " +
         "\"grilo#Box\" " +
         "tracker:coalesce(tracker:id(nmm:musicAlbum(?urn)), 0) AS ?id " +
-        "tracker:coalesce(nmm:albumTitle(nmm:musicAlbum(?urn)), \"%12\") AS ?title " +
+        "tracker:coalesce(nie:title(nmm:musicAlbum(?urn)), \"%12\") AS ?title " +
         "IF(COUNT(DISTINCT(tracker:coalesce(nmm:performer(?urn), 0))) > 1, \"%13\", tracker:coalesce(nmm:artistName(nmm:performer(?urn)), \"%11\")) AS ?author " +
         "COUNT(DISTINCT(?urn)) AS ?childcount " +
         "\"%3\" AS tracker-urn "
@@ -82,11 +82,13 @@ var albumsSearchSelect = "" +
         "?title " +
         "?author " +
         "?childcount " +
+        "?year "+
         "\"%3\" AS tracker-urn " +
     "WHERE { " +
         "{ SELECT " +
             "tracker:coalesce(tracker:id(nmm:musicAlbum(?urn)), 0) AS ?id " +
-            "tracker:coalesce(nmm:albumTitle(nmm:musicAlbum(?urn)), \"%12\") AS ?title " +
+            "tracker:coalesce(nie:title(nmm:musicAlbum(?urn)), \"%12\") AS ?title " +
+            "tracker:coalesce(nie:contentCreated(?urn), 0) AS ?year " +
             "IF(COUNT(DISTINCT(tracker:coalesce(nmm:performer(?urn), 0))) > 1, \"%13\", tracker:coalesce(nmm:artistName(nmm:performer(?urn)), \"%11\")) AS ?author " +
             "COUNT(DISTINCT(?urn)) AS ?childcount "
 
@@ -101,8 +103,10 @@ var albumsOrderBy = "" +
         "ASC(fn:lower-case(?author)) " +
         "ASC(fn:lower-case(?title))"
 
-var albumsFromArtistOrderBy = TrackerHelpers.titleOrderBy +
-        "ASC(fn:lower-case(?author)) "
+var albumsFromArtistOrderBy = 
+	"ORDER BY " +
+        "DESC(?year) " +		
+        "ASC(fn:lower-case(?title)) "
 
 
 // We are "overloading" childcount to hold the total duration. Just

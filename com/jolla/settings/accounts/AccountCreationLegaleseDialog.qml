@@ -64,7 +64,7 @@ Dialog {
         id: termsView
         visible: false
         overridePageStackNavigation: true
-        property string userAgent: "Mozilla/5.0 (Linux; U; Jolla; Sailfish; Mobile; rv:20.0) Gecko/20.0 Firefox/20.0 Sailfish Browser/1.0 like Safari/535.19"
+        property string userAgent: "Mozilla/5.0 (Mobile Linux; U; like Android 4.4.3; Sailfish OS/2.0) AppleWebkit/535.19 (KHTML, like Gecko) Version/4.0 Mobile Safari/535.19"
         property bool _isScrolledToEnd: (termsView.contentY + termsView.height + 2) >= termsView.contentHeight
         property bool _isScrolledToBeginning: termsView.contentY <= 2
         property bool _isFinishedPanning: termsView.atXBeginning && termsView.atXEnd && !termsView.moving

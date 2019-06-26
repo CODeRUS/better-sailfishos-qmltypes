@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013-2016 Jolla Ltd.
+** Copyright (C) 2013-2017 Jolla Ltd.
 ** Contact: Raine Mäkeläinen <raine.makelainen@jollamobile.com>
 **
 ****************************************************************************/
@@ -29,27 +29,30 @@ PickerPage {
             title: contentPicker.title
         }
 
-        delegate: BackgroundItem {
-            Label {
-                id: categoryName
-
-                text: categoryList.model.category(index)
-                color: down ? Theme.highlightColor : Theme.primaryColor
-                anchors.verticalCenter: parent.verticalCenter
-                x: Theme.horizontalPageMargin
-                width: parent.width - x*2
-            }
+        delegate: CategoryItem {
+            text: categoryModel.category(index)
+            iconSource: model.iconSource
 
             onClicked: {
-                var subview = pageStack.push(Qt.resolvedUrl(model.subview), {
+                var props = {
                     title: contentPicker.title,
                     _lastAppPage: pageStack.previousPage(contentPicker),
                     _animationDuration: contentPicker._animationDuration,
                     _background: contentPicker._background
-                }, pageStack._transitionDuration === 0 ? PageStackAction.Immediate : PageStackAction.Animated);
+                }
 
-                subview.selectedContentChanged.connect(function() {
-                    contentPicker._updateSelectedContent(subview.selectedContentProperties, subview.selectedContent)
+                // Copy properties from model to the sub-page
+                for (var i in model.properties) {
+                    props[i] = model.properties[i]
+                }
+
+                var obj = pageStack.animatorPush(Qt.resolvedUrl(model.subview), props,
+                                                 pageStack._transitionDuration === 0 ? PageStackAction.Immediate
+                                                                                     : PageStackAction.Animated);
+                obj.pageCompleted.connect(function(subview) {
+                    subview.selectedContentChanged.connect(function() {
+                        contentPicker._updateSelectedContent(subview.selectedContentProperties, subview.selectedContent)
+                    })
                 })
             }
         }

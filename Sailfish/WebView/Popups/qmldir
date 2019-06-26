@@ -13,3 +13,4 @@ ContextMenu 1.0 ContextMenu.qml
 DownloadMenuItem 1.0 DownloadMenuItem.qml
 ShareLinkPage 1.0 ShareLinkPage.qml
 ShareTextPage 1.0 ShareTextPage.qml
+typeinfo plugins.qmltypes

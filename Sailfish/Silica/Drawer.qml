@@ -64,7 +64,10 @@ Item {
         }
     }
 
+    property bool _immediate
+
     Behavior on _progress {
+        enabled: !_immediate
         NumberAnimation {
             id: menuProgressAnimation
             duration: 300
@@ -80,17 +83,15 @@ Item {
     }
 
     function show(immediate) {
+        _immediate = !!immediate
         open = true
-        if (immediate) {
-            _completeAnimations()
-        }
+        _immediate = false
     }
 
     function hide(immediate) {
+        _immediate = !!immediate
         open = false
-        if (immediate) {
-            _completeAnimations()
-        }
+        _immediate = false
     }
 
     Item {
@@ -130,6 +131,7 @@ Item {
         // easing is cubic instead of the normal quad.
         opacity: root.open ? 0.5 : 0.0
         Behavior on opacity {
+            enabled: !_immediate
             NumberAnimation {
                 id: backgroundOpacityAnimation
                 duration: 300

@@ -1,4 +1,5 @@
 module Sailfish.FileManager
-plugin sailfishfilemanagerplugin
+ArchivePage 1.0 ArchivePage.qml
 DirectoryPage 1.0 DirectoryPage.qml
 SortingPage 1.0 SortingPage.qml
+singleton FileManager 1.0 FileManager.qml

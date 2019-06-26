@@ -10,7 +10,7 @@ Column {
 
     property string selectedDevice
     property bool selectedDevicePaired
-    readonly property bool empty: pairedDevices.visibleItemCount == 0 && nearbyDevices.visibleItemCount == 0
+    readonly property bool empty: pairedDevices.count == 0 && nearbyDevices.count == 0
     readonly property bool discovering: adapter && adapter.discovering
     property bool highlightSelectedDevice: true
     property bool requirePairing
@@ -24,7 +24,7 @@ Column {
 
     property QtObject _bluetoothManager : BluezQt.Manager
     readonly property bool _showDiscoveryProgress: adapter && adapter.discovering
-    readonly property bool _showPairedDevicesHeader: showPairedDevicesHeader && !_showDiscoveryProgress && pairedDevices.visibleItemCount > 0
+    readonly property bool _showPairedDevicesHeader: showPairedDevicesHeader && !_showDiscoveryProgress && pairedDevices.count > 0
     property QtObject _devicePendingPairing
     property var _connectingDevices: []
     property bool _autoStartDiscoveryTriggered
@@ -99,17 +99,6 @@ Column {
         }
     }
 
-    function _matchingItemCount(repeater, propertyName, propertyValue) {
-        var result = 0
-        for (var i=0; i<repeater.count; i++) {
-            var obj = repeater.itemAt(i)
-            if (obj && obj[propertyName] === propertyValue) {
-                result++
-            }
-        }
-        return result
-    }
-
     width: parent.width
 
     Item {
@@ -144,162 +133,150 @@ Column {
         }
     }
 
-    Column {
+    ColumnView {
+        id: pairedDevices
+
         width: parent.width
+        itemHeight: Theme.itemSizeSmall
 
-        Repeater {
-            id: pairedDevices
+        model: BluezQt.DevicesModel {
+            id: knownDevicesModel
+            filters: BluezQt.DevicesModelPrivate.PairedDevices
+            hiddenAddresses: root.excludedDevices
+        }
 
-            property int visibleItemCount
+        delegate: ListItem {
+            id: pairedDelegate
 
-            function _resetVisibleItemCount() {
-                pairedDevices.visibleItemCount = root._matchingItemCount(pairedDevices, "display", true)
+            property bool showConnectionStatus: model.Connected || isConnecting || minConnectionStatusTimeout.running
+            property bool isConnecting: _connectingDevices.indexOf(model.Address.toUpperCase()) >= 0
+
+            property bool matchesProfileHint: root._matchesProfileHint(model.Uuids, model.Class)
+            property bool useHighlight: highlighted || (highlightSelectedDevice && model.Address === root.selectedDevice)
+
+            function _removePairing() {
+                var device = _bluetoothManager.deviceForAddress(model.Address)
+                if (device && root.adapter) {
+                    root.adapter.removeDevice(device)
+                }
             }
 
-            onCountChanged: {
-                pairedDevices._resetVisibleItemCount()
+            width: root.width
+
+            onIsConnectingChanged: {
+                if (isConnecting) {
+                    minConnectionStatusTimeout.start()
+                }
             }
 
-            model: BluezQt.DevicesModel { id: knownDevicesModel }
+            Timer {
+                id: minConnectionStatusTimeout
+                interval: 2000
+            }
 
-            delegate: ListItem {
-                id: pairedDelegate
+            menu: Component {
+                ContextMenu {
+                    MenuItem {
+                        //: Show settings for the selected bluetooth device
+                        //% "Device settings"
+                        text: qsTrId("components_bluetooth-me-device_settings")
 
-                property bool showConnectionStatus: model.Connected || isConnecting || minConnectionStatusTimeout.running
-                property bool isConnecting: _connectingDevices.indexOf(model.Address.toUpperCase()) >= 0
-
-                property bool matchesProfileHint: root._matchesProfileHint(model.Uuids, model.Class)
-                property bool useHighlight: highlighted || (highlightSelectedDevice && model.Address === root.selectedDevice)
-                property bool display: model.Paired && model.Address && root.excludedDevices.indexOf(model.Address.toUpperCase()) < 0
-
-                function _removePairing() {
-                    var device = _bluetoothManager.deviceForAddress(model.Address)
-                    if (device && root.adapter) {
-                        root.adapter.removeDevice(device)
-                    }
-                }
-
-                visible: display
-
-                onIsConnectingChanged: {
-                    if (isConnecting) {
-                        minConnectionStatusTimeout.start()
-                    }
-                }
-
-                Timer {
-                    id: minConnectionStatusTimeout
-                    interval: 2000
-                }
-
-                menu: Component {
-                    ContextMenu {
-                        MenuItem {
-                            //: Show settings for the selected bluetooth device
-                            //% "Device settings"
-                            text: qsTrId("components_bluetooth-me-device_settings")
-
-                            onClicked: {
-                                var device = _bluetoothManager.deviceForAddress(model.Address)
-                                if (device) {
-                                    pageStack.push(Qt.resolvedUrl("PairedDeviceSettings.qml"), {"bluetoothDevice": device})
-                                }
-                            }
-                        }
-
-                        MenuItem {
-                            //: Remove the pairing with the selected bluetooth device
-                            //% "Remove pairing"
-                            text: qsTrId("components_bluetooth-me-pairing_remove")
-
-                            onClicked: {
-                                pairedDelegate._removePairing()
+                        onClicked: {
+                            var device = _bluetoothManager.deviceForAddress(model.Address)
+                            if (device) {
+                                pageStack.animatorPush(Qt.resolvedUrl("PairedDeviceSettings.qml"), {"bluetoothDevice": device})
                             }
                         }
                     }
-                }
 
-                onDisplayChanged: {
-                    pairedDevices._resetVisibleItemCount()
-                }
+                    MenuItem {
+                        //: Remove the pairing with the selected bluetooth device
+                        //% "Remove pairing"
+                        text: qsTrId("components_bluetooth-me-pairing_remove")
 
-                onClicked: {
-                    root._deviceClicked(model.Address, model.Paired)
-                }
-
-                BluetoothDeviceInfo {
-                    id: pairedDeviceInfo
-                    address: model.Address
-                    deviceClass: model.Class
-                }
-
-                Image {
-                    id: icon
-                    x: Theme.horizontalPageMargin
-                    anchors.verticalCenter: parent.verticalCenter
-                    source: "image://theme/" + pairedDeviceInfo.icon + (pairedDelegate.useHighlight ? "?" + Theme.highlightColor : "")
-                    opacity: pairedDelegate.matchesProfileHint || pairedDelegate.useHighlight ? 1 : 0.5
-                }
-
-                Label {
-                    id: deviceNameLabel
-                    anchors {
-                        left: icon.right
-                        leftMargin: Theme.paddingMedium
-                        right: trustedIcon.left
-                        rightMargin: Theme.paddingMedium
-                    }
-                    y: pairedDelegate.contentHeight/2 - implicitHeight/2
-                       - (showConnectionStatus ? connectedLabel.implicitHeight/2 : 0)
-                    text: model.FriendlyName
-                    truncationMode: TruncationMode.Fade
-                    color: pairedDelegate.useHighlight
-                           ? Theme.highlightColor
-                           : Theme.rgba(Theme.primaryColor, pairedDelegate.matchesProfileHint ? 1.0 : 0.5)
-
-                    Behavior on y { NumberAnimation {} }
-                }
-
-                Label {
-                    id: connectedLabel
-                    anchors {
-                        left: deviceNameLabel.left
-                        top: deviceNameLabel.bottom
-                        right: parent.right
-                        rightMargin: Theme.paddingLarge
-                    }
-                    font.pixelSize: Theme.fontSizeExtraSmall
-                    opacity: showConnectionStatus ? 1.0 : 0.0
-                    color: pairedDelegate.useHighlight
-                           ? Theme.secondaryHighlightColor
-                           : Theme.secondaryColor
-
-                    text: {
-                        if (model.Connected) {
-                            //% "Connected"
-                            return qsTrId("components_bluetooth-la-connected")
-                        } else if (pairedDelegate.isConnecting || minConnectionStatusTimeout.running) {
-                            //% "Connecting"
-                            return qsTrId("components_bluetooth-la-connecting")
-                        } else {
-                            return ""
+                        onClicked: {
+                            pairedDelegate._removePairing()
                         }
                     }
-
-                    Behavior on opacity { FadeAnimation {} }
                 }
+            }
 
-                Image {
-                    id: trustedIcon
-                    anchors {
-                        right: parent.right
-                        rightMargin: Theme.horizontalPageMargin
-                        verticalCenter: icon.verticalCenter
+            onClicked: {
+                root._deviceClicked(model.Address, model.Paired)
+            }
+
+            BluetoothDeviceInfo {
+                id: pairedDeviceInfo
+                address: model.Address
+                deviceClass: model.Class
+            }
+
+            Image {
+                id: icon
+                x: Theme.horizontalPageMargin
+                anchors.verticalCenter: parent.verticalCenter
+                source: "image://theme/" + pairedDeviceInfo.icon + (pairedDelegate.useHighlight ? "?" + Theme.highlightColor : "")
+                opacity: pairedDelegate.matchesProfileHint || pairedDelegate.useHighlight ? 1 : 0.5
+            }
+
+            Label {
+                id: deviceNameLabel
+                anchors {
+                    left: icon.right
+                    leftMargin: Theme.paddingMedium
+                    right: trustedIcon.left
+                    rightMargin: Theme.paddingMedium
+                }
+                y: pairedDelegate.contentHeight/2 - implicitHeight/2
+                   - (showConnectionStatus ? connectedLabel.implicitHeight/2 : 0)
+                text: model.FriendlyName
+                truncationMode: TruncationMode.Fade
+                color: pairedDelegate.useHighlight
+                       ? Theme.highlightColor
+                       : Theme.rgba(Theme.primaryColor, pairedDelegate.matchesProfileHint ? 1.0 : 0.5)
+
+                Behavior on y { NumberAnimation {} }
+            }
+
+            Label {
+                id: connectedLabel
+                anchors {
+                    left: deviceNameLabel.left
+                    top: deviceNameLabel.bottom
+                    right: parent.right
+                    rightMargin: Theme.paddingLarge
+                }
+                font.pixelSize: Theme.fontSizeExtraSmall
+                opacity: showConnectionStatus ? 1.0 : 0.0
+                color: pairedDelegate.useHighlight
+                       ? Theme.secondaryHighlightColor
+                       : Theme.secondaryColor
+
+                text: {
+                    if (model.Connected) {
+                        //% "Connected"
+                        return qsTrId("components_bluetooth-la-connected")
+                    } else if (pairedDelegate.isConnecting || minConnectionStatusTimeout.running) {
+                        //% "Connecting"
+                        return qsTrId("components_bluetooth-la-connecting")
+                    } else {
+                        return ""
                     }
-                    visible: model.Trusted
-                    source: "image://theme/icon-s-certificates" + (pairedDelegate.useHighlight ? "?" + Theme.highlightColor : "")
-                    opacity: icon.opacity
                 }
+
+                Behavior on opacity { FadeAnimation {} }
+            }
+
+            Image {
+                id: trustedIcon
+                anchors {
+                    right: parent.right
+                    rightMargin: Theme.horizontalPageMargin
+                    verticalCenter: icon.verticalCenter
+                }
+                visible: model.Trusted
+                source: "image://theme/icon-s-certificates" + (pairedDelegate.useHighlight ? "?" + Theme.highlightColor : "")
+                opacity: icon.opacity
             }
         }
     }
@@ -308,7 +285,7 @@ Column {
     // its vertical text alignment is wrong
     Item {
         width: parent.width
-        height: nearbyDevices.visibleItemCount ? Theme.itemSizeExtraSmall : 0
+        height: nearbyDevices.count > 0 ? Theme.itemSizeExtraSmall : 0
 
         Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
 
@@ -317,80 +294,63 @@ Column {
             //% "Nearby devices"
             text: qsTrId("components_bluetooth-he-nearby_devices_header")
 
-            opacity: nearbyDevices.visibleItemCount ? 1.0 : 0.0
+            opacity: nearbyDevices.count > 0 ? 1.0 : 0.0
 
             Behavior on opacity { FadeAnimation {} }
         }
     }
 
-    Column {
+    ColumnView {
+        id: nearbyDevices
+
         width: parent.width
+        itemHeight: Theme.itemSizeSmall
 
-        opacity: nearbyDevices.visibleItemCount ? 1.0 : 0.0
+        model: BluezQt.DevicesModel {
+            id: nearbyDevicesModel
+            filters: BluezQt.DevicesModelPrivate.UnpairedDevices
+            hiddenAddresses: root.excludedDevices
+        }
 
-        Behavior on opacity { FadeAnimation {} }
+        delegate: BackgroundItem {
+            id: nearbyDeviceDelegate
 
-        Repeater {
-            id: nearbyDevices
+            property bool matchesProfileHint: root._matchesProfileHint(model.Uuids, model.Class)
+            property bool useHighlight: highlighted || (highlightSelectedDevice && model.Address === root.selectedDevice)
 
-            property int visibleItemCount
+            width: root.width
 
-            function _resetVisibleItemCount() {
-                nearbyDevices.visibleItemCount = root._matchingItemCount(nearbyDevices, "display", true)
+            BluetoothDeviceInfo {
+                id: nearbyDeviceInfo
+                address: model.Address
+                deviceClass: model.Class
             }
 
-            onCountChanged: {
-                nearbyDevices._resetVisibleItemCount()
+            Image {
+                id: nearbyDeviceIcon
+                x: Theme.horizontalPageMargin
+                anchors.verticalCenter: parent.verticalCenter
+                source: "image://theme/" + nearbyDeviceInfo.icon + (nearbyDeviceDelegate.useHighlight ? "?" + Theme.highlightColor : "")
+                opacity: nearbyDeviceDelegate.matchesProfileHint || nearbyDeviceDelegate.useHighlight ? 1 : 0.5
             }
 
-            model: BluezQt.DevicesModel { id: nearbyDevicesModel }
-
-            delegate: BackgroundItem {
-                id: nearbyDeviceDelegate
-
-                property bool matchesProfileHint: root._matchesProfileHint(model.Uuids, model.Class)
-                property bool useHighlight: highlighted || (highlightSelectedDevice && model.Address === root.selectedDevice)
-                property bool display: !model.Paired && model.Address && root.excludedDevices.indexOf(model.Address.toUpperCase()) < 0
-
-                width: root.width
-                visible: display
-
-                onDisplayChanged: {
-                    nearbyDevices._resetVisibleItemCount()
+            Label {
+                anchors {
+                    left: nearbyDeviceIcon.right
+                    leftMargin: Theme.paddingMedium
+                    right: parent.right
+                    rightMargin: Theme.horizontalPageMargin
+                    verticalCenter: parent.verticalCenter
                 }
+                text: model.FriendlyName
+                truncationMode: TruncationMode.Fade
+                color: nearbyDeviceDelegate.useHighlight
+                       ? Theme.highlightColor
+                       : Theme.rgba(Theme.primaryColor, nearbyDeviceDelegate.matchesProfileHint ? 1.0 : 0.5)
+            }
 
-                BluetoothDeviceInfo {
-                    id: nearbyDeviceInfo
-                    address: model.Address
-                    deviceClass: model.Class
-                }
-
-                Image {
-                    id: nearbyDeviceIcon
-                    x: Theme.horizontalPageMargin
-                    anchors.verticalCenter: parent.verticalCenter
-                    source: "image://theme/" + nearbyDeviceInfo.icon + (nearbyDeviceDelegate.useHighlight ? "?" + Theme.highlightColor : "")
-                    opacity: nearbyDeviceDelegate.matchesProfileHint || nearbyDeviceDelegate.useHighlight ? 1 : 0.5
-                }
-
-                Label {
-                    anchors {
-                        left: nearbyDeviceIcon.right
-                        leftMargin: Theme.paddingMedium
-                        right: parent.right
-                        rightMargin: Theme.horizontalPageMargin
-                        verticalCenter: parent.verticalCenter
-                    }
-                    text: model.FriendlyName
-                    truncationMode: TruncationMode.Fade
-                    color: nearbyDeviceDelegate.useHighlight
-                           ? Theme.highlightColor
-                           : Theme.rgba(Theme.primaryColor, nearbyDeviceDelegate.matchesProfileHint ? 1.0 : 0.5)
-                }
-
-                onClicked: {
-                    root._deviceClicked(model.Address, model.Paired)
-                }
+            onClicked: {
+                root._deviceClicked(model.Address, model.Paired)
             }
         }
     }

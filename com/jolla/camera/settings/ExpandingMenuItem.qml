@@ -15,6 +15,8 @@ MouseArea {
     property bool persistentHighlight
     readonly property bool selected: settings[property] == value
     readonly property bool highlighted: (parent.open || parent.pressed) && ((persistentHighlight && selected) || menuItem.pressed)
+    property color highlightColor: Theme.colorScheme == Theme.LightOnDark
+                                   ? Theme.highlightColor : Theme.highlightFromColor(Theme.highlightColor, Theme.LightOnDark)
 
     width: parent.width
     height: selected ? parent.width : parent.itemHeight
@@ -51,7 +53,7 @@ MouseArea {
 
             radius: width / 2
 
-            color: Theme.highlightColor
+            color: highlightColor
             opacity: menuItem.highlighted ? 0.4 : 0.0
             Behavior on opacity { FadeAnimation {} }
         }
@@ -59,8 +61,8 @@ MouseArea {
         Image {
             anchors.centerIn: parent
             source: menuItem.pressed
-                    ? menuItem.icon + "?" + Theme.highlightColor
-                    : menuItem.icon
+                    ? menuItem.icon + "?" + highlightColor
+                    : menuItem.icon + "?" + Theme.lightPrimaryColor
         }
     }
 }

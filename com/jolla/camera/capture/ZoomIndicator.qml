@@ -8,7 +8,8 @@ Item {
     property real zoom
     property real maximumZoom
 
-    property color color: Theme.highlightColor
+    property color color: Theme.colorScheme == Theme.LightOnDark
+                          ? Theme.highlightColor : Theme.highlightFromColor(Theme.highlightColor, Theme.LightOnDark)
 
     implicitWidth: line.width + minimumLabel.implicitWidth/2 + maximumLabel.implicitWidth/2
     implicitHeight: Theme.itemSizeSmall

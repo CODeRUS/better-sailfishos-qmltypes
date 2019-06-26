@@ -1,5 +1,4 @@
 module com.jolla.gallery.facebook
-plugin jollagalleryfacebookplugin
 AccessTokensProvider 1.0 AccessTokensProvider.qml
 AddCommentPage 1.0 AddCommentPage.qml
 AlbumDelegate 1.0 AlbumDelegate.qml

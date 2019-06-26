@@ -35,7 +35,7 @@ Item {
         }
     }
 
-    Image {
+    HighlightImage {
         id: icon
 
         width: root._iconSize
@@ -55,14 +55,17 @@ Item {
                 return "image://theme/" + _source + _suffix
             }
         }
-        layer.effect: PressEffect {}
-        layer.enabled: root.highlighted
 
-        Image {
+        highlighted: root.highlighted
+
+        HighlightImage {
             id: errorImage
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit
             source: icon.status == Image.Error ? "image://theme/icon-lock-information" + _suffix : ""
+            highlighted: root.highlighted
+            monochromeWeight: colorWeight
+            highlightColor: Theme.highlightBackgroundColor
         }
     }
 

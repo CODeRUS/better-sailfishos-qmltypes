@@ -41,7 +41,7 @@ function titleSearchFilter(string)
 
 function titleCaseSensitiveSearchFilter(string)
 {
-    _titleCaseSensitiveSearchFilter.arg(escapeSparql(string))
+    return _titleCaseSensitiveSearchFilter.arg(escapeSparql(string))
 }
 
 function pathSearchFilter(string)

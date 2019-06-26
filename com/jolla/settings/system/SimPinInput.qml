@@ -23,15 +23,16 @@ PinInput {
     modemPath: simManager.modemPath
 
     titleColor: Theme.rgba(keypadTextColor, 0.6)
-    warningTextColor: emergency ? Theme.primaryColor : keypadTextColor
+    warningTextColor: emergency ? Theme.lightPrimaryColor : keypadTextColor
     pinDisplayColor: keypadTextColor
-    keypadTextColor: Theme.highlightDimmerColor
+    keypadTextColor: Theme.colorScheme === Theme.LightOnDark ? Theme.highlightDimmerColor : Theme.lightPrimaryColor
+    optionButtonColor: Theme.lightPrimaryColor
     dimmerBackspace: true
 
     Rectangle {
         z: -1
         anchors.fill: parent
-        color: Theme.highlightDimmerColor
+        color: Theme.colorScheme === Theme.LightOnDark ? Theme.highlightDimmerColor : Theme.primaryColor
         visible: root.showBackgroundGradient
         opacity: root.emergency || !root.showBackgroundGradient ? 0.0 : 1.0
 
@@ -41,8 +42,8 @@ PinInput {
             id: gradient
             anchors.fill: parent
             gradient: Gradient {
-                GradientStop { position: 0.0; color: Theme.primaryColor }
-                GradientStop { position: 1.0; color: Theme.rgba(Theme.primaryColor, 0.4) }
+                GradientStop { position: 0.0; color: Theme.colorScheme === Theme.LightOnDark ? Theme.primaryColor : Theme.highlightColor }
+                GradientStop { position: 1.0; color: Theme.rgba(Theme.colorScheme === Theme.LightOnDark ? Theme.primaryColor : Theme.highlightColor, 0.4) }
             }
         }
     }

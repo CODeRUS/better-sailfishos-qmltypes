@@ -130,6 +130,7 @@ Module {
         Property { name: "isAudioRouted"; type: "bool" }
         Property { name: "isMicrophoneMuted"; type: "bool" }
         Property { name: "isSpeakerMuted"; type: "bool" }
+        Property { name: "isDebugEnabled"; type: "bool"; isReadonly: true }
         Signal {
             name: "error"
             Parameter { name: "message"; type: "string" }

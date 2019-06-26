@@ -38,12 +38,15 @@ import Sailfish.Silica 1.0
 BackgroundItem {
     id: button
 
+    property color primaryColor: Theme.primaryColor
     property color highlightColor: Theme.highlightColor
+    property color highlightBackgroundColor: Theme.highlightBackgroundColor
     property alias text: label.text
     property alias icon: iconButton.icon
 
     down: (pressed && containsMouse) || iconButton.down
     height: Theme.itemSizeMedium
+    highlightedColor: Theme.rgba(highlightBackgroundColor, Theme.highlightBackgroundOpacity)
 
     Label {
         id: label
@@ -56,7 +59,7 @@ BackgroundItem {
             rightMargin: iconButton.icon.status == Image.Ready ? Theme.paddingLarge : Theme.horizontalPageMargin
         }
 
-        color: button.highlighted ? button.highlightColor : Theme.primaryColor
+        color: button.highlighted ? button.highlightColor : button.primaryColor
         font.pixelSize: Theme.fontSizeMedium
         truncationMode: TruncationMode.Fade
         opacity: button.enabled ? 1.0 : 0.4
@@ -72,6 +75,11 @@ BackgroundItem {
         }
 
         enabled: button.enabled
+        icon {
+            highlighted: iconButton._showPress
+            color: button.primaryColor
+            highlightColor: button.highlightColor
+        }
 
         highlighted: button.down
         onClicked: button.clicked(mouse)

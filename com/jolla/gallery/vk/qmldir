@@ -1,5 +1,4 @@
 module com.jolla.gallery.vk
-plugin jollagalleryvkplugin
 VKGalleryIcon 1.0 VKGalleryIcon.qml
 VKUsersPage 1.0 VKUsersPage.qml
 VKAlbumsPage 1.0 VKAlbumsPage.qml

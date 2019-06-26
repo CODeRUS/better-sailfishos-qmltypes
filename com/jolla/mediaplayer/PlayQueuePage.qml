@@ -25,6 +25,7 @@ Page {
         PullDownMenu {
             id: playQueueMenu
 
+            visible: view.count > 1
             MenuItem {
                 id: menuItemSearch
 
@@ -32,7 +33,6 @@ Page {
                 //% "Search"
                 text: qsTrId("mediaplayer-me-search")
                 onClicked: playQueueHeader.enableSearch()
-                enabled: view.count > 0 || playQueueHeader.searchText !== ''
             }
         }
 
@@ -48,7 +48,7 @@ Page {
             width: parent.width
 
             //: Title for the play queue page
-            //% "Play Queue"
+            //% "Play queue"
             title: qsTrId("mediaplayer-he-play-queue")
 
             //: Playlist search field placeholder text

@@ -1,2 +1,2 @@
 module com.jolla.connection
-plugin connectionagentplugin
+typeinfo plugins.qmltypes

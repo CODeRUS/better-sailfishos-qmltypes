@@ -105,6 +105,7 @@ Module {
         Property { name: "entryType"; type: "string"; isReadonly: true }
         Property { name: "iconId"; type: "string"; isReadonly: true }
         Property { name: "desktopCategories"; type: "QStringList"; isReadonly: true }
+        Property { name: "mimeType"; type: "QStringList"; isReadonly: true }
         Property { name: "titleUnlocalized"; type: "string"; isReadonly: true }
         Property { name: "shouldDisplay"; type: "bool"; isReadonly: true }
         Property { name: "isValid"; type: "bool"; isReadonly: true }
@@ -174,9 +175,10 @@ Module {
         Property { name: "compositor"; type: "QObject"; isReadonly: true; isPointer: true }
         Method {
             name: "takeScreenshot"
+            type: "ScreenshotResult*"
             Parameter { name: "path"; type: "string" }
         }
-        Method { name: "takeScreenshot" }
+        Method { name: "takeScreenshot"; type: "ScreenshotResult*" }
     }
     Component {
         name: "LipstickCompositor"
@@ -258,6 +260,7 @@ Module {
         prototype: "QWaylandSurfaceItem"
         Property { name: "windowId"; type: "int"; isReadonly: true }
         Property { name: "isInProcess"; type: "bool"; isReadonly: true }
+        Property { name: "isAlien"; type: "bool"; isReadonly: true }
         Property { name: "delayRemove"; type: "bool" }
         Property { name: "userData"; type: "QVariant" }
         Property { name: "category"; type: "string"; isReadonly: true }
@@ -266,9 +269,14 @@ Module {
         Property { name: "mouseRegionBounds"; type: "QRect"; isReadonly: true }
         Property { name: "focusOnTouch"; type: "bool" }
         Signal { name: "committed" }
+        Signal { name: "resized" }
         Method {
             name: "terminateProcess"
             Parameter { name: "killTimeout"; type: "int" }
+        }
+        Method {
+            name: "resize"
+            Parameter { name: "size"; type: "QSize" }
         }
     }
     Component {
@@ -310,6 +318,8 @@ Module {
         Property { name: "origin"; type: "string"; isReadonly: true }
         Property { name: "owner"; type: "string"; isReadonly: true }
         Property { name: "maxContentLines"; type: "int"; isReadonly: true }
+        Property { name: "progress"; type: "float"; isReadonly: true }
+        Property { name: "hasProgress"; type: "bool"; isReadonly: true }
         Signal {
             name: "actionInvoked"
             Parameter { name: "action"; type: "string" }
@@ -343,10 +353,6 @@ Module {
         isCreatable: false
         exportMetaObjectRevisions: [0]
         Property { name: "notification"; type: "LipstickNotification"; isReadonly: true; isPointer: true }
-        Signal {
-            name: "notificationPresented"
-            Parameter { name: "id"; type: "uint" }
-        }
         Method { name: "showNextNotification" }
     }
     Component {
@@ -702,6 +708,25 @@ Module {
         Method { name: "requestUpdate"; revision: 3 }
     }
     Component {
+        name: "ScreenshotResult"
+        prototype: "QObject"
+        exports: ["org.nemomobile.lipstick/ScreenshotResult 0.1"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Status"
+            values: {
+                "Writing": 0,
+                "Finished": 1,
+                "Error": 2
+            }
+        }
+        Property { name: "status"; type: "Status"; isReadonly: true }
+        Property { name: "path"; type: "QUrl"; isReadonly: true }
+        Signal { name: "finished" }
+        Signal { name: "error" }
+    }
+    Component {
         name: "ShutdownScreen"
         prototype: "QObject"
         exports: ["org.nemomobile.lipstick/ShutdownScreen 0.1"]
@@ -716,12 +741,25 @@ Module {
         isCreatable: false
         exportMetaObjectRevisions: [0]
         Property { name: "windowVisible"; type: "bool" }
-        Property { name: "supportedUSBModes"; type: "QStringList"; isReadonly: true }
-        Property { name: "availableUSBModes"; type: "QStringList"; isReadonly: true }
+        Property { name: "supportedModes"; type: "QStringList"; isReadonly: true }
+        Property { name: "availableModes"; type: "QStringList"; isReadonly: true }
+        Property { name: "preparingMode"; type: "string"; isReadonly: true }
         Signal { name: "dialogShown" }
         Signal { name: "showUnlockScreen" }
+        Signal {
+            name: "preparingModeChanged"
+            Parameter { name: "preparing"; type: "string" }
+        }
+        Signal {
+            name: "showNotification"
+            Parameter { name: "type"; type: "Notification" }
+        }
+        Signal {
+            name: "showError"
+            Parameter { name: "errorCode"; type: "string" }
+        }
         Method {
-            name: "setUSBMode"
+            name: "setMode"
             Parameter { name: "mode"; type: "string" }
         }
     }

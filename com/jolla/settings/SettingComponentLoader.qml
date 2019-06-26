@@ -4,23 +4,22 @@ import com.jolla.settings 1.0
 Loader {
     id: root
 
-    property variant settingsObject
+    property var settingsObject
     property url sectionSource: "SettingsSectionLink.qml"
     property url pageSource: "SettingsPageLink.qml"
+    property url actionSource
 
     width: parent.width
 
     source: {
         var objType = settingsObject.type
 
-        if (objType === "bool") {
-            return "SwitchSetting.qml"
-        } else if (objType === "integer") {
-            return "SliderSetting.qml"
-        } else if (objType === "section") {
+        if (objType === "section") {
             return sectionSource
         } else if (objType === "page") {
             return pageSource
+        } else if (objType === "action") {
+            return actionSource
         } else if (objType === "custom") {
             // notice custom QML screens will not use SettingsItem
             // so will not have entryPath properties etc.
@@ -39,30 +38,17 @@ Loader {
         if (item.hasOwnProperty("entryPath") && item.entryPath === "") {
             item.entryPath = settingsObject.location().join("/")
         }
+        if (item.hasOwnProperty("entryParams")) {
+            item.entryParams = params
+        }
         if (params && item.hasOwnProperty("depth")) {
             item.depth = params.depth && params.depth > 0 ? params.depth : 1
         }
-        if (objType === "bool") {
-            item.iconSource = settingsObject.icon ? settingsObject.icon : ""
-            if (params) {
-                item.saveKey = params.key ? params.key : ""
-                item.defaultSaveValue = params.defaultValue ? params.defaultValue : false
-            }
-        } else if (objType === "integer") {
-            // todo currently the slider will animate to its position.
-            // We can fix this either by backporting Loader.createObject()
-            // or by using Component.createObject() with initial property
-            // values and use a root Item instead of a Loader.
-            if (params) {
-                item.saveKey = params.key ? params.key : ""
-                item.defaultSaveValue = params.defaultValue ? params.defaultValue : 0
-                if (params.min)
-                    item.minimumValue = parseInt(params.min)
-                if (params.max)
-                    item.maximumValue = parseInt(params.max)
-            }
-        } else if (objType === "section") {
+        if (objType === "section" || objType === "action") {
             item.name = settingsObject.title
+            if (item.hasOwnProperty("shortName")) {
+                item.shortName = settingsObject.shortTitle
+            }
             item.iconSource = settingsObject.icon ? settingsObject.icon : ""
         } else if (objType === "page") {
             // Special handling for applications/something.desktop. Get icon used in the desktop file.
@@ -76,6 +62,9 @@ Loader {
             }
 
             item.name = settingsObject.title
+            if (item.hasOwnProperty("shortName")) {
+                item.shortName = settingsObject.shortTitle
+            }
             if (params) {
                 item.pageSource = params.source ? params.source : ""
             }

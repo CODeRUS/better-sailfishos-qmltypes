@@ -72,7 +72,7 @@ PulleyMenuBase {
         anchors { fill: parent; bottomMargin: (pullDownMenu.spacing - _shadowHeight) * Math.min(1, _dragDistance/Theme.itemSizeSmall) }
         opacity: pullDownMenu.active ? 1.0 : 0.0
         gradient: Gradient {
-            GradientStop { position: 0.0; color: Theme.rgba(pullDownMenu.backgroundColor, 0.4) }
+            GradientStop { position: 0.0; color: Theme.rgba(pullDownMenu.backgroundColor, Theme.highlightBackgroundOpacity + 0.1) }
             GradientStop {
                 position: (pullDownMenu.height-pullDownMenu.spacing)/bg.height
                 color: Theme.rgba(pullDownMenu.backgroundColor, Theme.highlightBackgroundOpacity)

@@ -167,17 +167,20 @@ Page {
                 //% "Add more links"
                 text: qsTrId("components_contacts-me-add_links")
                 onClicked: {
-                    var picker = pageStack.push(Qt.resolvedUrl("ContactsMultiSelectDialog.qml"))
-                    picker.accepted.connect(function() {
-                        for (var i=0; i<picker.selectedContacts.count; i++) {
-                            var id = picker.selectedContacts.get(i).person.id
-                            if (root._aggregationIds === undefined) {
-                                root._aggregationIds = [ id ]
-                            } else {
-                                root._aggregationIds.push(id)
+                    var obj = pageStack.animatorPush(Qt.resolvedUrl("ContactsMultiSelectDialog.qml"))
+                    obj.pageCompleted.connect(function(picker) {
+
+                        picker.accepted.connect(function() {
+                            for (var i=0; i<picker.selectedContacts.count; i++) {
+                                var id = picker.selectedContacts.get(i).person.id
+                                if (root._aggregationIds === undefined) {
+                                    root._aggregationIds = [ id ]
+                                } else {
+                                    root._aggregationIds.push(id)
+                                }
                             }
-                        }
-                        _tryAggregateContact()
+                            _tryAggregateContact()
+                        })
                     })
                 }
             }

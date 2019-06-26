@@ -9,11 +9,8 @@ SettingsBase {
     // mode change goes here, CaptureView updates to global.cameraDevice
     property string cameraDevice: global.cameraDevice
 
-    readonly property var globalDefaults: ({
-                                               "iso": 0
-                                           })
-
     readonly property var settingsDefaults: ({
+                                                 "iso": 0,
                                                  "timer": 0,
                                                  "viewfinderGrid": "none",
                                                  "flash": ((modeSettings.captureMode == Camera.CaptureStillImage) &&
@@ -21,10 +18,15 @@ SettingsBase {
                                                                Camera.FlashAuto : Camera.FlashOff)
                                              })
 
-    readonly property bool defaultSettings: globalSettings.iso === settingsDefaults["iso"] &&
+    readonly property bool defaultSettings: modeSettings.iso === settingsDefaults["iso"] &&
                                             modeSettings.timer === settingsDefaults["timer"] &&
                                             modeSettings.viewfinderGrid === settingsDefaults["viewfinderGrid"] &&
                                             modeSettings.flash == settingsDefaults["flash"]
+    // FIXME: should use something like QtMultimedia.availableCameras.length > 1, but that currently
+    // returns bogus cameras on Sailfish when they don't really exist.
+    // Also now only handling missing back camera which is somewhat hard-coded in qtmultimedia gstreamer integration
+    // to be the primary camera.
+    readonly property bool hasMultipleCameras: primaryResolution.value != "" && primaryResolution.value[0] != "0"
 
     function reset() {
         var basePath = globalSettings.path + "/" + modeSettings.path
@@ -33,15 +35,14 @@ SettingsBase {
             _singleValue.key = basePath + "/" + i
             _singleValue.value = settingsDefaults[i]
         }
-
-        basePath = globalSettings.path
-        for (i in globalDefaults) {
-            _singleValue.key = basePath + "/" + i
-            _singleValue.value = globalDefaults[i]
-        }
     }
 
     property ConfigurationValue _singleValue: ConfigurationValue {}
+    property ConfigurationValue _primaryCameraResolution: ConfigurationValue {
+        id: primaryResolution
+        key: globalSettings.path + "/primary/image/imageResolution"
+        defaultValue: ""
+    }
 
     property ConfigurationGroup _global: ConfigurationGroup {
         id: globalSettings
@@ -65,11 +66,9 @@ SettingsBase {
 
         property bool saveLocationInfo
 
-        property int iso: 0
         property int exposureCompensation: 0
         property int whiteBalance: CameraImageProcessing.WhiteBalanceAuto
 
-        property var isoValues: [ 0, 100, 200, 400 ]
         property var exposureCompensationValues: [ 4, 3, 2, 1, 0, -1, -2, -3, -4 ]
         property var whiteBalanceValues: [
             CameraImageProcessing.WhiteBalanceAuto,
@@ -85,6 +84,7 @@ SettingsBase {
 
             property int captureMode: Camera.CaptureStillImage
 
+            property int iso: 0
             property int flash: Camera.FlashOff
             property int exposureMode: 0
             property int meteringMode: Camera.MeteringMatrix
@@ -93,11 +93,13 @@ SettingsBase {
 
             property string imageResolution: "1280x720"
             property string videoResolution: "1280x720"
+            property int videoFrameRate: 30
             property string viewfinderResolution: "1280x720"
 
+            property var isoValues: [ 0, 100, 200, 400 ]
             property var focusDistanceValues: [ Camera.FocusInfinity ]
             property var flashValues: [ Camera.FlashOff ]
-            property var exposureModeValues: [ Camera.ExposureAuto ]
+            property var exposureModeValues: [ Camera.ExposureManual ]
             property var meteringModeValues: [
                 Camera.MeteringMatrix,
                 Camera.MeteringAverage,
@@ -143,24 +145,14 @@ SettingsBase {
                 : qsTrId("camera_settings-la-timer-no-delay")
     }
 
-    function isoIcon(iso) {
-        return iso > 0
-                ? "image://theme/icon-camera-iso-" + iso
-                : "image://theme/icon-camera-iso"
-    }
-
     function isoText(iso) {
-        switch (iso) {
-        //% "Light sensitivity • Automatic"
-        case 0: return qsTrId("camera_settings-la-light-sensitivity-auto")
-        //% "Light sensitivity • ISO 100"
-        case 100: return qsTrId("camera_settings-la-light-sensitivity-100")
-        //% "Light sensitivity • ISO 200"
-        case 200: return qsTrId("camera_settings-la-light-sensitivity-200")
-        //% "Light sensitivity • ISO 400"
-        case 400: return qsTrId("camera_settings-la-light-sensitivity-400")
-        //% "Light sensitivity • ISO 800"
-        case 800: return qsTrId("camera_settings-la-light-sensitivity-800")
+        if (iso == 0) {
+            //% "Light sensitivity • Automatic"
+            return qsTrId("camera_settings-la-light-sensitivity-auto")
+        } else {
+            //: %1 replaced with iso value
+            //% "Light sensitivity • ISO %1"
+            return qsTrId("camera_settings-la-light-sensitivity-iso_value").arg(iso)
         }
     }
 

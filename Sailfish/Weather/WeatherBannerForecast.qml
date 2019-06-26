@@ -3,16 +3,22 @@ import Sailfish.Silica 1.0
 import Sailfish.Weather 1.0
 
 Column {
-    property bool loading: forecastModel.status == Weather.Loading
+    id: root
 
+    property int itemHeight
+    property bool highlighted
+    property int contentHeight: itemHeight + providerDisclaimer.height
+    property bool loading: forecastModel.status == Weather.Loading
     property real dataOpacity: forecastModel.status == Weather.Ready && forecastModel.count > 0
                                ? 1.0
                                : (forecastModel.status == Weather.Loading && forecastModel.count > 0) ? 0.4 : 0.0
     Behavior on dataOpacity { FadeAnimation { property: "dataOpacity" } }
 
+    function attemptReload() {
+        forecastModel.attemptReload()
+    }
+
     height: parent.height
-    property int contentHeight: itemHeight + providerDisclaimer.height
-    property int itemHeight
 
     Item {
         x: Theme.horizontalPageMargin-Theme.paddingLarge
@@ -67,7 +73,7 @@ Column {
             id: weatherForecastList
 
             anchors.fill: parent
-            clip: true // limit to five day forecast
+            clip: true // limit to 5-7 day forecast
             currentIndex: -1
             interactive: false
             orientation: ListView.Horizontal
@@ -77,10 +83,16 @@ Column {
                 weather: weatherBanner.weather
                 timestamp: weatherModel.timestamp
             }
+
             delegate: Item {
-                width: weatherForecastList.width/5
+
+                // Show 5 items on normal phones, 7 on larger screens
+                readonly property int columnCount: Math.round(weatherForecastList.width / (540 * Theme.pixelRatio/5)) >= 7 ? 7 : 5
+
+                width: Math.round(weatherForecastList.width/columnCount)
                 height: weatherForecastList.height
                 WeatherForecastItem {
+                    highlighted: root.highlighted
                     onHeightChanged: if (model.index == 0) itemHeight = height
                 }
             }

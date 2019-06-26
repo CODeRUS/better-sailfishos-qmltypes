@@ -16,6 +16,7 @@ Dialog {
     property alias showRecentContactList: contactBrowser.showRecentContactList
     property alias recentContactsCategoryMask: contactBrowser.recentContactsCategoryMask
     property alias searchEnabled: contactBrowser.searchEnabled
+    property alias promptSimSelection: contactBrowser.promptSimSelection
 
     signal contactClicked(variant contact, variant clickedItemY, variant property, string propertyType)
 

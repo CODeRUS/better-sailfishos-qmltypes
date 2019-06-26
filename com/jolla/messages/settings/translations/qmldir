@@ -1,2 +1,2 @@
 module com.jolla.messages.settings.translations
-plugin messagessettingsplugin
+typeinfo plugins.qmltypes

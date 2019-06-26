@@ -31,23 +31,17 @@ ExpandingDelegate {
     function handleActionClicked(actionType) {
         var actionValue = detailValue
 
-        // Sanitize phone numbers before submitting them further.
-        switch(actionType) {
-        case "sms":
-            actionValue = NumberUtils.sanitizePhoneNumber(actionValue)
-            break;
-        }
-
-        switch(actionType) {
+        switch (actionType) {
         case "call":
             if (Telephony.voiceSimUsageMode == Telephony.AlwaysAskSim) {
                 _menu = simSelectorComponent.createObject(null)
-                _menu.show(menuContainer)
+                _menu.open(menuContainer)
             } else {
                 callClicked(actionValue, "gsm", "")
             }
             break;
         case "sms":
+            actionValue = NumberUtils.sanitizePhoneNumber(actionValue)
             smsClicked(actionValue, "gsm")
             break;
         case "email":
@@ -124,7 +118,7 @@ ExpandingDelegate {
                 onSimSelected: {
                     var actionValue = NumberUtils.sanitizePhoneNumber(detailValue)
                     callClicked(actionValue, "gsm", modemPath)
-                    contextMenu.hide()
+                    contextMenu.close()
                 }
             }
         }

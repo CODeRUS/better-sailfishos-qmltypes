@@ -32,12 +32,13 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.2
 import Sailfish.Silica 1.0
 
 Item {
     // Visualizes the edge of the page exiting the view
     property Item stack
+    property alias transitionDuration: animator.duration
     property bool active: container && container.parent
     property Item container: stack._currentContainer === null || stack._currentContainer.transitionPartner === null
                                  ? null
@@ -46,21 +47,32 @@ Item {
                                     : stack._currentContainer)
     property bool landscape: container && container.page.isLandscape
 
-    width: parent ? (landscape ? container.width : container.width/2) : 0
-    height: parent ? (landscape ? container.height/2 : container.height) : 0
-    x: parent && !landscape ? (container.x < 0 ? container.x + width : container.x) : 0
-    y: parent && landscape ? (container.y < 0 ? container.y + height : container.y) : 0
-    parent: active ? container.parent : null
+    width: parent && container ? (landscape ? container.width : container.width/2) : 0
+    height: parent && container ? (landscape ? container.height/2 : container.height) : 0
+    x: parent && container && !landscape ? (useAnimator ? container.width/2 : (container.x < 0 ? width : 0)) : 0
+    y: parent && container && landscape ? (useAnimator ? container.height/2 : (container.y < 0 ? height : 0)) : 0
+    parent: active ? container : null
 
+    property bool useAnimator: active && container.useAnimator
+
+    OpacityAnimator {
+        id: animator
+        target: grad
+        easing.type: Easing.InOutQuad
+        from: 0.0
+        to: 0.6
+        running: useAnimator
+    }
 
     Rectangle {
+        id: grad
         anchors.centerIn: parent
         width: landscape ? parent.width : parent.height
         height: landscape ? parent.height : parent.width
         color: Theme.highlightDimmerColor
-        opacity: active ? Math.min(0.6, Math.abs(container.lateralOffset/container.width)*0.7) : 0.0
-        rotation: landscape ? (container && container.y < 0 ? 180 : 0)
-                            : (container && container.x < 0 ? 90 : 270)
+        opacity: !useAnimator && active ? Math.min(0.6, Math.abs(container.lateralOffset/container.width)*0.7) : 0.0
+        rotation: landscape ? ((container && container.y < 0) || useAnimator ? 180 : 0)
+                            : ((container && container.x < 0) || useAnimator ? 90 : 270)
         gradient: Gradient {
             GradientStop { position: 0.0; color: Theme.highlightDimmerColor }
             GradientStop { position: 0.7; color: Theme.highlightDimmerColor }

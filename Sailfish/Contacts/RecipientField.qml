@@ -131,8 +131,7 @@ Item {
                 top: summaryLabel.bottom
                 topMargin: Theme.paddingMedium
             }
-            color: Theme.primaryColor
-            opacity: 0.6
+            color: Theme.secondaryColor
             visible: summary !== ""
             elide: Text.ElideRight
             font.pixelSize: Theme.fontSizeSmall

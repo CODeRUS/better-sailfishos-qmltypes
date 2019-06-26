@@ -1,2 +1,2 @@
 module org.nemomobile.dbus
-plugin nemodbus
+typeinfo plugins.qmltypes

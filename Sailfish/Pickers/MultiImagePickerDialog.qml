@@ -37,6 +37,8 @@ PickerDialog {
             model: imageModel
             contentType: ContentType.Image
             visible: active || imageModel.count > 0
+            selectedCount: _selectedCount
+            showBack: !_clearOnBackstep
             _glassOnly: imagePickerDialog._background
 
             onActiveFocusChanged: {

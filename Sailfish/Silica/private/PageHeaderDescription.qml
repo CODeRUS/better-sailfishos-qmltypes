@@ -43,9 +43,9 @@ Label {
         rightMargin: parent.rightMargin
     }
     font.pixelSize: Theme.fontSizeSmall
-    color: Theme.highlightColor
-    opacity: 0.6
+    color: Theme.secondaryHighlightColor
     horizontalAlignment: Text.AlignRight
     truncationMode: TruncationMode.Fade
     text: pageHeader.description
+    visible: pageHeader.description.length > 0
 }

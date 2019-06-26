@@ -2,7 +2,6 @@ import QtQuick 2.0
 import QtQuick.XmlListModel 2.0
 import Sailfish.Weather 1.0
 import "WeatherModel.js" as WeatherModel
-import Nemo.Connectivity 1.0
 
 XmlListModel {
     id: root
@@ -10,7 +9,7 @@ XmlListModel {
     property var weather
     property var savedWeathers
     property bool active: true
-    property bool connectedToNetwork
+    readonly property bool online: WeatherConnectionHelper.online
     readonly property int locationId: weather ? weather.locationId : -1
     property date timestamp: new Date()
 
@@ -22,12 +21,16 @@ XmlListModel {
 
     function attemptReload() {
         if (updateAllowed()) {
-            if (connectedToNetwork) {
+            if (online) {
                 reload()
+            } else {
+                WeatherConnectionHelper.requestNetwork()
             }
         }
     }
 
+    onActiveChanged: if (active) attemptReload()
+    onOnlineChanged: if (online) attemptReload()
     onError: {
         if (savedWeathersModel && weather) {
             savedWeathersModel.setErrorStatus(locationId)
@@ -37,9 +40,6 @@ XmlListModel {
 
     query: "/xml/weather/obs"
     source: locationId > 0 ? "http://feed-jll.foreca.com/jolla-jan14fi/data.php?l=" + root.locationId + "&products=cc" : ""
-
-
-    onActiveChanged: if (active) attemptReload()
 
     onStatusChanged: {
         if (status == XmlListModel.Ready) {
@@ -77,7 +77,7 @@ XmlListModel {
     }
     XmlRole {
         name: "temperatureFeel"
-        query: "@t/string()"
+        query: "@tf/string()"
     }
     XmlRole {
         name: "windSpeed"
@@ -90,15 +90,5 @@ XmlListModel {
     XmlRole {
         name: "accumulatedPrecipitation"
         query: "@pr/string()"
-    }
-
-    property ConnectionHelper connectionHelper: ConnectionHelper {
-        onNetworkConnectivityEstablished: {
-            root.connectedToNetwork = true
-            if (updateAllowed()) {
-                root.reload()
-            }
-        }
-        onNetworkConnectivityUnavailable: root.connectedToNetwork = false
     }
 }

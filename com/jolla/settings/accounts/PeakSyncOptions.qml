@@ -43,15 +43,17 @@ Column {
         label: qsTrId("settings-accounts-la-peak_interval")
         value: root.alwaysOnPeak ? _textAlwaysOn : root.intervalModel.intervalText(root.peakInterval)
         onClicked: {
-            var obj = pageStack.push(intervalPickerDialog, {"showAlwaysOn": showAlwaysOn, "intervalModel": root.intervalModel})
-            obj.intervalClicked.connect(function(interval, text) {
-                root.peakInterval = interval
-                if (text == _textAlwaysOn) {
-                    schedule.syncExternallyDuringPeak = true
-                } else {
-                    schedule.syncExternallyDuringPeak = false
-                }
-                root._updateSchedule()
+            var obj = pageStack.animatorPush(intervalPickerDialog, {"showAlwaysOn": showAlwaysOn, "intervalModel": root.intervalModel})
+            obj.pageCompleted.connect(function(dialog) {
+                dialog.intervalClicked.connect(function(interval, text) {
+                    root.peakInterval = interval
+                    if (text == _textAlwaysOn) {
+                        schedule.syncExternallyDuringPeak = true
+                    } else {
+                        schedule.syncExternallyDuringPeak = false
+                    }
+                    root._updateSchedule()
+                })
             })
         }
     }
@@ -62,10 +64,12 @@ Column {
         label: qsTrId("settings-accounts-la-off_peak_interval")
         value: root.offPeakIntervalModel.intervalText(root.offPeakInterval)
         onClicked: {
-            var obj = pageStack.push(intervalPickerDialog, {"intervalModel": root.offPeakIntervalModel})
-            obj.intervalClicked.connect(function(interval, text) {
-                root.offPeakInterval = interval
-                root._updateSchedule()
+            var obj = pageStack.animatorPush(intervalPickerDialog, {"intervalModel": root.offPeakIntervalModel})
+            obj.pageCompleted.connect(function(dialog) {
+                dialog.intervalClicked.connect(function(interval, text) {
+                    root.offPeakInterval = interval
+                    root._updateSchedule()
+                })
             })
         }
     }
@@ -76,11 +80,15 @@ Column {
         label: qsTrId("settings-accounts-la-peak_start")
         value: Format.formatDate(root.peakStartTime, Format.TimeValue)
         onClicked: {
-            var obj = pageStack.push(timePickerDialog,
-                    {"hour": root.peakStartTime.getHours(), "minute": root.peakStartTime.getMinutes() })
-            obj.accepted.connect(function() {
-                root.peakStartTime = obj.time
-                root._updateSchedule()
+            var obj = pageStack.animatorPush(timePickerDialog,
+                                             {   "hour": root.peakStartTime.getHours(),
+                                                 "minute": root.peakStartTime.getMinutes()
+                                             })
+            obj.pageCompleted.connect(function(dialog) {
+                dialog.accepted.connect(function() {
+                    root.peakStartTime = dialog.time
+                    root._updateSchedule()
+                })
             })
         }
     }
@@ -91,11 +99,15 @@ Column {
         label: qsTrId("settings-accounts-la-peak_end")
         value: Format.formatDate(root.peakEndTime, Format.TimeValue)
         onClicked: {
-            var obj = pageStack.push(timePickerDialog,
-                    {"hour": root.peakEndTime.getHours(), "minute": root.peakEndTime.getMinutes() })
-            obj.accepted.connect(function() {
-                root.peakEndTime = obj.time
-                root._updateSchedule()
+            var obj = pageStack.animatorPush(timePickerDialog,
+                                             {   "hour": root.peakEndTime.getHours(),
+                                                 "minute": root.peakEndTime.getMinutes()
+                                             })
+            obj.pageCompleted.connect(function(dialog) {
+                dialog.accepted.connect(function() {
+                    root.peakEndTime = dialog.time
+                    root._updateSchedule()
+                })
             })
         }
     }

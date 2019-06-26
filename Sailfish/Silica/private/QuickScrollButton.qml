@@ -37,9 +37,10 @@ import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 
 QuickScrollButtonBase {
+    id: button
     property bool active
     property bool invert
-    property string source
+    property alias source: image.source
 
     onClicked: pressTimer.start()
 
@@ -54,7 +55,7 @@ QuickScrollButtonBase {
             GradientStop { position: invert ? 0.0 : 1.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.3) }
         }
     }
-    Image {
+    HighlightImage {
         id: image
         anchors {
             bottom: invert ? undefined : parent.bottom
@@ -65,7 +66,7 @@ QuickScrollButtonBase {
         }
         Behavior on opacity { FadeAnimation {} }
         opacity: active ? 1.0 : 0.0
-        source: parent.source + "?" + (pressed || pressTimer.running ? Theme.highlightColor : Theme.primaryColor)
+        highlighted: button.pressed || pressTimer.running
     }
     Timer {
         id: pressTimer

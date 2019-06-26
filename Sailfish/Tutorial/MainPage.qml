@@ -25,14 +25,7 @@ Page {
     property real xScale: width / baseWidth
     property real yScale: height / baseHeight
 
-    property bool androidLauncher
-
     property var lessons: []
-
-    Connections {
-        target: Tutorial
-        onDeviceTypeChanged: buildLessons()
-    }
 
     onStatusChanged: {
         if (status === PageStatus.Active && lessonCounter === 0) {
@@ -45,11 +38,9 @@ Page {
         if (lessons.length > 0)
             return
 
-        if (androidLauncher)
-            lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "AndroidLauncherPulleyLesson.qml" ]
-        else if (Tutorial.deviceType === Tutorial.PhoneDevice)
+         if (Screen.sizeCategory <= Screen.Medium)
             lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "PageStackLesson.qml", "PhonePulleyLesson.qml", "PhoneCallLesson.qml" ]
-        else if (Tutorial.deviceType === Tutorial.TabletDevice)
+        else // tablet
             lessons = [ "HomeLesson.qml", "LauncherLesson.qml", "SwipeLesson.qml", "PageStackLesson.qml", "TabletPulleyLesson.qml", "TabletAlarmLesson.qml" ]
     }
 
@@ -253,11 +244,7 @@ Page {
 
         descriptionText: {
             if (lessonCounter === 0) {
-                if (androidLauncher) {
-                    //: The secondary label shown when the tutorial is started on Android
-                    //% "Simply hold the device in one hand and follow the instructions on screen to learn how to navigate in Jolla Launcher"
-                    return qsTrId("tutorial-la-follow_the_instructions_alternative")
-                } else if (upgradeMode) {
+                if (upgradeMode) {
                     //: The secondary label shown when the tutorial is started after an upgrade
                     //% "We've made some exciting changes. Start the Tutorial to learn about them!"
                     return qsTrId("tutorial-la-exciting_changes")

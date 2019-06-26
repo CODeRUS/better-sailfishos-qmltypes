@@ -1,2 +1,2 @@
 module com.jolla.keyboard.translations
-plugin translationplugin
+typeinfo plugins.qmltypes

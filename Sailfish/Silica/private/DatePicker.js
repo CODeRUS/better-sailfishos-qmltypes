@@ -43,14 +43,14 @@ function _isLeapYear(year) {
 function _maxDaysForMonth(month, year) {
     switch (month) {
     case 2:
-        return _isLeapYear(year) ? 29 : 28;
+        return _isLeapYear(year) ? 29 : 28
     case 4:
     case 6:
     case 9:
     case 11:
-        return 30;
+        return 30
     default:
-        return 31;
+        return 31
     }
 }
 

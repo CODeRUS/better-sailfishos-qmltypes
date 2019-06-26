@@ -3,7 +3,7 @@ import QtQuick.Window 2.1 as QtQuick
 import Sailfish.Silica 1.0
 import Sailfish.Lipstick 1.0
 
-Item {
+FocusScope {
     id: pannable
 
     property alias currentItem: content.currentItem
@@ -109,6 +109,8 @@ Item {
         _effectiveOrientation = orientation
         if (_pendingCurrentItem) {
             setCurrentItem(_pendingCurrentItem, true)
+        } else {
+            currentItem.focus = true
         }
     }
 
@@ -148,6 +150,7 @@ Item {
             currentItem.x = 0
             currentItem.y = 0
             currentItem.visible = true
+            currentItem.focus = true
 
             if (previousItem && previousItem != currentItem && previousItem.cleanup) {
                 previousItem.cleanup()
@@ -339,6 +342,7 @@ Item {
             maximumX: pannable.width
             minimumY: -pannable.height
             maximumY: pannable.height
+            threshold: QtQuick.Screen.pixelDensity * 5 // 5mm
         }
 
         states: [

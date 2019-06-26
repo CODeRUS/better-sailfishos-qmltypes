@@ -1,7 +1,8 @@
 module com.jolla.settings
 SettingItem 1.0 SettingItem.qml
-SwitchSetting 1.0 SwitchSetting.qml
-SliderSetting 1.0 SliderSetting.qml
+SettingsControl 1.0 SettingsControl.qml
+SettingsToggle 1.0 SettingsToggle.qml
+SettingsSlider 1.0 SettingsSlider.qml
 SettingsSectionLink 1.0 SettingsSectionLink.qml
 SettingsPageLink 1.0 SettingsPageLink.qml
 SettingComponentLoader 1.0 SettingComponentLoader.qml
@@ -12,3 +13,6 @@ ApplicationsGridView 1.0 ApplicationsGridView.qml
 SettingsExpandedPage 1.0 SettingsExpandedPage.qml
 SettingsSectionView 1.0 SettingsSectionView.qml
 SettingsListView 1.0 SettingsListView.qml
+SettingsMenuItem 1.0 SettingsMenuItem.qml
+SettingsErrorNotification 1.0 SettingsErrorNotification.qml
+typeinfo plugins.qmltypes

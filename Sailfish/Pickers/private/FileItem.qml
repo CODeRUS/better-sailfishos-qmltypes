@@ -20,6 +20,7 @@ BackgroundItem {
     property bool selected
     property real leftMargin: Theme.horizontalPageMargin
     property bool isParentDirectory: baseName == '..' && extension == ''
+    property alias textFormat: nameLabel.textFormat
 
     property string _iconSource: isParentDirectory ? 'image://theme/icon-m-page-up' : iconSource
 
@@ -55,6 +56,7 @@ BackgroundItem {
             width: parent.width - parent.height - parent.spacing - Theme.horizontalPageMargin
             anchors.verticalCenter: parent.verticalCenter
             Label {
+                id: nameLabel
                 text: backgroundItem.baseName + backgroundItem.extension
                 width: parent.width
                 truncationMode: TruncationMode.Fade
@@ -70,6 +72,7 @@ BackgroundItem {
                 truncationMode: TruncationMode.Fade
                 font.pixelSize: Theme.fontSizeExtraSmall
                 color: highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
+                textFormat: nameLabel.textFormat
             }
         }
         Label {

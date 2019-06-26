@@ -75,6 +75,9 @@ Image {
     property int interactionMode: TouchInteraction.Swipe
     property alias running: animationGroup.running
     property alias alwaysRunToEnd: animationGroup.alwaysRunToEnd
+    // TODO: Would be better if this was alias to animationGroup having loop count set, so that running wouldn't
+    // get false between the loops, but that doesn't play well along with code that adjusts direction
+    // between the loops. Could be considered a Qt bug too. See JB#43752
     property int loops: 3
     property int _loopsRun
     property bool _stopped: true

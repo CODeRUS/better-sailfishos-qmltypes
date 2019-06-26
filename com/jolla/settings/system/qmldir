@@ -25,3 +25,5 @@ Tones 1.0 Tones.qml
 Use24HourClockSettingDisplay 1.0 Use24HourClockSettingDisplay.qml
 FingerEnrollmentDialog 1.0 FingerEnrollmentDialog.qml
 FingerEnrollmentWelcomeDialog 1.0 FingerEnrollmentWelcomeDialog.qml
+DeviceLockFeedback 1.0 DeviceLockFeedback.qml
+typeinfo plugins.qmltypes

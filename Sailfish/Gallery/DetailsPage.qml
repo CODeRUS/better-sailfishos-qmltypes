@@ -4,7 +4,6 @@ import QtDocGallery 5.0
 import "private"
 
 Page {
-    id: detailsPage
     property alias modelItem: galleryItem.item
 
     allowedOrientations: Orientation.All
@@ -13,45 +12,45 @@ Page {
     property variant flashValues: {
         'http://www.tracker-project.org/temp/nmm#flash-on':
         //% "Did fire"
-        qsTrId("gallery-value-flash-on"),
+        qsTrId("components_gallery-value-flash-on"),
         'http://www.tracker-project.org/temp/nmm#flash-off':
         //% "Did not fire"
-        qsTrId("gallery-value-flash-off")
+        qsTrId("components_gallery-value-flash-off")
     }
 
     // https://developer.gnome.org/ontology/stable/nmm-MeteringMode.html
     property variant meteringModeValues: {
         'http://www.tracker-project.org/temp/nmm#metering-mode-other':
         //% "Other"
-        qsTrId("gallery-value-metering-mode-other"),
+        qsTrId("components_gallery-value-metering-mode-other"),
         'http://www.tracker-project.org/temp/nmm#metering-mode-partial':
         //% "Partial"
-        qsTrId("gallery-value-metring-mode-partial"),
+        qsTrId("components_gallery-value-metring-mode-partial"),
         'http://www.tracker-project.org/temp/nmm#metering-mode-pattern':
         //% "Pattern"
-        qsTrId("gallery-value-metering-mode-pattern"),
+        qsTrId("components_gallery-value-metering-mode-pattern"),
         'http://www.tracker-project.org/temp/nmm#metering-mode-multispot':
         //% "Multispot"
-        qsTrId("gallery-value-metering-mode-multispot"),
+        qsTrId("components_gallery-value-metering-mode-multispot"),
         'http://www.tracker-project.org/temp/nmm#metering-mode-spot':
         //% "Spot"
-        qsTrId("gallery-value-metering-mode-spot"),
+        qsTrId("components_gallery-value-metering-mode-spot"),
         'http://www.tracker-project.org/temp/nmm#metering-mode-center-weighted-average':
         //% "Center Weighted Average"
-        qsTrId("gallery-value-metering-mode-center-weighted-average"),
+        qsTrId("components_gallery-value-metering-mode-center-weighted-average"),
         'http://www.tracker-project.org/temp/nmm#metering-mode-average':
         //% "Average"
-        qsTrId("gallery-value-metering-mode-average")
+        qsTrId("components_gallery-value-metering-mode-average")
     }
 
     // https://developer.gnome.org/ontology/stable/nmm-WhiteBalance.html
     property variant whiteBalanceValues: {
         'http://www.tracker-project.org/temp/nmm#white-balance-manual':
         //% "Manual"
-        qsTrId("gallery-value-white-balance-manual"),
+        qsTrId("components_gallery-value-white-balance-manual"),
         'http://www.tracker-project.org/temp/nmm#white-balance-auto':
         //% "Auto"
-        qsTrId("gallery-value-white-balance-auto")
+        qsTrId("components_gallery-value-white-balance-auto")
     }
 
     DocumentGalleryItem {
@@ -90,12 +89,12 @@ Page {
                     fNumberItem.value = galleryItem.metaData.fNumber != ""
                             //: Camera aperture value
                             //% "f/%1"
-                            ? qsTrId("gallery-value-fnumber").arg(galleryItem.metaData.fNumber) : ""
+                            ? qsTrId("components_gallery-value-fnumber").arg(galleryItem.metaData.fNumber) : ""
                     flashEnabledItem.value = flashValues[galleryItem.metaData.flashEnabled]
                     focalLengthItem.value = galleryItem.metaData.focalLength != ""
                             //: Camera focal length in millimeters
                             //% "%1 mm"
-                            ? qsTrId("gallery-value-focal-length").arg(galleryItem.metaData.focalLength) : ""
+                            ? qsTrId("components_gallery-value-focal-length").arg(galleryItem.metaData.focalLength) : ""
                     meteringModeItem.value = galleryItem.metaData.meteringMode != ""
                             ? meteringModeValues[galleryItem.metaData.meteringMode]
                             : ""
@@ -105,7 +104,7 @@ Page {
                     gpsItem.value = galleryItem.metaData.latitude != ""
                             //: GPS coordinates
                             //% "Latitude %1 - Longitude %2 - Altitude %3"
-                            ? qsTrId("gallery-value-gps").arg(galleryItem.metaData.latitude).arg(galleryItem.metaData.longitude).arg(galleryItem.metaData.altitude)
+                            ? qsTrId("components_gallery-value-gps").arg(galleryItem.metaData.latitude).arg(galleryItem.metaData.longitude).arg(galleryItem.metaData.altitude)
                             : ""
                 }
 
@@ -126,99 +125,98 @@ Page {
             width: parent.width
 
             PageHeader {
-                //: This is a temporary translation ID to re-use translations from jolla-gallery.  The ID should be corrected before translation.
                 //% "Details"
-                title: qsTrId("gallery-he-details")
+                title: qsTrId("components_gallery-he-details")
             }
             DetailItem {
                 id: nameItem
                 //% "Filename"
-                label: qsTrId("gallery-la-filename")
+                label: qsTrId("components_gallery-la-filename")
             }
             DetailItem {
                 id: sizeItem
                 //% "Size"
-                label: qsTrId("gallery-la-size")
+                label: qsTrId("components_gallery-la-size")
             }
             DetailItem {
                 id: typeItem
                 //% "Type"
-                label: qsTrId("gallery-la-type")
+                label: qsTrId("components_gallery-la-type")
             }
             DetailItem {
                 id: widthItem
                 //% "Width"
-                label: qsTrId("gallery-la-width")
+                label: qsTrId("components_gallery-la-width")
             }
             DetailItem {
                 id: heightItem
                 //% "Height"
-                label: qsTrId("gallery-la-height")
+                label: qsTrId("components_gallery-la-height")
             }
             DetailItem {
                 id: dateTakenItem
                 //% "Date Taken"
-                label: qsTrId("gallery-la-date-taken")
+                label: qsTrId("components_gallery-la-date-taken")
                 visible: value.length > 0
             }
             DetailItem {
                 id: cameraManufacturerItem
                 //% "Camera Manufacturer"
-                label: qsTrId("gallery-la-camera-manufacturer")
+                label: qsTrId("components_gallery-la-camera-manufacturer")
                 visible: value.length > 0
             }
             DetailItem {
                 id: cameraModelItem
                 //% "Camera Model"
-                label: qsTrId("gallery-la-camera-model")
+                label: qsTrId("components_gallery-la-camera-model")
                 visible: value.length > 0
             }
             DetailItem {
                 id: exposureTimeItem
                 //% "Exposure Time"
-                label: qsTrId("gallery-la-exposure-time")
+                label: qsTrId("components_gallery-la-exposure-time")
                 visible: value.length > 0
             }
             DetailItem {
                 id: fNumberItem
                 //% "Aperture"
-                label: qsTrId("gallery-la-aperture")
+                label: qsTrId("components_gallery-la-aperture")
                 visible: value.length > 0
             }
             DetailItem {
                 id: flashEnabledItem
                 //% "Flash"
-                label: qsTrId("gallery-la-flash-enabled")
+                label: qsTrId("components_gallery-la-flash-enabled")
                 visible: value.length > 0
             }
             DetailItem {
                 id: focalLengthItem
                 //% "Focal Length"
-                label: qsTrId("gallery-la-focal-length")
+                label: qsTrId("components_gallery-la-focal-length")
                 visible: value.length > 0
             }
             DetailItem {
                 id: meteringModeItem
                 //% "Metering Mode"
-                label: qsTrId("gallery-la-metering-mode")
+                label: qsTrId("components_gallery-la-metering-mode")
                 visible: value.length > 0
             }
             DetailItem {
                 id: whiteBalanceItem
                 //% "White Balance"
-                label: qsTrId("gallery-la-white-balance")
+                label: qsTrId("components_gallery-la-white-balance")
                 visible: value.length > 0
             }
             DetailItem {
                 id: gpsItem
                 //% "GPS"
-                label: qsTrId("gallery-la-gps")
+                label: qsTrId("components_gallery-la-gps")
                 visible: value.length > 0
             }
             DetailItem {
                 id: durationItem
                 //% "Duration"
-                label: qsTrId("gallery-la-duration")
+                label: qsTrId("components_gallery-la-duration")
                 visible: value.length > 0
             }
         }

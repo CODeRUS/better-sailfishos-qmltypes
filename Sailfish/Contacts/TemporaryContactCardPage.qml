@@ -49,16 +49,6 @@ Page {
         onContactModified: contacts.savePerson(contact)
 
         PullDownMenu {
-            id: menu
-
-            property bool exitOnClose
-            onActiveChanged: {
-                if (!active && exitOnClose) {
-                    // Return to anchor page if we're attached, or pop entirely
-                    pageStack.navigateBack()
-                }
-            }
-
             MenuItem {
                 // Defined in ContactCardPage.qml
                 text: qsTrId("components_contacts-me-edit")
@@ -68,7 +58,7 @@ Page {
             MenuItem {
                 // Defined in ContactCardPage.qml
                 text: qsTrId("components_contacts-me-link")
-                onClicked: pageStack.push(contactPickerComponent)
+                onClicked: pageStack.animatorPush(contactPickerComponent)
                 visible: contact === null || !contact.id
             }
             MenuItem {
@@ -85,13 +75,15 @@ Page {
                         properties["accountUris"] = contact.accountDetails[0].accountUri
                     }
                     ContactsService.createContact(properties)
-
+                }
+                onDelayedClick: {
                     if (exitAfterSave) {
                         // After saving, the source model should update but our temporary contact
                         // won't, so pop the temporary card page
-                        menu.exitOnClose = true
+                        pageStack.navigateBack()
                     }
                 }
+
                 visible: contact === null || !contact.id
             }
         }
@@ -107,10 +99,12 @@ Page {
 
             function appendDetail() {
                 var detail
+                var details
+
                 if (contactPage.contact.phoneDetails.length) {
                     detail = contactPage.contact.phoneDetails[0].number
 
-                    var details = selectedContact.phoneDetails
+                    details = selectedContact.phoneDetails
                     details.push({
                         'number': detail,
                         'type': Person.PhoneNumberType,
@@ -120,7 +114,7 @@ Page {
                 } else if (contactPage.contact.emailDetails.length) {
                     detail = contactPage.contact.emailDetails[0].address
 
-                    var details = selectedContact.emailDetails
+                    details = selectedContact.emailDetails
                     details.push({
                         'address': detail,
                         'type': Person.EmailAddressType,
@@ -131,7 +125,7 @@ Page {
                 } else if (contactPage.contact.accountDetails.length) {
                     detail = contactPage.contact.accountDetails[0].accountUri
 
-                    var details = selectedContact.accountDetails
+                    details = selectedContact.accountDetails
                     details.push({
                         'accountUri': detail,
                         'type': Person.OnlineAccountType,

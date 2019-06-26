@@ -111,60 +111,15 @@ BackgroundItem {
         height: dialog.isPortrait ? Theme.itemSizeLarge : Theme.itemSizeSmall
         width: dialogHeader.width
         y: flickable ? Math.max(flickable.contentY, flickable.originY) : 0
+        x: flickable ? dialogHeader.x : 0
 
         Wallpaper {
             id: wallpaper
-            anchors.centerIn: parent
+            width: overlay.width
+            height: overlay.height
             visible: dialogHeader._backgroundVisible
-            rotation: dialog.rotation
             source: glassOnly ? "" : Theme.backgroundImage
-            state: rotation
-            states: [
-                State {
-                    name: "0"
-                    PropertyChanges {
-                        target: wallpaper
-                        windowRotation: 0
-                        verticalOffset: 0
-                        horizontalOffset: -dialog.parent.x
-                        width: overlay.width
-                        height: overlay.height
-                    }
-                },
-                State {
-                    name: "180"
-                    PropertyChanges {
-                        target: wallpaper
-                        windowRotation: 180
-                        verticalOffset: 0
-                        horizontalOffset: -dialog.parent.x
-                        width: overlay.width
-                        height: overlay.height
-                    }
-                },
-                State {
-                    name: "270"
-                    PropertyChanges {
-                        target: wallpaper
-                        windowRotation: 270
-                        verticalOffset: -dialog.parent.y
-                        horizontalOffset: -(Screen.width-overlay.height)
-                        width: overlay.height
-                        height: overlay.width
-                    }
-                },
-                State {
-                    name: "90"
-                    PropertyChanges {
-                        target: wallpaper
-                        windowRotation: 90
-                        verticalOffset: -dialog.parent.y
-                        horizontalOffset: 0
-                        width: overlay.height
-                        height: overlay.width
-                    }
-                }
-            ]
+            windowRotation: dialog.rotation
         }
 
         PanelBackground {

@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.theme 1.0
 import org.nemomobile.socialcache 1.0
+import com.jolla.gallery.extensions 1.0
 
 BackgroundItem {
     id: root
@@ -27,19 +28,17 @@ BackgroundItem {
     }
 
     height: Theme.itemSizeExtraLarge
+    enabled: imagesModel.count > 0
+    opacity: enabled ? 1.0 : 0.6
 
     SlideshowIcon {
         id: image
-        // Between 7 and 14 s, it is funnier when it is random
-        timerInterval: 7000 +  Math.floor((Math.random() * 7000));
-        anchors.left: parent.left
-        opacity: root.down ? 0.5 : 1
         model: root.imagesModel
+        highlighted: root.highlighted
+        serviceIcon: "image://theme/graphic-service-facebook"
     }
 
     Column {
-        id: column
-
         anchors {
             left: image.right
             leftMargin: Theme.paddingLarge
@@ -49,7 +48,6 @@ BackgroundItem {
         }
 
         Label {
-            id: titleLabel
             width: parent.width
             text: albumName
             font.family: Theme.fontFamilyHeading
@@ -59,7 +57,6 @@ BackgroundItem {
         }
 
         Label {
-            id: subtitleLabel
             width: parent.width
 
             //: Photos count for facebook album

@@ -8,12 +8,14 @@ SettingItem {
     property url iconSource
     property url pageSource
     property bool useHighlightColor: true
+    property int leftMargin: Theme.horizontalPageMargin
+    property int rightMargin: Theme.horizontalPageMargin
 
-    onClicked: pageStack.push(pageSource.toString(), {})
+    onClicked: pageStack.animatorPush(pageSource.toString())
 
     Image {
         id: icon
-        x: Theme.horizontalPageMargin
+        x: root.leftMargin
         anchors.verticalCenter: parent.verticalCenter
         source: (root.highlighted && root.iconSource != "" && root.useHighlightColor)
                 ? root.iconSource + "?" + Theme.highlightColor
@@ -28,7 +30,7 @@ SettingItem {
             leftMargin: icon.width > 0 ? Theme.paddingMedium : 0
             verticalCenter: parent.verticalCenter
             right: parent.right
-            rightMargin: Theme.horizontalPageMargin
+            rightMargin: root.rightMargin
         }
     }
 }

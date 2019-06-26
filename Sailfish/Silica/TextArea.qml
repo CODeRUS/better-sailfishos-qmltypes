@@ -51,6 +51,7 @@ TextBase {
     property alias selectedText: textEdit.selectedText
     property alias selectionStart: textEdit.selectionStart
     property alias selectionEnd: textEdit.selectionEnd
+    property alias length: textEdit.length
 
     onHorizontalAlignmentChanged: {
         if (explicitHorizontalAlignment) {
@@ -75,7 +76,6 @@ TextBase {
         id: textEdit
         objectName: "textEditor"
 
-        property alias _preeditText: preeditText // for TextAutoScroller
         onHorizontalAlignmentChanged: textArea.setImplicitHorizontalAlignment(horizontalAlignment)
 
         x: -parent.contentX
@@ -97,6 +97,8 @@ TextBase {
         // Note: need to disable if textFormat is ever allowed to be more than TextEdit.PlainText
         PreeditText {
             id: preeditText
+
+            onTextChanged: textArea._fixupScrollPosition()
         }
     }
 }

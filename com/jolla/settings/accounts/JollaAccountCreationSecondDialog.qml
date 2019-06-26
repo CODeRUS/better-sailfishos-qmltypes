@@ -121,7 +121,7 @@ Dialog {
                && !emailField.errorHighlight
                && countryCode !== ""
                && languageLocale !== ""
-               && (birthday != null && !isNaN(birthday.getTime()))
+               && birthdayButton.isOldEnough(birthday)
 
     onAccepted: {
         _saveContactDetails()
@@ -290,7 +290,7 @@ Dialog {
                 id: languageButton
 
                 //: Allows language to be selected
-                //% "Language:"
+                //% "Language"
                 label: qsTrId("settings_accounts-la-language")
                 // TODO: change hardcoded color to upcoming theme error color
                 valueColor: languageLocale === "" && checkMandatoryFields
@@ -301,13 +301,15 @@ Dialog {
 
                 onClicked: {
                     root.focus = true
-                    var picker = pageStack.push(languagePickerComponent)
-                    picker.languageClicked.connect(function(language, locale) {
-                        root.languageLocale = locale
-                        languageButton.value = language
-                        if (picker === pageStack.currentPage) {
-                            pageStack.pop()
-                        }
+                    var obj = pageStack.animatorPush(languagePickerComponent)
+                    obj.pageCompleted.connect(function(picker) {
+                        picker.languageClicked.connect(function(language, locale) {
+                            root.languageLocale = locale
+                            languageButton.value = language
+                            if (picker === pageStack.currentPage) {
+                                pageStack.pop()
+                            }
+                        })
                     })
                 }
 
@@ -326,13 +328,33 @@ Dialog {
             ValueButton {
                 id: birthdayButton
 
+                function isOldEnough(birthday) {
+                    if (birthday == null || isNaN(birthday.getTime())) {
+                        return false
+                    }
+
+                    var today = new Date()
+                    var age = today.getFullYear() - birthday.getFullYear()
+                    var months = today.getMonth() - birthday.getMonth()
+                    if (months < 0 || (months === 0 && today.getDate() < birthday.getDate())) {
+                        age--
+                    }
+
+                    return (age >= 13)
+                }
+
+
                 //: Allows birthday to be selected
-                //% "Birthday:"
+                //% "Birthday"
                 label: qsTrId("settings_accounts-la-birthday")
                 // TODO: change hardcoded color to upcoming theme error color
-                valueColor: (root.birthday == null || isNaN(root.birthday.getTime())) && checkMandatoryFields
+                valueColor: !isOldEnough(root.birthday) && checkMandatoryFields
                             ? "#ff4d4d"
                             : Theme.highlightColor
+
+                //% "If you are under 13 please contact customer support for more information."
+                description: !isOldEnough(root.birthday) && checkMandatoryFields ? qsTrId("settings_accounts-la-age_disclaimer") : ""
+                descriptionColor: "#ff4d4d"
 
                 value: root.birthday != null && !isNaN(root.birthday.getTime())
                        ? Format.formatDate(root.birthday, Format.DateLong)
@@ -349,10 +371,12 @@ Dialog {
                         defaultBirthday = new Date()
                         defaultBirthday.setFullYear(defaultBirthday.getFullYear() - 20)
                     }
-                    var dialog = pageStack.push(datePickerComponent, { date: defaultBirthday, _showYearSelectionFirst: true })
-                    dialog.accepted.connect(function() {
-                        root.birthday = dialog.date
-                        birthdayButton.value = Format.formatDate(root.birthday, Format.DateLong)
+                    var obj = pageStack.animatorPush(datePickerComponent, { date: defaultBirthday, _showYearSelectionFirst: true })
+                    obj.pageCompleted.connect(function(dialog) {
+                        dialog.accepted.connect(function() {
+                            root.birthday = dialog.date
+                            birthdayButton.value = Format.formatDate(root.birthday, Format.DateLong)
+                        })
                     })
                 }
 

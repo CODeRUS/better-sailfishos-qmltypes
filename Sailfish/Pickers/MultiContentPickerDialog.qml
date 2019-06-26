@@ -15,9 +15,7 @@ PickerDialog {
 
     property string title
 
-    // We are single selection, so don't show the forward navigation indicator
-    forwardNavigation: false
-
+    forwardNavigation: _selectedCount > 0
     orientationTransitions: Private.PageOrientationTransition {
         fadeTarget: _background ? categoryList : __silica_applicationwindow_instance.contentItem
         targetPage: contentPickerDialog
@@ -27,35 +25,63 @@ PickerDialog {
         id: categoryList
 
         anchors.fill: parent
-        header: PageHeader {
-            id: dialogHeader
-            title: contentPickerDialog.title
+        header: Loader {
+            id: headerLoader
+            width: parent.width
+
+            sourceComponent: _selectedCount > 0 ? dialogHeader : pageHeader
+
+            Component {
+                id: pageHeader
+                PageHeader {
+                    title: contentPickerDialog.title
+                }
+            }
+
+            Component {
+                id: dialogHeader
+                PickerDialogHeader {
+                    showBack: !_clearOnBackstep
+                    selectedCount: _selectedCount
+                    _glassOnly: _background
+                }
+            }
         }
 
         model: categoryModel
 
-        delegate: BackgroundItem {
-            Label {
-                id: categoryName
-
-                text: categoryList.model.category(index)
-                color: down ? Theme.highlightColor : Theme.primaryColor
-                anchors.verticalCenter: parent.verticalCenter
-                x: Theme.horizontalPageMargin
-                width: parent.width - x*2
-            }
+        delegate: CategoryItem {
+            text: categoryModel.category(index)
+            iconSource: model.iconSource
 
             onClicked: {
-                var subview = pageStack.push(Qt.resolvedUrl(model.subview), {
-                    acceptDestination: pageStack.previousPage(contentPickerDialog),
+                var props = {
                     acceptDestinationAction: PageStackAction.Pop,
                     _selectedModel: contentPickerDialog._selectedModel,
                     _animationDuration: contentPickerDialog._animationDuration,
                     _background: contentPickerDialog._background
-                }, pageStack._transitionDuration === 0 ? PageStackAction.Immediate : PageStackAction.Animated);
+                }
 
-                subview.accepted.connect(function() {
-                    contentPickerDialog._dialogDone(DialogResult.Accepted)
+
+                // Copy properties from model to the sub-page
+                for (var i in model.properties) {
+                    props[i] = model.properties[i]
+                }
+
+                // Accept destination cannot be set, if forward navigation is not enabled
+                if (model.acceptDestination) {
+                    props["acceptDestination"] = pageStack.previousPage(contentPickerDialog)
+                } else {
+                    props["_maskedAcceptDestination"] = pageStack.previousPage(contentPickerDialog)
+                }
+
+                var obj = pageStack.animatorPush(Qt.resolvedUrl(model.subview), props,
+                                                 pageStack._transitionDuration === 0 ? PageStackAction.Immediate
+                                                                                     : PageStackAction.Animated);
+                obj.pageCompleted.connect(function(subview) {
+                    subview.accepted.connect(function() {
+                        contentPickerDialog._dialogDone(DialogResult.Accepted)
+                    })
                 })
             }
         }

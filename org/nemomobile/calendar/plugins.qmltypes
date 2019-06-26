@@ -104,24 +104,46 @@ Module {
             }
         }
         Enum {
-            name: "Reminder"
-            values: {
-                "ReminderNone": 0,
-                "ReminderTime": 1,
-                "Reminder5Min": 2,
-                "Reminder15Min": 3,
-                "Reminder30Min": 4,
-                "Reminder1Hour": 5,
-                "Reminder2Hour": 6,
-                "Reminder1Day": 7,
-                "Reminder2Day": 8
-            }
-        }
-        Enum {
             name: "TimeSpec"
             values: {
                 "SpecLocalZone": 0,
                 "SpecClockTime": 1
+            }
+        }
+        Enum {
+            name: "Secrecy"
+            values: {
+                "SecrecyPublic": 0,
+                "SecrecyPrivate": 1,
+                "SecrecyConfidential": 2
+            }
+        }
+        Enum {
+            name: "Response"
+            values: {
+                "ResponseUnspecified": 0,
+                "ResponseAccept": 1,
+                "ResponseTentative": 2,
+                "ResponseDecline": 3
+            }
+        }
+        Enum {
+            name: "ParticipantStatus"
+            values: {
+                "NeedsAction": 0,
+                "Accepted": 1,
+                "Declined": 2,
+                "Tentative": 3,
+                "Delegated": 4
+            }
+        }
+        Enum {
+            name: "AttendeeRole"
+            values: {
+                "ReqParticipant": 0,
+                "OptParticipant": 1,
+                "NonParticipant": 2,
+                "Chair": 3
             }
         }
         Property { name: "displayLabel"; type: "string"; isReadonly: true }
@@ -129,16 +151,24 @@ Module {
         Property { name: "startTime"; type: "QDateTime"; isReadonly: true }
         Property { name: "endTime"; type: "QDateTime"; isReadonly: true }
         Property { name: "allDay"; type: "bool"; isReadonly: true }
-        Property { name: "recur"; type: "Recur"; isReadonly: true }
+        Property { name: "recur"; type: "NemoCalendarEvent::Recur"; isReadonly: true }
         Property { name: "recurEndDate"; type: "QDateTime"; isReadonly: true }
         Property { name: "hasRecurEndDate"; type: "bool"; isReadonly: true }
-        Property { name: "reminder"; type: "Reminder"; isReadonly: true }
+        Property { name: "reminder"; type: "int"; isReadonly: true }
         Property { name: "uniqueId"; type: "string"; isReadonly: true }
         Property { name: "recurrenceId"; type: "string"; isReadonly: true }
         Property { name: "color"; type: "string"; isReadonly: true }
         Property { name: "readonly"; type: "bool"; isReadonly: true }
         Property { name: "calendarUid"; type: "string"; isReadonly: true }
         Property { name: "location"; type: "string"; isReadonly: true }
+        Property { name: "secrecy"; type: "NemoCalendarEvent::Secrecy"; isReadonly: true }
+        Property { name: "ownerStatus"; type: "NemoCalendarEvent::Response"; isReadonly: true }
+        Property { name: "rsvp"; type: "bool"; isReadonly: true }
+        Method {
+            name: "sendResponse"
+            type: "bool"
+            Parameter { name: "response"; type: "int" }
+        }
         Method {
             name: "vCalendar"
             type: "string"
@@ -160,7 +190,8 @@ Module {
         Property { name: "recur"; type: "NemoCalendarEvent::Recur" }
         Property { name: "recurEndDate"; type: "QDateTime"; isReadonly: true }
         Property { name: "hasRecurEndDate"; type: "bool"; isReadonly: true }
-        Property { name: "reminder"; type: "NemoCalendarEvent::Reminder" }
+        Property { name: "recurrenceId"; type: "string"; isReadonly: true }
+        Property { name: "reminder"; type: "int" }
         Property { name: "location"; type: "string" }
         Property { name: "calendarUid"; type: "string" }
         Method {
@@ -209,6 +240,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "count"; type: "int"; isReadonly: true }
         Property { name: "fileName"; type: "string" }
+        Property { name: "icsString"; type: "string" }
         Method {
             name: "getEvent"
             type: "QObject*"

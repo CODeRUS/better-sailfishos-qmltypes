@@ -21,6 +21,7 @@ Module {
         "org.nemomobile.configuration 1.0",
         "org.nemomobile.contacts 1.0",
         "org.nemomobile.dbus 2.0",
+        "org.nemomobile.notifications 1.0",
         "org.nemomobile.thumbnailer 1.0",
         "org.nemomobile.time 1.0"
     ]

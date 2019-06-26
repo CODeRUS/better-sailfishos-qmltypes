@@ -5,6 +5,7 @@ import com.jolla.gallery.extensions 1.0
 
 AlbumsPage {
     id: root
+
     accessTokenService: "dropbox-images"
     clientId: keyProviderHelper.dropboxClientId
     syncService: "dropbox-images"
@@ -49,14 +50,14 @@ AlbumsPage {
 
         onClicked: {
             imagesModel.loadImages()
-            window.pageStack.push(photoGridComponent,
-                                  {"albumName": albumName,
-                                   "albumIdentifier": albumIdentifier,
-                                   "userIdentifier": userIdentifier,
-                                   "model": imagesModel,
-                                   "fullSizeDownloader": Qt.binding(function() { return root.fullSizeDownloader }),
-                                   "syncHelper": Qt.binding(function() { return root.syncHelper }),
-                                   "accessTokensProvider": Qt.binding(function() { return root.accessTokensProvider }) })
+            window.pageStack.animatorPush(photoGridComponent,
+                                          {   "albumName": albumName,
+                                              "albumIdentifier": albumIdentifier,
+                                              "userIdentifier": userIdentifier,
+                                              "model": imagesModel,
+                                              "fullSizeDownloader": Qt.binding(function() { return root.fullSizeDownloader }),
+                                              "syncHelper": Qt.binding(function() { return root.syncHelper }),
+                                              "accessTokensProvider": Qt.binding(function() { return root.accessTokensProvider }) })
         }
     }
 

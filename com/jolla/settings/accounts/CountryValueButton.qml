@@ -15,7 +15,7 @@ ValueButton {
     signal countrySelected(string countryName, string countryCode)
 
     //: Allows country to be selected
-    //% "Country:"
+    //% "Country"
     label: qsTrId("settings_accounts-la-country")
 
     value: countryName
@@ -25,14 +25,16 @@ ValueButton {
            : qsTrId("settings_accounts-la-select_country")
 
     onClicked: {
-        var picker = pageStack.push(countryPickerComponent)
-        picker.countryClicked.connect(function(countryName, countryCode) {
-            root.countryCode = countryCode
-            root.countryName = countryName
-            root.countrySelected(countryName, countryCode)
-            if (picker === pageStack.currentPage) {
-                pageStack.pop()
-            }
+        var obj = pageStack.animatorPush(countryPickerComponent)
+        obj.pageCompleted.connect(function(picker) {
+            picker.countryClicked.connect(function(countryName, countryCode) {
+                root.countryCode = countryCode
+                root.countryName = countryName
+                root.countrySelected(countryName, countryCode)
+                if (picker === pageStack.currentPage) {
+                    pageStack.pop()
+                }
+            })
         })
     }
 

@@ -16,6 +16,7 @@ ListView {
     property int eventCategoryMask: CommHistory.AnyCategory
     property Component contextMenuComponent
     property bool ready: recentContactsModel.resolved
+    property bool promptSimSelection: Telephony.voiceSimUsageMode === Telephony.AlwaysAskSim
 
     property bool _animationEnabled: recentContactsModel.resolved
 
@@ -40,7 +41,7 @@ ListView {
 
     CommRecentContactsModel {
         id: recentContactsModel
-        limit: 10
+        limit: 5
         requiredProperty: root.requiredProperty
         eventCategoryMask: root.eventCategoryMask
         excludeFavorites: true
@@ -62,6 +63,7 @@ ListView {
     delegate: ContactBrowserItem {
         id: contactItem
 
+        recent: true
         width: root.width
         menu: root.contextMenuComponent
 
@@ -75,6 +77,7 @@ ListView {
         secondText: eventPerson.secondaryName
         iconSource: isMessage ? "image://theme/icon-launcher-messaging" : "image://theme/icon-launcher-phone"
         presenceState: eventPerson.globalPresenceState
+        promptSimSelection: root.promptSimSelection
 
         Binding {
             when: contactItem.highlighted

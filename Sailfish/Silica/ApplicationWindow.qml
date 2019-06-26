@@ -144,7 +144,7 @@ Window {
                     // We cannot blindly assign _coverObject to _coverWindow.cover (DeclarativeCover)
                     // as the _coverObject can be an item that is not inherited from DeclarativeCover (e.g. QQuickRectangle)
                     try {
-                        _coverWindow.cover = _coverObject;
+                        _coverWindow.cover = _coverObject
                     } catch (e) {
                         console.log("Warning: recommended to use Cover or CoverBackground component based cover")
                     }
@@ -164,6 +164,11 @@ Window {
 
     focus: true
     objectName: "rootWindow"
+
+    _windowOpacity: ambienceChangeTimer.running ? 0.0 : 1.0
+    Behavior on _windowOpacity {
+        NumberAnimation { easing.type: Easing.InOutQuad; duration: 400; alwaysRunToEnd: true }
+    }
 
     // If we have anything assigned to cover, then we let lipstick know that a cover window may be coming.
     _haveCoverHint: !!cover
@@ -185,6 +190,20 @@ Window {
         anchors.centerIn: parent
 
         rotation: Config.desktop ? 0 : window.QtQuick.Screen.angleBetween(Qt.PortraitOrientation, window.QtQuick.Screen.primaryOrientation)
+
+        ThemeTransaction {
+            deferAmbience: ambienceChangeTimer.running
+            onAmbienceAboutToChange: {
+                if (Config.wayland && window.__quickWindow.visible) { // Don't do this inside of the compositor.
+                    ambienceChangeTimer.restart()
+                }
+            }
+        }
+
+        Timer {
+            id: ambienceChangeTimer
+            interval: 600
+        }
 
         Item {
             id: rotatingItem
@@ -224,6 +243,8 @@ Window {
 
             Item {
                 id: content
+
+                property alias _windowOpacity: content.opacity
 
                 // Content is now being resized. We need to add a property to skip resizing if there
                 // is such requirement in an app.
@@ -334,7 +355,7 @@ Window {
                     console.log('Warning: specifying an object instance for initialPage is sub-optimal - prefer to use a Component')
                 }
             }
-            pageStack.push(initialPage)
+            pageStack.animatorPush(initialPage)
         }
 
         if (cover) {

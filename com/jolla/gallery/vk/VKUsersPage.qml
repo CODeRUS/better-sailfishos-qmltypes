@@ -6,6 +6,7 @@ import com.jolla.gallery.extensions 1.0
 
 UsersPage {
     id: root
+
     socialNetwork: SocialSync.VK
     dataType: SocialSync.Images
     usersModel: VKImageCacheModel {
@@ -31,10 +32,10 @@ UsersPage {
             downloader: VKImageDownloader
         }
         onClicked: {
-            window.pageStack.push(Qt.resolvedUrl("VKAlbumsPage.qml"),
-                                  {"userId": delegateItem.userId,
-                                   "accountId": delegateItem.accountId,
-                                   "title": root.title})
+            window.pageStack.animatorPush(Qt.resolvedUrl("VKAlbumsPage.qml"),
+                                          {   "userId": delegateItem.userId,
+                                              "accountId": delegateItem.accountId,
+                                              "title": root.title})
         }
     }
 }

@@ -97,9 +97,10 @@ ValueButton {
             if (!_page) {
                 _page = Util.findPage(comboBox)
             }
-            _menuDialogItem = pageStack.push(menuDialogComponent)
+            var obj = pageStack.animatorPush(menuDialogComponent)
+            obj.pageCompleted.connect(function(page) { _menuDialogItem = page })
         } else {
-            comboBox.menu.show(comboBox)
+            comboBox.menu.open(comboBox)
         }
     }
 
@@ -230,7 +231,6 @@ ValueButton {
             allowedOrientations: _page ? _page.allowedOrientations : Orientation.All
 
             Component.onCompleted: {
-                menu.height = 1 // XXX hack to allow us to check the MenuItems visibilities
                 var menuItems = comboBox.menu.children
                 for (var i = 0; i < menuItems.length; i++) {
                     var child = menuItems[i]
@@ -238,7 +238,6 @@ ValueButton {
                         items.append( {"item": child } )
                     }
                 }
-                menu.height = 0
             }
 
             ListModel {
@@ -246,8 +245,6 @@ ValueButton {
             }
 
             SilicaListView {
-                id: view
-
                 anchors.fill: parent
                 model: items
 

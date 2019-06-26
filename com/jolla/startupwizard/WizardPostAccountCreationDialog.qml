@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQml.Models 2.1
 import Sailfish.Silica 1.0
 import com.jolla.startupwizard 1.0
 import org.nemomobile.configuration 1.0
@@ -12,7 +13,7 @@ Dialog {
     property bool runningFromSettingsApp
 
     property var endDestination
-    property var endDestinationAction: PageStackAction.Push
+    property int endDestinationAction: PageStackAction.Push
     property var endDestinationProperties: ({})
     property var endDestinationReplaceTarget: undefined
 
@@ -22,20 +23,21 @@ Dialog {
     property bool _selectedAppsToInstall: ((_sailfishAppInstallationDialog && _sailfishAppInstallationDialog.selectedAppCount > 0) ||
                                            (_androidAppsInstallDialog && _androidAppsInstallDialog.selectedAppCount > 0))
 
-    property bool _skipAppPage: sailfishAppSelectionSuppressed.value == true || !policy.value
-    property bool _skipAndroidPage: androidSelectionSuppressed.value == true || !policy.value
+    property bool _skipAppPage: !_sailfishAppInstallationAllowed || !_sailfishAppInstallationDialog
+    property bool _skipAndroidPage: !_androidAppInstallationAllowed || !_androidAppsInstallDialog
 
-    Component.onCompleted: {
-        if (!_skipAppPage) {
-            _sailfishAppInstallationDialog = applicationInstallationComponent.createObject(root)
-        }
-        if (!_skipAndroidPage) {
-            _androidAppsInstallDialog = androidInstallationComponent.createObject(root)
+    readonly property bool _sailfishAppInstallationAllowed: !sailfishAppSelectionSuppressed.value && policy.value
+    readonly property bool _androidAppInstallationAllowed: !androidSelectionSuppressed.value && policy.value
+
+    canAccept: sailfishAppsModel.populated && androidAppsModel.populated && androidAppsModel.androidSupportStatus != StartupApplicationModel.Unknown
+    acceptDestination: {
+        if (canAccept) {
+            _skipAppPage ? (_skipAndroidPage ? root.endDestination : root._androidAppsInstallDialog)
+                         : root._sailfishAppInstallationDialog
+        } else {
+            return null
         }
     }
-
-    acceptDestination: _skipAppPage ? (_skipAndroidPage ? root.endDestination : root._androidAppsInstallDialog)
-                                    : root._sailfishAppInstallationDialog
     acceptDestinationAction: _skipAppPage ? (_skipAndroidPage ? root.endDestinationAction : PageStackAction.Push)
                                           : PageStackAction.Push
     acceptDestinationProperties: _skipAppPage ? (_skipAndroidPage ? root.endDestinationProperties : undefined)
@@ -45,16 +47,56 @@ Dialog {
     StartupApplicationModel {
         id: sailfishAppsModel
         category: "jolla"
+
+        onPopulatedChanged: {
+            if (_sailfishAppInstallationAllowed && populated && count > 0) {
+                _sailfishAppInstallationDialog = applicationInstallationComponent.createObject(root)
+            }
+        }
     }
 
     StartupApplicationModel {
         id: androidAppsModel
+
+        readonly property bool createAndroidAppInstallationDialog: (androidSupportStatus == StartupApplicationModel.Installed && count > 0) || androidSupportPackageAvailable
+        property bool androidSupportPackageAvailable
+
+        function isAndroidSupportPackage(packageName) {
+            return packageName == "aliendalvik"
+        }
+
         category: "marketplace"
 
-        Component.onCompleted: {
-            populate(accountManager.getProviderList())
+        onPopulatedChanged: {
+            if (_androidAppInstallationAllowed && populated && count > 0) {
+                delegateModel.model = androidAppsModel
+            }
+        }
+
+        onCreateAndroidAppInstallationDialogChanged: {
+            if (createAndroidAppInstallationDialog && !_androidAppsInstallDialog) {
+                _androidAppsInstallDialog = androidInstallationComponent.createObject(root)
+            }
+        }
+
+        Component.onCompleted: populate(accountManager.getProviderList())
+    }
+
+    DelegateModel {
+        id: delegateModel
+        delegate: QtObject {}
+        onCountChanged: {
+            var androidSupportPackageAvailable = false
+            for (var i = 0; i < items.count; ++i) {
+                if (androidAppsModel.isAndroidSupportPackage(items.get(i).model.packageName)) {
+                    androidSupportPackageAvailable = true
+                    break
+                }
+            }
+            androidAppsModel.androidSupportPackageAvailable = androidSupportPackageAvailable
         }
     }
+
 
     AccountManager {
         id: accountManager
@@ -77,6 +119,7 @@ Dialog {
     }
 
     Column {
+        id: accountSuccessfullyCreatedView
         width: parent.width
 
         WizardDialogHeader {
@@ -101,6 +144,41 @@ Dialog {
         Image {
             anchors.horizontalCenter: parent.horizontalCenter
             source: "image://theme/graphic-store-jolla-apps"
+        }
+
+    }
+
+    Item {
+        anchors {
+            top: accountSuccessfullyCreatedView.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
+
+        Column {
+            anchors.centerIn: parent
+            width: parent.width
+            spacing: Theme.paddingLarge
+
+            Label {
+                //: Displayed the same time with "Great! your Jolla was successfully added!", and we might be fetching more than just one application.
+                //% "Fetching applications to install"
+                text: qsTrId("startupwizard-la-fetching_application_information")
+                x: Theme.horizontalPageMargin
+                width: parent.width - Theme.horizontalPageMargin*2
+                opacity: busyIndicator.opacity
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                color: Theme.highlightColor
+            }
+
+            BusyIndicator {
+                id: busyIndicator
+                anchors.horizontalCenter: parent.horizontalCenter
+                size: BusyIndicatorSize.Large
+                running: !root.canAccept
+            }
         }
     }
 
@@ -177,10 +255,12 @@ Dialog {
     ConfigurationValue {
         id: sailfishAppSelectionSuppressed
         key: "/apps/jolla-startupwizard/sailfish_app_selection_suppressed"
+        defaultValue: false
     }
 
     ConfigurationValue {
         id: androidSelectionSuppressed
         key: "/apps/jolla-startupwizard/android_selection_suppressed"
+        defaultValue: false
     }
 }

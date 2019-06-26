@@ -37,17 +37,13 @@ Column {
         id: providerModel
     }
 
-    Column {
-        width: root.width
-
-        Repeater {
-            model: providerModel
-            delegate: AccountProviderPickerDelegate {
-                width: root.width
-                visible: !root._isOtherProvider(model.providerName)
-                         && !root._isCloudStorageProvider(model.providerName)
-                         && canCreateAccount
-            }
+    Repeater {
+        model: providerModel
+        delegate: AccountProviderPickerDelegate {
+            width: root.width
+            visible: !root._isOtherProvider(model.providerName)
+                     && !root._isCloudStorageProvider(model.providerName)
+                     && canCreateAccount
         }
     }
 
@@ -55,26 +51,17 @@ Column {
         //: List of account providers that offer cloud storage
         //% "Cloud storage"
         text: qsTrId("components_accounts-la-service_name_cloud_storage")
-        visible: cloudStorageRepeater.cloudProviderCount > 0
+        // Returns true when serviceFilter contains "sharing" or "storage" or "sync" or is empty
+        visible: !serviceFilter.join(",") || /sharing|storage|sync/.test(serviceFilter)
     }
 
-    Column {
-        width: root.width
-
-        Repeater {
-            id: cloudStorageRepeater
-            property int cloudProviderCount
-            model: providerModel
-            delegate: AccountProviderPickerDelegate {
-                id: csPickerDelegate
-                width: root.width
-                visible: root._isCloudStorageProvider(model.providerName) && canCreateAccount
-                Component.onCompleted: {
-                    if (root._isCloudStorageProvider(model.providerName)) {
-                        cloudStorageRepeater.cloudProviderCount += 1
-                    }
-                }
-            }
+    Repeater {
+        id: cloudStorageRepeater
+        model: providerModel
+        delegate: AccountProviderPickerDelegate {
+            id: csPickerDelegate
+            width: root.width
+            visible: root._isCloudStorageProvider(model.providerName) && canCreateAccount
         }
     }
 
@@ -82,26 +69,17 @@ Column {
         //: List of other types of account providers
         //% "Other"
         text: qsTrId("components_accounts-la-other")
-        visible: otherRepeater.otherProviderCount > 0
+        // Returns true when serviceFilter contains "caldav" or "carddav" or "e-mail" or is empty
+        visible: !serviceFilter.join(",") || /caldav|carddav|e\-mail/.test(serviceFilter)
     }
 
-    Column {
-        width: root.width
-
-        Repeater {
-            id: otherRepeater
-            property int otherProviderCount
-            model: providerModel
-            delegate: AccountProviderPickerDelegate {
-                id: opPickerDelegate
-                width: root.width
-                visible: root._isOtherProvider(model.providerName) && canCreateAccount
-                Component.onCompleted: {
-                    if (root._isOtherProvider(model.providerName)) {
-                        otherRepeater.otherProviderCount += 1
-                    }
-                }
-            }
+    Repeater {
+        id: otherRepeater
+        model: providerModel
+        delegate: AccountProviderPickerDelegate {
+            id: opPickerDelegate
+            width: root.width
+            visible: root._isOtherProvider(model.providerName) && canCreateAccount
         }
     }
 }

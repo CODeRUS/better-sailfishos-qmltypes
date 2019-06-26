@@ -1,2 +1,2 @@
 module Sailfish.Calculator
-plugin sailfishcalculatorplugin
+typeinfo plugins.qmltypes

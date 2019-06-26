@@ -1,2 +1,2 @@
 module org.nemomobile.contentaction
-plugin contentaction
+typeinfo plugins.qmltypes

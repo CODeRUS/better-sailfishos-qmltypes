@@ -7,15 +7,18 @@ import QtQuick.tooling 1.2
 // 'qmlplugindump -nonrelocatable -noinstantiate Sailfish.Silica 1.0'
 
 Module {
-    dependencies: [
-        "QtQuick 2.6",
-        "QtQuick.Window 2.1",
-        "QtWebKit 3.0",
-        "QtWebKit.experimental 1.0",
-        "Sailfish.Silica.private 1.0",
-        "org.nemomobile.configuration 1.0",
-        "org.nemomobile.thumbnailer 1.0"
-    ]
+    dependencies: []
+    Component {
+        name: "AutoScroll"
+        prototype: "QObject"
+        Property { name: "keepVisible"; type: "bool" }
+        Property { name: "restorePosition"; type: "bool" }
+        Property { name: "modal"; type: "bool" }
+        Property { name: "animated"; type: "bool" }
+        Property { name: "hasCursor"; type: "bool"; isReadonly: true }
+        Property { name: "cursorRectangle"; type: "QRectF" }
+        Method { name: "fixup" }
+    }
     Component {
         name: "ButtonLayout"
         defaultProperty: "data"
@@ -278,7 +281,8 @@ Module {
                 "MonthNameStandalone": 16,
                 "MonthNameStandaloneShort": 17,
                 "DateMedium": 18,
-                "DateMediumWithoutYear": 19
+                "DateMediumWithoutYear": 19,
+                "DateFullWithoutYear": 20
             }
         }
         Enum {
@@ -375,6 +379,8 @@ Module {
         exports: ["Sailfish.Silica/GlassItem 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "color"; type: "QColor" }
+        Property { name: "backgroundColor"; type: "QColor" }
+        Property { name: "pattern"; type: "QUrl" }
         Property { name: "dimmed"; type: "bool" }
         Property { name: "cache"; type: "bool" }
         Property { name: "radius"; type: "float" }
@@ -445,9 +451,27 @@ Module {
         Enum {
             name: "Navigation"
             values: {
-                "None": 0,
+                "NoNavigation": 0,
                 "Back": 1,
-                "Forward": 2
+                "Forward": 2,
+                "None": 0
+            }
+        }
+        Enum {
+            name: "Direction"
+            values: {
+                "NoDirection": 0,
+                "Up": 1,
+                "Down": 2,
+                "Left": 3,
+                "Right": 4
+            }
+        }
+        Enum {
+            name: "Style"
+            values: {
+                "Horizontal": 0,
+                "Vertical": 1
             }
         }
     }
@@ -480,15 +504,25 @@ Module {
         exports: ["Sailfish.Silica/PageStackBase 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "pressed"; type: "bool"; isReadonly: true }
+        Property { name: "busy"; type: "bool"; isReadonly: true }
+        Property { name: "depth"; type: "int" }
         Property { name: "backNavigation"; type: "bool" }
         Property { name: "forwardNavigation"; type: "bool" }
-        Property { name: "_backFlickDifference"; type: "float"; isReadonly: true }
-        Property { name: "_forwardFlickDifference"; type: "float"; isReadonly: true }
+        Property { name: "horizontalNavigationStyle"; type: "bool"; isReadonly: true }
+        Property { name: "navigationStyle"; type: "DeclarativePageNavigation::Style" }
+        Property { name: "_leftFlickDifference"; type: "float"; isReadonly: true }
+        Property { name: "_rightFlickDifference"; type: "float"; isReadonly: true }
+        Property { name: "_upFlickDifference"; type: "float"; isReadonly: true }
+        Property { name: "_downFlickDifference"; type: "float"; isReadonly: true }
+        Property { name: "_ongoingTransitionCount"; type: "int" }
         Property { name: "_currentContainer"; type: "QQuickItem"; isPointer: true }
         Property { name: "currentPage"; type: "QQuickItem"; isPointer: true }
         Property { name: "_noGrabbing"; type: "bool" }
         Signal { name: "backFlickDifferenceChanged" }
         Signal { name: "forwardFlickDifferenceChanged" }
+        Signal { name: "upFlickDifferenceChanged" }
+        Signal { name: "downFlickDifferenceChanged" }
+        Signal { name: "ongoingTransitionCountChanged" }
         Signal { name: "currentContainerChanged" }
         Signal { name: "noGrabbingChanged" }
         Signal { name: "pressed" }
@@ -510,6 +544,7 @@ Module {
             type: "string"
             Parameter { name: "page"; type: "string" }
         }
+        Method { name: "_grabMouse" }
     }
     Component {
         name: "DeclarativePageStatus"
@@ -543,6 +578,7 @@ Module {
         Property { name: "pictures"; type: "string"; isReadonly: true }
         Property { name: "videos"; type: "string"; isReadonly: true }
         Property { name: "home"; type: "string"; isReadonly: true }
+        Property { name: "temporary"; type: "string"; isReadonly: true }
     }
     Component {
         name: "DeclarativeTouchBlocker"
@@ -598,6 +634,15 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "sourceModel"; type: "QAbstractItemModel"; isPointer: true }
         Property { name: "formattedProperties"; type: "QVariantList" }
+    }
+    Component {
+        name: "HorizontalAutoScroll"
+        prototype: "AutoScroll"
+        exports: ["Sailfish.Silica/HorizontalAutoScroll 1.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Property { name: "leftMargin"; type: "float" }
+        Property { name: "rightMargin"; type: "float" }
     }
     Component {
         name: "MInverseMouseArea"
@@ -683,14 +728,14 @@ Module {
             }
         }
         Enum {
-            name: "Style"
+            name: "ColorScheme"
             values: {
-                "StyleLight": 0,
-                "StyleDark": 1
+                "LightOnDark": 0,
+                "DarkOnLight": 1
             }
         }
         Property { name: "pixelRatio"; type: "float"; isReadonly: true }
-        Property { name: "style"; type: "Style"; isReadonly: true }
+        Property { name: "colorScheme"; type: "ColorScheme"; isReadonly: true }
         Property { name: "fontFamilyHeading"; type: "string"; isReadonly: true }
         Property { name: "fontFamily"; type: "string"; isReadonly: true }
         Property { name: "fontSizeTiny"; type: "int"; isReadonly: true }
@@ -721,6 +766,7 @@ Module {
         Property { name: "iconSizeExtraLarge"; type: "float"; isReadonly: true }
         Property { name: "iconSizeLauncher"; type: "float"; isReadonly: true }
         Property { name: "launcherIconDirectories"; type: "QStringList"; isReadonly: true }
+        Property { name: "buttonWidthExtraSmall"; type: "float"; isReadonly: true }
         Property { name: "buttonWidthSmall"; type: "float"; isReadonly: true }
         Property { name: "buttonWidthMedium"; type: "float"; isReadonly: true }
         Property { name: "buttonWidthLarge"; type: "float"; isReadonly: true }
@@ -742,10 +788,26 @@ Module {
         Property { name: "secondaryColor"; type: "QColor"; isReadonly: true }
         Property { name: "overlayBackgroundColor"; type: "QColor"; isReadonly: true }
         Property { name: "secondaryHighlightColor"; type: "QColor"; isReadonly: true }
+        Property { name: "backgroundGlowColor"; type: "QColor"; isReadonly: true }
+        Property { name: "errorColor"; type: "QColor"; isReadonly: true }
         Property { name: "backgroundImage"; type: "QUrl"; isReadonly: true }
+        Property { name: "_homeBackgroundImage"; type: "QUrl"; isReadonly: true }
+        Property { name: "lightPrimaryColor"; type: "QColor"; isReadonly: true }
+        Property { name: "lightSecondaryColor"; type: "QColor"; isReadonly: true }
+        Property { name: "darkPrimaryColor"; type: "QColor"; isReadonly: true }
+        Property { name: "darkSecondaryColor"; type: "QColor"; isReadonly: true }
         Property { name: "startDragDistance"; type: "int"; isReadonly: true }
         Property { name: "minimumPressHighlightTime"; type: "int"; isReadonly: true }
         Property { name: "_webviewCustomLayoutWidthScalingFactor"; type: "float"; isReadonly: true }
+        Signal { name: "homeBackgroundImageChanged" }
+        Method {
+            name: "setColorScheme"
+            Parameter { name: "colorScheme"; type: "ColorScheme" }
+        }
+        Method {
+            name: "_setHighlightColor"
+            Parameter { name: "color"; type: "QColor" }
+        }
         Method {
             name: "highlightText"
             type: "string"
@@ -769,6 +831,39 @@ Module {
             type: "string"
             Parameter { name: "mimeType"; type: "string" }
         }
+        Method {
+            name: "highlightFromColor"
+            type: "QColor"
+            Parameter { name: "color"; type: "QColor" }
+            Parameter { name: "scheme"; type: "Silica::Theme::ColorScheme" }
+        }
+        Method {
+            name: "secondaryHighlightFromColor"
+            type: "QColor"
+            Parameter { name: "color"; type: "QColor" }
+            Parameter { name: "scheme"; type: "Silica::Theme::ColorScheme" }
+        }
+        Method {
+            name: "highlightBackgroundFromColor"
+            type: "QColor"
+            Parameter { name: "color"; type: "QColor" }
+            Parameter { name: "scheme"; type: "Silica::Theme::ColorScheme" }
+        }
+        Method {
+            name: "highlightDimmerFromColor"
+            type: "QColor"
+            Parameter { name: "color"; type: "QColor" }
+            Parameter { name: "scheme"; type: "Silica::Theme::ColorScheme" }
+        }
+    }
+    Component {
+        name: "VerticalAutoScroll"
+        prototype: "AutoScroll"
+        exports: ["Sailfish.Silica/VerticalAutoScroll 1.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Property { name: "topMargin"; type: "float" }
+        Property { name: "bottomMargin"; type: "float" }
     }
     Component {
         prototype: "QObject"

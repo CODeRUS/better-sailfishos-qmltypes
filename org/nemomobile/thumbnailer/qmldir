@@ -1,2 +1,2 @@
 module org.nemomobile.thumbnailer
-plugin nemothumbnailer
+typeinfo plugins.qmltypes

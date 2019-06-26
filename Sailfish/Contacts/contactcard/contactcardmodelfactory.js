@@ -20,7 +20,7 @@ function getDetailsActionItemsModel(model, detailType)
 {
     var actionsModel = {}
 
-    switch(detailType) {
+    switch (detailType) {
     case "phone":
         //% "Call"
         actionsModel["actionLabel"] = qsTrId("components_contacts-action_call")

@@ -11,11 +11,11 @@ MandatoryDeviceLockInputPage {
     property Component destination
 
     function goTo(target) {
-        pageStack.replace(target, {
-            "settings": settings,
-            "authenticationToken": authenticationToken,
-            "destination": destination
-        })
+        pageStack.animatorReplace(target, {
+                                      "settings": settings,
+                                      "authenticationToken": authenticationToken,
+                                      "destination": destination
+                                  })
     }
 
     backNavigation: false
@@ -51,16 +51,16 @@ MandatoryDeviceLockInputPage {
 
         onChallengeIssued: page.authenticate()
         onChallengeDeclined: {
-            pageStack.replace(Qt.resolvedUrl("FingerEnrollmentProgressPage.qml"), {
-                "settings": settings,
-                "authenticationToken": authenticationToken,
-                "_finished": true,
-                "_failed": true,
-                "forwardNavigation": true,
-                "destination": destination,
-                //% "The system is unable to acquire permissions to register a finger print."
-                "explanation": qsTrId("settings_devicelock-la-fingerprint_error_no_challenge_explanation")
-            })
+            pageStack.animatorReplace(Qt.resolvedUrl("FingerEnrollmentProgressPage.qml"), {
+                                          "settings": settings,
+                                          "authenticationToken": authenticationToken,
+                                          "_finished": true,
+                                          "_failed": true,
+                                          "forwardNavigation": true,
+                                          "destination": destination,
+                                          //% "The system is unable to acquire permissions to register a finger print."
+                                          "explanation": qsTrId("settings_devicelock-la-fingerprint_error_no_challenge_explanation")
+                                      })
         }
     }
 }

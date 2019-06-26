@@ -11,11 +11,11 @@ SettingItem {
     height: row.height
 
     onClicked: {
-        pageStack.push("SettingsPage.qml", {
-                           "name": root.name,
-                           "entryPath": root.entryPath,
-                           "depth": root.depth
-                       })
+        pageStack.animatorPush("SettingsPage.qml", {
+                                   "name": root.name,
+                                   "entryPath": root.entryPath,
+                                   "depth": root.depth
+                               })
     }
 
     Image {

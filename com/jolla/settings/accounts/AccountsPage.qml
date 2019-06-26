@@ -72,39 +72,40 @@ Page {
                 onAccountRemoveRequested: logic.accountRemoveRequested(accountId)
                 onAccountSyncRequested: logic.accountSyncRequested(accountId)
 
-                BackgroundItem {
-                    id: addItem
-                    width: accountsView.itemWidth
-                    height: Theme.itemSizeMedium
-                    onClicked: logic.accountCreationManager.startAccountCreation()
-                    Image {
-                        id: icon
-                        x: Theme.horizontalPageMargin
-                        anchors.verticalCenter: parent.verticalCenter
-                        source: "image://theme/icon-m-add" + (addItem.highlighted ? "?" + Theme.highlightColor : "")
-                    }
-                    Label {
-                        id: label
-                        //: Initiates adding a new account
-                        //% "Add account"
-                        text: qsTrId("components_accounts-me-add_account")
-                        truncationMode: TruncationMode.Fade
-                        color: addItem.highlighted ? Theme.highlightColor : Theme.primaryColor
-                        anchors {
-                            left: icon.right
-                            leftMargin: Theme.paddingLarge
-                            verticalCenter: parent.verticalCenter
-                            right: parent.right
-                            rightMargin: Theme.horizontalPageMargin
-                        }
-                    }
-                }
-
                 ViewPlaceholder {
                     enabled: provisionedAccountsView.model.count == 0 && accountsView.model.count == 0
 
+                    //: Viewplaceholder for no accounts, no pulley menu, only add account button
                     //% "No accounts"
-                    text: qsTrId("components_accounts-he-no_accounts")
+                    text: qsTrId("components_accounts-he-no_accounts_no_pulley")
+                }
+            }
+
+            BackgroundItem {
+                id: addItem
+                width: parent.width
+                height: Theme.itemSizeMedium
+                onClicked: logic.accountCreationManager.startAccountCreation()
+                Image {
+                    id: icon
+                    x: Theme.horizontalPageMargin
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "image://theme/icon-m-add" + (addItem.highlighted ? "?" + Theme.highlightColor : "")
+                }
+                Label {
+                    id: label
+                    //: Initiates adding a new account
+                    //% "Add account"
+                    text: qsTrId("components_accounts-me-add_account")
+                    truncationMode: TruncationMode.Fade
+                    color: addItem.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    anchors {
+                        left: icon.right
+                        leftMargin: Theme.paddingLarge
+                        verticalCenter: parent.verticalCenter
+                        right: parent.right
+                        rightMargin: Theme.horizontalPageMargin
+                    }
                 }
             }
         }

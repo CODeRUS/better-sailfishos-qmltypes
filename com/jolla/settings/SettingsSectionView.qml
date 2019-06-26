@@ -31,6 +31,16 @@ Column {
             delegate: SettingComponentLoader {
                 width: itemWidth
                 settingsObject: model.object
+                onLoaded: {
+                    if (columns === 2) {
+                        if (item.hasOwnProperty("leftMargin")) {
+                            item.leftMargin = Qt.binding(function() { return model.index % 2 ? Theme.paddingMedium : Theme.horizontalPageMargin })
+                        }
+                        if (item.hasOwnProperty("rightMargin")) {
+                            item.rightMargin = Qt.binding(function() { return model.index % 2 ? Theme.horizontalPageMargin : Theme.paddingMedium })
+                        }
+                    }
+                }
             }
         }
     }

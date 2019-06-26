@@ -110,12 +110,15 @@ Item {
         // Add the indices of the accounts in descending presence state order
         var orderedStates = [ Person.PresenceAvailable, Person.PresenceAway, Person.PresenceExtendedAway, Person.PresenceBusy ]
         var stateNames = [ 'available', 'away', 'away', 'busy' ]
-        for (var i = 0; i < orderedStates.length; ++i) {
+        var i
+        var j
+
+        for (i = 0; i < orderedStates.length; ++i) {
             var state = orderedStates[i]
             var name = stateNames[i]
 
             var stateIndices = []
-            for (var j = 0; j < states.length; ++j) {
+            for (j = 0; j < states.length; ++j) {
                 if (states[j] == state) {
                     if (addedIndices.length < maxAccounts) {
                         stateIndices.push(j)
@@ -135,8 +138,8 @@ Item {
         if ((addedIndices.length < states.length) && (addedIndices.length < maxAccounts)) {
             // Add any account indices we haven't already added
             var otherIndices = []
-            for (var i = 0; i < states.length; ++i) {
-                for (var j = 0; j < addedIndices.length; ++j) {
+            for (i = 0; i < states.length; ++i) {
+                for (j = 0; j < addedIndices.length; ++j) {
                     if (addedIndices[j] == i) {
                         break
                     }
@@ -533,8 +536,7 @@ Item {
             family: Theme.fontFamilyHeading
             pixelSize: Theme.fontSizeExtraSmall
         }
-        color: Theme.highlightColor
-        opacity: 0.6
+        color: Theme.secondaryHighlightColor
         horizontalAlignment: Text.AlignRight
         wrapMode: Text.WordWrap
         maximumLineCount: 2

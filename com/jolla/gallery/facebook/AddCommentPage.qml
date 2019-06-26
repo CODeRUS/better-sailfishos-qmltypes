@@ -11,15 +11,15 @@ Page {
     allowedOrientations: window.allowedOrientations
 
     function formattedTimestamp(isostr) {
-        var parts = isostr.match(/\d+/g);
+        var parts = isostr.match(/\d+/g)
         // Make sure to use UTC time.
         var dateTime = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5]))
-        var today = new Date;
+        var today = new Date
 
         // return time, if it's today
         if (dateTime.getFullYear() === today.getFullYear() &&
             dateTime.getMonth() === today.getMonth() &&
-            dateTime.getDay() === today.getDay()) {
+            dateTime.getDate() === today.getDate()) {
             return Format.formatDate(dateTime, Formatter.TimepointRelative)
         }
 
@@ -41,24 +41,34 @@ Page {
 
     SilicaListView {
         id: commentsList
-        width: parent.width
+
         spacing: Theme.paddingMedium
         anchors.fill: parent
+        currentIndex: -1
+        focus: true
 
         //: "Facebook album comments page title
         //% "Comments"
         header: PageHeader { title: qsTrId("jolla-gallery-facebook-he-comments") }
 
+        ViewPlaceholder {
+            //% "Error loading comments"
+            text: qsTrId("jolla-gallery-facebook-la-error_loading_comments")
+            enabled: commentsModel.count === 0 && (commentsModel.status === SocialNetwork.Error || commentsModel.status === SocialNetwork.Invalid)
+        }
+
+        BusyIndicator {
+            size: BusyIndicatorSize.Large
+            anchors.centerIn: parent
+            running: commentsModel.count === 0 && (commentsModel.status === SocialNetwork.Initializing || commentsModel.status === SocialNetwork.Busy)
+        }
+
         delegate: Item {
-            id: commentDelegate
             property bool _showDelegate: commentsList.count
 
             width: commentsList.width
-            height: commentFrom.paintedHeight
-                    + commentText.paintedHeight
-                    + likeText.paintedHeight
-                    + 3 * Theme.paddingSmall
-
+            height: (likeCount.visible ? (likeCount.y + likeCount.height) : (commentColumn.y + commentColumn.height))
+                    + Theme.paddingSmall
             opacity: _showDelegate ? 1 : 0
             Behavior on opacity { FadeAnimation {} }
 
@@ -89,11 +99,10 @@ Page {
                     leftMargin: Theme.paddingMedium
                     top: avatar.top
                     right: parent.right
-                    rightMargin: Theme.paddingLarge
+                    rightMargin: Theme.horizontalPageMargin
                 }
 
                 Label {
-                    id: commentText
                     text: _showDelegate ? model.contentItem.message : ""
                     width: parent.width
                     font.pixelSize: Theme.fontSizeExtraSmall
@@ -101,11 +110,11 @@ Page {
                     wrapMode: Text.Wrap
                 }
 
-                Row {
+                Flow {
+                    width: parent.width
                     spacing: Theme.paddingSmall
 
                     Label {
-                        id: commentFrom
                         text: _showDelegate ? model.contentItem.from.objectName : ""
                         color: Theme.secondaryColor
                         horizontalAlignment: Text.AlignLeft
@@ -114,7 +123,6 @@ Page {
                     }
 
                     Label {
-                        id: createdTime
                         text: _showDelegate ? formattedTimestamp(model.contentItem.createdTime) : ""
                         color: Theme.secondaryHighlightColor
                         font.pixelSize: Theme.fontSizeExtraSmall
@@ -138,20 +146,15 @@ Page {
             }
 
             Label {
-                id: likeText
-                //: Number of likes for the comment
-                //% "Like"
-                property string like: qsTrId("jolla_gallery_facebook-la-single-like-for-comment")
-                //% "Likes"
-                property string likes: qsTrId("jolla_gallery_facebook-la-number-of-likes-for-comment")
                 text: _showDelegate
-                        ? model.contentItem.likeCount > 1 ? likes : like
+                        ? //: Text at the right side of like count, should have plural handling for like vs likes.
+                          //% "likes"
+                          qsTrId("jolla_gallery_facebook-la-number-of-likes-for-comment", model.contentItem.likeCount)
                         : ""
                 visible: likeCount.visible
                 font.pixelSize: Theme.fontSizeExtraSmall
                 anchors {
-                    top: commentColumn.bottom
-                    topMargin: Theme.paddingSmall
+                    baseline: likeCount.baseline
                     left: commentColumn.left
                 }
             }
@@ -163,38 +166,51 @@ Page {
 
             TextArea {
                 id: addCommentTextField
-                width: parent.width - (sendButton.paintedWidth + Theme.paddingSmall)
-                height: Math.max(Theme.itemSizeMedium, implicitHeight)
+
                 //% "Write comment"
                 label: qsTrId("jolla_gallery_facebook-la-write-comment-page")
+                placeholderText: label
+                anchors { left: parent.left; right: buttonArea.left }
+                focus: true
+            }
 
-                //% "Write a comment"
-                placeholderText: qsTrId("jolla_gallery_facebook-ph-add-comment-page-ph-description")
+            MouseArea {
+                id: buttonArea
+                anchors {
+                    top: buttonText.top
+                    topMargin: -Theme.paddingLarge
+                    leftMargin: -Theme.paddingLarge - Math.max(0, Theme.itemSizeSmall - buttonText.width)
+                    left: buttonText.left
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+                enabled: addCommentTextField.text.length > 0
+                onClicked: {
+                    if (addCommentTextField.text != "") {
+                        photoItem.uploadComment(addCommentTextField.text)
+                        addCommentTextField.focus = false
+                        addCommentTextField.text = ""
+                    }
+                }
             }
 
             Label {
-                id: sendButton
-                //: Send comment button in FB album's comment page
-                //% "Send"
-                text: qsTrId("jolla-gallery-facebook-bt-send-comment")
-                visible: addCommentTextField.text.length > 0
+                id: buttonText
                 anchors {
-                    left: addCommentTextField.right
-                    bottom: addCommentTextField.bottom
-                    bottomMargin: Theme.paddingLarge
+                    right: parent.right
+                    rightMargin: Theme.horizontalPageMargin
+                    verticalCenter: addCommentTextField.top
+                    verticalCenterOffset: addCommentTextField.textVerticalCenterOffset + (addCommentTextField._editor.height - height)
                 }
 
-                MouseArea {
-                    enabled: sendButton.visible
-                    anchors.fill: parent
-                    onClicked: {
-                        if (addCommentTextField.text != "") {
-                            photoItem.uploadComment(addCommentTextField.text)
-                            addCommentTextField.focus = false
-                            addCommentTextField.text = ""
-                        }
-                    }
-                }
+                font.pixelSize: Theme.fontSizeSmall
+                color: !buttonArea.enabled ? Theme.secondaryColor
+                                           : (buttonArea.pressed ? Theme.highlightColor
+                                                                 : Theme.primaryColor)
+
+                //: Send comment button in Facebook album's comment page
+                //% "Send"
+                text: qsTrId("jolla-gallery-facebook-bt-send-comment")
             }
         }
         VerticalScrollDecorator {}

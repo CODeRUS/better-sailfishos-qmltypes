@@ -11,7 +11,7 @@ SettingItem {
 
     implicitHeight: Theme.itemSizeMedium
 
-    onClicked: pageStack.push(pageSource.toString(), {})
+    onClicked: pageStack.animatorPush(pageSource.toString())
 
     Rectangle {
         anchors.fill: parent

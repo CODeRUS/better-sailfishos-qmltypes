@@ -88,41 +88,35 @@ Lesson {
     Image {
         parent: applicationBackground
         anchors.fill: parent
-        opacity: galleryMainPage.opacity
+        opacity: galleryMainPageWrapper.opacity
         source: Screen.sizeCategory >= Screen.Large
                 ? Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-tablet-app-background.png")
                 : Qt.resolvedUrl("file:///usr/share/sailfish-tutorial/graphics/tutorial-phone-app-background.png")
     }
 
     Item {
-        id: galleryMainPage
+        id: galleryMainPageWrapper
 
         anchors.fill: parent
         opacity: 0.0
 
-        Loader {
-            id: pageContent
-
-            source: Screen.sizeCategory >= Screen.Large
-                    ? Qt.resolvedUrl("private/GalleryMainPageTablet.qml")
-                    : Qt.resolvedUrl("private/GalleryMainPagePhone.qml")
-
-            anchors.fill: parent
+        GalleryMainPage {
+            id: galleryMainPage
         }
 
         Item {
             id: shadow
 
-            width: pageContent.item.interactionItem.width
-            height: pageContent.item.interactionItem.height
-            x: pageContent.x + pageContent.item.interactionItem.x
-            y: pageContent.y + pageContent.item.interactionItem.y
+            width: galleryMainPage.interactionItem.width
+            height: galleryMainPage.interactionItem.height
+            x: galleryMainPage.x + galleryMainPage.interactionItem.x
+            y: galleryMainPage.y + galleryMainPage.interactionItem.y
         }
 
         Connections {
-            target: pageContent.item
+            target: galleryMainPage
             onItemClicked: {
-                pageStack.push(photosPage)
+                pageStack.animatorPush(photosPage)
                 galleryFader.opacity = 0.0
                 appInfoLabel.opacity = 0.0
             }
@@ -130,7 +124,7 @@ Lesson {
 
         TapInteractionHint {
             visible: appInfoLabel.opacity !== 0.0
-            running: pageContent.item.interactionItem.enabled
+            running: galleryMainPage.interactionItem.enabled
             anchors.centerIn: shadow
         }
 
@@ -169,7 +163,7 @@ Lesson {
             duration: 100
         }
         NumberAnimation {
-            target: galleryMainPage
+            target: galleryMainPageWrapper
             property: "opacity"
             to: 1.0
             duration: 500

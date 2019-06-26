@@ -1,6 +1,5 @@
 module com.jolla.settings.accounts
 JollaAccountSetupDialog 1.0 JollaAccountSetupDialog.qml
-JollaAccountCreationFirstDialog 1.0 JollaAccountCreationFirstDialog.qml
 JollaAccountCreationSecondDialog 1.0 JollaAccountCreationSecondDialog.qml
 JollaAccountSignInDialog 1.0 JollaAccountSignInDialog.qml
 JollaAccountSettingsDialog 1.0 JollaAccountSettingsDialog.qml
@@ -43,4 +42,6 @@ AccountSettingsSaveHint 1.0 AccountSettingsSaveHint.qml
 JollaAccountCredentialsInput 1.0 JollaAccountCredentialsInput.qml
 ValidatedTextInput 1.0 ValidatedTextInput.qml
 AddAccountMenuItem 1.0 AddAccountMenuItem.qml
+TermsWebView 1.0 TermsWebView.qml
 JollaAccountForgotPasswordInfo 1.0 JollaAccountForgotPasswordInfo.qml
+typeinfo plugins.qmltypes

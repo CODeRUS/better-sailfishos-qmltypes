@@ -96,15 +96,15 @@ QtObject {
         }
     }
 
-    property AccountManager accountManager : AccountManager {}
+    property AccountManager accountManager: AccountManager {}
 
-    property Component _accountInitializer : Component {
+    property Component _accountInitializer: Component {
         Account {
             property bool destroyWhenSyncTriggered
         }
     }
 
-    property Component _missingProfileCreator : Component {
+    property Component _missingProfileCreator: Component {
         AccountSyncManager {
             property Account account
 
@@ -120,7 +120,7 @@ QtObject {
         }
     }
 
-    property AccountSyncManager _syncManager : AccountSyncManager {}
+    property AccountSyncManager _syncManager: AccountSyncManager {}
 
     property DBusInterface buteoDaemon: DBusInterface {
         service: "com.meego.msyncd"

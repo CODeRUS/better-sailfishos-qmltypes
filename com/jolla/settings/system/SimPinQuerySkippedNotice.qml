@@ -6,6 +6,7 @@ Page {
 
     property alias titleColor: titleLabel.color
     property color textColor: Theme.highlightColor
+    property color buttonColor: Theme.primaryColor
 
     signal continueClicked()
 
@@ -19,8 +20,7 @@ Page {
             id: titleLabel
             width: parent.width
             wrapMode: Text.Wrap
-            color: Theme.highlightColor
-            opacity: 0.6
+            color: Theme.secondaryHighlightColor
             font {
                 family: Theme.fontFamilyHeading
                 pixelSize: Theme.fontSizeHuge
@@ -66,7 +66,7 @@ Page {
             anchors.centerIn: parent
             //% "Continue"
             text: qsTrId("settings_system-la-continue")
-            color: continueButton.highlighted ? Theme.highlightColor : Theme.primaryColor
+            color: continueButton.highlighted ? Theme.highlightColor : root.buttonColor
         }
     }
 }

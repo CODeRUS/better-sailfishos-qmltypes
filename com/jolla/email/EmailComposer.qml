@@ -8,7 +8,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Pickers 1.0
-import org.nemomobile.email 0.1
+import Nemo.Email 0.1
 import org.nemomobile.contacts 1.0
 import com.jolla.email.settings.translations 1.0
 import org.nemomobile.configuration 1.0
@@ -29,7 +29,6 @@ Item {
     property alias _toSummary: to.summary
     property alias _bodyText: body.text
 
-    property bool isEmailApp
     property string action
     property alias originalMessageId: originalMessage.messageId
     property int accountId
@@ -39,19 +38,22 @@ Item {
     property Page popDestination
     property int undownloadedAttachmentsCount
     property bool _isPortrait: !pageStack.currentPage || pageStack.currentPage.isPortrait
-    property bool draft
-    property bool discardDraft: true
+    property bool draft // opened from draft
+    property bool autoSaveDraft
+    property bool popOnDraftSaved
     property bool discardUndownloadedAttachments
     property alias toFieldHasFocus: to.activeFocus
+    property int totalAttachmentSize
+    readonly property bool maxAttachmentSizeExceeded: totalAttachmentSize > attachmentSizeMaxConfig.value
 
+    // avoid flashing menu when popping page
+    property bool _effectiveAutoSaveDraft: autoSaveDraft
     //: Discard draft message
     //% "Discard draft"
     readonly property string _strDiscardDraft: qsTrId("jolla-components_email-me-discard_draft")
     //: Save draft message
     //% "Save draft"
     readonly property string _strSaveDraft: qsTrId("jolla-components_email-me-save_draft")
-    //% "Add attachment"
-    readonly property string _strAddAttach: qsTrId("jolla-components_email-me-add_attachment")
     //: Send message
     //% "Send"
     readonly property string _strSend: qsTrId("jolla-components_email-me-send")
@@ -66,8 +68,9 @@ Item {
         }
     }
 
+    // FIXME: this is not safe or good. should get info from pagestack when item gets popped.
     Component.onDestruction: {
-        if (!discardDraft && messageComposer.undownloadedAttachmentsCount === 0
+        if (_effectiveAutoSaveDraft && messageComposer.undownloadedAttachmentsCount === 0
                 && messageContentModified()) {
             saveDraft()
         }
@@ -97,6 +100,15 @@ Item {
         id: contactSearchModel
     }
 
+    Component {
+        id: accountCreatorComponent
+        AccountCreation {
+            endDestination: pageStack.find(function(page) {
+                return true
+            })
+        }
+    }
+
     function _messagePriority(index) {
         return (index === 1 ? EmailMessage.HighPriority : (index === 2 ? EmailMessage.LowPriority : EmailMessage.NormalPriority))
     }
@@ -110,15 +122,23 @@ Item {
         }
 
         //Save any existent attachment that is not from the original message
+        var i
         if (attachmentFiles.count) {
-            for (var i = attachmentFiles.count -1; i >= 0; --i) {
+            for (i = attachmentFiles.count -1; i >= 0; --i) {
                 if (attachmentFiles.get(i).FromOriginalMessage === "true") {
                     attachmentFiles.remove(i)
                 }
             }
         }
 
-        for (var i = 0; i < attachmentListModel.count; ++i) {
+        for (i = 0; i < attachmentListModel.count; ++i) {
+            // first check whether attachment is downloaded or not.
+            if (attachmentListModel.isDownloaded(i)) {
+                // if attachment downloaded we should try to save it on a disk
+                if (!emailAgent.downloadAttachment(originalMessage.messageId, attachmentListModel.location(i))) {
+                    console.warn("Failed to save attachment " + attachmentListModel.location(i) + " on a disk:")
+                }
+            }
             attachmentFiles.append({"url": attachmentListModel.url(i), "title": attachmentListModel.displayName(i),
                                        "mimeType": attachmentListModel.mimeType(i), "FromOriginalMessage": "true"})
 
@@ -157,6 +177,7 @@ Item {
         message.priority = _messagePriority(importance.currentIndex)
         message.subject = subject.text
         message.body = body.text + body.quote
+        message.requestReadReceipt = requestReadReceiptSwitch.checked
 
         if (attachmentFiles.count > 0) {
             var att = []
@@ -174,8 +195,8 @@ Item {
         }
         buildMessage()
         message.send()
-        discardDraft = true
-        if (isEmailApp) {
+        _effectiveAutoSaveDraft = false
+        if (popDestination) {
             // pop any page/dialog on top of composer if it exists
             pageStack.pop(popDestination)
         } else {
@@ -190,38 +211,60 @@ Item {
         }
         buildMessage()
         message.saveDraft()
-
-        if (!isEmailApp) {
-            pageStack.pop()
+        if (popOnDraftSaved) {
+            if (popDestination) {
+                pageStack.pop(popDestination)
+            } else {
+                pageStack.pop()
+            }
         }
     }
 
     function _discardDraft() {
-        discardDraft = true
-        if (isEmailApp) {
-            // pop any page/dialog on top of composer if it exists
+        _effectiveAutoSaveDraft = false
+
+        // pop any page/dialog on top of composer if it exists
+        if (popDestination) {
             pageStack.pop(popDestination)
-            if (draft) {
-                requestDraftRemoval(message.messageId)
-            }
         } else {
             pageStack.pop()
         }
+        if (draft) {
+            // handling or ignoring depends on caller
+            requestDraftRemoval(message.messageId)
+        }
+    }
+
+    function isSelectedAttachment(acceptedItem) {
+        for (var i = 0; i < attachmentFiles.count; ++i) {
+            var attachedItem = attachmentFiles.get(i)
+            if (acceptedItem.filePath === attachedItem.filePath) {
+                return true
+            }
+        }
+        return false
     }
 
     function modifyAttachments() {
-        var picker = pageStack.push(contentPicker, { selectedContent: attachmentFiles })
-        picker.selectedContentChanged.connect(function() {
-            attachmentFiles.clear()
-            for (var i = 0; i < picker.selectedContent.count; ++i) {
-                attachmentFiles.append(picker.selectedContent.get(i))
-            }
+        var obj = pageStack.animatorPush(contentPicker)
+        obj.pageCompleted.connect(function(picker) {
+            picker.selectedContentChanged.connect(function() {
+                for (var i = 0; i < picker.selectedContent.count; ++i) {
+                    var acceptedItem = picker.selectedContent.get(i)
+                    if (!isSelectedAttachment(acceptedItem)) {
+                        attachmentFiles.insert(0, acceptedItem)
+                    }
+                }
+            })
         })
     }
 
     function showAttachments() {
-        var properties = { attachmentFiles: attachmentFiles, contentPicker: contentPicker }
-        pageStack.push(Qt.resolvedUrl('AttachmentsPage.qml'), properties)
+        var properties = { attachmentFiles: attachmentFiles }
+        var obj = pageStack.animatorPush(Qt.resolvedUrl('AttachmentsPage.qml'), properties)
+        obj.pageCompleted.connect(function(page) {
+            page.addAttachments.connect(modifyAttachments)
+        })
     }
 
     function messageContentModified() {
@@ -235,8 +278,8 @@ Item {
 
     function forwardContentAvailable() {
         if (!_originalMessageAttachmentsDownloaded()) {
-            pageStack.push(Qt.resolvedUrl('AttachmentDownloadPage.qml'), {email: originalMessage,
-                               composerItem: messageComposer, undownloadedAttachmentsCount: undownloadedAttachmentsCount})
+            pageStack.animatorPush(Qt.resolvedUrl('AttachmentDownloadPage.qml'), {email: originalMessage,
+                                       composerItem: messageComposer, undownloadedAttachmentsCount: undownloadedAttachmentsCount})
         }
     }
 
@@ -273,15 +316,9 @@ Item {
         contentWidth: parent.width
         contentHeight: accountListModel.numberOfAccounts ? contentItem.y + contentItem.height : viewPlaceHolder.height
 
-        ViewPlaceholder {
+        NoAccountsPlaceholder {
             id: viewPlaceHolder
             enabled: !accountListModel.numberOfAccounts
-            //: No accounts empty state
-            //% "No accounts available for email sending"
-            text: qsTrId("email-la_no_send_accounts")
-            //: Informs the user to configure an account capable of sending in Settings->Accounts
-            //% "Please configure a sending capable account in Settings->Accounts"
-            hintText: qsTrId("email-la_no_send_accounts_hint_text")
         }
 
         onAtYEndChanged: {
@@ -303,24 +340,36 @@ Item {
             }
         }
 
+        RemorsePopup {
+            id: discardDraftRemorse
+        }
+
         PullDownMenu {
-            visible: accountListModel.numberOfAccounts
             MenuItem {
-                // if discardDraft is set to false we auto-save drafts, so
-                // discardDraft is shown in pulley menu, by default this property is set to true
-                // so drafts are discarded.
-                text: discardDraft ? _strSaveDraft : _strDiscardDraft
+                visible: accountListModel.numberOfAccounts
+                // explicit save action only when not doing it automatically
+                text: autoSaveDraft ? _strDiscardDraft : _strSaveDraft
                 enabled: messageContentModified()
-                onClicked: discardDraft ? saveDraft() : _discardDraft()
+                //% "Discarding draft"
+                onClicked: autoSaveDraft ? (draft ? _discardDraft()
+                                                  : discardDraftRemorse.execute(qsTrId("email-me-discarding_draft"), _discardDraft))
+                                         : saveDraft()
             }
             MenuItem {
-                text: _strAddAttach
-                onClicked: modifyAttachments()
-            }
-            MenuItem {
+                visible: accountListModel.numberOfAccounts
                 text: _strSend
-                enabled: hasRecipients && (subject.text != '' || body.text != '')
+                enabled: hasRecipients && (subject.text != '' || body.text != '') && !maxAttachmentSizeExceeded
                 onClicked: sendMessage()
+            }
+            MenuItem {
+                visible: !accountListModel.numberOfAccounts
+                //: Add account menu item
+                //% "Add account"
+                text: qsTrId("jolla-email-me-add_account")
+                onClicked: {
+                    var accountCreator = accountCreatorComponent.createObject(messageComposer)
+                    accountCreator.creationCompleted.connect(function() { accountCreator.destroy() })
+                }
             }
         }
 
@@ -332,13 +381,12 @@ Item {
                 onClicked: sendMessage()
             }
             MenuItem {
-                text: _strAddAttach
-                onClicked: modifyAttachments()
-            }
-            MenuItem {
-                text: _strDiscardDraft
+                text: autoSaveDraft ? _strDiscardDraft : _strSaveDraft
                 enabled: messageContentModified()
-                onClicked: _discardDraft()
+                //% "Discarding draft"
+                onClicked: autoSaveDraft ? (draft ? _discardDraft()
+                                                  : discardDraftRemorse.execute(qsTrId("email-me-discarding_draft"), _discardDraft))
+                                         : saveDraft()
             }
         }
 
@@ -508,6 +556,18 @@ Item {
                         label: qsTrId("jolla-components_email-la-importance")
                     }
                     CompressibleItem {
+                        id: requestReadReceiptItem
+                        compressible: true
+                        TextSwitch {
+                            id: requestReadReceiptSwitch
+                            checked: false
+                            visible: !requestReadReceiptItem.compressed
+                            //: Enables read receipt request
+                            //% "Request read receipt"
+                            text: qsTrId("jolla-email-la-request_read_receipt")
+                        }
+                    }
+                    CompressibleItem {
                         id: attachmentsItem
 
                         compressible: attachmentFiles.count === 0
@@ -515,13 +575,14 @@ Item {
                         Item {
                             width: parent.width
                             // Padding small between this and subject field
-                            implicitHeight: attachmentBg.height + Theme.paddingSmall
+                            implicitHeight: attachmentBg.height + (attachmentSizeLabel.visible && attachmentSizeLabel.text.length ? attachmentSizeLabel.height : 0) + Theme.paddingSmall
 
                             ListItem {
                                 id: attachmentBg
                                 onClicked: attachmentFiles.count === 0 ? modifyAttachments() : showAttachments()
                                 enabled: !attachmentsItem.compressed
-                                menu: contextMenuComponent
+                                // If there is nothing to remove, don't show menu.
+                                menu: attachmentFiles.count > 0 ? contextMenuComponent : null
 
                                 // TODO: Should be changed to Label, default color should be primaryColor
                                 // as this is something that can be pressed. Need to change _updateAttachmentText as well.
@@ -562,6 +623,36 @@ Item {
                                 }
                             }
 
+                            Label {
+                                id: attachmentSizeLabel
+
+                                anchors {
+                                    top: attachmentBg.bottom
+                                    left: attachmentBg.left
+                                    leftMargin: Theme.horizontalPageMargin
+                                    right: attachmentBg.right
+                                    rightMargin: Theme.horizontalPageMargin
+                                }
+
+                                color: maxAttachmentSizeExceeded ? "#ff4d4d" : Theme.highlightColor
+                                wrapMode: Text.Wrap
+                                width: attachmentBg.width
+                                font.pixelSize: Theme.fontSizeExtraSmall
+
+                                text: {
+                                    if (totalAttachmentSize > 0) {
+                                        if (maxAttachmentSizeExceeded) {
+                                            //% "Email cannot be sent! Total file size exceeds %1."
+                                            return qsTrId("jolla-components_email-la-attachments_size_exceed_max").arg(Format.formatFileSize(attachmentSizeMaxConfig.value))
+                                        } else if (totalAttachmentSize > attachmentSizeWarningConfig.value) {
+                                            //% "Total file size exceeds %1. Consider removing some attachments."
+                                            return qsTrId("jolla-components_email-la-attachments_size_exceed_warning").arg(Format.formatFileSize(attachmentSizeWarningConfig.value))
+                                        }
+                                    }
+                                    return ""
+                                }
+                            }
+
                             // This should be attachments.text: _updateAttachmentText() instead
                             // but currectly _updateAttachmentText() break the binding.
                             Connections {
@@ -582,11 +673,6 @@ Item {
                                             attachmentFiles.clear()
                                             attachments.text = ""
                                         }
-                                    }
-                                    MenuItem {
-                                        //% "Add new attachment"
-                                        text: qsTrId("jolla-components_email-me-add_new_attachment")
-                                        onClicked: modifyAttachments()
                                     }
                                 }
                             }
@@ -639,9 +725,9 @@ Item {
 
                 //% "Write message..."
                 placeholderText: (action.slice(0, 5) !== 'reply') ? qsTrId("jolla-components_email-ph-body")
-                                                                     //: Reply text placeholder
-                                                                     //% "Write reply..."
-                                                                   : qsTrId("jolla-components_email-ph-reply")
+                                                                    //: Reply text placeholder
+                                                                    //% "Write reply..."
+                                                                  : qsTrId("jolla-components_email-ph-reply")
 
                 function appendQuote(maxLength) {
                     var lineBreak = -1
@@ -668,15 +754,19 @@ Item {
 
     EmailAccountListModel {
         id: accountListModel
-        canTransmitAccounts: true
+        onlyTransmitAccounts: true
     }
 
     function _updateAttachmentText() {
         var names = []
+        var attachmentTextUpdated = false
+        totalAttachmentSize = 0
         for (var i = 0; i < attachmentFiles.count; ++i) {
-            names.push(attachmentFiles.get(i).title)
+            var attachmentObj = attachmentFiles.get(i)
+            names.push(attachmentObj.title)
+            totalAttachmentSize += attachmentObj.fileSize
             attachments.text = names.join(", ")
-            if (attachments.implicitWidth > attachments.width) {
+            if (!attachmentTextUpdated && attachments.implicitWidth > attachments.width) {
                 while (names.length > 1 && attachments.implicitWidth > attachments.width) {
                     names.pop()
                     //: Number of additional attachments that are not currently shown
@@ -684,16 +774,20 @@ Item {
                     var more = qsTrId("jolla-components_email-la-attchements_summary", attachmentFiles.count - names.length)
                     attachments.text = names.join(", ") + ", " + more
                 }
-                break
+                attachmentTextUpdated = true
             }
         }
+
+        var attachmentSizeText = totalAttachmentSize == 0 ? "" : " (" + Format.formatFileSize(totalAttachmentSize) + ")"
+        attachments.text += attachmentSizeText
 
         // This format is used in case above loop produces too long format.
         if (attachments.implicitWidth > attachments.width) {
             //: Number of attachments, should have singular and plurar formats. Text should be relatively short (max 24 chars).
             //% "%n attachment(s)"
-            attachments.text = qsTrId("jolla-components_email-la-attchements", attachmentFiles.count)
+            attachments.text = qsTrId("jolla-components_email-la-attchements", attachmentFiles.count) + attachmentSizeText
         }
+
         attachments.text = attachmentFiles.count > 0 ? attachments.text : ""
     }
 
@@ -742,7 +836,14 @@ Item {
                     }
                     priority = originalMessage.priority
                     message.responseType = EmailMessage.Forward
-                    setOriginalMessageAttachments()
+                    if (!originalMessage.calendarInvitationSupportsEmailResponses) {
+                        // Do not attach original attachments, since SmartForward will be used by EAS daemon
+                        // and server will attach them automatically. This is valid only for EAS accounts.
+                        // TODO: Update it with a different check if/when calendarInvitationSupportsEmailResponses
+                        // will returns true for non-EAS accounts as well.
+                        // TODO:2 User will not/shouldn't be able to remove original invitation attachments.
+                        setOriginalMessageAttachments()
+                    }
 
                     // to be removed, just temporary to provide at least same functionality as before
                     body.text = forwardPrecursor()
@@ -755,25 +856,36 @@ Item {
                         subjectText = 'Re: ' + subjectText
                     }
                     var replyTo = originalMessage.replyTo ? originalMessage.replyTo : originalMessage.fromAddress
+
+                    // Use slice() to create a new array object that can be modified (QML limitation, should implicitly happen when you start to modify array var)
+                    var recipients = originalMessage.recipients.slice()
+                    var recipientsUsed = false
+
+                    // don't reply to yourself when choosing reply for message you sent
+                    var usersEmailAddress = accountListModel.emailAddressFromAccountId(messageComposer.accountId)
+                    if ((action == 'reply' || action == 'replyAll') && usersEmailAddress == replyTo && recipients.length > 0) {
+                        replyTo = recipients
+                        recipientsUsed = true
+                    }
+
                     to.setRecipients(replyTo)
                     if (action == 'replyAll') {
                         message.responseType = EmailMessage.ReplyToAll
-                        var tmpRecipients = originalMessage.recipients
-                        // tmpRecipients is a QML intermediate(v8-sequence-wrapper) that makes splice not work correctly
-                        // this should be fixed under Qt 5.2, see:
-                        // http://qt-project.org/doc/qt-5.1/qtqml/qtqml-cppintegration-data.html#sequence-type-to-javascript-array
-                        var recipients = tmpRecipients.slice()
-                        var fromIndex = recipients.indexOf(accountListModel.emailAddress(currentIndex >= 0 ? currentIndex : 0))
-                        if (fromIndex != -1) {
-                            // Remove current from address from the list
-                            recipients.splice(fromIndex, 1)
+
+                        if (!recipientsUsed) {
+                            var fromIndex = recipients.indexOf(accountListModel.emailAddress(currentIndex >= 0 ? currentIndex : 0))
+                            if (fromIndex != -1) {
+                                // Remove current from address from the list
+                                recipients.splice(fromIndex, 1)
+                            }
+                            var replyToIndex = recipients.indexOf(replyTo)
+                            if (replyToIndex != -1) {
+                                // Remove to address from the list
+                                recipients.splice(replyToIndex, 1)
+                            }
+
+                            cc.setRecipients(recipients)
                         }
-                        var replyToIndex = recipients.indexOf(replyTo)
-                        if (replyToIndex != -1) {
-                            // Remove to address from the list
-                            recipients.splice(replyToIndex, 1)
-                        }
-                        cc.setRecipients(recipients)
                     } else {
                         message.responseType = EmailMessage.Reply
                     }
@@ -798,6 +910,13 @@ Item {
 
             importance.currentIndex = (priority === EmailMessage.HighPriority) ? 1 : (priority === EmailMessage.LowPriority) ? 2 : 0
 
+            // Do not change request read receipt value of existent draft
+            if (!draft) {
+                requestReadReceiptSwitch.checked = false
+            } else {
+                requestReadReceiptSwitch.checked = message.requestReadReceipt
+            }
+
             if (to.empty && cc.empty && bcc.empty) {
                 to.forceActiveFocus()
             } else {
@@ -818,5 +937,17 @@ Item {
         id: defaultAccountConfig
         key: "/apps/jolla-email/settings/default_account"
         defaultValue: 0
+    }
+
+    ConfigurationValue {
+        id: attachmentSizeWarningConfig
+        key: "/apps/jolla-email/settings/attachment_size_warning"
+        defaultValue: 10 * 1024 * 1024  // 10 MB
+    }
+
+    ConfigurationValue {
+        id: attachmentSizeMaxConfig
+        key: "/apps/jolla-email/settings/attachment_size_max"
+        defaultValue: 25 * 1024 * 1024  // 25 MB
     }
 }

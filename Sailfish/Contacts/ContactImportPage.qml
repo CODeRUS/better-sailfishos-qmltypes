@@ -32,7 +32,7 @@ Page {
             busyIndicator.running = true
             versitImport.importContacts(importSourceUrl)
             var index = importSourceUrl.lastIndexOf("/")
-            _fileName = index >= 0 ? importSourceUrl.substring(index+1) : importSourceUrl
+            _fileName = decodeURIComponent(index >= 0 ? importSourceUrl.substring(index+1) : importSourceUrl)
         } else if (importSourceModemPath != "") {
             busyIndicator.running = true
             // This beginImport() call won't actually do anything if
@@ -98,8 +98,7 @@ Page {
 
         Label {
             width: parent.width
-            color: Theme.highlightColor
-            opacity: 0.6
+            color: Theme.secondaryHighlightColor
             visible: root._readCount > 0
             wrapMode: Text.Wrap
 
@@ -114,8 +113,7 @@ Page {
         Label {
             width: parent.width
             height: implicitHeight + Theme.paddingLarge
-            color: Theme.highlightColor
-            opacity: 0.6
+            color: Theme.secondaryHighlightColor
             wrapMode: Text.Wrap
             text: root._statusText()
         }

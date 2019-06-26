@@ -6,13 +6,6 @@ import com.jolla.gallery.extensions 1.0
 FullscreenPhotoPage {
     id: fullscreenPage
 
-    header: FullscreenPhotoHeader {
-        photoName: fullscreenPage.model.getField(fullscreenPage.currentIndex,
-                                                    OneDriveImageCacheModel.Title)
-        dateTime: fullscreenPage.model.getField(fullscreenPage.currentIndex,
-                                                OneDriveImageCacheModel.DateTaken)
-    }
-
     delegate: CloudImage {
         id: delegateItem
         imageId: model.id
@@ -40,17 +33,13 @@ FullscreenPhotoPage {
     }
 
     onDeletePhoto: {
-        var imageId = fullscreenPage.model.getField(index, OneDriveImageCacheModel.OneDriveId)
+        var imageId = model.getField(index, OneDriveImageCacheModel.OneDriveId)
 
         var doc = new XMLHttpRequest()
         doc.onreadystatechange = function() {
             if (doc.readyState === XMLHttpRequest.DONE) {
                 if (doc.status == 200 || doc.status == 204) {
-                    var doPop = imageId === fullscreenPage.model.getField(currentIndex, OneDriveImageCacheModel.OneDriveId)
                     model.removeImage(imageId)
-                    if (doPop) {
-                        pageStack.pop()
-                    }
                 } else {
                     console.warn("Failed to delete OneDrive image")
                 }

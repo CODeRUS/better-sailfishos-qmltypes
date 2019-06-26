@@ -18,20 +18,14 @@ Item {
     function show(pauseDuration) {
         showPause.duration = pauseDuration !== undefined ? pauseDuration : 500
         if (lessonCounter === 0) {
-            if (androidLauncher) {
-                //: The primary label shown when the tutorial is started on Android
-                //% "Learn basics of Jolla Launcher"
-                label.text = qsTrId("tutorial-la-learn_basics_alternative")
+            if (upgradeMode) {
+                //: The primary label shown when the tutorial is show after an upgrade
+                //% "Congratulations on upgrading to Sailfish OS 2.0!"
+                label.text = qsTrId("tutorial-la-thanks_for_updating")
             } else {
-                if (upgradeMode) {
-                    //: The primary label shown when the tutorial is show after an upgrade
-                    //% "Congratulations on upgrading to Sailfish OS 2.0!"
-                    label.text = qsTrId("tutorial-la-thanks_for_updating")
-                } else {
-                    //: The primary label shown when the tutorial is started
-                    //% "Learn basics of Sailfish OS"
-                    label.text = qsTrId("tutorial-la-learn_basics")
-                }
+                //: The primary label shown when the tutorial is started
+                //% "Learn basics of Sailfish OS"
+                label.text = qsTrId("tutorial-la-learn_basics")
             }
             againButton.visible = false
             //% "Start"
@@ -128,6 +122,9 @@ Item {
             right: parent.right
             margins: Theme.paddingLarge
         }
+
+        highlighted: true
+        icon.color: down ? tutorialTheme.highlightColor : tutorialTheme.primaryColor
 
         visible: allowSystemGesturesBetweenLessons
         icon.source: "image://theme/icon-m-clear"
