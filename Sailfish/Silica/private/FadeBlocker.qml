@@ -33,23 +33,54 @@
 ****************************************************************************************/
 
 import QtQuick 2.0
+import Sailfish.Silica 1.0
+import "Util.js" as Util
 
 Rectangle {
-    color: "black"
+    id: root
+    property alias wallpaperHidden: binding.when
+    property bool fullscreen: page && page.status === PageStatus.Active && !pageStack.dragInProgress && !pageStack._snapBackAnimation.running
+    property Page page: Util.findPage(root)
+
+    onFullscreenChanged: {
+        if (fullscreen) {
+            wallpaperHidden = true
+            delayedHide.restart()
+        } else {
+            visible = true
+            delayedHide.restart()
+        }
+    }
 
     z: -1
     anchors.fill: parent
+    color: "black"
 
-    // Indirect binding to avoid binding loop warning
-    // i.e. "parent = transition ? appWindow : parent"
-    Component.onCompleted: {
-        var _parent = parent
-        parent = Qt.binding(function () {
-            if (orientationTransitionRunning) {
-                return __silica_applicationwindow_instance
+    // hide asynchronously
+    Timer {
+        id: delayedHide
+        interval: 1
+        onTriggered: {
+            if (fullscreen) {
+                visible = false
             } else {
-                return	_parent
+                wallpaperHidden = false
             }
-        })
+        }
+    }
+
+    Binding {
+        id: binding
+        when: false
+        target: __silica_applicationwindow_instance
+        property: "_backgroundVisible"
+        value: false
+    }
+
+    Binding {
+        when: fullscreen
+        target: __silica_applicationwindow_instance.__quickWindow
+        property: "color"
+        value: Qt.application.active ? color : "transparent"
     }
 }

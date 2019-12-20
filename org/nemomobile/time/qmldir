@@ -1,2 +1,3 @@
 module org.nemomobile.time
+plugin nemotime
 typeinfo plugins.qmltypes

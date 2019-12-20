@@ -7,42 +7,41 @@ Dialog {
     id: root
     allowedOrientations: Orientation.All
 
-    // Telephony.Call or Telephony.Message
-    property alias actionType: contactBrowser.actionType
-    property ListModel selectedContacts: contactBrowser.selectedContacts
-    property string searchPlaceholderText: contactBrowser.searchPlaceholderText
-    property bool showSearchPatternAsNewContact: false
-    property alias requiredProperty: contactBrowser.requiredProperty
-    property alias showRecentContactList: contactBrowser.showRecentContactList
+    property ContactSelectionModel selectedContacts: contactBrowser.selectedContacts
+    property alias requiredProperty: contactBrowser.requiredContactProperty
     property alias recentContactsCategoryMask: contactBrowser.recentContactsCategoryMask
-    property alias searchEnabled: contactBrowser.searchEnabled
-    property alias promptSimSelection: contactBrowser.promptSimSelection
+    property alias searchActive: contactBrowser.searchActive
 
-    signal contactClicked(variant contact, variant clickedItemY, variant property, string propertyType)
+    signal contactClicked(var contact, var property, string propertyType)
+
+    function _propertySelected(contact, propertyData, contextMenu, propertyPicker) {
+        root.contactClicked(contact, propertyData.property, propertyData.propertyType)
+    }
 
     canAccept: selectedContacts.count > 0
 
     ContactBrowser {
         id: contactBrowser
 
-        contactsSelectable: true
-        deleteOnlyContextMenu: true
-        searchEnabled: true
-        focus: false
-        showSearchPatternAsNewContact: root.showSearchPatternAsNewContact
+        canSelect: true
+        searchActive: true
 
-        onContactClicked: root.contactClicked(contact, clickedItemY, property, propertyType)
+        pageHeader: DialogHeader {
+            dialog: root
+            acceptText: root.selectedContacts.count > 0
+                    //: Indicates number of selected contacts
+                    //% "%n selected"
+                   ? qsTrId("components_pickers-la-count_selected", root.selectedContacts.count)
+                   : ""
+            spacing: 0
+        }
 
-        topContent: [
-            DialogHeader {
-                dialog: root
-                acceptText: contactBrowser.selectedContacts.count
-                        //: Indicates number of selected contacts
-                        //% "%n selected"
-                       ? qsTrId("components_pickers-la-count_selected", contactBrowser.selectedContacts.count)
-                       : ""
-                spacing: 0
+        onContactClicked: {
+            if (root.requiredProperty === PeopleModel.NoPropertyRequired) {
+                root.contactClicked(contact, null, "")
+            } else {
+                contactBrowser.selectContactProperty(contact.id, root.requiredProperty, root._propertySelected)
             }
-        ]
+        }
     }
 }

@@ -1,2 +1,3 @@
 module Sailfish.Office.PDF
+plugin sailfishofficepdfplugin
 typeinfo plugins.qmltypes

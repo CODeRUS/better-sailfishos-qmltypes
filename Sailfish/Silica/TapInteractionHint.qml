@@ -35,15 +35,15 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
 
-Image {
+Icon {
     id: root
 
     property alias running: animationGroup.running
     property alias loops: animationGroup.loops
     property alias taps: blinkAnimation.loops
-    property color color: Theme.primaryColor
 
-    source: "image://theme/graphic-gesture-hint?" + color
+    color: palette.primaryColor
+    source: "image://theme/graphic-gesture-hint"
     opacity: 0.0
 
     function start() {

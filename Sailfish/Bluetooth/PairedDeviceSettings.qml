@@ -14,21 +14,39 @@ Page {
         QT_TRID_NOOP("components_bluetooth-la-other_unrecognized_profiles")
     }
 
-    function profilesList() {
-        var ret = []
-        var hasUnrecognizedProfiles = false
+    function updateProfilesAndServicesLabels() {
+        var profiles = []
+        var services = []
         for (var i=0; i<bluetoothDevice.uuids.length; i++) {
-            var s = BluetoothProfiles.profileNameFromUuid(bluetoothDevice.uuids[i].toUpperCase())
-            if (s === undefined) {
-                hasUnrecognizedProfiles = true
-            } else if (ret.indexOf(s) < 0) {
-                ret.push(s)
+            var profile = BluetoothProfiles.profileNameFromUuid(bluetoothDevice.uuids[i].toUpperCase())
+            if (profile.length > 0) {
+                if (profiles.indexOf(profile) < 0) {
+                    profiles.push(profile)
+                }
+            } else {
+                var service = BluetoothProfiles.serviceNameFromUuid(bluetoothDevice.uuids[i].toUpperCase())
+                if (service.length > 0 && services.indexOf(service) < 0) {
+                    services.push(service)
+                }
             }
         }
-        if (hasUnrecognizedProfiles) {
-            ret.push(qsTrId("components_bluetooth-la-other_unrecognized_profiles"))
+
+        //: List of bluetooth profiles that are supported by this bluetooth device
+        //% "Supported profiles: %1"
+        profilesLabel.text = qsTrId("components_bluetooth-la-profiles").arg(profiles.join(', '))
+
+        if (services.length > 0) {
+            //: List of bluetooth low energy services that this bluetooth device has
+            //% "Low Energy services: %1"
+            servicesLabel.text = qsTrId("components_bluetooth-la-low_energy_services").arg(services.join(', '))
         }
-        return ret.join(', ')
+    }
+
+    Component.onCompleted: updateProfilesAndServicesLabels()
+
+    Connections {
+        target: bluetoothDevice
+        onUuidsChanged: updateProfilesAndServicesLabels()
     }
 
     SilicaFlickable {
@@ -41,8 +59,15 @@ Page {
             width: root.width
 
             PageHeader {
-                //% "Paired device"
-                title: qsTrId("components_bluetooth-he-paired_device")
+                title: {
+                    if (bluetoothDevice.paired) {
+                        //% "Paired device"
+                        return qsTrId("components_bluetooth-he-paired_device")
+                    } else {
+                        //% "Nearby device"
+                        return qsTrId("components_bluetooth-he-nearby_device")
+                    }
+                }
             }
 
             TextField {
@@ -77,6 +102,7 @@ Page {
             }
 
             TrustBluetoothDeviceSwitch {
+                visible: root.bluetoothDevice.paired
                 checked: root.bluetoothDevice.trusted
 
                 onCheckedChanged: {
@@ -85,6 +111,7 @@ Page {
             }
 
             Label {
+                id: profilesLabel
                 x: Theme.horizontalPageMargin
                 width: root.width - x*2
                 height: implicitHeight + Theme.paddingMedium
@@ -92,10 +119,17 @@ Page {
                 font.pixelSize: Theme.fontSizeExtraSmall
                 wrapMode: Text.Wrap
                 color: Theme.rgba(Theme.highlightColor, 0.9)
+            }
 
-                //: List of bluetooth profiles that are supported by this bluetooth device
-                //% "Supported profiles: %1"
-                text: qsTrId("components_bluetooth-la-profiles").arg(profilesList())
+            Label {
+                id: servicesLabel
+                x: Theme.horizontalPageMargin
+                width: root.width - x*2
+                height: implicitHeight + Theme.paddingMedium
+                verticalAlignment: Text.AlignBottom
+                font.pixelSize: Theme.fontSizeExtraSmall
+                wrapMode: Text.Wrap
+                color: Theme.rgba(Theme.highlightColor, 0.9)
             }
         }
     }

@@ -37,6 +37,8 @@ import Sailfish.Silica 1.0
 import "private"
 
 Page {
+    palette.colorScheme: Theme.LightOnDark
+
     clip: status !== PageStatus.Active || pageStack.dragInProgress
     navigationStyle: PageNavigation.Vertical
     FadeBlocker {}

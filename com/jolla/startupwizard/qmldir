@@ -1,4 +1,5 @@
 module com.jolla.startupwizard
+plugin jollastartupwizardplugin
 WelcomePage 1.0 WelcomePage.qml
 PleaseWaitPage 1.0 PleaseWaitPage.qml
 DateTimeDialog 1.0 DateTimeDialog.qml

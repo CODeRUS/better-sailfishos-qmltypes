@@ -1,2 +1,3 @@
 module Sailfish.Policy
+plugin sailfishpolicyplugin
 typeinfo plugins.qmltypes

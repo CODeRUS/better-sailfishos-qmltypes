@@ -34,13 +34,15 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 import "private"
 
-MouseArea {
+Private.SilicaMouseArea {
     property alias icon: image
     property bool down: pressed && containsMouse
-    property bool highlighted: down
     property bool _showPress: highlighted || pressTimer.running
+
+    highlighted: down
 
     onPressedChanged: {
         if (pressed) {
@@ -51,12 +53,12 @@ MouseArea {
 
     width: Theme.itemSizeSmall; height: Theme.itemSizeSmall
 
-    HighlightImage {
+    Icon {
         id: image
 
         highlighted: _showPress
         anchors.centerIn: parent
-        opacity: parent.enabled ? 1.0 : 0.4
+        opacity: parent.enabled ? 1.0 : Theme.opacityLow
     }
     Timer {
         id: pressTimer

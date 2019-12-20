@@ -1,2 +1,3 @@
 module io.thp.pyotherside
-typeinfo plugins.qmltypes
+plugin pyothersideplugin
+typeinfo pyotherside.qmltypes

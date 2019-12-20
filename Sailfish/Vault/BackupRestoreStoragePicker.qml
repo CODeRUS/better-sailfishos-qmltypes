@@ -56,6 +56,9 @@ Column {
     property string _connectionErrorText: qsTrId("vault-la-backup_lookup_error")
 
     function _update() {
+        // No-op if already set.
+        _setInitialSelection()
+
         if (storageCombo.currentIndex < 0 || storageCombo.currentIndex >= storageListModel.count) {
             return
         }
@@ -105,7 +108,12 @@ Column {
     function _setInitialSelection() {
         // Select the first option that is usable. This selects a cloud account even if there is no
         // internet connection as the user may want to connect and then use it.
-        for (var i=0; i<storageListModel.count; i++) {
+        if (root.storageListModel.count == 0 || storageCombo.currentIndex >= 0 || storageCombo.hasInitialIndex) {
+            return
+        }
+
+
+        for (var i = 0; i < storageListModel.count; i++) {
             var data = storageListModel.get(i)
             if (data.type === storageListModel.storageTypeCloud && root._accountErrorText(data.accountId).length > 0) {
                 continue
@@ -113,6 +121,7 @@ Column {
             storageCombo.currentIndex = i
             break
         }
+        storageCombo.hasInitialIndex = true
     }
 
     BackupUtils {
@@ -126,8 +135,9 @@ Column {
 
     Connections {
         target: root.storageListModel
+        // This should be fixed separately. See JB#46110.
         onReadyChanged: {
-            if (root.storageListModel.ready && storageCombo.currentIndex < 0) {
+            if (root.storageListModel.ready) {
                 root._setInitialSelection()
             }
         }
@@ -135,6 +145,9 @@ Column {
 
     ComboBox {
         id: storageCombo
+
+        property bool hasInitialIndex
+
         width: parent.width
         leftMargin: root.leftMargin
         rightMargin: root.rightMargin

@@ -1,5 +1,13 @@
+/*
+ * Copyright (c) 2018 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Policy 1.0
 import org.nemomobile.systemsettings 1.0
 import Sailfish.Settings.Networking 1.0
 import Sailfish.Settings.Networking.Vpn 1.0
@@ -11,6 +19,10 @@ VpnDetailsPage {
     property var details: []
     property var stateDetails: []
     property var providerDetails: []
+
+    AboutSettings {
+        id: aboutSettings
+    }
 
     function booleanStateName(b) {
                  //% "True"
@@ -50,7 +62,7 @@ VpnDetailsPage {
                 stateDetails.push({ 'name': qsTrId("settings_network-la-vpn_details_nameservers"), 'value': value.join(',') })
             }
 
-            value = connection.iPv4
+            value = connection.ipv4
             if (value) {
                 var prop = value['Address']
                 if (prop) {
@@ -81,7 +93,7 @@ VpnDetailsPage {
                 }
             }
 
-            value = connection.iPv6
+            value = connection.ipv6
             if (value) {
                 prop = value['Address']
                 if (prop) {
@@ -194,6 +206,31 @@ VpnDetailsPage {
                 //% "State"
                 name: qsTrId("settings_network-la-vpn_details_state")
                 value: VpnTypes.stateName(connection.state)
+            }
+
+            VpnDetailItem {
+                visible: !AccessPolicy.vpnConnectionSettingsEnabled
+                //: VPN MDM policy (whether the user is allowed to turn the connection on or off)
+                //% "Policy"
+                name: qsTrId("settings_network-la-vpn_details_policy")
+                //: Detail item shown if the connection is controlled by MDM
+                //: %1 is an operating system name without the OS suffix
+                //% "Connection managed by %1 Device Manager"
+                value: qsTrId("settings_network-la-vpn_details_connection_status_policy")
+                    .arg(aboutSettings.baseOperatingSystemName)
+                valueLabel.wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            }
+
+            VpnDetailItem {
+                visible: AccessPolicy.vpnConnectionSettingsEnabled
+                         && !AccessPolicy.vpnConfigurationSettingsEnabled
+                name: qsTrId("settings_network-la-vpn_details_policy")
+                //: Detail item shown if the connection can't be modified due to MDM
+                //: %1 is an operating system name without the OS suffix
+                //% "Modification disabled by %1 Device Manager"
+                value: qsTrId("settings_network-la-vpn_details_manager_status_policy")
+                    .arg(aboutSettings.baseOperatingSystemName)
+                valueLabel.wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }
 
             VpnDetailItem {

@@ -37,7 +37,7 @@ import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 import "private"
 
-MouseArea {
+SilicaMouseArea {
     id: root
 
     property alias text: label.text
@@ -50,7 +50,6 @@ MouseArea {
     property real rightMargin: Theme.horizontalPageMargin
     property real _rightPadding
     property bool down: pressed && containsMouse && !DragFilter.canceled
-    property bool highlighted: down || pressTimer.running
     property bool busy
 
     // This is only used by ButtonGroup - if ButtonGroup is removed, this should be also:
@@ -58,6 +57,8 @@ MouseArea {
 
     width: parent ? parent.width : Screen.width
     implicitHeight: Math.max(toggle.height, desc.y + desc.height)
+
+    highlighted: down || pressTimer.running
 
     Item {
         id: toggle
@@ -73,9 +74,9 @@ MouseArea {
 
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
-            opacity: root.enabled ? 1.0 : 0.4
+            opacity: root.enabled ? 1.0 : Theme.opacityLow
             dimmed: !checked
-            falloffRadius: checked ? defaultFalloffRadius : (Theme.colorScheme === Theme.LightOnDark ? 0.075 : 0.1)
+            falloffRadius: checked ? defaultFalloffRadius : (root.palette.colorScheme === Theme.LightOnDark ? 0.075 : 0.1)
             Behavior on falloffRadius {
                 NumberAnimation { duration: busy ? 450 : 50; easing.type: Easing.InOutQuad }
             }
@@ -86,10 +87,10 @@ MouseArea {
             Behavior on brightness {
                 NumberAnimation { duration: busy ? 450 : 50; easing.type: Easing.InOutQuad }
             }
-            color: highlighted ? Theme.highlightColor
-                               : dimmed ? Theme.primaryColor
+            color: highlighted ? root.palette.highlightColor
+                               : dimmed ? root.palette.primaryColor
                                         : Theme.lightPrimaryColor
-            backgroundColor: checked || busy ? Theme.backgroundGlowColor : "transparent"
+            backgroundColor: checked || busy ? root.palette.backgroundGlowColor : "transparent"
         }
         states: State {
             when: root.busy
@@ -97,45 +98,44 @@ MouseArea {
         }
         Timer {
             id: busyTimer
-            property real brightness: 0.4
+            property real brightness: Theme.opacityLow
             property real falloffRadius: 0.075
             running: busy && Qt.application.active
             interval: 500
             repeat: true
             onRunningChanged: {
-                brightness = checked ? 1.0 : 0.4
+                brightness = checked ? 1.0 : Theme.opacityLow
                 falloffRadius = checked ? indicator.defaultFalloffRadius : 0.075
             }
             onTriggered: {
                 falloffRadius = falloffRadius === 0.075 ? indicator.defaultFalloffRadius : 0.075
-                brightness = brightness == 0.4 ? 1.0 : 0.4
+                brightness = brightness == Theme.opacityLow ? 1.0 : Theme.opacityLow
             }
         }
     }
     Label {
         id: label
         width: parent.width - toggle.width - root.leftMargin - root.rightMargin - root._rightPadding
-        opacity: root.enabled ? 1.0 : 0.4
+        opacity: root.enabled ? 1.0 : Theme.opacityLow
         anchors {
             verticalCenter: toggle.verticalCenter
             // center on the first line if there are multiple lines
             verticalCenterOffset: lineCount > 1 ? (lineCount-1)*height/lineCount/2 : 0
             left: toggle.right
-            leftMargin: Theme.colorScheme === Theme.DarkOnLight ? Theme.paddingMedium : 0
+            leftMargin: root.palette.colorScheme === Theme.DarkOnLight ? Theme.paddingMedium : 0
         }
         wrapMode: Text.Wrap
-        color: highlighted ? Theme.highlightColor : Theme.primaryColor
     }
     Label {
         id: desc
         width: label.width
         height: text.length ? (implicitHeight + Theme.paddingMedium) : 0
-        opacity: root.enabled ? 1.0 : 0.4
+        opacity: root.enabled ? 1.0 : Theme.opacityLow
         anchors.top: label.bottom
         anchors.left: label.left
         wrapMode: Text.Wrap
         font.pixelSize: Theme.fontSizeExtraSmall
-        color: highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
+        color: highlighted ? root.palette.secondaryHighlightColor : root.palette.secondaryColor
     }
     Timer {
         id: pressTimer

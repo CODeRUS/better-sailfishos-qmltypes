@@ -1,76 +1,73 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
-import Sailfish.Telephony 1.0
+import Sailfish.Contacts 1.0
 import org.nemomobile.contacts 1.0
 
 Item {
     id: favoriteBar
 
-    property PeopleModel favoritesModel
-    property ListModel selectionModel
-    property int requiredProperty
-    property alias heightAnimationEnabled: heightAnimation.enabled
-    property bool promptSimSelection: Telephony.voiceSimUsageMode === Telephony.AlwaysAskSim
+    property var favoritesModel
+    property ContactSelectionModel selectionModel
 
-    property Component contextMenuComponent
+    property int columns: width / avatarSize
+    property bool menuOpen
+    property Item menuItem
 
-    signal contactClicked(variant contactItem, variant contact, variant property, string propertyType)
-    signal contactPressed()
-
-    function _toggleSelection(contact, property, propertyType) {
-        if (selectionModel) {
-            var selectionIndex = selectionModel.findContact(contact)
-            if (selectionIndex >= 0) {
-                selectionModel.removeContactAt(selectionIndex)
-            } else {
-                var secondary = contact.secondaryName
-                var formattedName = contact.primaryName + (secondary == '' ? '' : ' ' + secondary)
-                selectionModel.addContact(contact, !contact.favorite, formattedName, property, propertyType)
-            }
-        }
+    readonly property int avatarSize: {
+        // use the maximum size available depending on the minimum number of columns
+        var minColumnCount = Math.floor(width / _minAvatarSize)
+        return width / minColumnCount
     }
+
+    // Avatar area fits minimum of 2 name lines + 2 company info lines + padding.
+    readonly property int _minAvatarSize: Theme.paddingMedium + (nameFont.height * 2)
+                                          + Theme.paddingSmall + (companyInfoFont.height * 2)
+                                          + Theme.paddingMedium
+    property bool _transitionsEnabled: allowAnimations.running && !pageStack.currentPage.orientationTransitionRunning
+
+    signal contactClicked(var delegateItem, var contact)
+    signal contactPressed()
+    signal contactPressAndHold(var delegateItem, var contact)
 
     width: parent.width
     height: grid.height
-    Behavior on height {
-        id: heightAnimation
-        enabled: false
 
-        NumberAnimation {
-            duration: 150
-            easing.type: Easing.InOutQuad
-        }
+    FontMetrics {
+        id: nameFont
+        font.pixelSize: Theme.fontSizeMedium
     }
+
+    FontMetrics {
+        id: companyInfoFont
+        font.pixelSize: Theme.fontSizeTiny
+    }
+
     Timer {
-        running: heightAnimation.enabled
-        interval: 1
-        onTriggered: heightAnimation.enabled = false
+        id: allowAnimations
+        interval: 400   // roughly after animations complete
+    }
+
+    // Only run the add/move animations when the model changes. Otherwise they are triggered
+    // when populating the model, or when the grid's overall dimensions change, or a context menu
+    // opens within the grid, etc. Using a timer for this is hacky but it's hard to calculate
+    // precisely when all add/move transitions have ended e.g. if a transition gets canceled.
+    Connections {
+        target: favoritesModel
+        onCountChanged: {
+            if (favoritesModel.populated) {
+                allowAnimations.restart()
+            }
+        }
     }
 
     Grid {
         id: grid
-        columns: Math.floor(parent.width / Theme.itemSizeExtraLarge)
-
-        width: columns * Theme.itemSizeExtraLarge
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        property bool transitionsEnabled: _enableTransitions
-        property bool _enableTransitions
-        property bool _populated: favoritesModel.populated
-        on_PopulatedChanged: {
-            if (_populated && !_enableTransitions) {
-                readyTimer.restart()
-            }
-        }
-        Timer {
-            id: readyTimer
-            interval: 1
-            onTriggered: grid._enableTransitions = true
-        }
+        columns: favoriteBar.columns
+        width: columns * favoriteBar.avatarSize
 
         add: Transition {
             id: add
-            enabled: grid.transitionsEnabled
+            enabled: favoriteBar._transitionsEnabled
 
             SequentialAnimation {
                 PropertyAction {
@@ -91,37 +88,40 @@ Item {
         }
         move: Transition {
             id: move
-            enabled: grid.transitionsEnabled
+            enabled: favoriteBar._transitionsEnabled
 
             SequentialAnimation {
-                PropertyAction {
-                    property: "dummy"
-                    value: {
-                        // Updating changingY as a side-effect works around an issue where the value is
-                        // seemingly updated correctly in the PropertyAction, but this does not have the
-                        // desired effect on the bound properties of the animations...
-                        move.ViewTransition.item.changingY = Math.abs(move.ViewTransition.item.y - move.ViewTransition.destination.y) > 1
-                        return true
+                id: favoriteItemAnimation
+
+                readonly property bool changingY: {
+                    if (!move.ViewTransition.item) {
+                        return false
                     }
+                    // Animate if the item is moving to first/last column. targetIndexes is only
+                    // set when triggered by insertions but not removals, so for insertions check
+                    // for a move to the first column, and for removals check for a move to the last.
+                    var col = Math.floor(move.ViewTransition.index % grid.columns)
+                    return move.ViewTransition.targetIndexes.length > 0 ? col === 0 : col === grid.columns-1
                 }
+
                 NumberAnimation {
                     properties: "opacity"
                     duration: 75
                     from: 1
-                    to: move.ViewTransition.item.changingY ? 0 : 1
+                    to: favoriteItemAnimation.changingY ? 0 : 1
                 }
                 PauseAnimation {
-                    duration: move.ViewTransition.item.changingY ? 150 : 0
+                    duration: favoriteItemAnimation.changingY ? 150 : 0
                 }
                 NumberAnimation {
                     properties: "x,y"
                     easing.type: Easing.InOutQuad
-                    duration: move.ViewTransition.item.changingY ? 0 : 150
+                    duration: favoriteItemAnimation.changingY ? 0 : 150
                 }
                 NumberAnimation {
                     properties: "opacity"
                     duration: 75
-                    from: move.ViewTransition.item.changingY ? 0 : 1
+                    from: favoriteItemAnimation.changingY ? 0 : 1
                     to: 1
                 }
             }
@@ -133,26 +133,21 @@ Item {
 
             FavoriteContactItem {
                 id: contactItem
-                selected: selectionModel !== null && selectionModel.findContactId(contactId) >= 0
-                requiredProperty: favoriteBar.requiredProperty
-                promptSimSelection: favoriteBar.promptSimSelection
+
+                width: favoriteBar.avatarSize
+                selectionModel: favoriteBar.selectionModel
 
                 onPressed: contactPressed()
-                onClicked: {
-                    _toggleSelection(model.person, property, propertyType)
-                    contactClicked(contactItem, model.person, property, propertyType)
-                }
+                onPressAndHold: contactPressAndHold(contactItem, model.person)
+                onClicked: contactClicked(contactItem, model.person)
 
-                // Used to control move transition for this delegate
-                property bool changingY
-                // Dummy value to update, so that we can update 'changingY' as a side-effect
-                property bool dummy
-
-                Binding {
-                    when: contactItem.highlighted
-                    target: grid
-                    property: 'transitionsEnabled'
-                    value: false
+                onMenuOpenChanged: {
+                    if (menuOpen) {
+                        favoriteBar.menuItem = _contextMenu
+                    } else if (favoriteBar.menuItem === _contextMenu) {
+                        favoriteBar.menuItem = null
+                    }
+                    favoriteBar.menuOpen = menuOpen
                 }
             }
         }
@@ -167,6 +162,7 @@ Item {
                     remorseContainer.destroy()
                 }
 
+                x: -x - parent.x
                 y: parent.height - height
                 width: favoriteBar.width
                 height: Theme.itemSizeSmall
@@ -181,6 +177,7 @@ Item {
                     id: remorseItem
                     onTriggered: destroyAnim.start()
                     onCanceled: destroyAnim.start()
+                    rightMargin: Theme.paddingMedium
                 }
 
                 Component.onDestruction: destroyAnim.start()

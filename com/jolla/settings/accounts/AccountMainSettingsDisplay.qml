@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
+import org.nemomobile.systemsettings 1.0
 
 Item {
     id: root
@@ -11,6 +12,10 @@ Item {
     property bool accountIsProvisioned
     property alias accountUserName: usernameLabel.text
     property alias accountDisplayName: accountDisplayNameField.text
+
+    AboutSettings {
+        id: aboutSettings
+    }
 
     property bool _changingAccountStatus
 
@@ -88,12 +93,16 @@ Item {
             if (root.accountIsProvisioned && root.accountEnabledReadOnly) {
                 if (accountEnabled) {
                     //: Indicates that the account is currently enabled by MDM
-                    //% "Enabled by Sailfish Device Manager"
+                    //: %1 is an operating system name without the OS suffix
+                    //% "Enabled by %1 Device Manager"
                     return qsTrId("settings-accounts-la-account_enabled_by_mdm")
+                        .arg(aboutSettings.baseOperatingSystemName)
                 } else {
                     //: Indicates that the account is currently disabled by MDM
-                    //% "Disabled by Sailfish Device Manager"
+                    //: %1 is an operating system name without the OS suffix
+                    //% "Disabled by %1 Device Manager"
                     return qsTrId("settings-accounts-la-account_disabled_by_mdm")
+                        .arg(aboutSettings.baseOperatingSystemName)
                 }
             } else {
                 return ""

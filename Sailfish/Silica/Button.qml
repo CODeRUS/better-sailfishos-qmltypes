@@ -36,15 +36,15 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 
-MouseArea {
+SilicaMouseArea {
     id: button
 
     property bool down: pressed && containsMouse && !DragFilter.canceled
     property alias text: buttonText.text
     property bool _showPress: down || pressTimer.running
-    property color color: Theme.primaryColor
-    property color highlightColor: Theme.highlightColor
-    property color highlightBackgroundColor: Theme.highlightBackgroundColor
+    property color color: palette.primaryColor
+    property color highlightColor: palette.highlightColor
+    property color highlightBackgroundColor: palette.highlightBackgroundColor
     property real preferredWidth: _implicitPreferredWidth
     property real _implicitPreferredWidth: Theme.buttonWidthSmall
     property bool __silica_button
@@ -64,6 +64,8 @@ MouseArea {
     height: Theme.itemSizeExtraSmall
     implicitWidth: Math.max(preferredWidth, buttonText.width+Theme.paddingLarge)
 
+    highlighted: _showPress
+
     Rectangle {
         anchors {
             fill: parent
@@ -72,9 +74,9 @@ MouseArea {
         }
         radius: Theme.paddingSmall
         color: _showPress ? Theme.rgba(button.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
-                          : Theme.rgba(button.color, 0.2)
+                          : Theme.rgba(button.color, Theme.opacityFaint)
 
-        opacity: button.enabled ? 1.0 : 0.4
+        opacity: button.enabled ? 1.0 : Theme.opacityLow
 
         Label {
             id: buttonText

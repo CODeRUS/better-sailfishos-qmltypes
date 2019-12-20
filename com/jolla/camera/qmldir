@@ -1,4 +1,5 @@
 module com.jolla.camera
+plugin jollacameraplugin
 CaptureView 1.0 capture/CaptureView.qml
 GalleryView 1.0 gallery/GalleryView.qml
 CameraPage 1.0 CameraPage.qml

@@ -34,8 +34,9 @@
 
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 
-Text {
+Private.SilicaText {
     id: root
 
     property int truncationMode
@@ -47,7 +48,7 @@ Text {
                                                                                                          : Text.ElideMiddle))
                       : Text.ElideNone
 
-    color: Theme.primaryColor
+    color: highlighted ? palette.highlightColor : palette.primaryColor
     font.pixelSize: Theme.fontSizeMedium
     textFormat: _defaultLabelFormat
 

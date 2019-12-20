@@ -30,7 +30,7 @@ Dialog {
 
     property bool _lightAndContrastMode
     property bool _cropMenu
-    property string _cropType
+    property string _cropType: "none"
     property int _cropRatio: cropOnly ? aspectRatio : -1.0
     property bool _checkRotation
     property bool _checkLevels
@@ -41,14 +41,15 @@ Dialog {
     signal edited
     signal finished
 
-    canAccept: imageRotation !== 0 || brightness !== 0 || contrast !== 0 || (_cropType !== "" || cropOnly)
+    canAccept: imageRotation !== 0 || brightness !== 0 || contrast !== 0 || (_cropType !== "none" || cropOnly)
     backNavigation: !_cropMenu
     forwardNavigation: !_cropMenu
 
     // JB#44195: Page is inactive, but the page transition is ongoing. Delay page operation a bit
     onStatusChanged: if (status == PageStatus.Inactive) delayedCompletion.restart()
 
-    onIsPortraitChanged: previewImage.resetScale()
+    onIsPortraitChanged: previewImage.resetZoom()
+
     onAccepted: {
         editInProgress = true
         editStep()

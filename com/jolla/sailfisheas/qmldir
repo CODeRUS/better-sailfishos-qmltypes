@@ -1,0 +1,3 @@
+module com.jolla.sailfisheas
+plugin sailfisheasplugin
+typeinfo plugins.qmltypes

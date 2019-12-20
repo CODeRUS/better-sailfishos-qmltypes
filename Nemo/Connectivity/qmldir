@@ -1,2 +1,3 @@
 module Nemo.Connectivity
+plugin nemoconnectivity
 typeinfo plugins.qmltypes

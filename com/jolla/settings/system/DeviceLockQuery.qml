@@ -8,6 +8,7 @@ QtObject {
 
     property QtObject _authorization
     property var _authenticated
+    property var _permissionGranted
     property var _canceled
     property var _delayedAction
     property alias _availableMethods: deviceLock.availableMethods
@@ -31,6 +32,13 @@ QtObject {
         default:
             break
         }
+    }
+
+    function requestPermission(message, properties, onGranted, onCanceled) {
+        _permissionGranted = onGranted
+        _canceled = onCanceled
+
+        deviceLock.requestPermission(message, properties)
     }
 
     function cancel() {
@@ -83,6 +91,13 @@ QtObject {
 
                 authenticated(authenticationToken)
             }
+            onPermissionGranted: {
+                var permissionGranted = query._permissionGranted
+                query._permissionGranted = undefined
+                query._canceled = undefined
+
+                permissionGranted()
+            }
         },
 
         AuthenticationInput {
@@ -92,14 +107,18 @@ QtObject {
 
             onAuthenticationStarted: {
                 query._runWhenPageStackNotBusy(function() {
-                    pageStack.animatorPush(Qt.resolvedUrl("DeviceLockQueryInputPage.qml"), {"authentication": authentication})
-                    authentication.feedback(feedback, -1)
+                    var obj = pageStack.animatorPush(Qt.resolvedUrl("DeviceLockQueryInputPage.qml"), {"authentication": authentication})
+                    obj.pageCompleted.connect(function(dialog) {
+                        authentication.feedback(feedback, data)
+                    })
                 })
             }
             onAuthenticationUnavailable: {
                 query._runWhenPageStackNotBusy(function() {
-                    pageStack.animatorPush(Qt.resolvedUrl("DeviceLockQueryInputPage.qml"), {"authentication": authentication})
-                    authentication.error(error)
+                    var obj = pageStack.animatorPush(Qt.resolvedUrl("DeviceLockQueryInputPage.qml"), {"authentication": authentication})
+                    obj.pageCompleted.connect(function(dialog) {
+                        authentication.error(error)
+                    })
                 })
             }
             onAuthenticationEnded: {

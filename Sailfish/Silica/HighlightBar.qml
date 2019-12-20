@@ -51,7 +51,7 @@ Rectangle {
     property QtObject _ngfEffect
 
     y: _highlightedItemPosition
-    color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
+    color: Theme.rgba(palette.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
 
     function clearHighlight() {
         if (highlightedItem) {

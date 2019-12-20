@@ -36,8 +36,8 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 ProgressCircleBase {
-    progressColor: inAlternateCycle ? Theme.highlightColor : Theme.highlightDimmerColor
-    backgroundColor: inAlternateCycle ? Theme.highlightDimmerColor : Theme.highlightColor
+    progressColor: inAlternateCycle ? palette.highlightColor : palette.highlightDimmerColor
+    backgroundColor: inAlternateCycle ? palette.highlightDimmerColor : palette.highlightColor
 
     property bool inAlternateCycle
 

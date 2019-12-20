@@ -7,6 +7,7 @@ ListItem {
 
     property string firstText
     property string secondText
+    property bool unnamed
     property int presenceState
     property alias iconSource: icon.source
 
@@ -39,8 +40,12 @@ ListItem {
         }
         Label {
             id: firstNameText
-            text: firstText
-            color: highlighted ? Theme.highlightColor: Theme.primaryColor
+            text: root.unnamed
+                    //: Default text shown instead of a contact name, if the contact name is not known
+                    //% "Unnamed"
+                  ? qsTrId("components_contacts-la-unnamed_contact")
+                  : firstText
+            color: highlighted ? Theme.highlightColor: (root.unnamed ? Theme.secondaryColor : Theme.primaryColor)
             width: Math.min(implicitWidth, row.width)
             truncationMode: width == row.width ? TruncationMode.Fade : TruncationMode.None
             textFormat: Text.AutoText

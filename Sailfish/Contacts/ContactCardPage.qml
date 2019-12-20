@@ -1,54 +1,24 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Contacts 1.0 as SailfishContacts
 import org.nemomobile.contacts 1.0
-import "contactcard/ContactsDBusService.js" as ContactsService
 
 Page {
     id: root
 
-    // Assign either of these to set the displayed contact. If the contactId is
-    // set, contactLoaded is set to true once the contact is loaded from the contactId.
     property alias contact: contactCard.contact
-    property int contactId
 
-    property bool contactLoaded
-
-    // Assign one if available to avoid creating a new model.
-    property PeopleModel peopleModel
-
-    property bool handleDelete: true
-    property bool handleEdit: true
+    // Whether to show the pulley menu with Delete, Share, Edit etc.
+    property alias actionsEnabled: menu.visible
 
     property alias activeDetail: contactCard.activeDetail
     property alias readOnly: contactCard.readOnly
 
-    property Item _remorsePopup
-
-    signal editRequested()
-    signal deleteRequested()
-
-    function showEditor() {
-        ContactsService.editContact(contactId)
-    }
-
-    function deleteContact() {
-        if (_remorsePopup === null) {
-            _remorsePopup = remorsePopupComponent.createObject(root)
+    function showError(errorText) {
+        if (errorText) {
+            errorLabel.text = errorText
+            contactLoadingBusy.running = false
         }
-        //: Deleting contact in 5 seconds
-        //% "Deleting contact"
-        _remorsePopup.execute(qsTrId("components_contacts-la-removing_contact"),
-            function() {
-                _peopleModel().removePerson(contact)
-                pageStack.pop()
-            }
-        )
-    }
-
-    function _peopleModel() {
-        if (peopleModel == null)
-            peopleModel = peopleModelComponent.createObject(root)
-        return peopleModel
     }
 
     function _contactComplete() {
@@ -56,51 +26,21 @@ Page {
         if (status === PageStatus.Activating || status === PageStatus.Active) {
             _updateContactInfo()
         }
-        contactLoaded = true
     }
 
     function _updateContactInfo() {
         contactCard.refreshDetails()
     }
 
-    function vCardName(person) {
-        // Return a name for this vcard that can be used as a filename
-
-        // Remove any whitespace
-        var noWhitespace = person.displayLabel.replace(/\s/g, '')
-
-        // Convert to 7-bit ASCII
-        var sevenBit = Format.formatText(noWhitespace, Formatter.Ascii7Bit)
-        if (sevenBit.length < noWhitespace.length) {
-            // This contact's name is not representable in ASCII
-            //: Placeholder name for contact vcard filename
-            //% "contact"
-            sevenBit = qsTrId("components_contacts-ph-vcard_name")
-        }
-
-        // Remove any characters that are not part of the portable filename character set
-        return Format.formatText(sevenBit, Formatter.PortableFilename) + '.vcf'
-    }
-
-    onContactIdChanged: {
-        if (contact && !contact.complete) {
-            contact.completeChanged.disconnect(_contactComplete)
-        }
-
-        contact = _peopleModel().personById(contactId)
-    }
-
     onContactChanged: {
-        contactLoaded = false
-
         if (!contact) {
+            contactLoadingBusy.running = false
         } else if (!contact.complete) {
             contact.completeChanged.connect(_contactComplete)
         } else {
             if (status === PageStatus.Activating || status === PageStatus.Active) {
                 _updateContactInfo()
             }
-            contactLoaded = true
         }
     }
 
@@ -110,73 +50,43 @@ Page {
         }
     }
 
-    Component {
-        id: remorsePopupComponent
-        RemorsePopup {}
+    BusyIndicator {
+        id: contactLoadingBusy
+
+        anchors.centerIn: parent
+
+        size: BusyIndicatorSize.Large
+        running: contact == null
     }
 
-    Component {
-        id: peopleModelComponent
-        PeopleModel { filterType: PeopleModel.FilterAll }
+    Label {
+        id: errorLabel
+
+        x: Theme.horizontalPageMargin
+        width: parent.width - Theme.horizontalPageMargin*2
+        anchors.centerIn: parent
+
+        //% "Contact not found"
+        text: qsTrId("components_contacts-la-contact_not_found")
+        wrapMode: Text.Wrap
+        horizontalAlignment: Text.AlignHCenter
+        font.pixelSize: Theme.fontSizeLarge
+        color: Theme.highlightColor
+        visible: contact == null && !contactLoadingBusy.running
     }
 
     ContactCard {
         id: contactCard
-        onContactModified: _peopleModel().savePerson(contact)
 
-        PullDownMenu {
+        visible: !contactLoadingBusy.running && !errorLabel.visible
+        opacity: 1 - contactLoadingBusy.opacity
+
+        ContactCardPullDownMenu {
             id: menu
 
-            MenuItem {
-                //: Deletes contact
-                //% "Delete"
-                text: qsTrId("components_contacts-me-delete")
-                onClicked: {
-                    if (root.handleDelete) {
-                        root.deleteContact()
-                    } else {
-                        root.deleteRequested()
-                    }
-                }
-            }
-
-            MenuItem {
-                //: Manage links (associated contacts) for this contact
-                //% "Link"
-                text: qsTrId("components_contacts-me-link")
-                onClicked: {
-                    pageStack.animatorPush(Qt.resolvedUrl("ContactLinksPage.qml"),
-                                           {"person": contactCard.contact, "peopleModel": root.peopleModel})
-                }
-            }
-
-            MenuItem {
-                //: Share contact via Bluetooth, Email, etc.
-                //% "Share"
-                text: qsTrId("components_contacts-me-share")
-                onClicked: {
-                    var content = {
-                        "data": contactCard.contact.vCard(),
-                        "name": root.vCardName(contactCard.contact),
-                        "type": "text/vcard",
-                        "icon": contactCard.contact.avatarPath.toString()
-                    }
-                    pageStack.animatorPush(Qt.resolvedUrl("ContactSharePage.qml"), {"content": content})
-                }
-            }
-
-            MenuItem {
-                //: Edit contact
-                //% "Edit"
-                text: qsTrId("components_contacts-me-edit")
-                onClicked: {
-                    if (root.handleEdit) {
-                        root.showEditor()
-                    } else {
-                        root.editRequested()
-                    }
-                }
-            }
+            visible: contact != null
+            page: root
+            contact: contactCard.contact
         }
     }
 }

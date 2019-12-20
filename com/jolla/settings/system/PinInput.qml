@@ -14,11 +14,15 @@ FocusScope {
 
     property bool showCancelButton: true
     property bool showOkButton: true
+    property bool busy
+
     property int minimumLength: 4
     property int maximumLength
 
     // modem for emergency calls
     property string modemPath: modemManager.defaultVoiceModem || manager.defaultModem
+
+    // okText and cancelText are no longer in use. See JB#46010 and JB#46275
 
     //: Confirms the entered PIN
     //% "Enter"
@@ -37,7 +41,6 @@ FocusScope {
     property bool highlightTitle: !_inputOrCancelEnabled && !emergency
     property color pinDisplayColor: Theme.highlightColor
     property color keypadTextColor: Theme.primaryColor
-    property alias optionButtonColor: option1Button.primaryColor
     property bool dimmerBackspace
     property color emergencyTextColor: "red"
 
@@ -299,11 +302,19 @@ FocusScope {
             text: root.subTitleText
         }
 
+        BusyIndicator {
+            running: root.busy
+            visible: running
+            anchors.horizontalCenter: parent.horizontalCenter
+            size: BusyIndicatorSize.Medium
+        }
+
         Label {
             width: parent.width
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
             color: root.warningTextColor
+            visible: text !== ""
 
             font.pixelSize: root._inputOrCancelEnabled ? Theme.fontSizeSmall : Theme.fontSizeMedium
             text: {
@@ -455,6 +466,7 @@ FocusScope {
         enabled: showEmergencyButton && !root.emergency && pinInput.length < 5
         opacity: enabled ? 1 : 0
         icon.source: "image://theme/icon-lockscreen-emergency-call"
+        icon.color: undefined
 
         Behavior on opacity { FadeAnimator {} }
 
@@ -489,6 +501,7 @@ FocusScope {
         anchors {
             horizontalCenter: option2Button.horizontalCenter
             verticalCenter: pinInput.verticalCenter
+            verticalCenterOffset: Theme.paddingMedium
         }
         states: State {
             when: root._twoColumnMode
@@ -503,7 +516,7 @@ FocusScope {
         icon {
             source: root._showSuggestionButton
                 ? "image://theme/icon-m-reload"
-                : "image://theme/icon-m-backspace"
+                : "image://theme/icon-m-backspace-keypad"
             color: {
                 if (root.emergency) {
                     return root.emergencyTextColor
@@ -575,7 +588,7 @@ FocusScope {
 
         symbolsVisible: pinInput.inputMethodHints & Qt.ImhDialableCharactersOnly
         visible: opacity > 0
-        opacity: pinInput.inputMethodHints & (Qt.ImhDigitsOnly | Qt.ImhDialableCharactersOnly) ? 1 : 0
+        opacity: root.requirePin && pinInput.inputMethodHints & (Qt.ImhDigitsOnly | Qt.ImhDialableCharactersOnly) ? 1 : 0
         textColor: {
             if (root.emergency) {
                 return root.emergencyTextColor
@@ -599,22 +612,30 @@ FocusScope {
 
     PinInputOptionButton {
         id: option1Button
-        visible: keypad.visible && text !== "" && showCancelButton
+        visible: (keypad.visible || !root.requirePin)
+                && text !== ""
+                && (showCancelButton || root.emergency)
 
         anchors {
             left: keypad.left
             leftMargin: keypad._horizontalPadding
             bottom: keypad.bottom
-            bottomMargin: (keypad._buttonHeight - height) / 2
+            bottomMargin: icon.visible ? 0 : (keypad._buttonHeight - height) / 2
         }
+        primaryColor: keypad.textColor
         width: keypad._buttonWidth
-        height: width / 2
+        height: icon.visible ? keypad._buttonHeight : width / 2
         emergency: root.emergency
         text: root.emergency
               ? //: Cancels out of the emergency call mode and returns to the PIN input screen
                 //% "Cancel"
                 qsTrId("settings_pin-bt-cancel_emergency_call")
               : root.cancelText
+
+        icon {
+            visible: !root.emergency
+            source: "image://theme/icon-m-cancel"
+        }
 
         onClicked: {
             root._feedback()
@@ -626,30 +647,37 @@ FocusScope {
         id: option2Button
 
         primaryColor: option1Button.primaryColor
-        visible: keypad.visible && text !== "" && ((root.showOkButton && root.inputEnabled) || root.emergency)
+        visible: (keypad.visible || !root.requirePin)
+                && text !== ""
+                && ((root.showOkButton && root.inputEnabled) || root.emergency)
 
         anchors {
             right: keypad.right
             rightMargin: keypad._horizontalPadding
-            bottom: option1Button.bottom
+            bottom: keypad.bottom
+            bottomMargin: icon.visible ? 0 : (keypad._buttonHeight - height) / 2
         }
         width: option1Button.width
-        height: option1Button.height
+        height: icon.visible ? keypad._buttonHeight : width / 2
         emergency: root.emergency
         text: {
             if (root.emergency) {
                 //: Starts the phone call
                 //% "Call"
                 return qsTrId("settings_pin-bt-start_call")
-            } else if (pinInput.length < minimumLength
+            } else if (root.requirePin && (pinInput.length < minimumLength
                        || _pinMismatch
-                       || (root.enteringNewPin && root._oldPin !== "" && root._oldPin === root.enteredPin)) {
+                       || (root.enteringNewPin && root._oldPin !== "" && root._oldPin === root.enteredPin))) {
                 return ""
             } else {
                 return root.okText
             }
         }
         showWhiteBackgroundByDefault: root.emergency
+        icon {
+            visible: text == root.okText
+            source: "image://theme/icon-m-accept"
+        }
 
         onClicked: {
             root._feedback()

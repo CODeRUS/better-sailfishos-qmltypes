@@ -1,4 +1,5 @@
 module Sailfish.Silica
+plugin sailfishsilicaplugin
 AddAnimation 1.0 AddAnimation.qml
 RemoveAnimation 1.0 RemoveAnimation.qml
 ApplicationWindow 1.0 ApplicationWindow.qml
@@ -19,9 +20,11 @@ FadeAnimation 1.0 FadeAnimation.qml
 FadeAnimator 1.0 FadeAnimator.qml
 FullscreenContentPage 1.0 FullscreenContentPage.qml
 FirstTimeUseCounter 1.0 FirstTimeUseCounter.qml
+GridItem 1.0 GridItem.qml
 HighlightBar 1.0 HighlightBar.qml
 IconButton 1.0 IconButton.qml
 InfoLabel 1.0 InfoLabel.qml
+MiniComboBox 1.0 MiniComboBox.qml
 InteractionHintLabel 1.0 InteractionHintLabel.qml
 SilicaListView 1.0 SilicaListView.qml
 SilicaGridView 1.0 SilicaGridView.qml
@@ -76,5 +79,6 @@ PasswordField 1.0 PasswordField.qml
 ExpandingSection 1.0 ExpandingSection.qml
 ExpandingSectionGroup 1.0 ExpandingSectionGroup.qml
 HighlightImage 1.0 HighlightImage.qml
+Icon 1.0 Icon.qml
 singleton Remorse 1.0 Remorse.qml
 typeinfo plugins.qmltypes

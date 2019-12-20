@@ -36,12 +36,11 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 
-MouseArea {
+SilicaMouseArea {
     id: item
 
     property bool down: pressed && containsMouse && !DragFilter.canceled
-    property bool highlighted: down
-    property color highlightedColor: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
+    property color highlightedColor: Theme.rgba(palette.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
     property alias contentHeight: content.height
     property alias contentWidth: content.width
     property alias contentX: content.x
@@ -57,6 +56,8 @@ MouseArea {
     implicitHeight: Theme.itemSizeSmall
 
     DragFilter.screenMargin: item._screenMargin
+
+    highlighted: down
 
     onPressed: {
         item.DragFilter.begin(mouse.x, mouse.y)

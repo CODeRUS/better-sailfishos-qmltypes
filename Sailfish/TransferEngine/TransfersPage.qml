@@ -9,6 +9,8 @@ import org.nemomobile.contentaction 1.0
 Page {
     id: transfersPage
 
+    property bool clearingTransfers
+
     function statusText(transferType, status, fileSize, transferDate) {
         switch(status) {
         case TransferModel.NotStarted:
@@ -124,6 +126,10 @@ Page {
             openMenuOnPressAndHold: false
             contentHeight: Math.max(thumbnail.height, fileNameLabel.y + fileNameLabel.height + Theme.paddingMedium)
 
+            enabled: !clearingTransfers || status === TransferModel.TransferStarted
+            opacity: enabled ? 1.0 : 0.0
+            Behavior on opacity { FadeAnimator {}}
+
             // Load thumbs on demand and only once. Note that share thumbnail is used only for local images/thumbs
             onFileUrlChanged: if (thumbnailItem == null) thumbnailItem = shareThumbnail.createObject(thumbnail)
             onThumbnailUrlChanged: if (thumbnailItem == null) thumbnailItem = shareThumbnail.createObject(thumbnail)
@@ -139,7 +145,7 @@ Page {
                     anchors.fill: parent
                     sourceSize.width: width
                     sourceSize.height: height
-                    opacity: mimeTypeImage.source == "" ? 1.0 : 0.8
+                    opacity: mimeTypeImage.source == "" ? 1.0 : Theme.opacityOverlay
                     source: thumbnailUrl != "" ? thumbnailUrl : fileUrl
                     priority: (status == Thumbnail.Ready || status == Thumbnail.Error)
                               ? Thumbnail.NormalPriority
@@ -332,6 +338,55 @@ Page {
                               "restartEnabled": canRestart})
                 }
             }
+
+
+            // Context menu for actions such as cancel and restart
+            Component {
+                id: contextMenuComponent
+
+                ContextMenu {
+                    id: contextMenu
+                    property int transferId
+                    property bool removeEnabled
+                    property bool cancelEnabled
+                    property bool restartEnabled
+
+                    MenuItem {
+                        visible: cancelEnabled || restartEnabled
+                        text: {
+                            if (cancelEnabled) {
+                                //% "Stop"
+                                return qsTrId("transferui-la_stop-transfer")
+                            } else if (restartEnabled) {
+                                //% "Restart"
+                                return qsTrId("transferui-la_restart-transfer")
+                            }
+                            return ""
+                        }
+
+                        onClicked: {
+                            if (cancelEnabled) {
+                                transferInterface.cbCancelTransfer(transferId)
+                            } else if (restartEnabled) {
+                                transferInterface.cbRestartTransfer(transferId)
+                            }
+                        }
+                    }
+
+                    MenuItem {
+                        visible: removeEnabled
+                        //% "Remove from history"
+                        text: qsTrId("transferui-remove-from-history")
+                        onClicked: {
+                            var id = transferId
+                            var transfer = transferInterface
+                            //% "Removed"
+                            transferEntry.remorseAction(qsTrId("transferui-remorse_removed"),
+                                                        function() { transfer.clearTransfer(id) })
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -342,6 +397,7 @@ Page {
 
     TransferModel {
         id: transferModel
+        onCountChanged: if (count === 0) clearingTransfers = false
     }
 
     // Actual list which displays transfers
@@ -359,16 +415,24 @@ Page {
             bottomMargin: 0
             visible: transferModel.count > 0
             MenuItem {
-                //% "Clear all"
-                text: qsTrId("transferui-me_clear-all")
+                //% "Clear history"
+                text: qsTrId("transferui-me_clear-history")
                 onClicked: {
-                    transferModel.clearTransfers()
+                    var remorse = Remorse.popupAction(
+                                transfersPage,
+                                //% "Cleared transfers"
+                                qsTrId("transferui-la-cleared_transfers"),
+                                function() {
+                                    transferModel.clearTransfers()
+                                })
+                    clearingTransfers = true
+                    remorse.canceled.connect(function() { clearingTransfers = false })
                 }
             }
         }
 
         ViewPlaceholder {
-            enabled: transferModel.count === 0 && transferModel.status == TransferModel.Finished
+            enabled: clearingTransfers || transferModel.count === 0 && transferModel.status == TransferModel.Finished
             //% "No Transfers"
             text: qsTrId("transferui-la-no_transfers")
         }
@@ -391,62 +455,6 @@ Page {
         function show(summary) {
             previewSummary = summary
             publish()
-        }
-    }
-
-    // Context menu for actions such as cancel and restart
-    Component {
-        id: contextMenuComponent
-
-        ContextMenu {
-            id: contextMenu
-            property int transferId
-            property bool removeEnabled
-            property bool cancelEnabled
-            property bool restartEnabled
-
-            MenuItem {
-                visible: cancelEnabled || restartEnabled
-                text: {
-                    if (cancelEnabled) {
-                        //% "Stop"
-                        return qsTrId("transferui-la_stop-transfer")
-                    } else if (restartEnabled) {
-                        //% "Restart"
-                        return qsTrId("transferui-la_restart-transfer")
-                    }
-                    return ""
-                }
-
-                onClicked: {
-                    if (cancelEnabled) {
-                        transferInterface.cbCancelTransfer(transferId)
-                    } else if (restartEnabled) {
-                        transferInterface.cbRestartTransfer(transferId)
-                    }
-                }
-            }
-
-            MenuItem {
-                visible: removeEnabled
-                //% "Remove"
-                text: qsTrId("transferui-la_remove-transfer")
-                onClicked: {
-                    // null parent because a reference is held by RemorseItem until
-                    // it either triggers or is cancelled.
-                    remorseComponent.createObject(null, {'transferId': transferId}).execute(contextMenu.parent,
-                        //% "Removing"
-                        qsTrId("transferui-remorse_remove"))
-                }
-            }
-        }
-    }
-
-    Component {
-        id: remorseComponent
-        RemorseItem {
-            property int transferId
-            onTriggered: transferInterface.clearTransfer(transferId)
         }
     }
 }

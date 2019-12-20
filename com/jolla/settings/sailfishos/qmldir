@@ -1,2 +1,3 @@
 module com.jolla.settings.sailfishos
+plugin settingssailfishosplugin
 typeinfo plugins.qmltypes

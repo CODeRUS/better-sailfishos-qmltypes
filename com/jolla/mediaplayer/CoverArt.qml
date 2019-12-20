@@ -21,7 +21,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.5) }
+                GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, Theme.opacityHigh) }
                 GradientStop { position: 0.3; color: "transparent" }
             }
         }

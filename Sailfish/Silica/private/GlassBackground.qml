@@ -35,9 +35,12 @@
 
 import QtQuick 2.1
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 
-Rectangle {
-    color: Theme.rgba(Theme.highlightDimmerColor, 1.0)
+Private.SilicaRectangle {
+    id: background
+
+    color: Theme.rgba(palette.highlightDimmerColor, 1.0)
 
     Item {
         id: noiseImage
@@ -70,8 +73,8 @@ Rectangle {
     }
 
     ShaderEffect {
-        property color colorTop: Theme.rgba(Theme.highlightBackgroundColor, .15)
-        property color colorBottom: Theme.rgba(Theme.highlightBackgroundColor, .3)
+        property color colorTop: Theme.rgba(palette.highlightBackgroundColor, .15)
+        property color colorBottom: Theme.rgba(palette.highlightBackgroundColor, .3)
         property var noise: noiseImage
         property var noiseScale: Qt.size(width / noiseImage.width, height / noiseImage.height)
         property var glass: glassImage

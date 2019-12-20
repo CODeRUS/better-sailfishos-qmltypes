@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import QtPositioning 5.2
 import QtQuick.XmlListModel 2.0
-import Nemo.KeepAlive 1.1
+import Nemo.KeepAlive 1.2
 import MeeGo.Connman 0.2
 
 Item {

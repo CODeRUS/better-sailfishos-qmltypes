@@ -6,8 +6,9 @@
 ****************************************************************************/
 
 import QtQuick 2.0
-import org.freedesktop.contextkit 1.0
 import Sailfish.Silica 1.0
+import org.nemomobile.systemsettings 1.0
+import Nemo.Mce 1.0
 
 Item {
     id: batteryStatusIndicator
@@ -19,23 +20,14 @@ Item {
     height: Theme.iconSizeExtraSmall
     width: batteryStatusIndicatorText.x+batteryStatusIndicatorText.width
 
-    ContextProperty {
-        id: batteryChargePercentageContextProperty
-        key: "Battery.ChargePercentage"
+    BatteryStatus {
+        id: batteryStatus
+    }
+    McePowerSaveMode {
+        id: mcePowerSaveMode
     }
 
-    ContextProperty {
-        id: batteryStateContextProperty
-        key: "Battery.State"
-    }
-
-    ContextProperty {
-        id: systemPowerSaveModeContextProperty
-        key: "System.PowerSaveMode"
-    }
-
-    property bool isCharging: batteryStateContextProperty.value == "charging"
-        || batteryStateContextProperty.value == "full"
+    readonly property bool isCharging: batteryStatus.chargerStatus == BatteryStatus.Connected
 
     Item {
         id: chargeItem
@@ -95,14 +87,14 @@ Item {
 
         readonly property bool baseNameEquals: sourceValue.indexOf(source) === 0 || source.toString().indexOf(sourceValue) === 0
         property string sourceValue: {
-            var state = batteryStateContextProperty.value
-            var name = (isCharging
-                        ? "charge"
-                        : (state == "low" || state == "empty"
-                           ? "battery-warning"
-                           : (systemPowerSaveModeContextProperty.value
-                              ? "powersave"
-                              : "battery")))
+            var name = "battery"
+            if (isCharging) {
+                name = "charge"
+            } else if (batteryStatus.status == BatteryStatus.Low || batteryStatus.status == BatteryStatus.Empty) {
+                name = "battery-warning"
+            } else if (mcePowerSaveMode.active) {
+                name = "powersave"
+            }
             return ["image://theme/icon-status-", name, iconSuffix].join("")
         }
 
@@ -128,9 +120,7 @@ Item {
             family: Theme.fontFamilyHeading
             pixelSize: Theme.fontSizeSmall
         }
-        text: batteryChargePercentageContextProperty.value === undefined
-              ? ""
-              : (batteryChargePercentageContextProperty.value.toLocaleString() + "%")
+        text: batteryStatus.chargePercentage < 0 ? "" : batteryStatus.chargePercentage + "%"
         color: Theme.primaryColor
     }
 }

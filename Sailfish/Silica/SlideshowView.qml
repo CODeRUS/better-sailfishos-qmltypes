@@ -40,10 +40,13 @@ PathView {
 
     property real itemWidth: view.width
     property real itemHeight: view.height
+    property int orientation: Qt.Horizontal
+
+    property real _itemSize: orientation === Qt.Horizontal ? itemWidth : itemHeight
 
     // half of the centre item, plus the number of items partially or fully
     // visible in half the view
-    property real _multiplier: Math.ceil((view.width/2) / view.itemWidth) + (pathItemCount <= 2 ? 0 : 0.5)
+    property real _multiplier: Math.ceil((view.width/2) / view._itemSize) + (pathItemCount <= 2 ? 0 : 0.5)
 
     property real _prevOffset
 
@@ -69,17 +72,20 @@ PathView {
     // we can fit in the view according to itemWidth
     // itemWidth < 1 check ensures we don't divide by itemWidth when it is 0
     pathItemCount: (itemWidth < 1 || (count <= 2 && itemWidth >= width)) ? 2 : Math.max(3, Math.ceil(width / itemWidth) + 1)
-
     interactive: count > 1
 
     path: Path {
         id: path
-        startX: -(view.itemWidth * view._multiplier - view.width/2)
-        startY: view.itemHeight / 2
+        startX: orientation === Qt.Horizontal ? -(view.itemWidth * view._multiplier - view.width/2)
+                                              :  view.itemWidth / 2
+        startY: orientation === Qt.Horizontal ? view.itemHeight / 2
+                                              : -(view.itemHeight * view._multiplier - view.height/2)
 
         PathLine {
-            x: (view.pathItemCount * view.itemWidth) + path.startX
-            y: view.itemHeight / 2
+            x: orientation === Qt.Horizontal ? (view.pathItemCount * view.itemWidth) + path.startX
+                                             : view.itemWidth / 2
+            y: orientation === Qt.Horizontal ?  view.itemHeight / 2
+                                             : (view.pathItemCount * view.itemHeight) + path.startY
         }
     }
 }

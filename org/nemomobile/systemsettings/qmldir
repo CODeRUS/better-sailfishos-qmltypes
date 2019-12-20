@@ -1,2 +1,3 @@
 module org.nemomobile.systemsettings
+plugin nemosystemsettings
 typeinfo plugins.qmltypes

@@ -1,6 +1,14 @@
+/*
+ * Copyright (c) 2018 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
 .pragma library
 .import org.nemomobile.systemsettings 1.0 as SystemSettings
 .import Sailfish.Silica 1.0 as Silica
+.import MeeGo.Connman 0.2 as Connman
 
 var settingsPath = "/usr/share/sailfish-vpn/"
 
@@ -18,19 +26,19 @@ function advancedSettingsPath(vpnType) {
 
 function stateName(state) {
     switch (state) {
-    case SystemSettings.VpnModel.Idle:
+    case Connman.VpnConnection.Idle:
         //% "Idle"
         return qsTrId("settings_network-me-vpn_state_idle")
-    case SystemSettings.VpnModel.Failure:
+    case Connman.VpnConnection.Failure:
         //% "Failure"
         return qsTrId("settings_network-me-vpn_state_failure")
-    case SystemSettings.VpnModel.Configuration:
+    case Connman.VpnConnection.Configuration:
         //% "Configuration"
         return qsTrId("settings_network-me-vpn_state_configuration")
-    case SystemSettings.VpnModel.Ready:
+    case Connman.VpnConnection.Ready:
         //% "Ready"
         return qsTrId("settings_network-me-vpn_state_ready")
-    case SystemSettings.VpnModel.Disconnect:
+    case Connman.VpnConnection.Disconnect:
         //% "Disconnect"
         return qsTrId("settings_network-me-vpn_state_disconnect")
     default:
@@ -158,7 +166,7 @@ function presentationName(input) {
 var ovpnImportPath = ""
 
 function importOvpnFile(pageStack, mainPage, path) {
-    var props = SystemSettings.VpnModel.processProvisioningFile(path, "openvpn")
+    var props = SystemSettings.SettingsVpnModel.processProvisioningFile(path, "openvpn")
     if (Object.keys(props).length == 0) {
         console.warn("Invalid .ovpn file:", path)
 

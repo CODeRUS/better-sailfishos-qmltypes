@@ -1,6 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013 - 2019 Jolla Ltd.
+** Copyright (c) 2019 Open Mobile Platform LLC.
 ** Contact: Martin Jones <martin.jones@jollamobile.com>
 ** All rights reserved.
 **
@@ -34,38 +35,40 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Silica.private 1.0
 import "private/RemorsePopup.js" as RemorseJs
 import "private/RemorseItem.js" as RemorseItemJs
 import "private/Util.js" as Util
+import "private"
 
-BackgroundItem {
+RemorseBase {
     id: remorseItem
-    property string text
-    property alias cancelText: cancelTextLabel.text
-    property alias wrapMode: titleLabel.wrapMode
-    property alias horizontalAlignment: titleLabel.horizontalAlignment
-    property alias pending: countdown.running
-    property real leftMargin: Theme.horizontalPageMargin
-    property real rightMargin: Theme.horizontalPageMargin
-    property alias font: titleLabel.font
 
-    function execute(item, title, callback, timeout) {
-        remorseItem.text = title
+    property Item _item
+
+    function execute(item, text, callback, timeout) {
+        if (text === undefined || text.length === 0) {
+            //% "Deleted"
+            remorseItem.text = qsTrId("components-la-deleted")
+        } else {
+            remorseItem.text = text
+        }
+
         RemorseJs.callback = callback
-        _timeout = timeout === undefined ? 5000 : timeout
+
+        _timeout = timeout === undefined ? 4000 : timeout
         _triggered = false
+        _page = Util.findPage(remorseItem)
         parent = item.parent
         if ('__silica_remorse_item' in parent) {
             parent.__silica_remorse_item = remorseItem
         }
         _item = item
-        _page = Util.findPage(remorseItem)
         state = "active"
-        countdown.restart()
+        _countdown.restart()
         RemorseItemJs.remorseItemCancel(remorseItem)
         RemorseItemJs.remorseItemActivated(remorseItem)
     }
+
     function cancel() {
         _close()
         if ('__silica_remorse_item' in parent) {
@@ -74,18 +77,25 @@ BackgroundItem {
         canceled()
         RemorseItemJs.remorseItemCancel(remorseItem)
     }
+
     function trigger() {
-        if (countdown.running) {
-            countdown.stop()
+        if (_countdown.running) {
+            _countdown.stop()
             return _execute(false)
         }
         return false
     }
 
+    function _trigger() {
+        remorseItem.state = "activePending"
+        _execute(true)
+    }
+
     function _close() {
-        countdown.stop()
+        _countdown.stop()
         state = ""
     }
+
     function _execute(closeAfterExecute) {
         if (!_triggered) {
             _triggered = true
@@ -95,37 +105,9 @@ BackgroundItem {
         return false
     }
 
-    drag.minimumX: -width
-    drag.maximumX: width
-    drag.target: _swipeToTrigger ? contentItem : null
-    drag.axis: Drag.XAxis
-    drag.onActiveChanged: if (!drag.active) dismissAnimation.animate(contentItem, 0, width)
-
-    DismissAnimation {
-        id: dismissAnimation
-        onCompleted: _execute(true)
-    }
-
-    property bool _swipeToTrigger: _page &&  (Screen.sizeCategory >= Screen.Large ? _page.width / 2 : _page.width) <= width
-    property int _timeout: 5000
-    property int _seconds: (_timeout + 999) / 1000
-    property int _secsRemaining: (_msRemaining + 999) / 1000
-    property real _msRemaining: _timeout
-    property Item _item
-    property Item _page
-    property bool _triggered
-    property real _contentOpacity
-
-    signal canceled
-    signal triggered
-
     opacity: 0.0
-    visible: false
-    width: parent ? parent.width : Screen.width
     height: Theme.itemSizeSmall
     z: 2
-
-    onClicked: cancel()
 
     states: [
         State {
@@ -185,7 +167,7 @@ BackgroundItem {
                     duration: 200
                 }
                 PropertyAction { target: remorseItem; property: "visible" }
-                ScriptAction { script: { RemorseItemJs.remorseItemDeactivated(remorseItem) } }
+                ScriptAction { script: { RemorseItemJs.remorseItemDeactivated(remorseItem) }}
                 FadeAnimation {
                     target: _item
                     duration: 100
@@ -197,92 +179,15 @@ BackgroundItem {
     Connections {
         target: _page
         onStatusChanged: {
-            if (_page && _page.status == PageStatus.Deactivating && countdown.running) {
+            if (_page && _page.status == PageStatus.Deactivating && _countdown.running) {
                 // if the page is changed then execute immediately
                 _execute(false)
             }
         }
     }
 
-    Row {
-        id: row
-
-        property real cellWidth: (parent.width - ((repeater.count - 1) * spacing)) / repeater.count
-
-        height: parent.height
-        spacing: 1
-
-        Repeater {
-            id: repeater
-
-            model: _seconds
-
-            Rectangle {
-                property real baseOpacity: Theme.colorScheme === Theme.DarkOnLight ? 1.0 : 0.7
-
-                width: row.cellWidth
-                height: parent ? parent.height : 0
-                color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
-                opacity: remorseItem._secsRemaining > Positioner.index ? baseOpacity : 0
-                Behavior on opacity {
-                    FadeAnimator {}
-                }
-            }
-        }
-    }
-    Column {
-        anchors {
-            left: parent.left
-            right: parent.right
-            topMargin: Theme.paddingLarge
-            bottomMargin: Theme.paddingLarge
-            leftMargin: remorseItem.leftMargin
-            rightMargin: remorseItem.rightMargin
-            verticalCenter: parent.verticalCenter
-        }
-        Label {
-            id: titleLabel
-            //% "in %n seconds"
-            text: remorseItem.text + " " + qsTrId("components-la-in-n-seconds", remorseItem._secsRemaining)
-            width: parent.width
-            color: remorseItem.down ? Theme.highlightColor : Theme.primaryColor
-            font.pixelSize: Theme.fontSizeSmall
-            truncationMode: wrapMode != Text.NoWrap ? TruncationMode.None : TruncationMode.Fade
-        }
-        Label {
-            id: cancelTextLabel
-
-            text: drag.active || dismissAnimation.running ?
-                      //% "Swipe to commit"
-                      qsTrId("components-la-swipe-to-commit")
-                    :
-                      //% "Tap to cancel"
-                      qsTrId("components-la-tap-to-cancel")
-            width: parent.width
-            color: remorseItem.down ? Theme.secondaryHighlightColor : Theme.secondaryColor
-            font.pixelSize: Theme.fontSizeExtraSmall
-            truncationMode: titleLabel.truncationMode
-            horizontalAlignment: titleLabel.horizontalAlignment
-        }
-    }
-
-    NumberAnimation {
-        id: countdown
-        target: remorseItem
-        property: "_msRemaining"
-        from: _timeout
-        to: 0
-        duration: _timeout
-        onRunningChanged: {
-            if (!running && _msRemaining == 0) {
-                remorseItem.state = "activePending"
-                _execute(true)
-            }
-        }
-    }
-
     Component.onDestruction: {
-        if (countdown.running) {
+        if (_countdown.running) {
             _execute(false)
         }
         RemorseItemJs.remorseItemDeactivated(remorseItem)

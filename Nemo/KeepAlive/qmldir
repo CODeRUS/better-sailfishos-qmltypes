@@ -1,2 +1,3 @@
 module Nemo.KeepAlive
+plugin keepaliveplugin
 typeinfo plugins.qmltypes

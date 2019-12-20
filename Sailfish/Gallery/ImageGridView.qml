@@ -11,7 +11,7 @@ SilicaGridView {
     property bool forceUnfocusHighlight
     property real _unfocusedOpacity: unfocusHighlightEnabled && (currentItem != null && currentItem.pressedAndHolded)
                                      || forceUnfocusHighlight
-                                     ? 0.2 : 1.0
+                                     ? Theme.opacityFaint : 1.0
     Behavior on _unfocusedOpacity { FadeAnimation {} }
 
     currentIndex: -1

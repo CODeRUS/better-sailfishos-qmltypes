@@ -47,7 +47,7 @@ SimSelectorBase {
 
         //% "None"
         value: (currentItem !== null && currentItem.text !== "") ? currentItem.text : qsTrId("settings_networking-la-none")
-        opacity: root.enabled ? 1.0 : 0.4
+        opacity: root.enabled ? 1.0 : Theme.opacityLow
         Behavior on opacity {
             FadeAnimation {}
         }

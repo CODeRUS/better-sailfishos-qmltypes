@@ -35,7 +35,16 @@
 import QtQuick 2.0
 
 Item {
+    id: root
+    property color color
     property Flickable flickable
-    VerticalScrollDecorator { flickable: parent.flickable }
-    HorizontalScrollDecorator { flickable: parent.flickable }
+
+    VerticalScrollDecorator {
+        color: root.color
+        flickable: root.flickable
+    }
+    HorizontalScrollDecorator {
+        color: root.color
+        flickable: root.flickable
+    }
 }

@@ -1,7 +1,9 @@
 module Sailfish.Pickers.private
+plugin sailfishcomponentspickersplugin
 AvatarPickerPage 1.0 AvatarPickerPage.qml
 DocumentModel 1.0 DocumentModel.qml
 ImageModel 1.0 ImageModel.qml
 MusicModel 1.0 MusicModel.qml
 SelectedContentModel 1.0 SelectedContentModel.qml
 VideoModel 1.0 VideoModel.qml
+typeinfo plugins.qmltypes

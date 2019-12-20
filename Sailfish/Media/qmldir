@@ -1,9 +1,7 @@
 module Sailfish.Media
-GStreamerVideoOutput 1.0 GStreamerVideoOutput.qml
+plugin sailfishmediaplugin
 MediaListItem 1.0 MediaListItem.qml
 MediaPlayerControlsPanel 1.0 MediaPlayerControlsPanel.qml
 MprisPlayerControls 1.0 MprisPlayerControls.qml
 MediaPlayerPanelBackground 1.0 MediaPlayerPanelBackground.qml
-ScreenBlank 1.0 ScreenBlank.qml
-VideoPlayer 1.0 VideoPlayer.qml
 typeinfo plugins.qmltypes

@@ -34,30 +34,36 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 import "private"
 
-Column {
+SilicaControl {
     id: dialer
 
     property alias voiceMailIconSource: voiceMailIcon.source
-    property var vanityDialNumbers: ["", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz", "+", "", ""]
+    //% "pause"
+    property var vanityDialNumbers: ["", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz", qsTrId("components-bt-pause"), "+", ""]
     property bool vanityDialNumbersVisible: true
     property bool symbolsVisible: true
-    property color textColor: Theme.primaryColor
-    property color pressedTextColor: Theme.highlightColor
+    property color textColor: palette.primaryColor
+    property color pressedTextColor: palette.highlightColor
+    property color secondaryTextColor: palette.secondaryColor
+    property color pressedSecondaryTextColor: palette.secondaryHighlightColor
     property alias pressedButtonColor: pressedButtonBackground.color
+    property bool preventStealing: true
 
     property string _numbers: "0123456789"
     property QtObject _feedbackEffect
     property int _buttonWidth: (3*Theme.itemSizeHuge - 4*Theme.paddingLarge) / 3
     property int _buttonHeight: screen.sizeCategory > Screen.Medium ? Theme.itemSizeExtraLarge : Theme.itemSizeLarge
     property int _horizontalSpacing: screen.sizeCategory > Screen.Medium ? Theme.paddingLarge : 0
-    property int _horizontalPadding: Math.max((width - implicitWidth) / 2, 0)
+    property int _horizontalPadding: Math.max((width - column.implicitWidth) / 2, 0)
 
     signal pressed(string number)
     signal released(string number)
     signal canceled(string number)
     signal clicked(string number)
+    signal pressAndHold(string number, QtObject mouse)
 
     signal voiceMailCalled
 
@@ -102,6 +108,7 @@ Column {
     }
 
     width: parent.width
+    implicitHeight: column.implicitHeight
 
     Component.onCompleted: {
         // Avoid hard dependency to feedback
@@ -109,105 +116,110 @@ Column {
                                              dialer, 'ThemeEffect')
     }
 
-    Item {
-        // Place button background here and not in the root Column so it can be repositioned.
-        Rectangle {
-            id: pressedButtonBackground
-            width: dialer._buttonWidth
-            height: dialer._buttonHeight + 2*Theme.paddingSmall // make highlight more square
-            visible: false
-            radius: 4
+    Rectangle {
+        id: pressedButtonBackground
+        width: dialer._buttonWidth
+        height: dialer._buttonHeight + 2*Theme.paddingSmall // make highlight more square
+        visible: false
+        radius: 4
 
-            // same as BackgroundItem
-            color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
-        }
+        // same as BackgroundItem
+        color: Theme.rgba(dialer.palette.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
     }
 
-    Row {
-        x: dialer._horizontalPadding
-        spacing: dialer._horizontalSpacing
+    Column {
+        id: column
 
-        KeypadButton {
-            key: Qt.Key_1
-            text: _numbers.charAt(1)
-            secondaryText: vanityDialNumbers[0]
-            onPressAndHold: dialer.voiceMailCalled()
-            Image {
-                id: voiceMailIcon
-                anchors {
-                    bottom: parent.bottom
-                    horizontalCenter: parent.horizontalCenter
+        width: dialer.width
+        height: dialer.height
+
+        Row {
+            x: dialer._horizontalPadding
+            spacing: dialer._horizontalSpacing
+
+            KeypadButton {
+                key: Qt.Key_1
+                text: _numbers.charAt(1)
+                secondaryText: vanityDialNumbers[0]
+                onPressAndHold: dialer.voiceMailCalled()
+                Image {
+                    id: voiceMailIcon
+                    anchors {
+                        bottom: parent.bottom
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                }
+            }
+            KeypadButton {
+                key: Qt.Key_2
+                text: _numbers.charAt(2)
+                secondaryText: vanityDialNumbers[1]
+            }
+            KeypadButton {
+                key: Qt.Key_3
+                text: _numbers.charAt(3)
+                secondaryText: vanityDialNumbers[2]
+            }
+        }
+        Row {
+            x: dialer._horizontalPadding
+            spacing: dialer._horizontalSpacing
+
+            Repeater {
+                model: 3
+                KeypadButton {
+                    key: Qt.Key_4 + index
+                    text: _numbers.charAt(4 + index)
+                    secondaryText: vanityDialNumbers[3 + index]
                 }
             }
         }
-        KeypadButton {
-            key: Qt.Key_2
-            text: _numbers.charAt(2)
-            secondaryText: vanityDialNumbers[1]
-        }
-        KeypadButton {
-            key: Qt.Key_3
-            text: _numbers.charAt(3)
-            secondaryText: vanityDialNumbers[2]
-        }
-    }
-    Row {
-        x: dialer._horizontalPadding
-        spacing: dialer._horizontalSpacing
 
-        Repeater {
-            model: 3
-            KeypadButton {
-                key: Qt.Key_4 + index
-                text: _numbers.charAt(4 + index)
-                secondaryText: vanityDialNumbers[3 + index]
+        Row {
+            x: dialer._horizontalPadding
+            spacing: dialer._horizontalSpacing
+
+            Repeater {
+                model: 3
+                KeypadButton {
+                    key: Qt.Key_7 + index
+                    text: _numbers.charAt(7 + index)
+                    secondaryText: vanityDialNumbers[6 + index]
+                }
             }
         }
-    }
-    Row {
-        x: dialer._horizontalPadding
-        spacing: dialer._horizontalSpacing
+        Row {
+            x: dialer._horizontalPadding
+            spacing: dialer._horizontalSpacing
 
-        Repeater {
-            model: 3
-            KeypadButton {
-                key: Qt.Key_7 + index
-                text: _numbers.charAt(7 + index)
-                secondaryText: vanityDialNumbers[6 + index]
+            Item {
+                width: asteriskButton.width
+                height: asteriskButton.height
+
+                KeypadButton {
+                    id: asteriskButton
+                    visible: symbolsVisible
+                    key: Qt.Key_Asterisk
+                    text: "*"
+                    secondaryText: vanityDialNumbers[9]
+                }
             }
-        }
-    }
-    Row {
-        x: dialer._horizontalPadding
-        spacing: dialer._horizontalSpacing
-
-        Item {
-            width: asteriskButton.width
-            height: asteriskButton.height
-
             KeypadButton {
-                id: asteriskButton
-                visible: symbolsVisible
-                key: Qt.Key_Asterisk
-                text: "*"
-                secondaryText: vanityDialNumbers[9]
+                key: Qt.Key_0
+                text: "0"
+                secondaryText: symbolsVisible ? vanityDialNumbers[10] : ""
             }
-        }
-        KeypadButton {
-            key: Qt.Key_0
-            text: "0"
-            secondaryText: vanityDialNumbers[10]
-        }
-        Item {
-            width: hashButton.width
-            height: hashButton.height
+            Item {
+                width: hashButton.width
+                height: hashButton.height
 
-            KeypadButton {
-                id: hashButton
-                visible: symbolsVisible
-                text: "#"
-                key: Qt.Key_NumberSign
-                secondaryText: vanityDialNumbers[11]
+                KeypadButton {
+                    id: hashButton
+                    visible: symbolsVisible
+                    text: "#"
+                    key: Qt.Key_NumberSign
+                    secondaryText: vanityDialNumbers[11]
+                }
             }
         }
     }

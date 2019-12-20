@@ -1,8 +1,16 @@
+/*
+ * Copyright (c) 2015 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
 import QtQuick 2.0
 import QtQml.Models 2.1
 import Sailfish.Silica 1.0
 import com.jolla.startupwizard 1.0
 import org.nemomobile.configuration 1.0
+import org.nemomobile.systemsettings 1.0
 import Sailfish.Accounts 1.0
 import Sailfish.Store 1.0
 import Sailfish.Policy 1.0
@@ -58,7 +66,8 @@ Dialog {
     StartupApplicationModel {
         id: androidAppsModel
 
-        readonly property bool createAndroidAppInstallationDialog: (androidSupportStatus == StartupApplicationModel.Installed && count > 0) || androidSupportPackageAvailable
+        readonly property bool createAndroidAppInstallationDialog: (androidSupportStatus == StartupApplicationModel.Installed && count > 0)
+                                                                   || androidSupportPackageAvailable
         property bool androidSupportPackageAvailable
 
         function isAndroidSupportPackage(packageName) {
@@ -123,9 +132,9 @@ Dialog {
         width: parent.width
 
         WizardDialogHeader {
-            //: Displayed when Jolla account creation or sign-in was successful
-            //% "Great, your Jolla account was successfully added!"
-            title: qsTrId("startupwizard-he-great_your_jolla_account_was_added")
+            //: Displayed when account creation or sign-in was successful
+            //% "Great, your account was successfully added!"
+            title: qsTrId("startupwizard-he-great_your_account_was_added")
         }
 
         Label {
@@ -137,7 +146,7 @@ Dialog {
             color: Theme.highlightColor
             visible: !root.runningFromSettingsApp
 
-            //% "You can find your Jolla account later from Settings | Accounts."
+            //% "You can find your accounts later from Settings | Accounts."
             text: qsTrId("startupwizard-la-other_accounts_setup_later_from_settings")
         }
 
@@ -162,7 +171,7 @@ Dialog {
             spacing: Theme.paddingLarge
 
             Label {
-                //: Displayed the same time with "Great! your Jolla was successfully added!", and we might be fetching more than just one application.
+                //: Displayed the same time with "Great! your account was successfully added!", and we might be fetching more than just one application.
                 //% "Fetching applications to install"
                 text: qsTrId("startupwizard-la-fetching_application_information")
                 x: Theme.horizontalPageMargin
@@ -186,7 +195,8 @@ Dialog {
         id: applicationInstallationComponent
 
         ApplicationInstallationDialog {
-            acceptDestination: _skipAndroidPage ? (_selectedAppsToInstall ? appInstallationConfirmationComponent : root.endDestination) : root._androidAppsInstallDialog
+            acceptDestination: _skipAndroidPage ? (_selectedAppsToInstall ? appInstallationConfirmationComponent : root.endDestination)
+                                                : root._androidAppsInstallDialog
             acceptDestinationAction: _skipAndroidPage ? (_selectedAppsToInstall ? PageStackAction.Push : root.endDestinationAction) : PageStackAction.Push
             acceptDestinationProperties: _skipAndroidPage ? (_selectedAppsToInstall ? undefined : root.endDestinationProperties) : undefined
             acceptDestinationReplaceTarget: acceptDestination == root.endDestination ? root.endDestinationReplaceTarget : undefined
@@ -212,9 +222,9 @@ Dialog {
         id: appInstallationConfirmationComponent
 
         Dialog {
-            //: Displayed just before the tutorial to teach how to use Sailfish OS
-            //% "Great! Next you'll learn to use Sailfish OS"
-            property string _textOnwardsToTutorial: qsTrId("startupwizard-he-great_next_learn_to_use_sailfish_os")
+            //: %1 is an operating system name, text displayed just before the tutorial to teach how to use Sailfish OS
+            //% "Great! Next you'll learn to use %1"
+            property string _textOnwardsToTutorial: qsTrId("startupwizard-he-great_next_learn_to_use_sailfish_os").arg(aboutSettings.operatingSystemName)
 
             //% "Your apps are downloading and installing in the background."
             property string _textAppsDownloading: qsTrId("startupwizard-la-your_apps_are_installing_in_background")
@@ -262,5 +272,9 @@ Dialog {
         id: androidSelectionSuppressed
         key: "/apps/jolla-startupwizard/android_selection_suppressed"
         defaultValue: false
+    }
+
+    AboutSettings {
+        id: aboutSettings
     }
 }

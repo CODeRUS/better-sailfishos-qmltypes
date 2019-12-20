@@ -1,4 +1,5 @@
 module com.jolla.mediaplayer
+plugin mediaplayerplugin
 AddToPlaylistPage 1.0 AddToPlaylistPage.qml
 AlbumArt 1.0 AlbumArt.qml
 singleton AudioPlayer 1.0 AudioPlayer.qml
@@ -12,6 +13,7 @@ MediaKeys 1.0 MediaKeys.qml
 MediaListDelegate 1.0 MediaListDelegate.qml
 MediaPlayerDockedPanel 1.0 MediaPlayerDockedPanel.qml
 MediaPlayerListView 1.0 MediaPlayerListView.qml
+ProxyMprisPlayer 1.0 ProxyMprisPlayer.qml
 NewPlaylistDialog 1.0 NewPlaylistDialog.qml
 NowPlayingMenuItem 1.0 NowPlayingMenuItem.qml
 PlayQueuePage 1.0 PlayQueuePage.qml

@@ -160,7 +160,9 @@ BackgroundItem {
             Label {
                 id: cancelLabel
                 text: cancelText
-                color: cancelButton.highlighted ? Theme.highlightColor : Theme.primaryColor
+                color: cancelButton.highlighted
+                       ? dialogHeader.palette.highlightColor
+                       : dialogHeader.palette.primaryColor
                 x: dialogHeader.leftMargin
                 width: Math.min(dialogHeader.width - acceptButton.width - x - Theme.paddingMedium, implicitWidth)
                 font {
@@ -199,7 +201,7 @@ BackgroundItem {
             height: overlay.height
             anchors.right: parent.right
             enabled: acceptText !== ""
-            opacity: !dialogHeader.dialog || dialogHeader.dialog.canAccept ? 1.0 : 0.3
+            opacity: !dialogHeader.dialog || dialogHeader.dialog.canAccept ? 1.0 : Theme.opacityLow
             Behavior on opacity { FadeAnimation { } }
 
             highlighted: pageStack._pageStackIndicator.forwardIndicatorDown || down
@@ -213,7 +215,9 @@ BackgroundItem {
             Label {
                 id: acceptLabel
                 text: acceptText
-                color: acceptButton.highlighted ? Theme.highlightColor : Theme.primaryColor
+                color: acceptButton.highlighted
+                       ? dialogHeader.palette.highlightColor
+                       : dialogHeader.palette.primaryColor
                 // Don't allow the label to extend over the page stack indicator
                 width: acceptButton.width - Theme.paddingLarge - Theme.horizontalPageMargin
                 truncationMode: TruncationMode.Fade
@@ -244,7 +248,7 @@ BackgroundItem {
         width: parent.width - leftMargin - rightMargin
         font.pixelSize: Theme.fontSizeExtraLarge
         wrapMode: Text.Wrap
-        color: Theme.highlightColor
+        color: dialogHeader.palette.highlightColor
         opacity: text.length > 0 ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation { } }
     }

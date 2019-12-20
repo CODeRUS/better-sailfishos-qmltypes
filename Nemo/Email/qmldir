@@ -1,2 +1,3 @@
 module Nemo.Email
+plugin nemoemail
 typeinfo plugins.qmltypes

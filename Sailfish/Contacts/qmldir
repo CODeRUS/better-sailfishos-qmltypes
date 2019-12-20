@@ -1,19 +1,31 @@
 module Sailfish.Contacts
+plugin sailfishcontactsplugin
+singleton ContactCreator 1.0 ContactCreator.qml
+singleton ContactModelCache 1.0 ContactModelCache.qml
 ContactsUtil 1.0 common/common.js
+ContactActivityDelegate 1.0 ContactActivityDelegate.qml
+ContactAvatar 1.0 ContactAvatar.qml
 ContactCard 1.0 ContactCard.qml
 ContactCardPage 1.0 ContactCardPage.qml
+ContactEditorDialog 1.0 ContactEditorDialog.qml
 ContactItem 1.0 ContactItem.qml
+ContactItemGradient 1.0 ContactItemGradient.qml
 ContactBrowser 1.0 ContactBrowser.qml
 ContactBrowserItem 1.0 ContactBrowserItem.qml
+ContactBrowserMenu 1.0 ContactBrowserMenu.qml
 ContactSelectPage 1.0 ContactSelectPage.qml
 ContactMultiSelectPage 1.0 ContactMultiSelectPage.qml
+ContactSelectionDockedPanel 1.0 ContactSelectionDockedPanel.qml
 ContactSharePage 1.0 ContactSharePage.qml
 ContactsMultiSelectDialog 1.0 ContactsMultiSelectDialog.qml
 FavoriteContactItem 1.0 FavoriteContactItem.qml
 FavoritesBar 1.0 FavoritesBar.qml
+ContactCardPostSavePage 1.0 ContactCardPostSavePage.qml
 ContactPresenceIndicator 1.0 ContactPresenceIndicator.qml
 ContactPresenceUpdate 1.0 ContactPresenceUpdate.qml
+ContactPropertyModel 1.0 ContactPropertyModel.qml
 TemporaryContactCardPage 1.0 TemporaryContactCardPage.qml
+TemporaryContactLinkPage 1.0 TemporaryContactLinkPage.qml
 RecipientField 1.0 RecipientField.qml
 ContactImportPage 1.0 ContactImportPage.qml
 PresenceDetailsPage 1.0 PresenceDetailsPage.qml

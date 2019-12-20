@@ -29,7 +29,7 @@ ListItem {
                         : Format.DurationShort)
             }
         }
-        opacity: highlighted || playing ? 1.0 : 0.4
+        opacity: highlighted || playing ? 1.0 : Theme.opacityLow
         horizontalAlignment: Text.AlignRight
         font {
             family: Theme.fontFamilyHeading

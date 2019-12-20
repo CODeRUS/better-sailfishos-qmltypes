@@ -1,15 +1,17 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import org.nemomobile.contacts 1.0
 import "recipientfield"
-import "common/common.js" as ContactsUtils
+import Sailfish.Contacts 1.0 as Contacts
 
 Item {
     id: root
-    property alias actionType: namesList.actionType
+    property int actionType
     property alias placeholderText: namesList.placeholderText
-    property string summaryPlaceholderText: placeholderText
+    property alias summaryPlaceholderText: labelItem.text
     property alias summary: namesList.summary
+    readonly property alias hasFocus: namesList.editing
+    property alias fullSummary: namesList.fullSummary
     property QtObject contactSearchModel
     property bool empty: namesList.summary == ""
     // Supported properties is a combination of: PeopleModel.EmailAddressRequired, AccountUriRequired, PhoneNumberRequired
@@ -27,10 +29,8 @@ Item {
     property QtObject selectedContacts: namesList.recipientsModel
 
     property QtObject addressesModel: addressesModelId
-    property bool _editing: namesList.editing
     property alias showLabel: namesList.showLabel
 
-    signal finishedEditing()
     signal selectionChanged()
     signal lastFieldExited()
 
@@ -47,9 +47,11 @@ Item {
     }
 
     function _addressList(contact) {
-        // Ensure the import is initialized
-        ContactsUtils.init(Person)
-        return ContactsUtils.selectableProperties(contact, requiredProperty, Person)
+        return ContactsUtil.selectableProperties(contact, requiredProperty, Person)
+    }
+
+    function updateSummary() {
+        namesList.updateSummary()
     }
 
     onMultipleAllowedChanged: {
@@ -59,7 +61,7 @@ Item {
         }
     }
 
-    height: _editing ? namesList.height : recipientsSummary.height
+    height: hasFocus ? namesList.height : recipientsSummary.height
     width: parent ? parent.width : Screen.width
 
     Binding {
@@ -68,7 +70,7 @@ Item {
         value: root.requiredProperty
     }
 
-    ContactAddressesModel {
+    ContactPropertyModel {
         id: addressesModelId
         requiredProperty: root.requiredProperty
     }
@@ -76,14 +78,14 @@ Item {
     AutoCompleteFieldList {
         id: namesList
         requiredProperty: root.requiredProperty
-        opacity: _editing ? 1.0 : 0.0
+        opacity: editing ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation {} }
         visible: opacity > 0.0
-        onEditingChanged: {
-            if (!editing) {
-                root.finishedEditing()
-            }
-        }
+
+        //: A single recipient
+        //% "Recipient"
+        placeholderText: qsTrId("components_contacts-ph-recipient")
+
         onSelectionChanged: root.selectionChanged()
         onLastFieldExited: root.lastFieldExited()
     }
@@ -93,7 +95,7 @@ Item {
 
         width: parent.width
         height: Screen.sizeCategory >= Screen.Large ? Theme.itemSizeLarge : Theme.itemSizeMedium
-        opacity: !_editing ? 1.0 : 0.0
+        opacity: !root.hasFocus ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation {} }
         visible: opacity > 0.0
 
@@ -104,6 +106,12 @@ Item {
             } else {
                 namesList.forceActiveFocus()
             }
+        }
+
+        TextMetrics {
+            id: fullSummaryMetrics
+            font: summaryLabel.font
+            text: fullSummary
         }
 
         Label {
@@ -119,12 +127,22 @@ Item {
             color: summary !== "" ? Theme.primaryColor : Theme.secondaryColor
             verticalAlignment: Text.AlignVCenter
             truncationMode: TruncationMode.Fade
-            text: summary !== "" ? summary : placeholderText
+            text: {
+                if (fullSummary != "" && fullSummaryMetrics.width <= width)
+                    return fullSummary
+                if (summary != "")
+                    return summary
+                return placeholderText
+            }
         }
 
         Label {
             id: labelItem
-            text: root.summaryPlaceholderText
+
+            //: Summary of all selected recipients, e.g. "Bob, Jane, 75553243"
+            //% "Recipients"
+            text: qsTrId("components_contacts-ph-recipients")
+
             anchors {
                 left: summaryLabel.left
                 right: summaryLabel.right

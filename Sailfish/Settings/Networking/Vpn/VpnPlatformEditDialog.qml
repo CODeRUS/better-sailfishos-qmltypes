@@ -1,5 +1,13 @@
+/*
+ * Copyright (c) 2018 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import MeeGo.Connman 0.2
 import org.nemomobile.systemsettings 1.0
 import Sailfish.Settings.Networking 1.0
 import Sailfish.Settings.Networking.Vpn 1.0
@@ -46,6 +54,16 @@ VpnEditDialog {
         return ''
     }
 
+    function mergeProviderProperties(newProperties) {
+        if (!providerProperties) {
+            providerProperties = newProperties
+        } else {
+            for (var key in newProperties) {
+                providerProperties[key] = newProperties[key]
+            }
+        }
+    }
+
     function init() {
         if (connection) {
             vpnType = connection.type
@@ -87,7 +105,7 @@ VpnEditDialog {
         props['storeCredentials'] = root.connectionProperties['storeCredentials'] || false
 
         var domain = root.connectionProperties['domain']
-        if (domain && domain != '') {
+        if (domain) {
             props['domain'] = domain
         }
         var networks = root.connectionProperties['networks']
@@ -100,9 +118,9 @@ VpnEditDialog {
         }
 
         if (newConnection) {
-            VpnModel.createConnection(props)
+            SettingsVpnModel.createConnection(props)
         } else {
-            VpnModel.modifyConnection(connection.path, props)
+            SettingsVpnModel.modifyConnection(connection.path, props)
         }
     }
 
@@ -133,7 +151,7 @@ VpnEditDialog {
                 visible: text != ""
 
                 text: {
-                    if (connection != undefined && connection.state == VpnModel.Ready) {
+                    if (connection != undefined && connection.state == VpnConnection.Ready) {
                         //: Warning for editing active connection
                         //% "This connection is currently active. Saving the settings will cause the connection to be disconnected."
                         return qsTrId("settings_network-he-vpn_active_warning")
@@ -197,7 +215,8 @@ VpnEditDialog {
                     obj.pageCompleted.connect(function(advancedPage) {
                         advancedPage.propertiesUpdated.connect(function(connectionProperties, providerProperties) {
                             root.connectionProperties = connectionProperties
-                            root.providerProperties = providerProperties
+
+                            mergeProviderProperties(providerProperties)
                         })
                     })
                 }

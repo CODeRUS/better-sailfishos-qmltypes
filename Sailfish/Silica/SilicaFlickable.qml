@@ -47,6 +47,7 @@ Flickable {
     property alias quickScrollEnabled: quickScrollItem.quickScroll
     property alias quickScroll: quickScrollItem.quickScroll
     property alias quickScrollAnimating: quickScrollItem.quickScrollAnimating
+    property alias quickScrollVisible: quickScrollItem.quickScrollVisible
     property Item pullDownMenu
     property Item pushUpMenu
     property QtObject _scrollAnimation

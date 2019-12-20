@@ -1,2 +1,3 @@
 module org.nemomobile.messages.internal
+plugin nemomessages-internal
 typeinfo plugins.qmltypes

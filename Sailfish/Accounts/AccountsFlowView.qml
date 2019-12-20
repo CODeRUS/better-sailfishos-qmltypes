@@ -12,6 +12,7 @@ Flow {
     property alias model: accountModel
     property bool entriesInteractive
     property real itemWidth: width
+    property int deletingAccountId
 
     signal accountClicked(int accountId, string providerName)
     signal accountRemoveRequested(int accountId)
@@ -33,9 +34,11 @@ Flow {
         delegate: AccountsListDelegate {
             id: delegateItem
 
+            hidden: deletingAccountId === model.accountId
             width: root.itemWidth
 
             enabled: root.entriesInteractive
+
             visible: !root._hideJollaAccount || model.providerName !== "jolla"
             entriesInteractive: root.entriesInteractive
             allowRemoveOnly: !model.providerValid

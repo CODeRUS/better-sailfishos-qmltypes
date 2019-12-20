@@ -13,26 +13,33 @@ Column {
             return ''
         }
 
-        if (getProperty('PPPD.ReqMPPE128') == 'true') {
+        var getBoolProperty = function(name) {
+            if (getProperty(name) === 'true') {
+                return true
+            }
+            return false
+        }
+
+        if (getBoolProperty('PPPD.ReqMPPE128')) {
             pppdReqMPPE.setValue('mppe128-required')
-        } else if (getProperty('PPPD.ReqMPPE40') == 'true') {
+        } else if (getBoolProperty('PPPD.ReqMPPE40')) {
             pppdReqMPPE.setValue('mppe40-required')
-        } else if (getProperty('PPPD.ReqMPPE') == 'true') {
+        } else if (getBoolProperty('PPPD.ReqMPPE')) {
             pppdReqMPPE.setValue('mppe-required')
         } else {
             pppdReqMPPE.setValue('no-mppe')
         }
-        pppdReqMPPEStateful.checked = getProperty('PPPD.ReqMPPEStateful') == 'true'
-        pppdAcceptEAP.checked = getProperty('PPPD.RefuseEAP') != 'true'
-        pppdAcceptPAP.checked = getProperty('PPPD.RefusePAP') != 'true'
-        pppdAcceptCHAP.checked = getProperty('PPPD.RefuseCHAP') != 'true'
-        pppdAcceptMSCHAP.checked = getProperty('PPPD.RefuseMSCHAP') != 'true'
-        pppdAcceptMSCHAP2.checked = getProperty('PPPD.RefuseMSCHAP2') != 'true'
-        pppdAddrCtrlComp.checked = getProperty('PPPD.UseAccomp') == 'true'
-        pppdBsdComp.checked = getProperty('PPPD.NoBSDComp') != 'true'
-        pppdProtocolComp.checked = getProperty('PPPD.NoPcomp') != 'true'
-        pppdDeflateComp.checked = getProperty('PPPD.NoDeflate') != 'true'
-        pppdVJComp.checked = getProperty('PPPD.NoVJ') != 'true'
+        pppdReqMPPEStateful.checked = getBoolProperty('PPPD.ReqMPPEStateful')
+        pppdAcceptEAP.checked = !getBoolProperty('PPPD.RefuseEAP')
+        pppdAcceptPAP.checked = !getBoolProperty('PPPD.RefusePAP')
+        pppdAcceptCHAP.checked = !getBoolProperty('PPPD.RefuseCHAP')
+        pppdAcceptMSCHAP.checked = !getBoolProperty('PPPD.RefuseMSCHAP')
+        pppdAcceptMSCHAP2.checked = !getBoolProperty('PPPD.RefuseMSCHAP2')
+        pppdAddrCtrlComp.checked = getBoolProperty('PPPD.UseAccomp')
+        pppdBsdComp.checked = !getBoolProperty('PPPD.NoBSDComp')
+        pppdProtocolComp.checked = !getBoolProperty('PPPD.NoPcomp')
+        pppdDeflateComp.checked = !getBoolProperty('PPPD.NoDeflate')
+        pppdVJComp.checked = !getBoolProperty('PPPD.NoVJ')
         pppdEchoInterval.text = getProperty('PPPD.EchoInterval')
         pppdEchoFailure.text = getProperty('PPPD.EchoFailure')
     }
@@ -45,48 +52,37 @@ Column {
             }
         }
 
-        if (pppdReqMPPE.currentIndex == 1) {
-            updateProvider('PPPD.ReqMPPE', 'true')
-        } else if (pppdReqMPPE.currentIndex == 2) {
-            updateProvider('PPPD.ReqMPPE40', 'true')
-        } else if (pppdReqMPPE.currentIndex == 3) {
-            updateProvider('PPPD.ReqMPPE128', 'true')
-        }
-        if (pppdReqMPPEStateful.checked) {
-            updateProvider('PPPD.ReqMPPEStateful', 'true')
-        }
-        if (!pppdAcceptEAP.checked) {
-            updateProvider('PPPD.RefuseEAP', 'true')
-        }
-        if (!pppdAcceptPAP.checked) {
-            updateProvider('PPPD.RefusePAP', 'true')
-        }
-        if (!pppdAcceptCHAP.checked) {
-            updateProvider('PPPD.RefuseCHAP', 'true')
-        }
-        if (!pppdAcceptMSCHAP.checked) {
-            updateProvider('PPPD.RefuseMSCHAP', 'true')
-        }
-        if (!pppdAcceptMSCHAP2.checked) {
-            updateProvider('PPPD.RefuseMSCHAP2', 'true')
-        }
-        if (pppdAddrCtrlComp.checked) {
-            updateProvider('PPPD.UseAccomp', 'true')
-        }
-        if (!pppdBsdComp.checked) {
-            updateProvider('PPPD.NoBSDComp', 'true')
-        }
-        if (!pppdProtocolComp.checked) {
-            updateProvider('PPPD.NoPcomp', 'true')
-        }
-        if (!pppdDeflateComp.checked) {
-            updateProvider('PPPD.NoDeflate', 'true')
-        }
-        if (!pppdVJComp.checked) {
-            updateProvider('PPPD.NoVJ', 'true')
-        }
+        updateProvider('PPPD.ReqMPPE', pppdReqMPPE.currentIndex === 1 ? 'true' : 'false')
+        updateProvider('PPPD.ReqMPPE40', pppdReqMPPE.currentIndex === 2 ? 'true' : 'false')
+        updateProvider('PPPD.ReqMPPE128', pppdReqMPPE.currentIndex === 3 ? 'true' : 'false')
+        updateProvider('PPPD.ReqMPPEStateful', pppdReqMPPEStateful.checked.toString())
+
+        // These are reversed in meaning, if the value is checked, the option should be false
+        updateProvider('PPPD.RefuseEAP', (!pppdAcceptEAP.checked).toString())
+        updateProvider('PPPD.RefusePAP', (!pppdAcceptPAP.checked).toString())
+        updateProvider('PPPD.RefuseCHAP', (!pppdAcceptCHAP.checked).toString())
+        updateProvider('PPPD.RefuseMSCHAP', (!pppdAcceptMSCHAP.checked).toString())
+        updateProvider('PPPD.RefuseMSCHAP2', (!pppdAcceptMSCHAP2.checked).toString())
+        updateProvider('PPPD.NoBSDComp', (!pppdBsdComp.checked).toString())
+        updateProvider('PPPD.NoPcomp', (!pppdProtocolComp.checked).toString())
+        updateProvider('PPPD.NoDeflate', (!pppdDeflateComp.checked).toString())
+        updateProvider('PPPD.NoVJ', (!pppdVJComp.checked).toString())
+
+        updateProvider('PPPD.UseAccomp', pppdAddrCtrlComp.checked.toString())
+
         updateProvider('PPPD.EchoInterval', pppdEchoInterval.text)
         updateProvider('PPPD.EchoFailure', pppdEchoFailure.text)
+    }
+
+    function enableMSCHAP() {
+        if (pppdReqMPPE.currentIndex === 0)
+            return
+
+        // If any of MPPE (Microsof Point to Point Encryption is used) either of MSCHAP must be enabled
+        if (!pppdAcceptMSCHAP.checked && !pppdAcceptMSCHAP2.checked) {
+            pppdAcceptMSCHAP.checked = true
+            pppdAcceptMSCHAP2.checked = true
+        }
     }
 
     width: parent.width
@@ -104,6 +100,7 @@ Column {
 
         //% "Authentication via MPPE"
         label: qsTrId("settings_network-la-vpn_pppd_reqmppe")
+        onValueChanged: enableMSCHAP()
     }
 
     TextSwitch {
@@ -144,6 +141,11 @@ Column {
 
         //% "MSCHAP"
         text: qsTrId("settings_network-la-vpn_pppd_accept_mschap")
+        onCheckedChanged: {
+            // If any of the MPPE modes is selected and this is not checked, MSCHAP must be selected
+            if (!checked && pppdReqMPPE.currentIndex !== 0 && !pppdAcceptMSCHAP2.checked)
+                pppdAcceptMSCHAP2.checked = true
+        }
     }
 
     TextSwitch {
@@ -151,6 +153,11 @@ Column {
 
         //% "MSCHAP v2"
         text: qsTrId("settings_network-la-vpn_pppd_accept_mschap2")
+        onCheckedChanged: {
+            // If any of the MPPE modes is selected and this is not checked, MSCHAPv2 must be selected
+            if (!checked && pppdReqMPPE.currentIndex !== 0 && !pppdAcceptMSCHAP.checked)
+                pppdAcceptMSCHAP.checked = true
+        }
     }
 
     SectionHeader {

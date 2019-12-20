@@ -43,14 +43,14 @@ Dialog {
     property int hour
     property int minute
     //property int second                   // not supported
-    property int hourMode
+    property alias hourMode: clockItem.hourMode
     //property string acceptButtonText      // not supported
     //property string rejectButtonText      // not supported
     //property string titleText             // not supported
     //property int fields                   // not supported
 
     property date time: new Date(0,0,0, hour, minute)
-    property string timeText: timePicker._formatTime()
+    property string timeText: timePicker._formatTime(hour, minute, 0)
 
     allowedOrientations: Orientation.All
 
@@ -58,15 +58,17 @@ Dialog {
         spacing: Theme.paddingLarge
         width: parent.width
 
-        DialogHeader {
-        }
+        DialogHeader {}
+
         TimePicker {
             id: timePicker
             anchors.horizontalCenter: parent.horizontalCenter
+            hourMode: clockItem.hourMode
 
             ClockItem {
-                anchors.centerIn: parent
+                id: clockItem
                 time: timePicker.time
+                anchors.centerIn: parent
             }
         }
     }
@@ -74,7 +76,6 @@ Dialog {
     onOpened: {
         timePicker.hour = hour
         timePicker.minute = minute
-        timePicker.hourMode = hourMode
     }
 
     onDone: {

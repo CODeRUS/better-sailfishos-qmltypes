@@ -1,4 +1,5 @@
 module com.jolla.settings
+plugin jollasettings
 SettingItem 1.0 SettingItem.qml
 SettingsControl 1.0 SettingsControl.qml
 SettingsToggle 1.0 SettingsToggle.qml

@@ -1,4 +1,5 @@
 module Sailfish.Gallery
+plugin sailfishgalleryplugin
 DetailsPage 1.0 DetailsPage.qml
 GalleryMediaPlayer 1.0 GalleryMediaPlayer.qml
 GalleryOverlay 1.0 GalleryOverlay.qml

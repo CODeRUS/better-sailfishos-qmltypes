@@ -18,9 +18,17 @@ NetworkService {
         }
     }
 
-    onConnectedChanged: if (connected) timer.stop()
+    onAvailableChanged: if (available) outOfRangeTimer.stop()
+    onConnectedChanged: if (connected) {
+        timer.stop()
+        outOfRangeTimer.stop()
+    }
     onPropertiesReady: {
         if (path != "" && !available) {
+            if (hidden) {
+                outOfRangeTimer.restart()
+                return
+            }
             //% "Network out of range"
             errorNotification.previewBody = qsTrId("settings_network-la-network_out_of_range")
             errorNotification.publish()
@@ -34,6 +42,15 @@ NetworkService {
             //% "Connecting to network failed"
             errorNotification.previewBody = qsTrId("settings_network-la-connecting_failed")
             errorNotification.publish()
+        }
+    }
+    property Timer outOfRangeTimer: Timer {
+        interval: 5000
+        onTriggered: {
+            errorNotification.previewBody = qsTrId("settings_network-la-network_out_of_range")
+            errorNotification.publish()
+            timer.stop()
+            path = ""
         }
     }
     property Notification errorNotification: Notification {

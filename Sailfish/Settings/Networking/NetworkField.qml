@@ -14,8 +14,8 @@ TextField {
 
     //% "Network address"
     label: qsTrId("settings_network-la-network_address")
+    hideLabelOnEmptyField: false
 
     width: parent.width
-    _labelItem.opacity: 1.0
     inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
 }

@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0
 import Sailfish.Gallery 1.0
-import Sailfish.Gallery.private 1.0
 import Sailfish.Ambience 1.0
 
 Item {
@@ -79,7 +79,7 @@ Item {
         id: detailsButton
         x: Theme.horizontalPageMargin
         y: Theme.paddingLarge
-        icon.source: "image://theme/icon-m-about?" + Theme.lightPrimaryColor
+        icon.source: "image://theme/icon-m-about"
         visible: localFile && !viewerOnlyMode && itemId.length > 0
         onClicked: if (itemId.length > 0) pageStack.animatorPush("DetailsPage.qml", { modelItem: overlay.itemId } )
     }
@@ -103,11 +103,6 @@ Item {
         opacity: overlay.error ? 0.0 : 1.0
         anchors { left: parent.left; right: toolbar.left; bottom: parent.bottom }
         rightMargin: Theme.paddingLarge
-
-        color: Theme.lightPrimaryColor
-        backgroundColor: Theme.lightSecondaryColor
-        valueLabelColor: Theme.lightPrimaryColor
-        colorScheme: Theme.LightOnDark
 
         height: Math.max(implicitHeight, toolbar.height + toolbar.anchors.bottomMargin * 2 + _valueLabel.height/2)
         handleVisible: false
@@ -158,7 +153,7 @@ Item {
 
         IconButton {
             id: deleteButton
-            icon.source: "image://theme/icon-m-delete?" + Theme.lightPrimaryColor
+            icon.source: "image://theme/icon-m-delete"
             visible: localFile
             anchors.verticalCenter: parent.verticalCenter
             onClicked: overlay.remove()
@@ -166,7 +161,7 @@ Item {
 
         IconButton {
             id: editButton
-            icon.source: "image://theme/icon-m-edit?" + Theme.lightPrimaryColor
+            icon.source: "image://theme/icon-m-edit"
             visible: fileInfo.editableImage && isImage && !viewerOnlyMode
             anchors.verticalCenter: parent.verticalCenter
             onClicked: {
@@ -204,7 +199,7 @@ Item {
 
         IconButton {
             id: shareButton
-            icon.source: "image://theme/icon-m-share?" + Theme.lightPrimaryColor
+            icon.source: "image://theme/icon-m-share"
             anchors.verticalCenter: parent.verticalCenter
             onClicked: {
                 if (player && player.playing) {
@@ -230,7 +225,7 @@ Item {
             property bool suppressClick
 
             visible: isImage
-            icon.source: "image://theme/icon-m-ambience?" + Theme.lightPrimaryColor
+            icon.source: "image://theme/icon-m-ambience"
             anchors.verticalCenter: parent.verticalCenter
             onClicked: {
                 if (suppressClick) return

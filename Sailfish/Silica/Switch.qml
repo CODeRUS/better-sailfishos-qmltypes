@@ -37,14 +37,13 @@ import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 import "private"
 
-MouseArea {
+SilicaMouseArea {
     id: switchItem
 
     property bool checked
     property alias iconSource: image.source //XXX Deprecated
     property alias icon: image
     property bool down: pressed && containsMouse && !DragFilter.canceled
-    property bool highlighted: down
     property bool busy
     property bool automaticCheck: true
 
@@ -60,22 +59,24 @@ MouseArea {
 
     width: column.width; height: column.height
 
+    highlighted: down
+
     Column {
         id: column
 
-        spacing: Theme.colorScheme === Theme.DarkOnLight ? Theme.paddingMedium : -Theme.paddingLarge
+        spacing: switchItem.palette.colorScheme === Theme.DarkOnLight ? Theme.paddingMedium : -Theme.paddingLarge
         anchors.centerIn: parent
 
         GlassItem {
             id: indicator
-            opacity: switchItem.enabled ? 1.0 : 0.4
-            color: highlighted ? Theme.highlightColor
-                               : dimmed ? Theme.primaryColor
+            opacity: switchItem.enabled ? 1.0 : Theme.opacityLow
+            color: highlighted ? switchItem.palette.highlightColor
+                               : dimmed ? switchItem.palette.primaryColor
                                         : Theme.lightPrimaryColor
-            backgroundColor: checked || busy ? Theme.backgroundGlowColor : "transparent"
+            backgroundColor: checked || busy ? switchItem.palette.backgroundGlowColor : "transparent"
             anchors.horizontalCenter: parent.horizontalCenter
             dimmed: !checked
-            falloffRadius: checked ? defaultFalloffRadius : (Theme.colorScheme === Theme.LightOnDark ? 0.075 : 0.1)
+            falloffRadius: checked ? defaultFalloffRadius : (switchItem.palette.colorScheme === Theme.LightOnDark ? 0.075 : 0.1)
             Behavior on falloffRadius {
                 NumberAnimation { duration: busy ? 450 : 50; easing.type: Easing.InOutQuad }
             }
@@ -87,11 +88,10 @@ MouseArea {
                 NumberAnimation { duration: busy ? 450 : 50; easing.type: Easing.InOutQuad }
             }
         }
-        HighlightImage {
+        Icon {
             id: image
 
-            opacity: switchItem.enabled ? 1.0 : 0.4
-            highlighted: switchItem.highlighted
+            opacity: switchItem.enabled ? 1.0 : Theme.opacityLow
             anchors.horizontalCenter: parent.horizontalCenter
         }
         states: State {
@@ -100,18 +100,18 @@ MouseArea {
         }
         Timer {
             id: busyTimer
-            property real brightness: 0.4
+            property real brightness: Theme.opacityLow
             property real falloffRadius: 0.075
             running: busy && Qt.application.active
             interval: 500
             repeat: true
             onRunningChanged: {
-                brightness = checked ? 1.0 : 0.4
+                brightness = checked ? 1.0 : Theme.opacityLow
                 falloffRadius = checked ? indicator.defaultFalloffRadius : 0.075
             }
             onTriggered: {
                 falloffRadius = falloffRadius === 0.075 ? indicator.defaultFalloffRadius : 0.075
-                brightness = brightness == 0.4 ? 1.0 : 0.4
+                brightness = brightness == Theme.opacityLow ? 1.0 : Theme.opacityLow
             }
         }
     }

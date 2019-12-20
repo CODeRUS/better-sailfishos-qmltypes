@@ -1,68 +1,62 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Telephony 1.0
+import Sailfish.Contacts 1.0 as Contacts
 import org.nemomobile.contacts 1.0
-import "common/common.js" as ContactsUtils
 
 Item {
     id: favoriteItem
 
-    property bool menuOpen: _contextMenuHeight || _propertyMenuHeight || _remorseItemHeight
-    property bool selected
-    property int requiredProperty
-    property alias highlighted: backgroundItem.highlighted
-    property bool promptSimSelection: Telephony.voiceSimUsageMode === Telephony.AlwaysAskSim
+    readonly property int contactId: model.contactId
+    property bool canDeleteContact: true
+    property var selectionModel
+    readonly property int selectionModelIndex: selectionModel !== null ? (selectionModel.count > 0, selectionModel.findContactId(model.contactId)) : -1 // count to retrigger on change.
+    property var propertyPicker
 
-    signal clicked(variant property, string propertyType)
-    signal pressed
+    property var menu
+    readonly property bool menuOpen: _contextMenuHeight
+    property alias highlighted: backgroundItem.highlighted
+
+    signal clicked()
+    signal pressed()
+    signal pressAndHold()
 
     property bool _hasAvatar: model.avatarUrl != ''
-
     property Item _contextMenu
     property Item _remorseItem
-    property Item _propertyMenu
 
     property real _contextMenuHeight: _contextMenu !== null ? _contextMenu.height : 0
     property real _remorseItemHeight: _remorseItem !== null ? _remorseItem.height : 0
-    property real _propertyMenuHeight: _propertyMenu !== null ? _propertyMenu.height : 0
+    property bool _menuOrRemorseOpen: menuOpen || _remorseItemHeight
+    property bool _pendingDeletion: Contacts.ContactModelCache._deletingContactId === contactId
 
-    function getSelectableProperties() {
-        // Ensure the import is initialized
-        ContactsUtils.init(Person)
-        return ContactsUtils.selectableProperties(model, root.requiredProperty, Person)
-    }
-
-    function _openContextMenu(person) {
-        if (!_contextMenu) {
-            _contextMenu = contextMenuComponent.createObject(favoriteItem, {"person": person})
+    function openMenu(properties) {
+        if (_contextMenu) {
+            _contextMenu.destroy()
         }
-        _contextMenu.x = Qt.binding(function () { return -x - parent.x })
+        _contextMenu = menu.createObject(favoriteItem, properties)
         _contextMenu.open(favoriteItem)
     }
 
-    function _openPropertyMenu(addresses) {
-        if (!_propertyMenu) {
-            _propertyMenu = propertyMenuComponent.createObject(favoriteItem)
-        }
-        _propertyMenu.addressesModel.setAddresses(addresses)
-        _propertyMenu.x = Qt.binding(function () { return -x - parent.x })
-        _propertyMenu.open(favoriteItem)
+    function personObject() {
+        return model.person
     }
 
-    function remove(contactIdCheck) {
-        if (!removalComponent ||
-            (contactIdCheck != undefined && model.contactId != contactIdCheck)) {
+    function deleteContact() {
+        if (menuOpen) {
+            // Delay deletion to avoid showing both menu and remorse item at the same time.
+            delayedContactDeletion.target = _contextMenu
+            return
+        }
+
+        if (!removalComponent) {
             return
         }
 
         _remorseItem = removalComponent.createObject(favoriteItem)
-        _remorseItem.x = Qt.binding(function () { return -x - parent.x })
-
-        //: Deleting image in 5 seconds
-        //% "Deleting"
-        _remorseItem.remorse.execute(_remorseItem, qsTrId("components_contacts-me-deleting"),
-                                    function() { favoritesModel.removePerson(model.person) })
+        _remorseItem.remorse.execute(_remorseItem, _remorseItem.text,
+                                         function() { favoritesModel.removePerson(model.person) })
     }
+
     function _confirmOrCancelRemorse() {
         if (_remorseItemHeight) {
             _remorseItem.remorse.cancel()
@@ -74,16 +68,20 @@ Item {
             _remorseItem.remorse._timeout=0
         }
     }
-    width: Theme.itemSizeExtraLarge
-    height: width + _contextMenuHeight + _remorseItemHeight + _propertyMenuHeight
+
+    opacity: _pendingDeletion ? 0.0 : 1.0
+    width: _pendingDeletion ? 0 : Theme.itemSizeExtraLarge
+    height: _pendingDeletion ? 0 : width + _contextMenuHeight + _remorseItemHeight
 
     BackgroundItem {
         id: backgroundItem
 
-        highlighted: down || favoriteItem.menuOpen || favoriteItem.selected
+        // user chose to delete the item. hide the item during undo period
+        opacity: _remorseItem && _remorseItem.remorse.pending ? 0.0 : 1.0
+        highlighted: down || _menuOrRemorseOpen || favoriteItem.selectionModelIndex >= 0
 
         // copied from Sailfish.Silica ListItem
-        _backgroundColor: _showPress && !menuOpen ? Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
+        _backgroundColor: _showPress && !_menuOrRemorseOpen ? Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
                                                   : (_hasAvatar ? Theme.highlightDimmerColor : Theme.rgba(Theme.highlightBackgroundColor, 0.1))
 
         width: parent.width
@@ -92,29 +90,7 @@ Item {
 
         onClicked: {
             _confirmOrCancelRemorse()
-
-            var selectedProperty = { "property": undefined, "propertyType": "" }
-            var properties = getSelectableProperties()
-
-            if (!selected && properties) {
-                if (properties.length > 1) {
-                    _openPropertyMenu(properties)
-                    return
-                }
-
-                selectedProperty = properties[0]
-            }
-
-            if (selectedProperty.propertyType == 'phoneNumber' && favoriteItem.promptSimSelection) {
-                // Select a SIM via menu
-                _openPropertyMenu(properties)
-                _propertyMenu.property = selectedProperty.property
-                _propertyMenu.type = selectedProperty.propertyType
-                _propertyMenu.simPickerActive = true
-                return
-            }
-
-            favoriteItem.clicked(selectedProperty.property, selectedProperty.propertyType)
+            favoriteItem.clicked()
         }
 
         Image {
@@ -127,7 +103,7 @@ Item {
             Rectangle {
                 anchors.fill: parent
                 color: Theme.highlightColor
-                opacity: 0.3
+                opacity: Theme.highlightBackgroundOpacity
                 visible: backgroundItem.highlighted
             }
         }
@@ -147,16 +123,13 @@ Item {
                 top: parent.top
                 left: parent.left
                 right: parent.right
-                topMargin: Theme.paddingSmall
-                leftMargin: Theme.paddingMedium
-                rightMargin: Theme.paddingMedium
             }
 
             Label {
-                id: firstName
                 text: model.primaryName
                 color: backgroundItem.highlighted ? Theme.highlightColor : Theme.primaryColor
                 width: parent.width
+                height: text.length > 0 ? implicitHeight : 0
                 font {
                     family: Theme.fontFamilyHeading
                     pixelSize: Theme.fontSizeMedium
@@ -164,7 +137,6 @@ Item {
                 truncationMode: TruncationMode.Fade
             }
             Label {
-                id: lastName
                 text: model.secondaryName
                 width: parent.width
                 color: backgroundItem.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
@@ -175,6 +147,33 @@ Item {
                 truncationMode: TruncationMode.Fade
             }
         }
+
+        Column {
+            visible: !_hasAvatar
+            anchors {
+                margins: Theme.paddingMedium
+                bottom: parent.bottom
+                left: parent.left
+                right: parent.right
+            }
+
+            Label {
+                text: model.companyName
+                color: backgroundItem.highlighted ? Theme.secondaryHighlightColor : Theme.highlightColor
+                width: parent.width
+                font.pixelSize: Theme.fontSizeTiny
+                truncationMode: TruncationMode.Fade
+            }
+            Label {
+                text: model.title || model.role
+                width: parent.width
+                height: text.length > 0 ? implicitHeight : 0
+                color: backgroundItem.highlighted ? Theme.secondaryHighlightColor : Theme.highlightColor
+                font.pixelSize: Theme.fontSizeTiny
+                truncationMode: TruncationMode.Fade
+            }
+        }
+
         ContactPresenceIndicator {
             id: presence
             visible: !offline
@@ -182,62 +181,26 @@ Item {
                 left: parent.left
                 leftMargin: Theme.paddingMedium
                 bottom: parent.bottom
-                bottomMargin: Theme.paddingMedium
+                bottomMargin: Theme.paddingSmall
             }
             presenceState: model.globalPresenceState
         }
 
-
         onPressed: favoriteItem.pressed()
 
         onPressAndHold: {
-            if (!contextMenuComponent)
-                return
-
             _confirmOrCancelRemorse()
-
-            _openContextMenu(model.person)
-        }
-
-        Component {
-            id: propertyMenuComponent
-
-            ContextMenu {
-                id: contextMenu
-
-                property ContactAddressesModel addressesModel: ContactAddressesModel {
-                    requiredProperty: favoriteItem.requiredProperty
-                }
-                property var property
-                property string type
-                property alias simPickerActive: simPicker.active
-
-                SimPickerMenuItem {
-                    id: simPicker
-                    menu: contextMenu
-                    fadeAnimationEnabled: addressesModel.count > 1
-                    onSimSelected: {
-                        property['modemPath'] = modemPath
-                        favoriteItem.clicked(property, type)
-                    }
-                }
-
-                Repeater {
-                    model: contextMenu.addressesModel
-                    MenuItem {
-                        text: displayLabel
-                        onClicked: {
-                            if (type == 'phoneNumber' && favoriteItem.promptSimSelection) {
-                                contextMenu.property = property
-                                contextMenu.type = type
-                                simPicker.active = true
-                            } else {
-                                favoriteItem.clicked(property, type)
-                            }
-                        }
-                    }
-                }
-            }
+            favoriteItem.pressAndHold()
         }
     }
+
+    Connections {
+        id: delayedContactDeletion
+        target: null
+        onClosed: {
+            deleteContact()
+            target = null
+        }
+    }
+
 }

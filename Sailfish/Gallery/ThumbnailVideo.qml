@@ -9,7 +9,7 @@ ThumbnailImage {
         anchors.bottom: parent.bottom
         width: parent.width
         height: parent.height / 2
-        opacity: 0.8
+        opacity: Theme.opacityOverlay
         gradient: Gradient {
             GradientStop { position: 0.0; color: "transparent" }
             GradientStop { position: 1.0; color: Theme.highlightDimmerColor }

@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2016 – 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Nemo.FileManager 1.0
@@ -7,11 +13,15 @@ Page {
     id: page
 
     property alias path: fileModel.path
-    property string homePath
+    property alias header: listView.header
+    property string initialPath: homePath
+    property string homePath // deprecated
+    onHomePathChanged: if (homePath.length > 0) console.warn("DirectoryPage.homePath deprecated, use initialPath instead.")
+
     property string title
     property string description
     property bool showFormat
-    property bool showDeleteFolder
+    property alias showDeleteFolder: deleteFolder.visible
 
     property bool mounting
     property bool showNewFolder: true
@@ -20,6 +30,9 @@ Page {
     property alias sortOrder: fileModel.sortOrder
     property alias caseSensitivity: fileModel.caseSensitivity
     property alias directorySort: fileModel.directorySort
+
+    property int __directory_page
+    property string _deletingPath
 
     /*!
     \internal
@@ -36,6 +49,10 @@ Page {
         fileModel.refresh()
     }
 
+    function _commitDeletion() {
+        FileEngine.deleteFiles(_deletingPath, true)
+    }
+
     backNavigation: !FileEngine.busy
 
     Component.onCompleted: {
@@ -47,6 +64,8 @@ Page {
         if (!FileManager.errorNotification) {
             FileManager.errorNotification = errorNotification
         }
+
+        FileOperationMonitor.instance()
     }
 
     FileModel {
@@ -54,7 +73,7 @@ Page {
 
         directorySort: FileModel.SortDirectoriesBeforeFiles
 
-        path: homePath
+        path: initialPath
         active: page.status === PageStatus.Active
         onError: {
             if (error == FileModel.ErrorReadNoPermissions) {
@@ -65,6 +84,7 @@ Page {
         }
     }
     SilicaListView {
+        id: listView
         opacity: {
             if (FileEngine.busy) {
                 return 0.6
@@ -79,7 +99,6 @@ Page {
         anchors.fill: parent
         model: fileModel
 
-        RemorsePopup { id: remorse }
 
         PullDownMenu {
             MenuItem {
@@ -90,6 +109,33 @@ Page {
             }
 
             MenuItem {
+                id: deleteFolder
+                //% "Delete folder"
+                text: qsTrId("filemanager-me-delete_folder")
+                visible: page.path !== page.initialPath
+                onClicked: {
+                    var _page = pageStack.previousPage(page)
+                    if (_page && _page.hasOwnProperty("__directory_page")) {
+                        pageStack.pop()
+                        _page._deletingPath = page.path
+                        var popup = Remorse.popupAction(_page,
+                                    Remorse.deletedText,
+                                    function() {
+                                        _page._commitDeletion()
+                                    })
+                        popup.canceled.connect(function() { _page._deletingPath = "" })
+                    } else {
+                        //% "Deleting folder"
+                        Remorse.popupAction(page, qsTrId("filemanager-la-deleting_folder"), function() {
+                            FileEngine.deleteFiles(path, true)
+                            folderDeleted(path)
+                            pageStack.pop()
+                        })
+                    }
+                }
+            }
+
+            MenuItem {
                 //% "New folder"
                 text: qsTrId("filemanager-me-new_folder")
                 visible: page.showNewFolder
@@ -97,19 +143,6 @@ Page {
                     pageStack.animatorPush(Qt.resolvedUrl("NewFolderDialog.qml"), { path: page.path })
                 }
             }
-
-            MenuItem {
-                //% "Delete folder"
-                text: qsTrId("filemanager-me-delete_folder")
-                visible: page.showDeleteFolder
-                //% "Deleting folder"
-                onClicked: remorse.execute(qsTrId("filemanager-la-deleting_folder"), function() {
-                    FileEngine.deleteFiles(path, true)
-                    folderDeleted(path)
-                    pageStack.pop()
-                })
-            }
-
 
             MenuItem {
                 //% "Sort"
@@ -151,35 +184,47 @@ Page {
         }
 
         header: PageHeader {
-            title: path == homePath && page.title.length > 0 ? page.title
-                                                             : page.path.split("/").pop()
+            id: pageHeader
+            title: path == initialPath && page.title.length > 0 ? page.title
+                                                                : page.path.split("/").pop()
             description: page.description
+
+            BusyIndicator {
+                parent: pageHeader.extraContent
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    right: parent.right
+                    rightMargin: Theme.paddingLarge
+                }
+                size: BusyIndicatorSize.ExtraSmall
+                running: FileEngine.mode === FileEngine.CopyMode || FileEngine.mode === FileEngine.MoveMode
+            }
         }
 
         delegate: FileItem {
             id: fileItem
 
             function remove() {
-                //% "Deleting"
-                remorseAction(qsTrId("filemanager-la-deleting"), function() { FileEngine.deleteFiles(fileModel.fileNameAt(model.index), true) })
+                remorseDelete(function() { FileEngine.deleteFiles(fileModel.fileNameAt(model.index), true) })
             }
 
             menu: contextMenu
+
+            hidden: _deletingPath === model.absolutePath
 
             ListView.onRemove: if (page.status === PageStatus.Active) animateRemoval(fileItem)
             onClicked: {
                 if (model.isDir) {
                     FileManager.openDirectory({
                                                   path: fileModel.appendPath(model.fileName),
-                                                  homePath: page.homePath,
+                                                  initialPath: page.initialPath,
                                                   sortBy: page.sortBy,
                                                   sortOrder: page.sortOrder,
                                                   caseSensitivity: page.caseSensitivity,
                                                   directorySort: page.directorySort
                                               })
                 } else {
-                    var filePath = Qt.resolvedUrl(fileModel.path + "/" + model.fileName)
-                    FileManager.openUrlExternally(filePath)
+                    Qt.openUrlExternally(FileManager.pathToUrl(fileModel.path + "/" + fileName))
                 }
             }
 
@@ -195,7 +240,8 @@ Page {
                                                mimeType: model.mimeType,
                                                isDir: model.isDir,
                                                modified: model.modified,
-                                               size: model.size
+                                               size: model.size,
+                                               path: model.absolutePath
                                            })
                         }
                     }
@@ -264,8 +310,9 @@ Page {
                         show(qsTrId("filemanager-la-renaming_failed"))
                         break
                     case FileEngine.ErrorCannotCopyIntoItself:
-                        //% "You cannot copy a folder into itself"
-                        show(qsTrId("filemanager-la-cannot_copy_folder_into_itself"))
+                        //: Shown both when trying to copy file over itself and copying a folder into itself
+                        //% "You cannot copy into itself"
+                        show(qsTrId("filemanager-la-cannot_copy_into_itself"))
                         break
                     case FileEngine.ErrorFolderCopyFailed:
                         //% "Copying folder failed"
@@ -279,6 +326,12 @@ Page {
                         //% "Could not set permission"
                         show(qsTrId("filemanager-la-set_permissions_failed"))
                         break
+                    }
+                    _deletingPath = "" // reset state if deletion failed
+                }
+                onModeChanged: {
+                    if (FileEngine.mode === FileEngine.IdleMode) {
+                        _deletingPath = ""
                     }
                 }
             }

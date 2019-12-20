@@ -88,9 +88,9 @@ Item {
         editor.adjustLevels(root.previewBrightness, root.previewContrast)
     }
 
-    function resetScale() {
+    function resetZoom() {
         editor.setSize()
-        zoomableImage.resetScale()
+        zoomableImage.resetZoom()
     }
 
     function previewRotate(angle) {
@@ -98,7 +98,7 @@ Item {
         editor.setSize()
     }
 
-    onAspectRatioTypeChanged: resetScale()
+    onAspectRatioTypeChanged: resetZoom()
 
     onIsPortraitChanged: {
         // Reset back to original aspect ratio that needs to be calculated
@@ -121,13 +121,13 @@ Item {
 
         anchors.fill: parent
         baseRotation: -metadata.orientation
-        photo.onStatusChanged: if (status === Image.Ready) delayedReset.restart()
+        photo.onStatusChanged: if (photo.status === Image.Ready) delayedReset.restart()
     }
 
     Timer {
         id: delayedReset
         running: true; interval: 10
-        onTriggered: root.resetScale()
+        onTriggered: root.resetZoom()
     }
 
     Label {
@@ -153,9 +153,9 @@ Item {
             zoomableImage.rightMargin = 0
             zoomableImage.topMargin = 0
             zoomableImage.bottomMargin = 0
-            zoomableImage.minimumScale = -1
-            zoomableImage.fittedScale = -1
-            zoomableImage.resetScale()
+            zoomableImage.minimumZoom = zoomableImage.implicitFittedZoom
+            zoomableImage.fittedZoom = zoomableImage.implicitFittedZoom
+            zoomableImage.resetZoom()
         }
 
         // As a function to avoid binding loops
@@ -208,12 +208,12 @@ Item {
             var contentHeight = Math.min(zoomableImage.transpose ? zoomableImage.photo.width : zoomableImage.photo.height, root.height)
             var contentWidth = Math.min(zoomableImage.transpose ? zoomableImage.photo.height : zoomableImage.photo.width, root.width)
 
-            zoomableImage.minimumScale = zoomableImage._scale * Math.max(height/contentHeight, width/contentWidth)
+            zoomableImage.minimumZoom = zoomableImage.zoom * Math.max(height/contentHeight, width/contentWidth)
             if (realAspectRatio !== aspectRatio) {
-                zoomableImage.fittedScale = zoomableImage.minimumScale
+                zoomableImage.fittedZoom = zoomableImage.minimumZoom
             }
 
-            zoomableImage.resetScale()
+            zoomableImage.resetZoom()
         }
 
         onCropped: {
@@ -255,7 +255,7 @@ Item {
     DimmedRegion {
         anchors.fill: parent
         color: Theme.highlightDimmerFromColor(Theme.highlightDimmerColor, Theme.LightOnDark)
-        opacity: aspectRatioType !== "none" ? 0.5 : 0.0
+        opacity: aspectRatioType !== "none" ? Theme.opacityHigh : 0.0
         visible: !longPressed
 
 

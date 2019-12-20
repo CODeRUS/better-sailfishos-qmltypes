@@ -27,7 +27,9 @@ Page {
         height: Math.max(0, -view.contentY +  view.backgroundHeight)
         windowRotation: -root.rotation
         source: ambience.applicationWallpaperUrl
-        colorScheme: ambience.colorScheme
+        palette.colorScheme: ambience.colorScheme
+
+        color: palette._wallpaperOverlayColor
     }
 
     AmbienceSettingsView {
@@ -35,14 +37,16 @@ Page {
 
         PullDownMenu {
             visible: Ambience.source != ambience.url
-            highlightColor: ambience.highlightColor
-            backgroundColor: Theme.highlightBackgroundFromColor(ambience.highlightColor, ambience.colorScheme)
+
+            palette {
+                colorScheme: ambience.colorScheme
+                highlightColor: ambience.highlightColor
+            }
 
             MenuItem {
                 //: Remove ambience from the ambience list
                 //% "Remove ambience"
                 text: qsTrId("jolla-gallery-ambience-me-remove_ambience")
-                color: down || highlighted ? ambience.primaryColor : ambience.highlightColor
                 onClicked: {
                     //: Remorse popup text for ambience deletion
                     //% "Deleting Ambience"
@@ -58,7 +62,6 @@ Page {
                 //: Active the ambience
                 //% "Set Ambience"
                 text: qsTrId("jolla-gallery-ambience-me-set_ambience")
-                color: down || highlighted ? ambience.primaryColor : ambience.highlightColor
                 onClicked: {
                     ambience.save()
                     Ambience.source = ambience.url

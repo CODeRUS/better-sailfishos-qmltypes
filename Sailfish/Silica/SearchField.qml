@@ -38,6 +38,14 @@ import Sailfish.Silica 1.0
 TextField {
     id: searchField
 
+    property bool canHide
+    property bool active: true
+    property int transitionDuration: 200
+
+    property bool _initialized
+
+    signal hideClicked()
+
     implicitWidth: _editor.implicitWidth + Theme.paddingSmall
                    + Theme.itemSizeSmall*2  // width of two icons
     implicitHeight: Math.max(Theme.itemSizeMedium, _editor.height + Theme.paddingMedium + Theme.paddingSmall)  + (labelVisible ? _labelItem.height : 0)
@@ -60,8 +68,11 @@ TextField {
     onFocusChanged: if (focus) cursorPosition = text.length
 
     inputMethodHints: Qt.ImhNoPredictiveText
-
     background: null
+
+    Component.onCompleted: {
+        _initialized = true
+    }
 
     Item {
         parent: searchField // avoid TextBase contentItem auto-parenting
@@ -89,16 +100,55 @@ TextField {
             }
             width: icon.width
             height: parent.height
-            icon.source: "image://theme/icon-m-clear"
+            icon.source: searchField.canHide
+                         ? "image://theme/icon-m-input-remove"
+                         : (searchField.text.length > 0 ? "image://theme/icon-m-clear" : "")
 
             enabled: searchField.enabled
 
-            opacity: searchField.text.length > 0 ? 1 : 0
+            opacity: icon.status === Image.Ready ? 1 : 0
             Behavior on opacity {
                 FadeAnimation {}
             }
 
-            onClicked: searchField.text = ""
+            onClicked: {
+                if (searchField.canHide) {
+                    searchField.hideClicked()
+                } else {
+                    searchField.text = ""
+                }
+            }
         }
     }
+
+    states: State {
+        name: "inactive"
+        when: !searchField.active
+
+        PropertyChanges { target: searchField; height: 0; opacity: 0; clip: true }
+        PropertyChanges { target: searchField._editor; focus: false }
+    }
+
+    transitions: [
+        Transition {
+            from: ""; to: "inactive"
+            enabled: searchField._initialized
+
+            SequentialAnimation {
+                NumberAnimation { duration: searchField.transitionDuration; easing.type: Easing.InOutQuad; properties: "opacity,height" }
+                PropertyAction { target: searchField; property: "visible"; value: false }
+                PropertyAction { target: searchField; property: "text"; value: "" }
+            }
+        },
+
+        Transition {
+            from: "inactive"; to: ""
+            enabled: searchField._initialized
+
+            SequentialAnimation {
+                PropertyAction { target: searchField; property: "visible"; value: true }
+                NumberAnimation { duration: searchField.transitionDuration; easing.type: Easing.InOutQuad; properties: "opacity,height" }
+            }
+        }
+    ]
 }

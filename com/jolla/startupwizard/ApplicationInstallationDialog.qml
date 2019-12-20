@@ -1,9 +1,9 @@
-/****************************************************************************
-**
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Petri M. Gerdt <petri.gerdt@jollamobile.com>
-**
-****************************************************************************/
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
@@ -60,7 +60,7 @@ Dialog {
                 color: Theme.highlightColor
                 font.pixelSize: Theme.fontSizeExtraSmall
 
-                //% "Selected apps will be downloaded from the Jolla store and installed to your device."
+                //% "Selected apps will be downloaded from the Store and installed to your device."
                 text: qsTrId("startupwizard-la-selected_apps_will_be_downloaded_and_installed")
             }
         }

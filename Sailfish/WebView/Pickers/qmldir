@@ -1,4 +1,5 @@
 module Sailfish.WebView.Pickers
+plugin sailfishwebviewpickersplugin
 MultiSelectDialog 1.0 MultiSelectDialog.qml
 SingleSelectPage 1.0 SingleSelectPage.qml
 PickerCreator 1.0 PickerCreator.qml
@@ -11,3 +12,4 @@ MultiMusicPicker 1.0 MultiMusicPicker.qml
 MultiVideoPicker 1.0 MultiVideoPicker.qml
 MusicPicker 1.0 MusicPicker.qml
 VideoPicker 1.0 VideoPicker.qml
+typeinfo plugins.qmltypes

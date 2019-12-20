@@ -114,12 +114,15 @@ Item {
     }
 
     function indexOfModemFromImsi(imsi) {
-        for (var i = 0; i < simData.count; ++i) {
-            var sim = simData.itemAt(i)
-            if (sim && sim.imsi == imsi) {
-                return i
+        if (typeof imsi === "string" && imsi.length > 0) {
+            for (var i = 0; i < simData.count; ++i) {
+                var sim = simData.itemAt(i)
+                if (sim && sim.imsi == imsi) {
+                    return i
+                }
             }
         }
+
         return -1
     }
 

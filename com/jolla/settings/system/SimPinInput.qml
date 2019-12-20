@@ -22,11 +22,10 @@ PinInput {
     maximumLength: simManager.maximumPinLength(_currentPinType)
     modemPath: simManager.modemPath
 
-    titleColor: Theme.rgba(keypadTextColor, 0.6)
+    titleColor: Theme.rgba(keypadTextColor, Theme.opacityHigh)
     warningTextColor: emergency ? Theme.lightPrimaryColor : keypadTextColor
     pinDisplayColor: keypadTextColor
     keypadTextColor: Theme.colorScheme === Theme.LightOnDark ? Theme.highlightDimmerColor : Theme.lightPrimaryColor
-    optionButtonColor: Theme.lightPrimaryColor
     dimmerBackspace: true
 
     Rectangle {
@@ -43,7 +42,7 @@ PinInput {
             anchors.fill: parent
             gradient: Gradient {
                 GradientStop { position: 0.0; color: Theme.colorScheme === Theme.LightOnDark ? Theme.primaryColor : Theme.highlightColor }
-                GradientStop { position: 1.0; color: Theme.rgba(Theme.colorScheme === Theme.LightOnDark ? Theme.primaryColor : Theme.highlightColor, 0.4) }
+                GradientStop { position: 1.0; color: Theme.rgba(Theme.colorScheme === Theme.LightOnDark ? Theme.primaryColor : Theme.highlightColor, Theme.opacityLow) }
             }
         }
     }

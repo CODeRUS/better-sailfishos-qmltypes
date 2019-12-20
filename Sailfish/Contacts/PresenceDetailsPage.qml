@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Contacts 1.0 as Contacts
 import org.nemomobile.contacts 1.0
-import "common/common.js" as CommonJs
 
 Page {
     id: presencePage
@@ -147,7 +147,7 @@ Page {
                                 model: 5
                                 MenuItem {
                                     property int presence: presenceSelection(index)
-                                    text: CommonJs.presenceDescription(presence)
+                                    text: ContactsUtil.presenceDescription(presence)
                                     onClicked: presenceUpdate.setAccountPresence(path, presence)
                                 }
                             }

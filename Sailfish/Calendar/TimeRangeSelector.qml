@@ -6,6 +6,8 @@ Item {
 
     property bool allDay
     property bool showError
+    property real leftMargin: Theme.horizontalPageMargin
+    property real rightMargin: Theme.horizontalPageMargin
 
     property Item currentDialog
     property int startHour
@@ -64,7 +66,7 @@ Item {
     CalendarStartEndWidget {
         id: dateSelectorWidget
 
-        x: Theme.horizontalPageMargin
+        x: dateSelector.leftMargin
         icon: "image://theme/icon-s-date?" + Theme.highlightColor
         error: showError
         //: Pattern for date and month, %1 is day, %2 is month
@@ -112,7 +114,7 @@ Item {
     CalendarStartEndWidget {
         id: timeSelectorWidget
 
-        x: parent.width - width - Theme.horizontalPageMargin
+        x: parent.width - width - dateSelector.rightMargin
         icon: "image://theme/icon-s-time?" + Theme.highlightColor
         error: showError
         startText: Format.formatDate(dateSelector.startDate, Formatter.TimeValue)

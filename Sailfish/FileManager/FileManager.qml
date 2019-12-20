@@ -31,34 +31,6 @@ Item {
         return pageStack.animatorPush(Qt.resolvedUrl("DirectoryPage.qml"), properties)
     }
 
-    function openUrlExternally(url) {
-        createErrorNotification()
-        var ok = ContentAction.trigger(url)
-        if (!ok) {
-            switch (ContentAction.error) {
-            case ContentAction.FileIsEmpty:
-                //% "Cannot open empty file"
-                errorNotification.show(qsTrId("filemanager-la-file_is_empty"))
-                break;
-            case ContentAction.FileTypeNotSupported:
-                //: Notification text shown when user tries to open a file of a type that is not supported
-                //: %1 represents mime type, e.g. image/djvu, video/3gp, etc.
-                //% "File type '%1' is not supported"
-                errorNotification.show(qsTrId("filemanager-la-unsupported_mime_type").arg(ContentAction.mimeType))
-                break
-            case ContentAction.FileDoesNotExist:
-                //: Notification text shown when user tries to open a file but the file is not found locally.
-                //% "Cannot open file, file was not found"
-                errorNotification.show(qsTrId("filemanager-la-file_not_found"))
-                break
-            default:
-                //% "Error opening file"
-                errorNotification.show(qsTrId("filemanager-la-file_generic_error"))
-                break
-            }
-        }
-    }
-
     function openArchive(file, path, baseExtractionDirectory, stackAction) {
         createErrorNotification()
         stackAction = stackAction || PageStackAction.Animated
@@ -80,6 +52,15 @@ Item {
         if (!errorNotification) {
             errorNotification = errorNotificationComponent.createObject(root)
         }
+    }
+
+    function pathToUrl(path) {
+        if (path.indexOf("file://") == 0) {
+            console.warn("pathToUrl() argument already url:", path)
+            return path
+        }
+
+        return "file://" + path.split("/").map(encodeURIComponent).join("/")
     }
 
     Component {

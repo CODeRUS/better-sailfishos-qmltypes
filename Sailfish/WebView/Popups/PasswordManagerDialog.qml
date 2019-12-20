@@ -59,7 +59,7 @@ Dialog {
                 pixelSize: Theme.fontSizeExtraLarge
             }
             color: Theme.highlightColor
-            opacity: 0.6
+            opacity: Theme.opacityHigh
 
             text: {
                 switch (notificationType) {

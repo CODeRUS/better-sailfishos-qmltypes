@@ -19,7 +19,7 @@ MouseArea {
 
         y: Math.round((parent.height - (height + appTitle.height)) / 2)
         anchors.horizontalCenter: parent.horizontalCenter
-        opacity: appItem.enabled ? 1 : 0.2
+        opacity: appItem.enabled ? 1 : Theme.opacityFaint
         pressed: highlighted
         icon: launcher ? launcher.iconId : ""
     }
@@ -34,7 +34,7 @@ MouseArea {
             right: parent.right
         }
         horizontalAlignment: Text.AlignHCenter
-        opacity: appItem.enabled ? 1 : 0.2
+        opacity: appItem.enabled ? 1 : Theme.opacityFaint
         font.pixelSize: Theme.fontSizeTiny
         elide: Text.ElideRight
         textFormat: Text.PlainText

@@ -42,7 +42,10 @@ MediaPlayerControlsPanel {
         })
     }
 
-    onOpenChanged: if (!open) AudioPlayer.pause()
+    onOpenChanged: {
+        if (!open) AudioPlayer.pause()
+        AudioPlayer.playerVisible = open
+    }
     onSliderReleased: AudioPlayer.setPosition(value * 1000)
 
     Column {

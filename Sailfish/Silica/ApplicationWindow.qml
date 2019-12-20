@@ -75,7 +75,7 @@ Window {
     property alias _touchBlockerItem: touchBlocker
     property alias _rotating: wallpaperRotationAnim.running
 
-    property color dimmedRegionColor: Theme.highlightDimmerColor
+    property color dimmedRegionColor: palette.highlightDimmerColor
 
     property bool _dimScreen: { return false }
     readonly property bool _dimmingActive: _dimScreen || dimAnimation.running
@@ -87,6 +87,9 @@ Window {
 
     property bool _roundedCorners: true
     property bool _resizeContent: true
+
+    property alias _overlayBackgroundSource: overlayBackgroundSource
+    readonly property Item _applicationBlur: applicationBlur.blur ? applicationBlur : null
 
     // TODO minimization gc is temporary disabled while v4 gc does not
     // release memory allocated for js heap. See JB#22508 and JB#22814
@@ -101,9 +104,10 @@ Window {
     onWindowChanged: {
         __quickWindow = window ? window : null
 
-        // Use black background when running Silica on desktop without ambiences
-        if (window && Config.desktop) {
-            window.color = "black"
+        if (window) {
+            // Use black background when running Silica on desktop without ambiences
+            // Force binding so the state gets restored after Binding override
+            window.color = Qt.binding(function() { return Config.desktop ? "black" : "transparent" })
         }
     }
     property var _coverIncubator: null
@@ -161,6 +165,7 @@ Window {
     // For page stack applications, bind orientation to the Page at the top of the stack
     _allowedOrientations: stack.currentPage ? stack.currentPage._allowedOrientations : allowedOrientations
     _pageOrientation: stack.currentPage ? stack.currentPage._windowOrientation : undefined
+    _backgroundVisible: { true } // Force binding so the state gets restored after Binding override
 
     focus: true
     objectName: "rootWindow"
@@ -180,6 +185,32 @@ Window {
         if ( pageStack.currentPage) {
             _loadCover()
         }
+    }
+
+    OverlayBackgroundSource {
+        id: overlayBackgroundSource
+
+        width: Screen.width
+        height: Screen.height
+
+        sourceItem: wallpaper
+        backgroundItem: Wallpaper {
+            width: Screen.width
+            height: Screen.height
+        }
+    }
+
+    BlurEffect {
+        id: applicationBlur
+        sourceItem: overlayBackgroundSource
+        visible: false
+        blur: overlayBackgroundSource.capturing
+
+        iterations: 2
+        kernel: BlurEffect.Gaussian17
+//        levels: Theme.pixelRatio >= 1.5 ? 4 : 3         // Homescreen values
+        levels: Theme.pixelRatio >= 1.5 ? 3 : 2
+        deviation: 5
     }
 
     // background image
@@ -238,7 +269,7 @@ Window {
             height: parent.height - (stack.verticalOrientation ? Math.max(window.bottomMargin, stack.panelSize) : 0)
             clip: stack.panelSize > 0
 
-            opacity: _dimScreen ? 0.4 : 1.0
+            opacity: _dimScreen ? Theme.opacityLow : 1.0
             Behavior on opacity { FadeAnimation { id: dimAnimation } }
 
             Item {
@@ -270,6 +301,7 @@ Window {
 
                     clip: bottomMargin > 0
                     anchors.fill: parent
+                    focus: true
 
                     VirtualKeyboardObserver {
                         id: virtualKeyboardObserver
@@ -348,6 +380,8 @@ Window {
         }
     }
 
+    ReturnToHomeHintCounter {}
+
     Component.onCompleted: {
         if (initialPage) {
             if (!initialPage.createObject && (typeof initialPage !== "string")) {
@@ -361,16 +395,8 @@ Window {
         if (cover) {
             _loadCover()
         }
-        if (Config.demoMode === Config.Retail) {
-            var component = Qt.createComponent(Qt.resolvedUrl("private/ReturnToHomeHintCounter.qml"))
-            if (component.status == Component.Ready) {
-                component.createObject(contentItem)
-            } else {
-                console.warn("ReturnToHomeHintCounter.qml instantiation failed " + component.errorString())
-            }
-        }
         if (Config.layoutGrid) {
-            component = Qt.createComponent(Qt.resolvedUrl("private/LayoutGrid.qml"))
+            var component = Qt.createComponent(Qt.resolvedUrl("private/LayoutGrid.qml"))
             if (component.status == Component.Ready) {
                 component.createObject(window)
             } else {

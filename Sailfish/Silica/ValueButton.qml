@@ -43,7 +43,7 @@ BackgroundItem {
 
     property alias labelColor: titleText.color
     property alias valueColor: valueText.color
-    property color descriptionColor: root.down ? Theme.secondaryHighlightColor : Theme.secondaryColor
+    property color descriptionColor: root.down ? palette.secondaryHighlightColor : palette.secondaryColor
 
     property alias labelMargin: root.leftMargin
     property real leftMargin: Theme.horizontalPageMargin
@@ -55,7 +55,7 @@ BackgroundItem {
     width: parent ? parent.width : 0
     height: contentItem.height
     contentHeight: visible ? Math.max(column.height + 2*Theme.paddingMedium, Theme.itemSizeSmall) : 0
-    opacity: enabled ? 1.0 : 0.4
+    opacity: enabled ? 1.0 : Theme.opacityLow
 
     onDescriptionChanged: if (!_descriptionLabel && description.length > 0) _descriptionLabel = descriptionComponent.createObject(column)
 
@@ -75,8 +75,9 @@ BackgroundItem {
 
             Label {
                 id: titleText
-                color: root.down ? Theme.highlightColor : Theme.primaryColor
+                color: root.down ? palette.highlightColor : palette.primaryColor
                 width: Math.min(implicitWidth + Theme.paddingMedium, parent.width)
+                height: text.length ? implicitHeight : 0
                 fontSizeMode: Text.HorizontalFit
                 minimumPixelSize: Theme.fontSizeSmallBase
                 truncationMode: TruncationMode.Fade
@@ -84,7 +85,7 @@ BackgroundItem {
 
             Label {
                 id: valueText
-                color: Theme.highlightColor
+                color: palette.highlightColor
                 width: Math.min(implicitWidth, parent.width)
                 truncationMode: TruncationMode.Fade
             }

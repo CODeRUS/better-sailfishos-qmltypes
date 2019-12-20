@@ -1,12 +1,11 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Item {
+SilicaControl {
     id: root
 
     property bool open
     property bool _open
-    property bool highlighted: content.pressed && content.containsMouse
     property int horizontalMargin: Theme.horizontalPageMargin
     property int bottomMargin
     property int collapsedHeight
@@ -19,6 +18,8 @@ Item {
 
     width: parent ? parent.width : Screen.width
     height: _open ? expandedHeight : collapsedHeight
+
+    highlighted: content.pressed && content.containsMouse
 
     onClicked: if (expandOnClick) open = !open
     onOpenChanged: {
@@ -49,7 +50,8 @@ Item {
         onClicked: parent.clicked()
     }
 
-    Image {
+    Icon {
+        id: icon
         opacity: expandable ? 1.0 : 0.0
         Behavior on opacity { FadeAnimator {}}
         anchors {
@@ -58,8 +60,7 @@ Item {
             rightMargin: horizontalMargin
             bottomMargin: Theme.paddingSmall
         }
-
-        source: "image://theme/icon-lock-more?" + (highlighted ? Theme.highlightColor : Theme.primaryColor)
+        source: "image://theme/icon-lock-more"
     }
 
     OpacityRampEffect {

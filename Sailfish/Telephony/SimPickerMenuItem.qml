@@ -52,7 +52,7 @@ SimPicker {
     onSimSelected: {
         selectedSim = sim
         selectedModemPath = modemPath
-        menu.hide()
+        menu.close()
     }
 
     states: State {

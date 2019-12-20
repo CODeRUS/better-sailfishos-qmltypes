@@ -222,7 +222,6 @@ Dialog {
                         rightMargin: Theme.horizontalPageMargin
                         verticalCenter: parent.verticalCenter
                     }
-                    color: yearPicker.highlighted ? Theme.highlightColor : Theme.primaryColor
                     font.pixelSize: _largeScreen ? Theme.fontSizeExtraLarge : Theme.fontSizeLarge
                     text: Format.formatDate(datePicker.date, Format.DateLong)
                     wrapMode: Text.Wrap

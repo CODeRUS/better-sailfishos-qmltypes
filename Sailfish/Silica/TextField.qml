@@ -43,7 +43,7 @@ TextBase {
     property alias text: preeditText.text
     property alias textWidth: textInput.width
     property alias readOnly: textInput.readOnly
-    property alias inputMethodHints: textInput.inputMethodHints
+    property int inputMethodHints
     property alias inputMethodComposing: textInput.inputMethodComposing
     property alias validator: textInput.validator
     property alias echoMode: textInput.echoMode
@@ -57,7 +57,9 @@ TextBase {
     property alias maximumLength: textInput.maximumLength
     property alias length: textInput.length
 
+    property bool _cursorBlinkEnabled: true
     property real _minimumWidth: textField.width - Theme.paddingSmall - textField.textLeftMargin - textField.textRightMargin
+    property bool __silica_textfield: true
 
     onHorizontalAlignmentChanged: {
         if (explicitHorizontalAlignment) {
@@ -98,14 +100,17 @@ TextBase {
         activeFocusOnPress: false
         passwordCharacter: "\u2022"
         color: textField.color
-        selectionColor: Theme.rgba(Theme.primaryColor, 0.3)
-        selectedTextColor: Theme.highlightColor
+        selectionColor: Theme.rgba(textField.palette.primaryColor, 0.3)
+        selectedTextColor: textField.palette.highlightColor
         font: textField.font
-        cursorDelegate: Rectangle {
-            color: parent.cursorColor
-            visible: parent.activeFocus && parent.selectedText == ""
-            width: 2
+        cursorDelegate: Cursor {
+            color: textField.cursorColor
+            preedit: preeditText
+            _blinkEnabled: textField._cursorBlinkEnabled
         }
+        // JB#45985 and QTBUG-37850: Qt was changed to mess up with virtual keyboard state when enter key
+        // is handled. Work around by always forcing multiline hint for this single line entry
+        inputMethodHints: textField.inputMethodHints | Qt.ImhMultiLine
 
         PreeditText {
             id: preeditText

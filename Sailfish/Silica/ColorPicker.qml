@@ -68,7 +68,7 @@ Grid {
 
                 Rectangle {
                     anchors.fill: parent
-                    color: Theme.rgba("white", 0.4)
+                    color: Theme.rgba("white", Theme.opacityLow)
                     opacity: (mouseArea.pressed && mouseArea.containsMouse) ? 1.0 : 0.0
                 }
             }

@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import QtDocGallery 5.0
 import "private"
@@ -9,7 +9,7 @@ Page {
     allowedOrientations: Orientation.All
 
     // https://developer.gnome.org/ontology/stable/nmm-Flash.html
-    property variant flashValues: {
+    property var flashValues: {
         'http://www.tracker-project.org/temp/nmm#flash-on':
         //% "Did fire"
         qsTrId("components_gallery-value-flash-on"),
@@ -19,7 +19,7 @@ Page {
     }
 
     // https://developer.gnome.org/ontology/stable/nmm-MeteringMode.html
-    property variant meteringModeValues: {
+    property var meteringModeValues: {
         'http://www.tracker-project.org/temp/nmm#metering-mode-other':
         //% "Other"
         qsTrId("components_gallery-value-metering-mode-other"),
@@ -44,7 +44,7 @@ Page {
     }
 
     // https://developer.gnome.org/ontology/stable/nmm-WhiteBalance.html
-    property variant whiteBalanceValues: {
+    property var whiteBalanceValues: {
         'http://www.tracker-project.org/temp/nmm#white-balance-manual':
         //% "Manual"
         qsTrId("components_gallery-value-white-balance-manual"),
@@ -57,7 +57,7 @@ Page {
         id: galleryItem
         autoUpdate: false
         // See all properties at https://github.com/qtproject/qtdocgallery/blob/master/src/gallery/qdocumentgallery.h
-        properties: [ 'fileName', 'fileSize', 'mimeType',
+        properties: [ 'filePath', 'fileSize', 'mimeType',
                       // Image & Video common
                       'width', 'height',
                       // Media
@@ -68,16 +68,18 @@ Page {
                       // https://github.com/qtproject/qtdocgallery/blob/0b9ca223d4d5539ff09ce49a841fec4c24077830/src/gallery/qdocumentgallery.cpp#L799
                       'exposureTime',
                       'fNumber', 'flashEnabled', 'focalLength', 'meteringMode', 'whiteBalance',
-                      'latitude', 'longitude', 'altitude'
+                      'latitude', 'longitude', 'altitude',
+                      'description', 'copyright'
                     ]
 
         onStatusChanged: {
             if (status == DocumentGalleryItem.Finished) {
-                nameItem.value = galleryItem.metaData.fileName
-                sizeItem.value = Format.formatFileSize(galleryItem.metaData.fileSize)
+                filePathItem.value = galleryItem.metaData.filePath
+                fileSizeItem.value = Format.formatFileSize(galleryItem.metaData.fileSize)
                 typeItem.value = galleryItem.metaData.mimeType
-                widthItem.value = galleryItem.metaData.width
-                heightItem.value = galleryItem.metaData.height
+                //: Pattern for image resolution, width x height
+                //% "%1 × %2"
+                sizeItem.value = qsTrId("components_gallery-size_format").arg(galleryItem.metaData.width).arg(galleryItem.metaData.height)
 
                 if (itemType == DocumentGallery.Image) {
                     dateTakenItem.value = galleryItem.metaData.dateTaken != ""
@@ -90,7 +92,10 @@ Page {
                             //: Camera aperture value
                             //% "f/%1"
                             ? qsTrId("components_gallery-value-fnumber").arg(galleryItem.metaData.fNumber) : ""
-                    flashEnabledItem.value = flashValues[galleryItem.metaData.flashEnabled]
+
+                    flashEnabledItem.value = galleryItem.metaData.flashEnabled != ""
+                            ? flashValues[galleryItem.metaData.flashEnabled]
+                            : ""
                     focalLengthItem.value = galleryItem.metaData.focalLength != ""
                             //: Camera focal length in millimeters
                             //% "%1 mm"
@@ -104,8 +109,13 @@ Page {
                     gpsItem.value = galleryItem.metaData.latitude != ""
                             //: GPS coordinates
                             //% "Latitude %1 - Longitude %2 - Altitude %3"
-                            ? qsTrId("components_gallery-value-gps").arg(galleryItem.metaData.latitude).arg(galleryItem.metaData.longitude).arg(galleryItem.metaData.altitude)
+                            ? qsTrId("components_gallery-value-gps")
+                              .arg(galleryItem.metaData.latitude)
+                              .arg(galleryItem.metaData.longitude)
+                              .arg(galleryItem.metaData.altitude)
                             : ""
+                    descriptionItem.value = galleryItem.metaData.description
+                    copyrightItem.value = galleryItem.metaData.copyright
                 }
 
                 if (itemType == DocumentGallery.Video) {
@@ -123,101 +133,126 @@ Page {
             id: column
 
             width: parent.width
+            bottomPadding: Theme.paddingLarge
 
             PageHeader {
                 //% "Details"
                 title: qsTrId("components_gallery-he-details")
             }
             DetailItem {
-                id: nameItem
-                //% "Filename"
-                label: qsTrId("components_gallery-la-filename")
+                id: filePathItem
+                //% "File path"
+                label: qsTrId("components_gallery-la-file_path")
+                alignment: Qt.AlignLeft
             }
             DetailItem {
-                id: sizeItem
-                //% "Size"
-                label: qsTrId("components_gallery-la-size")
+                id: fileSizeItem
+                //% "File size"
+                label: qsTrId("components_gallery-la-file_size")
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: typeItem
                 //% "Type"
                 label: qsTrId("components_gallery-la-type")
+                alignment: Qt.AlignLeft
             }
             DetailItem {
-                id: widthItem
-                //% "Width"
-                label: qsTrId("components_gallery-la-width")
-            }
-            DetailItem {
-                id: heightItem
-                //% "Height"
-                label: qsTrId("components_gallery-la-height")
+                id: sizeItem
+                //% "Size"
+                label: qsTrId("components_gallery-la-size")
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: dateTakenItem
                 //% "Date Taken"
                 label: qsTrId("components_gallery-la-date-taken")
                 visible: value.length > 0
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: cameraManufacturerItem
                 //% "Camera Manufacturer"
                 label: qsTrId("components_gallery-la-camera-manufacturer")
                 visible: value.length > 0
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: cameraModelItem
                 //% "Camera Model"
                 label: qsTrId("components_gallery-la-camera-model")
                 visible: value.length > 0
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: exposureTimeItem
                 //% "Exposure Time"
                 label: qsTrId("components_gallery-la-exposure-time")
-                visible: value.length > 0
+                visible: value.length > 0 && value != "0"
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: fNumberItem
                 //% "Aperture"
                 label: qsTrId("components_gallery-la-aperture")
                 visible: value.length > 0
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: flashEnabledItem
                 //% "Flash"
                 label: qsTrId("components_gallery-la-flash-enabled")
                 visible: value.length > 0
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: focalLengthItem
                 //% "Focal Length"
                 label: qsTrId("components_gallery-la-focal-length")
                 visible: value.length > 0
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: meteringModeItem
                 //% "Metering Mode"
                 label: qsTrId("components_gallery-la-metering-mode")
                 visible: value.length > 0
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: whiteBalanceItem
                 //% "White Balance"
                 label: qsTrId("components_gallery-la-white-balance")
                 visible: value.length > 0
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: gpsItem
                 //% "GPS"
                 label: qsTrId("components_gallery-la-gps")
                 visible: value.length > 0
+                alignment: Qt.AlignLeft
             }
             DetailItem {
                 id: durationItem
                 //% "Duration"
                 label: qsTrId("components_gallery-la-duration")
                 visible: value.length > 0
+                alignment: Qt.AlignLeft
+            }
+            DetailItem {
+                id: descriptionItem
+                //% "Description"
+                label: qsTrId("components_gallery-la-description")
+                visible: value.length > 0
+                alignment: Qt.AlignLeft
+            }
+            DetailItem {
+                id: copyrightItem
+                //% "Copyright"
+                label: qsTrId("components_gallery-la-copyright")
+                visible: value.length > 0
+                alignment: Qt.AlignLeft
             }
         }
         VerticalScrollDecorator { }

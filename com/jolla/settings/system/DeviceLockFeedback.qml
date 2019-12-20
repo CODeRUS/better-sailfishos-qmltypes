@@ -1,14 +1,19 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import org.nemomobile.devicelock 1.0
+import org.nemomobile.systemsettings 1.0
 
 Connections {
     property AuthenticationInput agent
     property QtObject ui
     property bool submitted
 
+    //% "Enter security code"
+    readonly property string enterSecurityCode: qsTrId("settings_devicelock-he-enter_security_code")
+
     //% "Confirm with security code"
-    property string acceptTitle: qsTrId("settings_devicelock-he-security_code_confirm_title")
+    property string confirmTextTitle: qsTrId("settings_devicelock-he-security_code_confirm_title")
+    property string acceptTitle: confirmTextTitle
 
     //% "Confirm"
     property string confirmText: qsTrId("settings_devicelock-bt-devicelock_confirm")
@@ -16,6 +21,10 @@ Connections {
     //: Devicelock UI's enter-key which is pressed to confirm the new security code.
     //% "Enter"
     property string enterText: qsTrId("settings_devicelock-bt-enter")
+
+    //: Enter a new security code
+    //% "Enter new security code"
+    property string enterNewSecurityCode: qsTrId("settings_devicelock-he-enter_new_security_code")
 
     target: agent
     ignoreUnknownSignals: true
@@ -67,9 +76,7 @@ Connections {
             break
         case AuthenticationInput.EnterNewSecurityCode:
         case AuthenticationInput.SuggestSecurityCode:
-            //: Enter a new security code
-            //% "Enter new security code"
-            ui.titleText = qsTrId("settings_devicelock-he-enter_new_security_code")
+            ui.titleText = enterNewSecurityCode
             ui.descriptionText = data.message || ""
             ui.okText = enterText
             ui.suggestionsEnabled = agent.codeGeneration === AuthenticationInput.OptionalCodeGeneration
@@ -179,8 +186,10 @@ Connections {
             warn(data.warning || qsTrId("settings_devicelock-la-devicelock_device_is_locked"), false)
             break
         case AuthenticationInput.LockedByManager:
-            //% "Locked by Sailfish Device Manager"
+            //: %1 is operating system name without OS suffix
+            //% "Locked by %1 Device Manager"
             ui.titleText = qsTrId("settings_devicelock-la-devicelock_locked_by_manager")
+                .arg(aboutSettings.baseOperatingSystemName)
             ui.descriptionText = data.message || ""
             warn(data.warning || "", false)
             break
@@ -201,4 +210,6 @@ Connections {
             break
         }
     }
+
+    readonly property AboutSettings aboutSettings: AboutSettings {}
 }

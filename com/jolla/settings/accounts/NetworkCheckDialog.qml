@@ -19,6 +19,7 @@ Dialog {
     property bool _connectionSelected: networkManager.state == "online"
     property bool _connectionSelectorClosed
     property bool _shouldAccept
+    readonly property bool _applicationActive: Qt.application.active
 
     function _showConnSelector() {
         connectionSelector.openConnection()
@@ -47,6 +48,16 @@ Dialog {
             canAccept = false
             forwardNavigation = false
             _showConnSelector()
+        }
+    }
+
+    on_ApplicationActiveChanged: {
+        if (_applicationActive && status === PageStatus.Active, _connectionSelected, _connectionSelectorClosed) {
+            if (_connectionSelected) {
+                _tryAccept()
+            } else if (!_connectionSelectorClosed) {
+                _showConnSelector()
+            }
         }
     }
 

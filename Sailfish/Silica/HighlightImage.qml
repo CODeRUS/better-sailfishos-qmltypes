@@ -38,5 +38,6 @@ import Sailfish.Silica.private 1.0
 
 HighlightImageBase {
     id: image
-    highlightColor: Theme.highlightColor
+
+    highlightColor: palette.highlightColor
 }

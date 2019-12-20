@@ -35,7 +35,7 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
 
-Item {
+SilicaItem {
     id: root
 
     property bool running
@@ -69,7 +69,7 @@ Item {
             return prefix + indicatorSize
         }
 
-        color: Theme.highlightColor
+        color: palette.highlightColor
         smooth: true
         source: _updateSize()
         transformOrigin: Item.Center

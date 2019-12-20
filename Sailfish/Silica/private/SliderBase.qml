@@ -36,7 +36,7 @@ import QtQuick 2.4
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 
-MouseArea {
+SilicaMouseArea {
     id: slider
 
     property real maximumValue: 1.0
@@ -48,17 +48,16 @@ MouseArea {
     property string valueText
     property alias label: labelText.text
     property bool down: pressed && !DragFilter.canceled && !_cancel
-    property bool highlighted: down
     property real leftMargin: Math.round(Screen.width/8)
     property real rightMargin: Math.round(Screen.width/8)
 
-    property int colorScheme: Theme.colorScheme
+    property int colorScheme: palette.colorScheme
     property color color: Theme.lightPrimaryColor
-    property color backgroundColor: Theme.secondaryColor
-    property color highlightColor: Theme.highlightColor
+    property color backgroundColor: palette.secondaryColor
+    property color highlightColor: palette.highlightColor
 
-    property color secondaryHighlightColor: Theme.secondaryHighlightColor
-    property color valueLabelColor: Theme.primaryColor
+    property color secondaryHighlightColor: palette.secondaryHighlightColor
+    property color valueLabelColor: palette.primaryColor
 
     property bool _hasValueLabel: false
     property Item _valueLabel
@@ -103,6 +102,8 @@ MouseArea {
             velocity: 1500*Theme.pixelRatio
         }
     }
+
+    highlighted: down
 
     DragFilter.orientations: Qt.Vertical
     onPreventStealingChanged: if (preventStealing) slider.DragFilter.end()
@@ -244,7 +245,7 @@ MouseArea {
         PropertyChanges {
             target: slider
             enabled: false
-            opacity: 0.6
+            opacity: Theme.opacityHigh
         }
         StateChangeScript {
             script: console.log("Warning: Slider.maximumValue needs to be higher than Slider.minimumValue")

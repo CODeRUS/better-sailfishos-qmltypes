@@ -39,7 +39,7 @@ import "private/Util.js" as Util
 import "private/RemorseItem.js" as RemorseItem
 import "private"
 
-MouseArea {
+SilicaMouseArea {
     id: contextMenu
 
     property bool active
@@ -60,7 +60,7 @@ MouseArea {
     property real _expandedPosition
     property real _targetHeight
     property Item _page
-    property bool _activeAllowed: (!_page || _page.status != PageStatus.Inactive) && Qt.application.active
+    property bool _activeAllowed: (!_page || _page.status !== PageStatus.Inactive) && Qt.application.active
     readonly property alias _displayHeightAnimating: displayHeightAnimation.running
 
     property Item _activeMenuItem
@@ -214,13 +214,13 @@ MouseArea {
             _page = null
             contextMenu.closed()
 
-            if (_activeMenuItem) {
-                _activeMenuItem.delayedClick()
-            }
-            _activeMenuItem = null
-
             _setHighlightedItem(null)
             contextMenu._open = false
+
+            if (_activeMenuItem) {
+                _activeMenuItem.delayedClick()
+                _activeMenuItem = null
+            }
         }
     }
 
@@ -290,7 +290,7 @@ MouseArea {
 
     function _activatedMenuItem(item) {
         _foreachMenuItem(function (menuItem, index) {
-            if (menuItem === item) {
+            if (menuItem === item && menuItem.enabled) {
                 menuItem.clicked()
                 _activeMenuItem = menuItem
                 contextMenu.activated(index)
@@ -348,7 +348,6 @@ MouseArea {
         }
     }
 
-
     Binding {
         when: active && contextMenu._closeOnOutsideClick
         target: __silica_applicationwindow_instance
@@ -365,8 +364,8 @@ MouseArea {
                 layer.enabled: true
                 layer.smooth: true
                 layer.sourceRect: Qt.rect(Math.min(0, contextMenu.x), 0
-                                          , Math.max(parent.width, contextMenu.width)
-                                          , Math.max(contextMenu.parent.height, _targetHeight))
+                                          , Math.max(contextMenu.parent ? contextMenu.parent.width : 0, contextMenu.width)
+                                          , Math.max(contextMenu.parent ? contextMenu.parent.height : 0, _targetHeight))
             }
         }
     ]
@@ -388,7 +387,7 @@ MouseArea {
         id: background
 
         anchors.fill: parent
-        color: Theme.highlightBackgroundColor
+        color: contextMenu.palette.highlightBackgroundColor
         opacity: Theme.highlightBackgroundOpacity
         InverseMouseArea {
             anchors.fill: parent
@@ -428,7 +427,7 @@ MouseArea {
         onTriggered: contextMenu.close()
     }
 
-    property real _displayHeight: active && contentColumn.height > 0 ? _getDisplayHeight() : 0
+    property real _displayHeight: contentColumn.children.length, active && contentColumn.height > 0 ? _getDisplayHeight() : 0
     Behavior on _displayHeight {
         NumberAnimation {
             id: displayHeightAnimation

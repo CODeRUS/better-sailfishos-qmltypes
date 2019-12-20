@@ -83,7 +83,7 @@ SettingsControl {
         height: Theme.itemSizeSmall
         radius: width/2
 
-        opacity: root.checked ? (root.highlighted ? 0.6 : 0.4) : (root.available ? 0.1 : 0.05)
+        opacity: root.checked ? (root.highlighted ? Theme.opacityHigh : Theme.opacityLow) : (root.available ? Theme.opacityFaint : 0.05)
         color: _effectiveHighlight ? Theme.highlightColor : Theme.primaryColor
     }
 
@@ -99,7 +99,7 @@ SettingsControl {
         id: iconImage
 
         anchors.centerIn: circle
-        opacity: root._showOnOffLabel ? 0 : (root.available ? 1.0 : 0.4)
+        opacity: root._showOnOffLabel ? 0 : (root.available ? 1.0 : Theme.opacityLow)
         highlighted: _effectiveHighlight
         width: dummyImage.width
         height: dummyImage.height

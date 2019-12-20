@@ -40,6 +40,6 @@ Underline {
     property color color
 
     implicitHeight: 2
-    primaryColor: Theme.rgba(color, 0.5)
+    primaryColor: Theme.rgba(color, Theme.opacityHigh)
     secondaryColor: Theme.rgba(color, 0.0)
 }

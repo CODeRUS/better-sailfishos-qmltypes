@@ -41,7 +41,7 @@ import "private"
 // Note DatePicker uses month range 1-12, while JS Date uses month range 0-11,
 // so the month must be converted accordingly in all uses of JS Date values.
 
-Item {
+SilicaControl {
     id: datePicker
 
     readonly property int year: date.getFullYear()
@@ -78,11 +78,11 @@ Item {
                     if (pressed && containsMouse || model.day === datePicker.day
                             && model.month === datePicker.month
                             && model.year === datePicker.year) {
-                        return Theme.highlightColor
+                        return palette.highlightColor
                     } else if (model.month === model.primaryMonth) {
-                        return Theme.primaryColor
+                        return palette.primaryColor
                     }
-                    return Theme.secondaryColor
+                    return palette.secondaryColor
                 }
             }
 

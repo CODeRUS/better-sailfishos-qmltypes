@@ -6,6 +6,7 @@ Item {
     property Item accountsPage
     property string title
     property var model
+    property int deletingAccountId: -1
 
     property QtObject _accountSyncAdapter
     property QtObject _settingsLoader
@@ -14,10 +15,12 @@ Item {
     property alias accountCreationManager: accountCreationManager
 
     function _deleteAccountFromSettings(accountId) {
-        //: Deleting this account in 5 seconds
-        //% "Removing account"
-        accountDeletionRemorse.execute(qsTrId("settings-accounts-la-remove_account"),
+        deletingAccountId = accountId
+        //: User is informed that account was deleted
+        //% "Deleted account"
+        var remorse = Remorse.popupAction(accountsPage, qsTrId("settings-accounts-la-deleted_account"),
                                        function() { accountCreationManager.deleteAccount(accountId) } )
+        remorse.canceled.connect(function() { deletingAccountId = -1 })
     }
 
     function _showSettings(providerName, accountId, showCredentialsPromptDialog) {

@@ -14,7 +14,7 @@ BackgroundItem {
     implicitHeight: content.height + topPadding + bottomPadding
     width: label.implicitWidth + 2*Theme.paddingMedium
 
-    opacity: enabled ? 1.0 : 0.6
+    opacity: enabled ? 1.0 : Theme.opacityLow
 
     Column {
         id: content

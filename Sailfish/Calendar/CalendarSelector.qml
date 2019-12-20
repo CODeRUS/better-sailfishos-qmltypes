@@ -13,7 +13,7 @@ BackgroundItem {
 
     width: parent ? parent.width : 0
     height: visible ? Math.max(Theme.itemSizeSmall, flow.height + Theme.paddingSmall*2) : 0
-    opacity: enabled ? 1.0 : 0.4
+    opacity: enabled ? 1.0 : Theme.opacityLow
 
     Flow {
         id: flow
@@ -36,7 +36,7 @@ BackgroundItem {
         }
 
         Column {
-            width: Math.max(nameRow.width, description.width)
+            width: flow.width > 0 ? Math.max(nameRow.width, description.width) : 0
 
             Row {
                 id: nameRow

@@ -1,6 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2016 Jolla Ltd.
+** Copyright (C) 2016 - 2019 Jolla Ltd.
+** Copyright (c) 2019 Open Mobile Platform LLC.
 ** Contact: Andrew den Exter <andrew.den.exter@jollamobile.com>
 ** All rights reserved.
 **
@@ -40,6 +41,9 @@ QtObject {
     property Component _itemComponent
     property Component _popupComponent
 
+    //% "Deleted"
+    readonly property string deletedText: qsTrId("components-la-deleted")
+
     function _create(component, parent) {
         if (!parent.RemorseCache.item) {
             parent.RemorseCache.item = component.createObject(parent)
@@ -48,7 +52,7 @@ QtObject {
         return parent.RemorseCache.item
     }
 
-    function itemAction(item, text, action, timeout) {
+    function itemAction(item, text, callback, timeout) {
         if (!_itemComponent) {  // Including the components inline silently breaks all of Silica.  True story.
             _itemComponent = Qt.createComponent(Qt.resolvedUrl("RemorseItem.qml"))
         }
@@ -56,7 +60,7 @@ QtObject {
         var remorseItem = _create(_itemComponent, item)
 
         if (remorseItem) {
-            remorseItem.execute(item, text, action, timeout)
+            remorseItem.execute(item, text, callback, timeout)
         } else if (_itemComponent) {
             console.warn("Failed to create RemorseItem", _itemComponent.errorString())
         }
@@ -64,7 +68,7 @@ QtObject {
         return remorseItem
     }
 
-    function popupAction(page, text, action, timeout) {
+    function popupAction(page, text, callback, timeout) {
         if (!_popupComponent) {
             _popupComponent = Qt.createComponent(Qt.resolvedUrl("RemorsePopup.qml"))
         }
@@ -72,7 +76,7 @@ QtObject {
         var remorsePopup = _create(_popupComponent, page)
 
         if (remorsePopup) {
-            remorsePopup.execute(text, action, timeout)
+            remorsePopup.execute(text, callback, timeout)
         } else if (_popupComponent) {
             console.warn("Failed to create RemorsePopup", _popupComponent.errorString())
         }

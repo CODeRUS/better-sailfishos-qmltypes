@@ -1,2 +1,3 @@
 module org.nemomobile.voicecall
+plugin voicecall
 typeinfo plugins.qmltypes

@@ -9,7 +9,10 @@ PinInput {
     property AuthenticationInput authenticationInput
     property alias acceptTitle: feedbackHandler.acceptTitle
     property alias confirmText: feedbackHandler.confirmText
+    property alias confirmTextTitle: feedbackHandler.confirmTextTitle
     property alias enterText: feedbackHandler.enterText
+    property alias enterSecurityCode: feedbackHandler.enterSecurityCode
+    property alias enterNewSecurityCode: feedbackHandler.enterNewSecurityCode
 
     property string descriptionText
     property alias securityCode: input.enteredPin
@@ -25,7 +28,8 @@ PinInput {
 
     showOkButton: authenticationInput && authenticationInput.status === AuthenticationInput.Authenticating
 
-    enabled: authenticationInput.status !== AuthenticationInput.Idle
+    enabled: authenticationInput.status !== AuthenticationInput.Idle && authenticationInput.status !== AuthenticationInput.Evaluating
+    busy: authenticationInput.status === AuthenticationInput.Evaluating
 
     minimumLength: authenticationInput ? authenticationInput.minimumCodeLength : 0
     maximumLength: authenticationInput ? authenticationInput.maximumCodeLength : 64

@@ -36,7 +36,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 
-Item {
+SilicaItem {
     id: progressBar
 
     property real maximumValue: 1.0
@@ -53,7 +53,6 @@ Item {
     property real _grooveWidth: Math.max(0, width - leftMargin - rightMargin)
     property real _glassItemPadding: background.height/2
     property Item _valueTextItem
-    property bool highlighted
 
     implicitHeight: contentColumn.y + contentColumn.height + Theme.paddingSmall
 
@@ -70,8 +69,8 @@ Item {
         width: parent.width
 
         // compensate empty space in GlassItem
-        spacing: -Theme.paddingSmall - (Theme.colorScheme === Theme.DarkOnLight ? Theme.paddingLarge : 0)
-                 + (indeterminate ? (Theme.colorScheme === Theme.DarkOnLight ? Theme.paddingMedium : Theme.paddingSmall)
+        spacing: -Theme.paddingSmall - (progressBar.palette.colorScheme === Theme.DarkOnLight ? Theme.paddingLarge : 0)
+                 + (indeterminate ? (progressBar.palette.colorScheme === Theme.DarkOnLight ? Theme.paddingMedium : Theme.paddingSmall)
                                   : 0)
 
 
@@ -89,13 +88,13 @@ Item {
             // because glass item doesn't visibly paint across the full width of the item
             x: progressBar.leftMargin - _glassItemPadding
             width: progressBar._grooveWidth + 2*_glassItemPadding
-            height: (Theme.colorScheme === Theme.LightOnDark ? 2 : (indeterminate ? 3 : 4)) * Theme.paddingLarge
+            height: (palette.colorScheme === Theme.LightOnDark ? 2 : (indeterminate ? 3 : 4)) * Theme.paddingLarge
 
             dimmed: true
-            radius: Theme.colorScheme === Theme.LightOnDark ? 0.06 : 0.05
-            falloffRadius: Theme.colorScheme === Theme.LightOnDark ? 0.09 : 0.05
+            radius: palette.colorScheme === Theme.LightOnDark ? 0.06 : 0.05
+            falloffRadius: palette.colorScheme === Theme.LightOnDark ? 0.09 : 0.05
             ratio: 0.0
-            color: progressBar.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
+            color: progressBar.highlighted ? palette.secondaryHighlightColor : palette.secondaryColor
 
             GlassItem {
                 id: highlight
@@ -107,13 +106,13 @@ Item {
                 height: background.height
                 visible: indeterminate || value > minimumValue
                 dimmed: false
-                radius: Theme.colorScheme === Theme.LightOnDark ? 0.05 : 0.04
-                falloffRadius: Theme.colorScheme === Theme.LightOnDark ? 0.14 : 0.10
+                radius: palette.colorScheme === Theme.LightOnDark ? 0.05 : 0.04
+                falloffRadius: palette.colorScheme === Theme.LightOnDark ? 0.14 : 0.10
                 dashMargin: Theme.paddingLarge*2
                 dashLength: Theme.paddingLarge
                 ratio: 0.0
-                color: progressBar.highlighted ? Theme.highlightColor : Theme.lightPrimaryColor
-                backgroundColor: Theme.colorScheme === Theme.DarkOnLight ? Theme.highlightDimmerColor : "transparent"
+                color: progressBar.highlighted ? palette.highlightColor : Theme.lightPrimaryColor
+                backgroundColor: palette.colorScheme === Theme.DarkOnLight ? palette.highlightDimmerColor : "transparent"
                 dashed: indeterminate
 
                 Timer {
@@ -141,7 +140,7 @@ Item {
             visible: text.length
             font.pixelSize: Theme.fontSizeSmall
             font.family: Theme.fontFamily
-            color: progressBar.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
+            color: progressBar.highlighted ? palette.secondaryHighlightColor : palette.secondaryColor
             textFormat: Text.PlainText
             anchors.horizontalCenter: parent.horizontalCenter
         }
@@ -150,7 +149,7 @@ Item {
     Component {
         id: valueIndicatorComponent
         Text {
-            color: progressBar.highlighted ? Theme.highlightColor : Theme.primaryColor
+            color: progressBar.highlighted ? progressBar.palette.highlightColor : progressBar.palette.primaryColor
             x: Math.min(Math.max(_glassItemPadding, background.x + highlight.width - width/2 - _glassItemPadding),
                         parent.width - width - _glassItemPadding)
 

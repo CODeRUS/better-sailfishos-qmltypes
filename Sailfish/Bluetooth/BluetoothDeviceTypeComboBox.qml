@@ -26,7 +26,10 @@ ComboBox {
         id: deviceInfo
         address: deviceAddress
         deviceClass: root.deviceClass
-        onDeviceTypeChanged: {
+        onDeviceTypeChanged: updateInfo()
+        Component.onCompleted: updateInfo()
+
+        function updateInfo() {
             if (deviceType >= 0) {
                 root._loadIndex(deviceType == BluetoothDeviceTypesModel.UncategorizedIconType
                                 ? deviceTypesModel.defaultIndex

@@ -3,7 +3,6 @@ import QtQml.Models 2.1
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as Private
 import Sailfish.Gallery 1.0
-import Sailfish.Media 1.0
 import QtMultimedia 5.0
 import com.jolla.camera 1.0
 import org.nemomobile.policy 1.0
@@ -102,7 +101,6 @@ ListView {
             readonly property int duration: model.duration
 
             readonly property bool isImage: mimeType.indexOf("image/") == 0
-            readonly property bool scaled: item && item.scaled
             readonly property bool error: item && item.error
 
             readonly property bool isCurrentItem: ListView.isCurrentItem
@@ -117,11 +115,19 @@ ListView {
 
                 ImageViewer {
 
-                    onClicked: overlay.active = !overlay.active
+                    onZoomedChanged: overlay.active = !zoomed
+                    onClicked: {
+                        if (zoomed) {
+                            zoomOut()
+                        } else {
+                            overlay.active = !overlay.active
+                        }
+                    }
+
                     source: parent.source
 
                     active: isCurrentItem && root.active
-                    orientation: model.orientation
+                    contentRotation: -model.orientation
                     viewMoving: root.moving
                 }
             }
@@ -166,7 +172,7 @@ ListView {
             active: false
             width: root.width
             height: root.height
-            sourceComponent: GStreamerVideoOutput {
+            sourceComponent: VideoOutput {
                 property alias player: mediaPlayer
                 visible: player.playbackState !== MediaPlayer.StoppedState
                 source: GalleryMediaPlayer {
@@ -180,6 +186,11 @@ ListView {
                         }
                     }
                     onLoadedChanged: if (loaded) playerLoader.anchors.centerIn = currentItem
+                    onStatusChanged: {
+                        if (status === MediaPlayer.InvalidMedia) {
+                            root.currentItem.item.displayError()
+                        }
+                    }
                 }
             }
         }

@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2016 - 2019 Jolla Ltd.
+ *
+ * License: Proprietary
+ */
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import com.jolla.startupwizard 1.0
@@ -6,8 +12,6 @@ TermsOfUseDialog {
     id: root
 
     readonly property variant strings: termsOfUseManager.vendorTermsSummary(localeName)
-
-    party: StartupWizardManager.Vendor
 
     function _string(index) {
         if (strings && strings.length > index) {

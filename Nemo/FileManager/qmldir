@@ -1,2 +1,3 @@
 module Nemo.FileManager
+plugin nemofilemanager
 typeinfo plugins.qmltypes

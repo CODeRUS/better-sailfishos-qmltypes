@@ -1,4 +1,5 @@
 module Sailfish.Settings.Networking
+plugin sailfishsettingsnetworkingplugin
 AddNetworkNotifications 1.0 AddNetworkNotifications.qml
 EncryptionComboBox 1.0 EncryptionComboBox.qml
 HiddenSwitch 1.0 HiddenSwitch.qml
@@ -11,4 +12,7 @@ PassphraseField 1.0 PassphraseField.qml
 SsidField 1.0 SsidField.qml
 WlanUtils 1.0 WlanUtils.js
 SimDependentSettingsToggle 1.0 SimDependentSettingsToggle.qml
+CACertChooser 1.0 CACertChooser.qml
+EapComboBox 1.0 EapComboBox.qml
+InnerAuthComboBox 1.0 InnerAuthComboBox.qml
 typeinfo plugins.qmltypes

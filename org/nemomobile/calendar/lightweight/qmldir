@@ -1,2 +1,3 @@
 module org.nemomobile.calendar.lightweight
+plugin nemocalendarwidget
 typeinfo plugins.qmltypes

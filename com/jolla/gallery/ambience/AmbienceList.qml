@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Ambience 1.0
 import Sailfish.Gallery 1.0
@@ -105,6 +105,8 @@ SilicaListView {
                 easing.type: Easing.InOutQuad
             }
             FadeAnimation { target: listItem; to: 1; duration: initialized ? 200 : 0 }
+
+            onStopped: listItem.height = undefined
         }
 
         Thumbnail {
@@ -127,7 +129,7 @@ SilicaListView {
 
             gradient: Gradient {
                 GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 1.0; color: Qt.rgba(0.0 ,0.0, 0.0, 0.5) }
+                GradientStop { position: 1.0; color: Qt.rgba(0.0 ,0.0, 0.0, Theme.opacityHigh) }
             }
         }
 
@@ -136,21 +138,20 @@ SilicaListView {
             anchors {
                 left: parent.left
                 leftMargin: Theme.paddingLarge
-                right: parent.right
+                right: favoriteIcon.left
                 rightMargin: Theme.paddingLarge
                 bottom: parent.bottom
                 bottomMargin: Theme.paddingMedium
             }
             font.pixelSize: Theme.fontSizeLarge
-            horizontalAlignment: Text.AlignLeft
+            truncationMode: TruncationMode.Fade
             text: displayName
-            wrapMode: Text.Wrap
-            maximumLineCount: 2
-            truncationMode: TruncationMode.Elide
-            color: highlightColor != undefined ? highlightColor : Theme.highlightColor
+            color: model.highlightColor ? Theme.highlightFromColor(model.highlightColor, Theme.LightOnDark)
+                                        : Theme.highlightColor
         }
 
         MouseArea {
+            id: favoriteButton
             anchors {
                 fill: favoriteIcon
                 margins: -Theme.paddingLarge
@@ -158,17 +159,18 @@ SilicaListView {
             onClicked: ambienceList.model.setProperty(model.index, "favorite", !favorite)
         }
 
-        Image {
+        Icon {
             id: favoriteIcon
 
-            source: (favorite ? "image://theme/icon-m-favorite-selected?"
-                              : "image://theme/icon-m-favorite?")
-                    + (colorScheme === Theme.DarkOnLight ? Theme.darkPrimaryColor : Theme.lightPrimaryColor)
+            palette.colorScheme: Theme.LightOnDark
+            source: favorite ? "image://theme/icon-m-favorite-selected"
+                             : "image://theme/icon-m-favorite"
             anchors {
                 right: parent.right
                 rightMargin: Theme.paddingLarge
                 verticalCenter: displayNameLabel.verticalCenter
             }
+            highlighted: favoriteButton.containsPress
         }
 
         Component {
@@ -181,12 +183,13 @@ SilicaListView {
 
     Rectangle {
         readonly property bool highlighting: ambienceList.currentItem && ambienceList.currentItem.down
+                                             && !ambienceList.currentItem.menuOpen
 
         parent: ambienceList.contentItem
         anchors.fill: ambienceList.currentItem
 
         visible: highlighting || highlightAnimation.running
-        opacity: highlighting ? 0.5 : 0.0
+        opacity: highlighting ? Theme.opacityHigh : 0.0
         Behavior on opacity { FadeAnimation { id: highlightAnimation; duration: 100 } }
 
         color: Theme.highlightBackgroundColor
@@ -215,7 +218,7 @@ SilicaListView {
             }
 
             color: Theme.lightPrimaryColor
-            backgroundColor: Theme.backgroundGlowColor
+            backgroundColor: palette.backgroundGlowColor
             radius: 0.22
             falloffRadius: 0.18
             clip: true

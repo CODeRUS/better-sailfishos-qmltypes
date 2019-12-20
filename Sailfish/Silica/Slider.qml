@@ -39,7 +39,7 @@ import Sailfish.Silica.private 1.0
 SliderBase {
     id: slider
 
-    property color backgroundGlowColor: slider.colorScheme === Theme.DarkOnLight ? Theme.highlightDimmerColor : "transparent"
+    property color backgroundGlowColor: slider.colorScheme === Theme.DarkOnLight ? palette.highlightDimmerColor : "transparent"
 
     readonly property real _glassItemPadding: Theme.paddingMedium
 

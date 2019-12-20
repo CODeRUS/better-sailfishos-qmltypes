@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Item {
+SilicaItem {
     id: root
 
     property bool open
@@ -94,6 +94,7 @@ Item {
         _immediate = false
     }
 
+
     Item {
         id: backgroundClip
         visible: root.opened
@@ -124,12 +125,12 @@ Item {
     Rectangle {
         id: dimmerRect
         anchors.fill: foregroundItem
-        color: Theme.highlightDimmerColor
+        color: root.palette.highlightDimmerColor
 
         // The dimmed rectangle provides a seam between the background and foreground.  It shouldn't
         // pop in instantly but should be distinct for the majority of the animation so the animation
         // easing is cubic instead of the normal quad.
-        opacity: root.open ? 0.5 : 0.0
+        opacity: root.open ? Theme.opacityHigh : 0.0
         Behavior on opacity {
             enabled: !_immediate
             NumberAnimation {

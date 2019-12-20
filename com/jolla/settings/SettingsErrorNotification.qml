@@ -1,10 +1,13 @@
 import QtQuick 2.0
 import Nemo.Notifications 1.0
 import com.jolla.settings 1.0
+import org.nemomobile.systemsettings 1.0
 
 Notification {
     isTransient: true
     icon: "icon-system-warning"
+
+    readonly property AboutSettings aboutSettings: AboutSettings {}
 
     function notify(error) {
         if (typeof error == "string") {
@@ -19,8 +22,10 @@ Notification {
             previewBody = qsTrId("settings-la-in_progress")
             break
         case SettingsControlError.BlockedByAccessPolicy:
-            //% "Disabled by Sailfish Device Manager"
+            //: %1 is an operating system name without the OS suffix
+            //% "Disabled by %1 Device Manager"
             previewBody = qsTrId("settings-la-disabled_by_sailfish_device_manager")
+                .arg(aboutSettings.baseOperatingSystemName)
             break
         case SettingsControlError.BlockedByFlightMode:
             //% "Disabled by flight mode"

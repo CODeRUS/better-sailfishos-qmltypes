@@ -4,7 +4,8 @@ import Sailfish.Silica 1.0
 MediaContainerListDelegate {
     id: root
 
-    property alias color: playlistRectangle.color
+    property color color: Theme.primaryColor
+    property color highlightColor: Theme.highlightColor
     property int songCount
 
     leftPadding: Theme.itemSizeExtraLarge + Theme.paddingLarge
@@ -21,7 +22,7 @@ MediaContainerListDelegate {
         anchors.verticalCenter: parent.verticalCenter
         x: Theme.itemSizeExtraLarge - Theme.paddingSmall - width
         radius: Theme.paddingSmall / 2
-        opacity: root.highlighted ? 1.0 : 0.7
+        color: root.highlighted ? root.highlightColor : root.color
 
         Image {
             source: "image://theme/graphic-media-playlist-medium"

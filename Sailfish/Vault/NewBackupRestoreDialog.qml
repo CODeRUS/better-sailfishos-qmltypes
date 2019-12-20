@@ -1,7 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Vault 1.0
-import NemoMobile.Vault 1.0
 
 Dialog {
     id: root
@@ -13,21 +12,9 @@ Dialog {
 
     property UnitListModel unitListModel: UnitListModel {
         // if unitListModel hasn't been set to a pre-filled list model, set it up here
-        property Vault _vault: Vault {
-            Component.onCompleted: {
-                root.canAccept = false
-                connectVault(false)
-            }
-            onDone: {
-                if (operation == Vault.Connect) {
-                    unitListModel.loadVaultUnits(units())
-                    root.canAccept = true
-                }
-            }
-            onError: {
-                console.log("Vault error", operation, "error", error.rc, error.snapshot, error.dst,
-                            error.stdout, error.stderr)
-            }
+        Component.onCompleted: {
+            unitListModel.loadVaultUnits(BackupRestoreUnitReader.readUnits())
+            root.canAccept = unitListModel.count > 0
         }
     }
 

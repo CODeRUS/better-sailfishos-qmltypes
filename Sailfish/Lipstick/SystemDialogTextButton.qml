@@ -10,7 +10,7 @@ BackgroundItem {
 
     implicitHeight: label.implicitHeight
     width: label.implicitWidth + 2*Theme.paddingLarge
-    opacity: enabled ? 1.0 : 0.4
+    opacity: enabled ? 1.0 : Theme.opacityLow
 
     Label {
         id: label

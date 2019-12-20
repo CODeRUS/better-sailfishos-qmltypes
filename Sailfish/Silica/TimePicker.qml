@@ -34,69 +34,111 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0
 import "private"
 
 // TODO: Investigate using one quarter of the image mirrored in two directions
 // TODO: Investigate using a scaled down version of the image
 
-Item {
+SilicaItem {
     id: timePicker
 
     property int hour
     property int minute
+    property int _second
+
     property int hourMode: DateTime.DefaultHours
 
-    property date time: new Date(0,0,0, hour, minute)
-    property string timeText: _formatTime()
-    property real _minuteWidth: Theme.itemSizeExtraSmall
+    property date time: new Date(0,0,0, hour, minute, _second)
+    property string timeText: _formatTime(hour, minute, _second)
+    property real _trackWidth: Theme.itemSizeExtraSmall
+
+    property int _mode: TimePickerMode.HoursAndMinutes
+    readonly property bool _hoursAndMinutes: _mode === TimePickerMode.HoursAndMinutes
 
     width: screen.sizeCategory > Screen.Medium ? Theme.itemSizeLarge*4 : Theme.itemSizeMedium*4
     height: width
 
     onHourChanged: {
         hour = (hour < 0 ? 0 : (hour > 23 ? 23 : hour))
-
-        if (mouse.changingProperty == 0) {
-            var delta = (hour - hourIndicator.value) % 24
-            if ((delta > 12) || (delta < -12)) {
-                // We don't want to animate for more than a full cycle
-                hourIndicator.animationEnabled = false
-
-                hourIndicator.value += (delta > 0 ? 12 : -12)
-                delta = (hour - hourIndicator.value) % 12
-
-                hourIndicator.animationEnabled = true
-            }
-
-            hourIndicator.value += delta
-        }
+        _updateHourIndicator()
     }
-
     onMinuteChanged: {
         minute = (minute < 0 ? 0 : (minute > 59 ? 59 : minute))
+        _updateMinuteIndicator()
+    }
+    on_SecondChanged: {
+        _second = (_second < 0 ? 0 : (_second > 59 ? 59 : _second))
+        _updateSecondIndicator()
+    }
 
-        if (mouse.changingProperty == 0) {
-            var delta = (minute - minuteIndicator.value)
-            minuteIndicator.value += (delta % 60)
+    on_HoursAndMinutesChanged: {
+        if (_hoursAndMinutes) {
+            _updateHourIndicator()
+            _updateMinuteIndicator()
+        } else {
+            _updateMinuteIndicator()
+            _updateSecondIndicator()
         }
     }
 
+    function _updateHourIndicator() {
+        if (mouse.changingProperty == 0 && _hoursAndMinutes) {
+            var delta = (hour - innerIndicator.value) % 24
+            if ((delta > 12) || (delta < -12)) {
+                // We don't want to animate for more than a full cycle
+                innerIndicator.animationEnabled = false
 
-    function _formatTime() {
-        var fmt = (hourMode == DateTime.DefaultHours ? Formatter.TimeValue
-                                                     : (hourMode == DateTime.TwentyFourHours ? Formatter.TimeValueTwentyFourHours
-                                                                                             : Formatter.TimeValueTwelveHours))
+                innerIndicator.value += (delta > 0 ? 12 : -12)
+                delta = (hour - innerIndicator.value) % 12
+
+                innerIndicator.animationEnabled = true
+            }
+
+            innerIndicator.value += delta
+        }
+    }
+
+    function _updateMinuteIndicator() {
+        if (mouse.changingProperty == 0) {
+            if (_hoursAndMinutes) {
+                var delta = (minute - outerIndicator.value)
+                outerIndicator.value += (delta % 60)
+            } else {
+                var delta = (minute - innerIndicator.value)
+                innerIndicator.value += (delta % 60)
+            }
+        }
+    }
+
+    function _updateSecondIndicator() {
+        if (mouse.changingProperty == 0 && !_hoursAndMinutes) {
+            var delta = (_second - outerIndicator.value)
+            outerIndicator.value += (delta % 60)
+        }
+    }
+
+    function _formatTime(hour, minute, _second) {
         var date = new Date()
-        date.setHours(timePicker.hour)
-        date.setMinutes(timePicker.minute)
-        return Format.formatDate(date, fmt)
+        date.setSeconds(_second)
+        date.setHours(hour)
+        date.setMinutes(minute)
+        var format
+        if (_hoursAndMinutes) {
+            format = (hourMode == DateTime.DefaultHours ? Formatter.TimeValue
+                                                        : (hourMode == DateTime.TwentyFourHours ? Formatter.TimeValueTwentyFourHours
+                                                                                                : Formatter.TimeValueTwelveHours))
+        } else {
+            format = Formatter.DurationShort
+        }
+        return Format.formatDate(date, format)
     }
 
     ShaderEffect {
         anchors.fill: parent
         property size size: Qt.size(width, height)
-        property real border: _minuteWidth / width
-        property color color: Theme.primaryColor
+        property real border: _trackWidth / width
+        property color color: timePicker.palette.primaryColor
         fragmentShader: "
             uniform lowp vec2 size;
             uniform lowp float border;
@@ -110,19 +152,19 @@ Item {
     }
 
     TimePickerGlassItem {
-        id: hourIndicator
-        stepCount: 12
-        rotationRadius: (timePicker.width - 3*_minuteWidth)/2
-        velocity: 30
+        id: innerIndicator
+        stepCount: _hoursAndMinutes ? 12 : 60
+        rotationRadius: (timePicker.width - 3*_trackWidth)/2
+        velocity: _hoursAndMinutes ? 30 : 80
         highlighted: mouse.changingProperty == 1
         moving: mouse.isMoving && !mouse.isLagging
         anchors.centerIn: parent
     }
 
     TimePickerGlassItem {
-        id: minuteIndicator
+        id: outerIndicator
         stepCount: 60
-        rotationRadius: (timePicker.width - _minuteWidth)/2
+        rotationRadius: (timePicker.width - _trackWidth)/2
         velocity: 80
         highlighted: mouse.changingProperty == 2
         moving: mouse.isMoving && !mouse.isLagging
@@ -170,7 +212,7 @@ Item {
 
         function propertyForRadius(radius) {
             // Return the property associated with clicking at radius distance from the center
-            if (radius < width/2 - _minuteWidth) {
+            if (radius < width/2 - _trackWidth) {
                 return 1 // Hours
             } else if (radius < width/2) {
                 return 2 // Minutes
@@ -180,55 +222,39 @@ Item {
 
         function updateForAngle(angle) {
             // Update the selected property for the specified angular position
-            if (changingProperty == 1) { // Hours
-                // Map angular position to 0-11
-                var h = remapAngle(angle, 12)
-                var delta = (h - hourIndicator.value) % 12
+            var indicator = changingProperty == 1 ? innerIndicator : outerIndicator
+            var stepCount = indicator.stepCount
+            var value = remapAngle(angle, stepCount)
 
-                // It is not possible to make jumps of more than 6 hours - reverse the direction
-                if (delta > 6) {
-                    delta -= 12
-                } else if (delta < -6) {
-                    delta += 12
+            // Round single touch to the nearest 5 min/second mark
+            if (stepCount >= 12 && !isMoving) value = (Math.round(value/5) * 5) % stepCount
+            var delta = (value - indicator.value) % stepCount
+
+            // It is not possible to make jumps of more than 6 hours - reverse the direction
+            if (delta > stepCount/2) {
+                delta -= stepCount
+            } else if (delta < -stepCount/2) {
+                delta += stepCount
+            }
+            if (isMoving && isLagging) {
+                if (Math.abs(delta) < 0.5) {
+                    isLagging = false
                 }
-                if (isMoving && isLagging) {
-                    if (Math.abs(delta) < 0.5) {
-                        isLagging = false
-                    }
-                }
+            }
 
-                var target = (hourIndicator.value + delta)
-                hourIndicator.value += delta
+            var target = (indicator.value + delta)
+            indicator.value += delta
 
+            if (changingProperty == 1 && _hoursAndMinutes) {
                 if (target < 0) {
                     var multiple = Math.ceil(target / 24)
                     target += ((-multiple + 1) * 24)
                 }
                 timePicker.hour = (target % 24)
-            } else { // Minutes
-                // Map angular position to 0-59
-                var m = remapAngle(angle, 60)
-
-                // Round single touch to the nearest 5 min mark
-                if (!isMoving) m = (Math.round(m/5) * 5) % 60
-
-                var delta = (m - minuteIndicator.value) % 60
-
-                // It is not possible to make jumps of more than 30 minutes - reverse the direction
-                if (delta > 30) {
-                    delta -= 60
-                } else if (delta < -30) {
-                    delta += 60
-                }
-                if (isMoving && isLagging) {
-                    if (Math.abs(delta) < 2) {
-                        isLagging = false
-                    }
-                }
-
-                minuteIndicator.value += delta
-
-                timePicker.minute = m
+            } else if (changingProperty == 2 && !_hoursAndMinutes) {
+                timePicker._second = value
+            } else {
+                timePicker.minute = value
             }
         }
 

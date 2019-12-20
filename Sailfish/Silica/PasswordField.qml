@@ -115,7 +115,7 @@ TextField {
             font.pixelSize: Theme.fontSizeMedium
             text: "abc"
             textFormat: Text.PlainText
-            color: parent.pressed && parent.containsMouse ? Theme.highlightColor : Theme.primaryColor
+            color: parent.pressed && parent.containsMouse ? root.palette.highlightColor : root.palette.primaryColor
         }
 
         Text {
@@ -129,7 +129,7 @@ TextField {
             font.pixelSize: Theme.fontSizeMedium
             text: "\u2022\u2022\u2022"
             textFormat: Text.PlainText
-            color: parent.pressed && parent.containsMouse ? Theme.highlightColor : Theme.primaryColor
+            color: parent.pressed && parent.containsMouse ? root.palette.highlightColor : root.palette.primaryColor
         }
     }
 }

@@ -1,9 +1,14 @@
+/*
+ * Copyright (c) 2014 - 2019 Jolla Ltd.
+ *
+ * License: Proprietary
+ */
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Lipstick 1.0
 
 MainPage {
-    property alias tutorialTheme: tutorialThemeId
     property bool allowSystemGesturesBetweenLessons
 
     property bool _tutorialStarted
@@ -25,13 +30,6 @@ MainPage {
         }
     }
 
-    QtObject {
-        id: tutorialThemeId
-        property color highlightColor: "#88f5e0"
-        property color secondaryHighlightColor: "#b588f5e0"
-        property color primaryColor: "#ffffffff"
-        property color secondaryColor: "#b0ffffff"
-        property color highlightBackgroundColor: "#00e6b9"
-        property color highlightDimmerColor: "#003329"
-    }
+    // Default to disable back navigation
+    backNavigation: false
 }

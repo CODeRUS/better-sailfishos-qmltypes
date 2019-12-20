@@ -57,7 +57,7 @@ BackgroundItem {
         height: parent.height
 
         // Fade out item in housekeeping mode, if not removable
-        opacity: Lipstick.compositor.eventsLayer.housekeeping && !root.userRemovable ? 0.4 : 1.0
+        opacity: Lipstick.compositor.eventsLayer.housekeeping && !root.userRemovable ? Theme.opacityLow : 1.0
         Behavior on opacity {
             FadeAnimation { duration: 200 }
         }

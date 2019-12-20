@@ -36,7 +36,7 @@ import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "private/Util.js" as Util
 
-Item {
+SilicaItem {
     id: pageHeader
 
     property alias title: headerText.text
@@ -45,11 +45,11 @@ Item {
     property alias extraContent: extraContentPlaceholder
     property string description
     property Item page
+    property alias titleColor: headerText.color
     property real leftMargin: Theme.horizontalPageMargin
     property real rightMargin: Theme.horizontalPageMargin
     property Item _descriptionLabel
     property real _preferredHeight: page && page.isLandscape ? Theme.itemSizeSmall : Theme.itemSizeLarge
-
     onDescriptionChanged: {
         if (description.length > 0 && !_descriptionLabel) {
             var component = Qt.createComponent(Qt.resolvedUrl("private/PageHeaderDescription.qml"))
@@ -76,7 +76,7 @@ Item {
         // Don't allow the label to extend over the page stack indicator
         width: Math.min(implicitWidth, parent.width - leftMargin - rightMargin)
         truncationMode: TruncationMode.Fade
-        color: Theme.highlightColor
+        color: pageHeader.palette.highlightColor
         // align first line with page indicator
         y: Math.floor(_preferredHeight/2 - metrics.height/2)
         anchors {

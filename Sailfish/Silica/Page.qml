@@ -76,7 +76,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as Private
 
-MouseArea {
+Private.SilicaMouseArea {
     id: page
 
     // The status of the page. One of the following:
@@ -137,6 +137,7 @@ MouseArea {
     property int __silica_page
 
     visible: false
+    focus: true
     // This unusual binding avoids a warning when the page is destroyed.
     anchors.centerIn: page ? parent : null
 

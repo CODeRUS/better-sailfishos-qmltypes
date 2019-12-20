@@ -41,7 +41,7 @@ IconButton {
     onClicked: if (popPageOnClick) pageStack.pop()
 
     y: Theme.paddingLarge
-    icon.source: "image://theme/icon-m-dismiss?" + Theme.lightPrimaryColor
+    icon.source: "image://theme/icon-m-dismiss"
     anchors {
         right: parent.right
         rightMargin: Theme.horizontalPageMargin

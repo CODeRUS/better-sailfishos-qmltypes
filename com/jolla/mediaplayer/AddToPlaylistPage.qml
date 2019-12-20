@@ -65,6 +65,8 @@ Page {
             songCount: media.childCount
             color: model.title != "" ? PlaylistColors.nameToColor(model.title)
                                      : "transparent"
+            highlightColor: model.title != "" ? PlaylistColors.nameToHighlightColor(model.title)
+                                              : "transparent"
             onClicked: {
                 // TODO: Notify user?
                 if (playlists.appendToPlaylist(media, page.media)) {

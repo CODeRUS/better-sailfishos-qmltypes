@@ -44,6 +44,7 @@ Page {
                 visible: provisionedAccountsView.model.count > 0
                 width: parent.width
                 itemWidth: Screen.sizeCategory >= Screen.Large ? width/2 : width
+                deletingAccountId: logic.deletingAccountId
                 entriesInteractive: true
 
                 onAccountClicked: logic.accountClicked(accountId, providerName)
@@ -66,6 +67,7 @@ Page {
                 filter: "false"
                 width: parent.width
                 itemWidth: Screen.sizeCategory >= Screen.Large ? width/2 : width
+                deletingAccountId: logic.deletingAccountId
                 entriesInteractive: true
 
                 onAccountClicked: logic.accountClicked(accountId, providerName)

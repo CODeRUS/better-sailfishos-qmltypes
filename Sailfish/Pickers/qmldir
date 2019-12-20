@@ -1,4 +1,5 @@
 module Sailfish.Pickers
+plugin sailfishcomponentspickersplugin
 ContentPickerPage 1.0 ContentPickerPage.qml
 DocumentPickerPage 1.0 DocumentPickerPage.qml
 DownloadPickerPage 1.0 DownloadPickerPage.qml

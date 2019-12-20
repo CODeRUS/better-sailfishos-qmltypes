@@ -34,14 +34,17 @@
 
 import QtQuick 2.0
 import Sailfish.Silica.private 1.0
-import org.nemomobile.configuration 1.0
+import Nemo.Configuration 1.0
 
 ConfigurationValue {
-    id: configurationValue
     property int count
     property int limit
-    property bool active: _initiated && count <= limit && Config.demoMode !== Config.Demo
+    readonly property bool active: _active && (ignoreSystemHints || (_systemHintCoordinator.item
+                                                                     && _systemHintCoordinator.item.active))
+    readonly property bool _active: _initiated && count <= limit && Config.demoMode !== Config.Demo
+                                    && _hintsEnabled.value
     property bool _initiated
+    property bool ignoreSystemHints
 
     function increase() {
         if (active) {
@@ -52,6 +55,12 @@ ConfigurationValue {
     function reset() {
         count = 0
         value = 0
+    }
+    function exhaust() {
+        if (active) {
+            count = limit +1
+            value = count
+        }
     }
 
     Component.onCompleted: {
@@ -65,4 +74,19 @@ ConfigurationValue {
         }
     }
     defaultValue: 0
+
+    property ConfigurationValue _hintsEnabled: ConfigurationValue {
+        key: "/desktop/sailfish/silica/hints_enabled"
+        defaultValue: true
+    }
+
+    property var _systemHintCoordinator: Loader {
+        active: _active && !ignoreSystemHints
+        sourceComponent: ConfigurationValue {
+            key: "/desktop/sailfish/hints/coordination_state"
+            defaultValue: 3 // no system hints for existing users
+
+            readonly property bool active: (value >= 3)
+        }
+    }
 }

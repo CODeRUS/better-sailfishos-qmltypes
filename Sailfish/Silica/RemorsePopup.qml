@@ -1,6 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013 - 2019 Jolla Ltd.
+** Copyright (c) 2019 Open Mobile Platform LLC.
 ** Contact: Martin Jones <martin.jones@jollamobile.com>
 ** All rights reserved.
 **
@@ -34,21 +35,25 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Silica.private 1.0
 import "private/RemorsePopup.js" as RemorseJs
 import "private/Util.js" as Util
+import "private"
 
-BackgroundItem {
+RemorseBase {
     id: remorsePopup
-    property string text
-    property real leftMargin: Theme.horizontalPageMargin
-    property real rightMargin: Theme.horizontalPageMargin
+
     readonly property bool active: state === "active"
 
-    function execute(title, callback, timeout) {
-        remorsePopup.text = title
+    function execute(text, callback, timeout) {
+        if (text === undefined || text.length === 0) {
+            //% "Deleted"
+            remorsePopup.text = qsTrId("components-la-deleted")
+        } else {
+            remorsePopup.text = text
+        }
+
         RemorseJs.callback = callback
-        _timeout = timeout === undefined ? 5000 : timeout
+        _timeout = timeout === undefined ? 4000 : timeout
         _triggered = false
         _page = Util.findPage(remorsePopup)
         if (_page) {
@@ -56,19 +61,26 @@ BackgroundItem {
         }
         state = "active"
     }
+
     function cancel() {
         _close()
         canceled()
     }
+
     function trigger() {
         _execute()
         _close()
     }
 
+    function _trigger() {
+        trigger()
+    }
+
     function _close() {
-        countdown.stop()
+        _countdown.stop()
         state = "inactive"
     }
+
     function _execute() {
         if (!_triggered) {
             _triggered = true
@@ -79,36 +91,11 @@ BackgroundItem {
         }
     }
 
-    property int _timeout: 5000
-    property int _seconds: (_timeout + 999) / 1000
-    property int _secsRemaining: (_msRemaining + 999) / 1000
-    property real _msRemaining: _timeout
-    property Item _page
-    property bool _triggered
-    property real _contentOpacity
-
-    signal canceled
-    signal triggered
-
-    drag.minimumX: -width
-    drag.maximumX: width
-    drag.target: contentItem
-    drag.axis: Drag.XAxis
-    drag.onActiveChanged: if (!drag.active) dismissAnimation.animate(contentItem, 0, width)
-
-    DismissAnimation {
-        id: dismissAnimation
-        onCompleted: trigger()
-    }
-
-    visible: false
-    width: parent ? parent.width : Screen.width
+    secondsHeight: Theme.paddingSmall
     height: Theme.itemSizeSmall + Theme.paddingSmall
     y: -height
     z: 1
     _screenMargin: 0
-
-    onClicked: cancel()
 
     states: [
         State {
@@ -123,7 +110,8 @@ BackgroundItem {
                 y: 0
                 _contentOpacity: 1
             }
-        }, State {
+        },
+        State {
             name: "inactive"
             PropertyChanges {
                 target: _page
@@ -136,6 +124,7 @@ BackgroundItem {
             }
         }
     ]
+
     transitions: [
         Transition {
             to: "active"
@@ -158,7 +147,7 @@ BackgroundItem {
                         }
                     }
                     ScriptAction {
-                        script: countdown.restart()
+                        script: _countdown.restart()
                     }
                 }
             }
@@ -173,10 +162,7 @@ BackgroundItem {
                     easing.type: Easing.OutQuad
                 }
                 ScriptAction {
-                    script: {
-                        remorsePopup.state = ""
-                        dismissAnimation.reset()
-                    }
+                    script: remorsePopup.state = ""
                 }
             }
         }
@@ -185,7 +171,7 @@ BackgroundItem {
     Connections {
         target: _page
         onStatusChanged: {
-            if (_page && _page.status == PageStatus.Deactivating && countdown.running) {
+            if (_page && _page.status == PageStatus.Deactivating && _countdown.running) {
                 // if the page is changed then execute immediately
                 _execute()
                 _close()
@@ -193,117 +179,8 @@ BackgroundItem {
         }
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: Theme.rgba(Theme.overlayBackgroundColor, 0.6)
-    }
-
-    Row {
-        id: row
-
-        property real cellWidth: (parent.width - ((repeater.count - 1) * spacing)) / repeater.count
-
-        height: Theme.paddingSmall
-        spacing: 1
-
-        Repeater {
-            id: repeater
-
-            model: _seconds
-
-            Rectangle {
-                width: row.cellWidth
-                height: parent ? parent.height : 0
-                color: Theme.highlightBackgroundColor
-                opacity: remorsePopup._secsRemaining > Positioner.index ? 0.6 : 0
-                Behavior on opacity {
-                    FadeAnimation { duration: 200 }
-                }
-            }
-        }
-    }
-    HighlightImage {
-        id: promptIcon
-
-        anchors {
-            verticalCenter: parent.verticalCenter
-            verticalCenterOffset: row.height/2
-            left: row.left
-            leftMargin: Theme.paddingMedium
-        }
-        source: "image://theme/icon-m-clear"
-        smooth: true
-        fillMode: Image.PreserveAspectFit
-        opacity: remorsePopup._contentOpacity
-        highlighted: remorsePopup.highlighted
-    }
-    Column {
-        anchors {
-            verticalCenter: promptIcon.verticalCenter
-            left: promptIcon.right
-            leftMargin: Theme.paddingMedium
-            right: parent.right
-        }
-        Label {
-            truncationMode: TruncationMode.Fade
-            font.pixelSize: Theme.fontSizeExtraSmall
-            color: remorsePopup.highlighted ? Theme.highlightColor : Theme.primaryColor
-            textFormat: Text.PlainText
-            maximumLineCount: 1
-            opacity: remorsePopup._contentOpacity
-            text: {
-                //: Describes the remaining time to prevent action trigger
-                //% "in %n seconds"
-                var text = remorsePopup.text + " " + qsTrId("components-la-in-n-seconds", remorsePopup._secsRemaining)
-                if (screen.sizeCategory > Screen.Medium) {
-                    if (drag.active || dismissAnimation.running) {
-                        //: Prompts the user to cancel the pending action, appended to the description
-                        //% ", Swipe to commit"
-                        text = text + qsTrId("components-la-swipe-to-commit-appended")
-                    } else {
-                        //: Prompts the user to cancel the pending action, appended to the description
-                        //% ", Tap to cancel"
-                        text = text + qsTrId("components-la-tap-to-cancel-appended")
-                    }
-                }
-                return text
-            }
-        }
-        Label {
-            truncationMode: TruncationMode.Fade
-            font.pixelSize: Theme.fontSizeExtraSmall
-            color: remorsePopup.highlighted ? Theme.highlightColor : Theme.primaryColor
-            textFormat: Text.PlainText
-            maximumLineCount: 1
-            opacity: remorsePopup._contentOpacity
-            text: drag.active || dismissAnimation.running ?
-                      //% "Swipe to commit"
-                      qsTrId("components-la-swipe-to-commit")
-                    :
-                      //: Prompts the user to cancel the pending action
-                      //% "Tap to cancel"
-                      qsTrId("components-la-tap-to-cancel")
-            visible: screen.sizeCategory <= Screen.Medium
-        }
-    }
-
-    NumberAnimation {
-        id: countdown
-        target: remorsePopup
-        property: "_msRemaining"
-        from: _timeout
-        to: 0
-        duration: _timeout
-        onRunningChanged: {
-            if (!running && _msRemaining == 0) {
-                _execute()
-                _close()
-            }
-        }
-    }
-
     Component.onDestruction: {
-        if (countdown.running) {
+        if (_countdown.running) {
             _execute()
         }
     }

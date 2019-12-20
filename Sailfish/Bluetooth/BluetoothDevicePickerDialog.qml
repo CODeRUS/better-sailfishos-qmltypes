@@ -9,6 +9,7 @@ Dialog {
     property alias requirePairing: picker.requirePairing
     property alias excludedDevices: picker.excludedDevices
     property alias preferredProfileHint: picker.preferredProfileHint
+    property alias showPairedDevices: picker.showPairedDevices
 
     canAccept: selectedDevice.length > 0
 

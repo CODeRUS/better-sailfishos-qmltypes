@@ -1,6 +1,8 @@
 module com.jolla.settings.system
+plugin systemsettingsplugin
 AboutText 1.0 AboutText.qml
 AllDateTimeSettingsDisplay 1.0 AllDateTimeSettingsDisplay.qml
+CertificateDetailsPage 1.0 CertificateDetailsPage.qml
 CurrentDateSettingDisplay 1.0 CurrentDateSettingDisplay.qml
 CurrentTimeSettingDisplay 1.0 CurrentTimeSettingDisplay.qml
 CurrentTimeZoneSettingDisplay 1.0 CurrentTimeZoneSettingDisplay.qml
@@ -8,6 +10,7 @@ DeviceLockInput 1.0 DeviceLockInput.qml
 DeviceLockInputPage 1.0 DeviceLockInputPage.qml
 DeviceLockQuery 1.0 DeviceLockQuery.qml
 DisabledByMdmBanner 1.0 DisabledByMdmBanner.qml
+DisabledByMdmView 1.0 DisabledByMdmView.qml
 LanguagePickerPage 1.0 LanguagePickerPage.qml
 MandatoryDeviceLockInputPage 1.0 MandatoryDeviceLockInputPage.qml
 NetworkAddressField 1.0 NetworkAddressField.qml
@@ -19,7 +22,9 @@ SimPinQuery 1.0 SimPinQuery.qml
 SimPinQuerySkippedNotice 1.0 SimPinQuerySkippedNotice.qml
 SimSectionPlaceholder 1.0 SimSectionPlaceholder.qml
 SimViewPlaceholder 1.0 SimViewPlaceholder.qml
+SimPinBackground 1.0 SimPinBackground.qml
 SoundDialog 1.0 SoundDialog.qml
+SystemPasswordField 1.0 SystemPasswordField.qml
 ToneItem 1.0 ToneItem.qml
 Tones 1.0 Tones.qml
 Use24HourClockSettingDisplay 1.0 Use24HourClockSettingDisplay.qml

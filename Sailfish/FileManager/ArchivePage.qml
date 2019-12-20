@@ -37,10 +37,10 @@ Page {
         delegate: FileItem {
 
             function cleanUp() {
-                //% "Deleting extracted directory"
-                var text = model.isDir ? qsTrId("filemanager-la-deleting_extracted_dir")
-                                       : //% "Deleting extracted file"
-                                         qsTrId("filemanager-la-deleting_extracted_file")
+                //% "Deleted extracted directory"
+                var text = model.isDir ? qsTrId("filemanager-la-deleted_extracted_dir")
+                                       : //% "Deleted extracted file"
+                                         qsTrId("filemanager-la-deleted_extracted_file")
                 remorseAction(text, function() {
                     FileEngine.deleteFiles(model.extractedTargetPath, true)
                     extractor.model.cleanExtractedEntry(model.fileName)
@@ -53,7 +53,7 @@ Page {
                     if (model.isDir) {
                         var directory = FileManager.openDirectory({
                                                                       path: model.extractedTargetPath,
-                                                                      homePath: StandardPaths.home,
+                                                                      initialPath: StandardPaths.home,
                                                                       showDeleteFolder: true,
                                                                       //% "Extracted folder"
                                                                       description: qsTrId("filemanager-he-extracted_folder")
@@ -62,7 +62,7 @@ Page {
                             extractor.model.cleanExtractedEntry(model.fileName)
                         })
                     } else {
-                        FileManager.openUrlExternally(Qt.resolvedUrl(model.extractedTargetPath))
+                        Qt.openUrlExternally(FileManager.pathToUrl(model.extractedTargetPath))
                     }
                 } else if (model.isDir) {
                     var obj = FileManager.openArchive(archiveFile, extractor.appendPath(model.fileName), baseExtractionDirectory)

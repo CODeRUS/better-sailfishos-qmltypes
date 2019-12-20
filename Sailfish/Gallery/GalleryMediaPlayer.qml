@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import Sailfish.Media 1.0
 import org.nemomobile.policy 1.0
+import Nemo.KeepAlive 1.2
 
 MediaPlayer {
     id: root
@@ -51,8 +52,8 @@ MediaPlayer {
             }
         }
 
-        ScreenBlank {
-            suspend: playing
+        DisplayBlanking {
+            preventBlanking: playing
         }
         MediaKey { enabled: keysResource.acquired; key: Qt.Key_MediaTogglePlayPause; onPressed: togglePlay() }
         MediaKey { enabled: keysResource.acquired; key: Qt.Key_MediaPlay; onPressed: play() }

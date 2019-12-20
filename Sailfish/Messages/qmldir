@@ -1,0 +1,11 @@
+module Sailfish.Messages
+plugin sailfishmessagesplugin
+singleton MessageUtils 1.0 MessageUtils.qml
+AccountErrorLabel 1.0 AccountErrorLabel.qml
+CharacterCountLabel 1.0 CharacterCountLabel.qml
+ChatTextInput 1.0 ChatTextInput.qml
+ConversationTypeMenu 1.0 ConversationTypeMenu.qml
+ErrorLabel 1.0 ErrorLabel.qml
+MessageComposerPage 1.0 MessageComposerPage.qml
+TypeMenuItem 1.0 TypeMenuItem.qml
+typeinfo plugins.qmltypes

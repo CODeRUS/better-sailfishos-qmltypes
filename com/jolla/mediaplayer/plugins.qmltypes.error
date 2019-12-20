@@ -1,0 +1,5 @@
+
+(process:29372): Tracker-WARNING **: 23:48:53.970: Locale '0' is not set, defaulting to C locale
+
+(qmlplugindump:29372): Tracker-WARNING **: 23:48:53.984: tracker-backend.vala:211: Falling back to bus backend, the direct backend failed to initialize: Locale change detected (DB:ru_RU.utf8, User/App:C)
+<Unknown File>: QML MprisPlayer: Failed attempting to register object path. Already registered?

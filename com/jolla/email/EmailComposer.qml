@@ -1,9 +1,9 @@
-/****************************************************************************
-**
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Valerio Valerio <valerio.valerio@jolla.com>
-**
-****************************************************************************/
+/*
+ * Copyright (c) 2013 – 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
@@ -60,6 +60,12 @@ Item {
 
     signal requestDraftRemoval(int messageId)
 
+    function _ensureRecipientsComplete() {
+        to.updateSummary()
+        cc.updateSummary()
+        bcc.updateSummary()
+    }
+
     onSignatureChanged: {
         // Sometimes ConfigurationValue return undefined in the first read
         if (!validSignatureSet && signature) {
@@ -78,6 +84,18 @@ Item {
 
     EmailMessage {
         id: message
+        onSendEnqueued: {
+            messageComposer.enabled = true
+            if (success) {
+                _effectiveAutoSaveDraft = false
+                if (popDestination) {
+                    // pop any page/dialog on top of composer if it exists
+                    pageStack.pop(popDestination)
+                } else {
+                    pageStack.pop()
+                }
+            }
+        }
     }
 
     EmailMessage {
@@ -174,6 +192,10 @@ Item {
         message.cc = cc.recipientsToString()
         message.bcc = bcc.recipientsToString()
         message.from = from.value
+        message.signingPlugin = cryptoSignatureSwitch.checked
+            ? accountListModel.cryptoSignatureType(accountId) : ""
+        message.signingKeys = cryptoSignatureSwitch.checked
+            ? accountListModel.cryptoSignatureIds(accountId) : []
         message.priority = _messagePriority(importance.currentIndex)
         message.subject = subject.text
         message.body = body.text + body.quote
@@ -194,14 +216,8 @@ Item {
             removeUndownloadedAttachments()
         }
         buildMessage()
+        messageComposer.enabled = false
         message.send()
-        _effectiveAutoSaveDraft = false
-        if (popDestination) {
-            // pop any page/dialog on top of composer if it exists
-            pageStack.pop(popDestination)
-        } else {
-            pageStack.pop()
-        }
     }
 
     function saveDraft() {
@@ -345,6 +361,12 @@ Item {
         }
 
         PullDownMenu {
+            onActiveChanged: {
+                if (active) {
+                    _ensureRecipientsComplete()
+                }
+            }
+
             MenuItem {
                 visible: accountListModel.numberOfAccounts
                 // explicit save action only when not doing it automatically
@@ -375,6 +397,13 @@ Item {
 
         PushUpMenu {
             visible: accountListModel.numberOfAccounts && flickable.contentHeight > 1.5*(isLandscape ? Screen.width : Screen.height)
+
+            onActiveChanged: {
+                if (active) {
+                    _ensureRecipientsComplete()
+                }
+            }
+
             MenuItem {
                 text: _strSend
                 enabled: hasRecipients && (subject.text != '' || body.text != '')
@@ -396,6 +425,7 @@ Item {
             visible: accountListModel.numberOfAccounts
             y: isLandscape ? Theme.paddingMedium : 0
             width: parent.width - x
+            opacity: messageComposer.enabled ? 1. : Theme.opacityLow
 
             PageHeader {
                 id: pageHeader
@@ -556,6 +586,22 @@ Item {
                         label: qsTrId("jolla-components_email-la-importance")
                     }
                     CompressibleItem {
+                        id: cryptoSignatureSwitch
+                        property alias checked: signatureSwitch.checked
+                        visible: accountListModel.cryptoSignatureType(accountId).length > 0
+                        compressible: !signatureSwitch.error
+                        SignatureSwitch {
+                            id: signatureSwitch
+                            visible: !cryptoSignatureSwitch.compressed
+                            width: parent.width
+                            checked: accountListModel.useCryptoSignatureByDefault(accountId)
+                            protocol: message.cryptoProtocolForKey
+                                        (accountListModel.cryptoSignatureType(accountId)
+                                        ,accountListModel.cryptoSignatureIds(accountId))
+                            error: message.signatureStatus == EmailMessage.SignedInvalid
+                        }
+                    }
+                    CompressibleItem {
                         id: requestReadReceiptItem
                         compressible: true
                         TextSwitch {
@@ -613,7 +659,7 @@ Item {
                                     id: addButton
 
                                     source: "image://theme/icon-m-add" + (attachmentBg.highlighted ? "?" + Theme.highlightColor : "")
-                                    opacity: 0.6
+                                    opacity: Theme.opacityHigh
 
                                     anchors {
                                         verticalCenter: parent.verticalCenter
@@ -743,6 +789,12 @@ Item {
         VerticalScrollDecorator {}
     }
 
+    BusyIndicator {
+        size: BusyIndicatorSize.Large
+        anchors.centerIn: parent
+        running: !messageComposer.enabled
+    }
+
     Component {
         id: contentPicker
 
@@ -845,11 +897,23 @@ Item {
                         setOriginalMessageAttachments()
                     }
 
-                    // to be removed, just temporary to provide at least same functionality as before
-                    body.text = forwardPrecursor()
-                    body.quote = originalMessage.quotedBody + signature
-                    // Append max 10000 chars from the quote
-                    body.appendQuote(10000)
+                    if (originalMessage.contentType == EmailMessage.Plain) {
+                        // to be removed, just temporary to provide at least same functionality as before
+                        body.text = forwardPrecursor()
+                        body.quote = originalMessage.quotedBody + signature
+                        // Append max 10000 chars from the quote
+                        body.appendQuote(10000)
+                    } else { // originalMessage.contentType == EmailMessage.HTML
+                        // forward as an attachment
+                        attachmentFiles.append({
+                            "url": "id://" + originalMessageId,
+                            "fileSize": originalMessage.size,
+                            "title": originalMessage.subject,
+                            "mimeType": "message/rfc822",
+                            "FromOriginalMessage": "false"
+                        })
+                        body.text = message.body + signature
+                    }
                 } else {
                     // Not translated:
                     if (subjectText.slice(0, 3) != 'Re:') {

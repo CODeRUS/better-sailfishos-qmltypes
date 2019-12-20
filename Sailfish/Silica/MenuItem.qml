@@ -38,7 +38,6 @@ import Sailfish.Silica 1.0
 Label {
     id: menuItem
     property bool down
-    property bool highlighted
 
     signal earlyClick
     signal clicked
@@ -46,8 +45,8 @@ Label {
 
     property int __silica_menuitem
     property int _duration: 50
-    property color _enabledColor: (down || highlighted) ^ _invertColors ? Theme.highlightColor : Theme.primaryColor
-    property color _disabledColor: Theme.rgba(Theme.secondaryColor, 0.4)
+    property color _enabledColor: (down || highlighted) ^ _invertColors ? palette.highlightColor : palette.primaryColor
+    property color _disabledColor: Theme.rgba(palette.secondaryColor, Theme.opacityLow)
     property bool _invertColors
     on_InvertColorsChanged: _duration = 200
 

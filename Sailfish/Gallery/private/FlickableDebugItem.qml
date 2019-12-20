@@ -7,6 +7,21 @@ Rectangle {
     height: column.height + column.y + Theme.paddingMedium
     color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
 
+    property Flickable flickable
+    Component.onCompleted: {
+        if (!flickable) {
+            var parentItem = parent
+            while (parentItem) {
+                if (parentItem.maximumFlickVelocity) {
+                    flickable = parentItem
+                    parent = flickable
+                    break
+                }
+                parentItem = parentItem.parent
+            }
+        }
+    }
+
     Column {
         id: column
         y: Theme.paddingMedium
@@ -14,25 +29,31 @@ Rectangle {
         width: parent.width - 2 * x
 
         DebugLabel {
-            text: "Margins t " +  zoomableImage.topMargin + " b " + zoomableImage.bottomMargin + " l " + zoomableImage.leftMargin + " r " + zoomableImage.rightMargin
+            text: "Margins t " +  flickable.topMargin + " b " + flickable.bottomMargin + " l " + flickable.leftMargin + " r " + flickable.rightMargin
         }
         DebugLabel {
-            text: "Content w " +  zoomableImage.contentWidth + " h " + zoomableImage.contentHeight + " x " + zoomableImage.contentX + " y " + zoomableImage.contentY
+            text: "Content w " +  flickable.contentWidth + " h " + flickable.contentHeight + " x " + flickable.contentX + " y " + flickable.contentY
         }
         DebugLabel {
-            text: "Photo w " + zoomableImage.photo.width + " h " + zoomableImage.photo.height + " iw " + zoomableImage.photo.implicitWidth + " ih " + zoomableImage.photo.implicitHeight
+            text: "Item iw " + flickable.implicitContentWidth + " ih " + flickable.implicitContentWidth + " interactive " + flickable.interactive
         }
         DebugLabel {
-            text: "Scale " + zoomableImage._scale.toFixed(1) + " minimum " + zoomableImage._minimumScale.toFixed(1) + " fitted " + zoomableImage._fittedScale
+            text: "Drag	detector horizontal " + flickable._dragDetector.horizontalDragUnused + " vertical " + flickable._dragDetector.verticalDragUnused
         }
         DebugLabel {
-            text: "Crop w " + editor.width + " h " + editor.height + " x " + editor.x + " y " + editor.y
+            text: flickable.zoom !== undefined ? "Zoom " + flickable.zoom.toFixed(1) + " minimum " + flickable.minimumZoom.toFixed(1) + " fitted " + flickable.fittedZoom : ""
         }
         DebugLabel {
-            text: "Rotation base " + zoomableImage.baseRotation + " image " + zoomableImage.imageRotation
+            text: editor ? "Crop w " + editor.width + " h " + editor.height + " x " + editor.x + " y " + editor.y : ""
         }
         DebugLabel {
-            text: "Orientation meta " + metadata.orientation + " orientation " + zoomableImage.orientation
+            text: flickable.baseRotation !== undefined ? "Rotation base " + flickable.baseRotation + " image " + flickable.imageRotation : ""
+        }
+        DebugLabel {
+            text: flickable.orientation !== undefined ? "Orientation " + flickable.orientation + " transpose " + flickable.transpose : ""
+        }
+        DebugLabel {
+            text: metadata ? "Orientation meta " + metadata.orientation + " orientation " + flickable.orientation : ""
         }
     }
 }

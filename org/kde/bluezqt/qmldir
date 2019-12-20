@@ -1,4 +1,0 @@
-module org.kde.bluezqt
-
-DevicesModel 1.0 DevicesModel.qml
-typeinfo plugins.qmltypes

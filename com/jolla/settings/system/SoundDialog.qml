@@ -91,7 +91,7 @@ Dialog {
 
                 width: parent.width
                 enabled: !noSound
-                opacity: enabled ? 1.0 : 0.5
+                opacity: enabled ? 1.0 : Theme.opacityLow
                 onClicked: pageStack.animatorPush(musicPicker, {
                                                       acceptDestination: soundDialog.acceptDestination
                                                                          || pageStack.previousPage(soundDialog),

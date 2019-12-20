@@ -22,15 +22,15 @@ ImagePickerPage {
     function _customSelectionHandler(model, index, selected) {
         model.updateSelected(index, selected)
         var selectedContentProperties = model.get(index)
-        var target = StandardPaths.genericData + "/data/avatars/" + selectedContentProperties.fileName
+        var target = AvatarFileHandler.createNewAvatarFileName(selectedContentProperties.fileName)
         _cropDialog = cropDialog.createObject(root, {
            acceptDestination: pageStack.previousPage(root),
            acceptDestinationAction: PageStackAction.Pop,
            source: selectedContentProperties.url,
            target: target,
            selectedContentProperties: selectedContentProperties
-       })
-       pageStack.animatorPush(_cropDialog)
+        })
+        pageStack.animatorPush(_cropDialog)
     }
 
     //: Title for avatar picker for selecting avatar

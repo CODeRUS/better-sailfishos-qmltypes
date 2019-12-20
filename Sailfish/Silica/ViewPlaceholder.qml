@@ -36,7 +36,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import "private/Util.js" as Util
 
-Item {
+SilicaItem {
     id: placeholder
     property Item flickable
     property alias text: mainLabel.text
@@ -79,8 +79,8 @@ Item {
             pixelSize: Theme.fontSizeLarge
             family: Theme.fontFamilyHeading
         }
-        color: Theme.highlightColor
-        opacity: 0.4
+        color: placeholder.palette.highlightColor
+        opacity: Theme.opacityLow
     }
 
     Component {

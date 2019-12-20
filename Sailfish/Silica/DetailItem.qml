@@ -1,6 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2014 Jolla Ltd.
+** Copyright (C) 2014-2015 Jolla Ltd.
+** Copyright (c) 2019 Open Mobile Platform LLC.
 ** Contact: Joona Petrell <joona.petrell@jollamobile.com>
 ** All rights reserved.
 ** 
@@ -32,18 +33,27 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 
-Item {
+SilicaItem {
     id: detailItem
+
     width: parent.width
-    height: Math.max(labelText.height, valueText.height) + 2*Theme.paddingSmall
+    height: Math.max(labelText.y*2 + labelText.height, valueText.y + valueText.height + Theme.paddingSmall)
 
     property alias label: labelText.text
     property alias value: valueText.text
+    property alias valueFont: valueText.font
     property real leftMargin: Theme.horizontalPageMargin
     property real rightMargin: Theme.horizontalPageMargin
+    // supported: Qt.AlignHCenter and Qt.AlignLeft
+    property int alignment: Qt.AlignHCenter
+
+    // only for edge aligned content
+    property bool forceValueBelow
+    property alias _valueItem: valueText
+    readonly property bool _center: alignment === Qt.AlignHCenter
 
     Text {
         id: labelText
@@ -51,12 +61,12 @@ Item {
         y: Theme.paddingSmall
         anchors {
             left: parent.left
-            right: parent.horizontalCenter
-            rightMargin: Theme.paddingSmall
             leftMargin: detailItem.leftMargin
+            right: _center ? parent.horizontalCenter : parent.right
+            rightMargin: _center ? Theme.paddingSmall : detailItem.rightMargin
         }
-        horizontalAlignment: Text.AlignRight
-        color: Theme.secondaryHighlightColor
+        horizontalAlignment: _center ? Text.AlignRight : Text.AlignLeft
+        color: palette.secondaryHighlightColor
         font.pixelSize: Theme.fontSizeSmall
         textFormat: Text.PlainText
         wrapMode: Text.Wrap
@@ -65,15 +75,20 @@ Item {
     Text {
         id: valueText
 
-        y: Theme.paddingSmall
+        property bool valueBelow: detailItem.forceValueBelow
+                                  || ((labelText.implicitWidth + valueText.implicitWidth)
+                                      > (detailItem.width - 2*Theme.horizontalPageMargin - 2*Theme.paddingSmall))
+        y: (!_center && valueBelow ? (labelText.y + labelText.height) : 0) + Theme.paddingSmall
         anchors {
-            left: parent.horizontalCenter
+            left: _center ? parent.horizontalCenter : parent.left
+            leftMargin: _center ? Theme.paddingSmall
+                                : (valueBelow ? detailItem.leftMargin
+                                              : (labelText.x + labelText.implicitWidth + 2*Theme.paddingSmall))
             right: parent.right
-            leftMargin: Theme.paddingSmall
             rightMargin: detailItem.rightMargin
         }
         horizontalAlignment: Text.AlignLeft
-        color: Theme.highlightColor
+        color: detailItem.palette.highlightColor
         font.pixelSize: Theme.fontSizeSmall
         textFormat: Text.PlainText
         wrapMode: Text.Wrap

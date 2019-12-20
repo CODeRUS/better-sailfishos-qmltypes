@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Item {
+SilicaItem {
     property alias text: text.text
     property alias wrapMode: text.wrapMode
     property alias truncationMode: text.truncationMode
@@ -47,7 +47,7 @@ Item {
     width: parent ? parent.width : Screen.width
     Label {
         id: text
-        color: Theme.secondaryHighlightColor
+        color: palette.secondaryHighlightColor
         font.pixelSize: Theme.fontSizeSmall
         width: parent.width - Theme.horizontalPageMargin*2
         wrapMode: Text.Wrap

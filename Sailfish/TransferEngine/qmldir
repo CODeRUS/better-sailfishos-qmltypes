@@ -1,4 +1,5 @@
 module Sailfish.TransferEngine
+plugin silicatransferengine
 TransfersPage 1.0 TransfersPage.qml
 ShareMethodList 1.0 ShareMethodList.qml
 ShareMethodItem 1.0 ShareMethodItem.qml

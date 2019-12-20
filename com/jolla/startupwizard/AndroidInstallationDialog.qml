@@ -1,9 +1,9 @@
-/****************************************************************************
-**
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Bea Lam <bea.lam@jollamobile.com>
-**
-****************************************************************************/
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
@@ -126,7 +126,7 @@ Dialog {
                 font.pixelSize: Theme.fontSizeExtraSmall
 
                 //: Explains how to install Android apps and stores later on.
-                //% "You can install additional stores to your device to find your favorite Android™ apps like Facebook, Twitter and WhatsApp. For more Android™ apps and stores, visit the Jolla Store later with the Store app."
+                //% "You can install additional stores to your device to find your favorite Android™ apps like Facebook, Twitter and WhatsApp. For more Android™ apps and stores, visit the Store app later."
                 text: qsTrId("startupwizard-la-install_additional_android_stores")
             }
 

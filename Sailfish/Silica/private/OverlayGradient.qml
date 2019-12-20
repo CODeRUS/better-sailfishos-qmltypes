@@ -40,8 +40,8 @@ import Sailfish.Silica.private 1.0 as SilicaPrivate
 SilicaPrivate.OverlayGradientBase {
     id: gradient
 
-    startColor: Theme.rgba(Theme.overlayBackgroundColor, 0.2)
-    endColor: Theme.rgba(Theme.overlayBackgroundColor, 0.0)
+    startColor: Theme.rgba(palette.overlayBackgroundColor, Theme.opacityFaint)
+    endColor: Theme.rgba(palette.overlayBackgroundColor, 0.0)
 
     noise: "noise.png"
 }

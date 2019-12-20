@@ -136,7 +136,7 @@ Item {
             gradient: Gradient {
                 GradientStop {
                     position: 0.0
-                    color: Theme.rgba(Theme.highlightBackgroundColor, 0.1)
+                    color: Theme.rgba(button.palette.highlightBackgroundColor, 0.1)
                 }
                 GradientStop {
                     position: 1.0
@@ -145,7 +145,7 @@ Item {
             }
         }
 
-        HighlightImage {
+        Icon {
             id: iconLeftImg
 
             anchors {
@@ -176,11 +176,11 @@ Item {
 
             color: {
                 if (button.highlighted) {
-                    return Theme.secondaryHighlightColor
+                    return palette.secondaryHighlightColor
                 } else if (root.expanded) {
-                    return Theme.highlightColor
+                    return palette.highlightColor
                 } else {
-                    return Theme.primaryColor
+                    return palette.primaryColor
                 }
             }
             font.pixelSize: Theme.fontSizeLarge
@@ -210,7 +210,7 @@ Item {
             ]
         }
 
-        HighlightImage {
+        Icon {
             id: iconRightImg
 
             anchors {

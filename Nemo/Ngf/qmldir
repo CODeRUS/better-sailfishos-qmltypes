@@ -1,2 +1,3 @@
 module Nemo.Ngf
+plugin ngf-declarative
 typeinfo plugins.qmltypes

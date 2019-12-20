@@ -1,2 +1,3 @@
 module org.nemomobile.social
+plugin nemosocial
 typeinfo plugins.qmltypes

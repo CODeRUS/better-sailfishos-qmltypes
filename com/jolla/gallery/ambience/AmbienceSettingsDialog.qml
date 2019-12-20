@@ -9,6 +9,14 @@ Dialog {
     property alias contentId: view.contentId
     property alias ambience: view.ambience
 
+    palette {
+        primaryColor: ambience.primaryColor
+        secondaryColor: ambience.secondaryColor
+        highlightColor: ambience.highlightColor
+        secondaryHighlightColor: ambience.secondaryHighlightColor
+        colorScheme: ambience.colorScheme
+    }
+
     onAccepted: {
         ambience.save()
         Ambience.source = ambience.url
@@ -24,7 +32,8 @@ Dialog {
         anchors.fill: parent
         source: ambience.applicationWallpaperUrl
         windowRotation: -dialog.rotation
-        colorScheme: ambience.colorScheme
+
+        color: palette._wallpaperOverlayColor
     }
 
     AmbienceSettingsView {
@@ -32,11 +41,6 @@ Dialog {
 
         showWallpaper: false
         fadeAmbiencePicture: true
-        primaryColor: ambience.primaryColor
-        secondaryColor: ambience.secondaryColor
-        highlightColor: ambience.highlightColor
-        secondaryHighlightColor: ambience.secondaryHighlightColor
-        colorScheme: ambience.colorScheme
         enableColorSchemeSelection: true
 
         topHeader: DialogHeader {
@@ -61,7 +65,7 @@ Dialog {
                 anchors.fill: parent
                 source: ambience.applicationWallpaperUrl
                 windowRotation: -dialog.rotation
-                colorScheme: ambience.colorScheme
+                color: palette._wallpaperOverlayColor
             }
         }
     }

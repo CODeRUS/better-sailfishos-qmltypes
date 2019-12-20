@@ -13,12 +13,12 @@ ImageViewer {
     readonly property bool longPressed: pressed && !delayPressTimer.running
     property bool animatingBrightnessContrast
 
-    orientation: -(baseRotation + imageRotation)
+    contentRotation: baseRotation + imageRotation
 
     onAnimatingBrightnessContrastChanged: adjustLevels.visible = true
 
     function rotate(angle) {
-        resetScale()
+        resetZoom()
         // Don't wait for the rotation animation to complete to new image dimensions
         transposeBinding.value = (baseRotation + rotationAnimation.to + angle) % 180
         rotationAnimation.to = rotationAnimation.to + angle
@@ -40,7 +40,7 @@ ImageViewer {
         duration: 200
     }
 
-    Behavior on _scale {
+    Behavior on zoom {
         enabled: rotationAnimation.running
         SmoothedAnimation { duration: 200 }
     }

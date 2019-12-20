@@ -1,8 +1,10 @@
 module Sailfish.Bluetooth
+plugin sailfishbluetoothplugin
 BluetoothDevicePicker 1.0 BluetoothDevicePicker.qml
 BluetoothDevicePickerDialog 1.0 BluetoothDevicePickerDialog.qml
 BluetoothDeviceTypeComboBox 1.0 BluetoothDeviceTypeComboBox.qml
 PairedDeviceSettings 1.0 PairedDeviceSettings.qml
 TrustBluetoothDeviceSwitch 1.0 TrustBluetoothDeviceSwitch.qml
 BluetoothViewPlaceholder 1.0 BluetoothViewPlaceholder.qml
+BluetoothDeviceColumnView 1.0 BluetoothDeviceColumnView.qml
 typeinfo plugins.qmltypes

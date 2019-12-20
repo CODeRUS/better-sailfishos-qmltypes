@@ -1,6 +1,7 @@
 /****************************************************************************************
 **
 ** Copyright (C) 2013 Jolla Ltd.
+** Copyright (c) 2019 Open Mobile Platform LLC.
 ** Contact: Joona Petrell <joona.petrell@jollamobile.com>
 ** All rights reserved.
 **
@@ -451,7 +452,6 @@ PageStackBase {
         value: _upFlickDifference > 0
     }
 
-
     function updatePeekContainer() {
         var peekContainer
         var push = true
@@ -526,6 +526,7 @@ PageStackBase {
     }
 
     property Item _incompleteSnapbackAnimationTarget
+    property alias _snapBackAnimation: snapBackAnimation
 
     onPressed: {
         if (!busy && _currentContainer && _currentContainer.page) {
@@ -591,12 +592,12 @@ PageStackBase {
     Rectangle {
         id: flash
         anchors.fill: parent
-        color: Theme.primaryColor
+        color: root.palette.primaryColor
         opacity: 0
         visible: opacity > 0
 
         function flashPage() {
-            opacity = 0.3
+            opacity = Theme.opacityLow
             opacity = 0.0
         }
 
@@ -975,8 +976,8 @@ PageStackBase {
                     return 0
                 }
             }
-            width: parent ? parent.width : 0
-            height: parent ? parent.height : 0
+            width: parent ? parent.width : Screen.width
+            height: parent ? parent.height : Screen.height
 
             Behavior on x {
                 enabled: useAnimator && (_currentOrientation == Orientation.Portrait || _currentOrientation == Orientation.PortraitInverted)

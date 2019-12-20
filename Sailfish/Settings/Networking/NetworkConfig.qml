@@ -9,9 +9,14 @@ QtObject {
     property bool passphraseAvailable: true
     property string ssid
     property int securityType: NetworkService.SecurityPSK
-    property int eapType: NetworkService.EapPEAP
+    property int eapMethod: NetworkService.EapPEAP
+    property int peapVersion: -1
     property string identity
     property string passphrase
+    property string phase2: 'MSCHAPV2'
+    property string caCert
+    property string caCertFile
+    property string domainSuffixMatch
     property bool eapMethodAvailable: true
     property bool autoConnect: true
     property bool hidden: true
@@ -48,11 +53,15 @@ QtObject {
         }
     }
 
-    function eapTypeToString(type) {
+    function eapTypeToString(type, peapVersion) {
         switch (type) {
         case NetworkService.EapNone:
             return "none"
         case NetworkService.EapPEAP:
+            if (peapVersion === 0)
+                return "peapv0"
+            if (peapVersion === 1)
+                return "peapv1"
             return "peap"
         case NetworkService.EapTTLS:
             return "ttls"
@@ -100,7 +109,15 @@ QtObject {
         }
 
         if (securityType === NetworkService.SecurityIEEE802) {
-            settings.eapType = eapTypeToString(eapType)
+            settings.EAP = eapTypeToString(eapMethod, peapVersion)
+            if (phase2)
+                settings.Phase2 = phase2
+            if (caCert)
+                settings.CACert = caCert
+            if (caCertFile)
+                settings.CACertFile = caCertFile
+            if (domainSuffixMatch)
+                settings.DomainSuffixMatch = domainSuffixMatch
         }
         if (nameserversConfig.length > 0) {
             settings.Nameservers = nameserversConfig.join(";")

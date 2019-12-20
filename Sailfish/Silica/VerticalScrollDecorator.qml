@@ -34,10 +34,11 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 import "private/Util.js" as Util
 import "private"
 
-Rectangle {
+Private.SilicaRectangle {
     id: verticalScrollDecorator
 
     property Flickable flickable
@@ -59,7 +60,7 @@ Rectangle {
     width: Math.round(Theme.paddingSmall/2)
     height: _sizeRatio * flickable.height
     anchors.right: parent ? parent.right : undefined
-    color: Theme.primaryColor
+    color: palette.primaryColor
     opacity: (timer.moving && _inBounds) || timer.running ? 1.0 : 0.0
     visible: flickable.contentHeight > flickable.height
     Behavior on opacity { FadeAnimation { duration: 400 } }

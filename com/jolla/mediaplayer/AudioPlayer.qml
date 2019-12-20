@@ -13,11 +13,17 @@ Container {
     property bool repeatOne
     property bool rewinding
     property bool forwarding
+    property bool playerVisible
 
     property bool _resume
     property int _seekOffset
     property bool _seekRepeat
     property var _metadata: ({})
+
+    property ProxyMprisPlayer mprisPlayerOverride
+    property ProxyMprisPlayer _mprisPlayer: mprisPlayerOverride != null
+                                                ? mprisPlayerOverride
+                                                : mprisPlayerDefault
 
     readonly property alias currentItem: audio.currentItem
 
@@ -37,7 +43,7 @@ Container {
 
     function setPosition(position) {
         audio.position = position
-        mprisPlayer.emitSeeked()
+        mprisPlayerDefault.emitSeeked()
     }
 
     function setSeekRepeat(repeat) {
@@ -49,7 +55,7 @@ Container {
         if (position > duration) {
             _seekOffset = duration - audio.position
         }
-        mprisPlayer.emitSeeked()
+        mprisPlayerDefault.emitSeeked()
     }
 
     function seekBackward(time) {
@@ -57,7 +63,7 @@ Container {
         if (position < 0) {
             _seekOffset = -audio.position
         }
-        mprisPlayer.emitSeeked()
+        mprisPlayerDefault.emitSeeked()
     }
 
     function playIndex(index) {
@@ -387,34 +393,25 @@ Container {
 
     }
 
-    MprisPlayer {
-        id: mprisPlayer
+    ProxyMprisPlayer {
+        id: mprisPlayerDefault
 
-        property alias localMetadata: player.metadata
+        property var localMetadata: playerVisible ? player.metadata : null
 
         function emitSeeked() {
-            seeked(audio.position * 1000)
+            mprisPlayer.seeked(audio.position * 1000)
         }
-
-        serviceName: "jolla-mediaplayer"
-
-        // Mpris2 Root Interface
-        identity: qsTrId("mediaplayer-ap-name")
-        // Hard coded. FIXME: JB#22001.
-        desktopEntry: "jolla-mediaplayer"
-        supportedUriSchemes: ["file", "http", "https"]
-        supportedMimeTypes: ["audio/x-wav", "audio/mp4", "audio/mpeg", "audio/x-vorbis+ogg"]
 
         // Mpris2 Player Interface
         canControl: true
 
         canGoNext: {
-            if (!active) return false
+            if (!active || !playerVisible) return false
             if ((audio.model.currentIndex + 1 >= audio.model.count) && (loopStatus != Mpris.Playlist)) return false
             return true
         }
         canGoPrevious: {
-            if (!active) return false
+            if (!active || !playerVisible) return false
 
             // Always possible to go to the beginning of the song
             // This is NOT how Mpris should behave but ... oh, well ...
@@ -442,32 +439,32 @@ Container {
         shuffle: player.shuffle
         volume: 1
 
-        onPauseRequested: player.pause()
-        onPlayRequested: player._play()
-        onPlayPauseRequested: player.playPause()
-        onStopRequested: audio.stop()
+        function onPauseRequested() { player.pause() }
+        function onPlayRequested() { player._play() }
+        function onPlayPauseRequested() { player.playPause() }
+        function onStopRequested () { audio.stop() }
 
         // This will start playback in any case. Mpris says to keep
         // paused/stopped if we were before but I suppose this is just
         // our general behavior decision here.
-        onNextRequested: audio.playNext()
-        onPreviousRequested: audio.playPrevious()
+        function onNextRequested() { audio.playNext() }
+        function onPreviousRequested() { audio.playPrevious() }
 
-        onSeekRequested: {
+        function onSeekRequested(offset) {
             var position = audio.position + (offset / 1000)
             player.setPosition(position < 0 ? 0 : position)
         }
-        onSetPositionRequested: player.setPosition(position / 1000)
-        onOpenUriRequested: playUrl(url)
+        function onSetPositionRequested(tradId, position) { player.setPosition(position / 1000) }
+        function onOpenUriRequested(url) { playUrl(url) }
 
-        onLoopStatusRequested: {
+        function onLoopStatusRequested(loopStatus) {
             if (loopStatus == Mpris.None) {
                 player.repeat = false
             } else if (loopStatus == Mpris.Playlist) {
                 player.repeat = true
             }
         }
-        onShuffleRequested: player.shuffle = shuffle
+        function onShuffleRequested(shuffle) { player.shuffle = shuffle }
 
         onLocalMetadataChanged: {
             var metadata = {}
@@ -486,7 +483,48 @@ Container {
                 metadata[Mpris.metadataToString(Mpris.TrackNumber)] = localMetadata['track'] // Int
             }
 
-            mprisPlayer.metadata = metadata
+            mprisPlayerDefault.metadata = metadata
         }
+    }
+
+    MprisPlayer {
+        id: mprisPlayer
+
+        serviceName: "jolla-mediaplayer"
+
+        // Mpris2 Root Interface
+        identity: qsTrId("mediaplayer-ap-name")
+        desktopEntry: "jolla-mediaplayer"
+        supportedUriSchemes: ["file", "http", "https"]
+        supportedMimeTypes: ["audio/x-wav", "audio/mp4", "audio/mpeg", "audio/x-vorbis+ogg"]
+
+        // Mpris2 Player Interface
+        canControl: _mprisPlayer.canControl
+        canGoNext: _mprisPlayer.canGoNext
+        canGoPrevious: _mprisPlayer.canGoPrevious
+        canPause: _mprisPlayer.canPause
+        canPlay: _mprisPlayer.canPlay
+        canSeek: _mprisPlayer.canSeek
+        loopStatus: _mprisPlayer.loopStatus
+        maximumRate: _mprisPlayer.maximumRate
+        metadata: _mprisPlayer.metadata
+        minimumRate: _mprisPlayer.minimumRate
+        playbackStatus: _mprisPlayer.playbackStatus
+        position: _mprisPlayer.position
+        rate: _mprisPlayer.rate
+        shuffle: _mprisPlayer.shuffle
+        volume: _mprisPlayer.volume
+
+        onPauseRequested: _mprisPlayer.onPauseRequested()
+        onPlayRequested: _mprisPlayer.onPlayRequested()
+        onPlayPauseRequested: _mprisPlayer.onPlayPauseRequested()
+        onStopRequested: _mprisPlayer.onStopRequested()
+        onNextRequested: _mprisPlayer.onNextRequested()
+        onPreviousRequested: _mprisPlayer.onPreviousRequested()
+        onSeekRequested: _mprisPlayer.onSeekRequested()
+        onSetPositionRequested: _mprisPlayer.onSetPositionRequested(trackId, position)
+        onOpenUriRequested: _mprisPlayer.onOpenUriRequested(url)
+        onLoopStatusRequested: _mprisPlayer.onLoopStatusRequested(loopStatus)
+        onShuffleRequested: _mprisPlayer.onShuffleRequested(shuffle)
     }
 }

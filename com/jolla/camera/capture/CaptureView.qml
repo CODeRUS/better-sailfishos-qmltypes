@@ -7,7 +7,7 @@ import org.nemomobile.policy 1.0
 import org.nemomobile.ngf 1.0
 import org.nemomobile.dbus 2.0
 import org.nemomobile.notifications 1.0
-import QtSystemInfo 5.0
+import org.nemomobile.systemsettings 1.0
 
 import "../settings"
 
@@ -49,7 +49,12 @@ FocusScope {
     property bool _captureOnFocus
     property real _captureCountdown
 
-    readonly property real viewfinderOffset: Math.min(0, isPortrait ? (focusArea.width - height)/2 : (focusArea.width - width)/2)
+    property bool reallyWideScreen: (Screen.height / Screen.width) >= 2.0
+    // wide screen can move 4:3 viewfinder a little lower and avoid overlap with top&bottom buttons
+    readonly property real viewfinderOffset: Math.min(0, isPortrait ? (focusArea.width - height)/2
+                                                                    : (focusArea.width - width)/2)
+                                             + ((reallyWideScreen && (focusArea.width/focusArea.height <= 1.4))
+                                                ? Theme.itemSizeLarge : 0)
 
     readonly property bool isPortrait: orientation == Orientation.Portrait
                 || orientation == Orientation.PortraitInverted
@@ -162,9 +167,10 @@ FocusScope {
         }
 
         category: "x-nemo.general.warning"
-        //: Camera audio won't be recorded, microphone disabled by Sailfish Device Manager (could be shorter translation).
-        //% "Camera audio won't be recorded, microphone disabled by Sailfish Device Manager"
+        //: %1 is an operating system name without the OS suffix
+        //% "Camera audio won't be recorded, microphone disabled by %1 Device Manager"
         previewBody: qsTrId("jolla-camera-la-microphone_disallowed_by_policy")
+            .arg(aboutSettings.baseOperatingSystemName)
     }
 
     onEffectiveIsoChanged: {
@@ -361,9 +367,6 @@ FocusScope {
             captureBusy = true
             captureOverlay.writeMetaData()
 
-            shutterEvent.play()
-            captureAnimation.start()
-
             camera.imageCapture.captureToLocation(Settings.photoCapturePath('jpg'))
 
             if (focusTimer.running) {
@@ -403,6 +406,11 @@ FocusScope {
             } else {
                 startFailedTimer.stop()
             }
+
+            if (camera.cameraStatus !== Camera.ActiveStatus) {
+                _captureQueued = false
+                captureBusy = false
+            }
         }
 
         imageCapture {
@@ -421,6 +429,10 @@ FocusScope {
                                 0,
                                 camera.imageCapture.resolution)
                 }
+            }
+            onImageExposed: {
+                shutterEvent.play()
+                captureAnimation.start()
             }
             onCaptureFailed: {
                 camera.unlockAutoFocus()
@@ -475,6 +487,8 @@ FocusScope {
 
         metaData {
             orientation: captureView.captureOrientation
+            cameraModel: deviceInfo.model
+            cameraManufacturer: deviceInfo.manufacturer
         }
 
         onDeviceIdChanged: captureView.reload()
@@ -490,10 +504,7 @@ FocusScope {
     }
 
     DeviceInfo {
-        Component.onCompleted: {
-            camera.metaData.cameraModel = model()
-            camera.metaData.cameraManufacturer = manufacturer()
-        }
+        id: deviceInfo
     }
 
     CameraExtensions {
@@ -504,12 +515,6 @@ FocusScope {
         target: captureView.viewfinder
         property: "source"
         value: camera
-    }
-
-    Binding {
-        target: captureView.viewfinder
-        property: "mirror"
-        value: captureView._mirrorViewfinder
     }
 
     SequentialAnimation {
@@ -805,5 +810,9 @@ FocusScope {
                 if (isOn) flashlightDbus.call("toggleFlashlight")
             }
         }
+    }
+
+    AboutSettings {
+        id: aboutSettings
     }
 }

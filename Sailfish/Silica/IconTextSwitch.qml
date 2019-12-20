@@ -48,6 +48,6 @@ TextSwitch {
         anchors.rightMargin: root.rightMargin
         y: (Theme.itemSizeSmall - height)/2
         highlighted: root.highlighted
-        opacity: parent.enabled ? 1.0 : 0.4
+        opacity: parent.enabled ? 1.0 : Theme.opacityLow
     }
 }

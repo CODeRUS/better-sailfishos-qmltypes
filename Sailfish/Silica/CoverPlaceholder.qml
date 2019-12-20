@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013-2019 Jolla Ltd.
 ** Contact: Martin Jones <martin.jones@jollamobile.com>
 ** All rights reserved.
 ** 
@@ -34,31 +34,60 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import "private/Util.js" as Util
 
-Item {
+SilicaItem {
+    id: placeholder
+
     property alias icon: image
     property alias text: label.text
     property alias textColor: label.color
+    property bool forceFit: (image.source + "").indexOf("image://theme/icon-launcher") > 0
+
+    property Cover _cover
+    property real bottomMargin
+
+    Component.onCompleted: {
+        var cover = Util.findParentWithProperty(placeholder, "coverActionArea")
+        if (cover) {
+            bottomMargin = Qt.binding(function () { return cover.coverActionArea.height })
+        }
+    }
 
     anchors.fill: parent
 
-    Image {
-        id: image
-        y: Theme.paddingLarge
-        anchors.horizontalCenter: parent.horizontalCenter
-        opacity: 0.4
-    }
+    Column {
+        width: parent.width
+        spacing: Theme.paddingLarge
+        anchors {
+            verticalCenter: parent.verticalCenter
+            verticalCenterOffset: -Theme.paddingLarge
+        }
 
-    Label {
-        id: label
-        anchors.centerIn: parent
-        width: parent.width - (Screen.sizeCategory > Screen.Medium
-                               ? 2*Theme.paddingMedium : 2*Theme.paddingLarge)
-        height: width
-        color: Theme.secondaryColor
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        wrapMode: Text.Wrap
-        fontSizeMode: Text.Fit
+        Image {
+            id: image
+            anchors.horizontalCenter: parent.horizontalCenter
+            states: State {
+                when: placeholder.forceFit
+                PropertyChanges {
+                    target: image
+                    width: parent.width/2
+                    fillMode: Image.PreserveAspectFit
+                }
+            }
+        }
+
+        Label {
+            id: label
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width - (Screen.sizeCategory > Screen.Medium
+                                   ? 2*Theme.paddingMedium : 2*Theme.paddingLarge)
+            height: Math.min(implicitHeight, placeholder.height - 2*Theme.paddingLarge - image.height - parent.spacing - placeholder.bottomMargin)
+            color: placeholder.palette.secondaryColor
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.Wrap
+            font.pixelSize: Theme.fontSizeLarge
+            fontSizeMode: Text.VerticalFit
+        }
     }
 }

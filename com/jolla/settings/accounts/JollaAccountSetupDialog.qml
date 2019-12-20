@@ -35,7 +35,7 @@ Dialog {
     property string _nextPageText: qsTrId("settings_accounts-he-next_page")
 
     // SUW loads on boot, so if it has not finished, then it should be running
-    property bool startupWizardRunning: startupWizardDoneWatcher.fileName !== "" || startupWizardSf2TutorialDoneWatcher.fileName !== ""
+    property bool startupWizardRunning: startupWizardDoneWatcher.fileName !== ""
 
     canAccept: userCredentials.canValidateCredentials
                && ((root.state == "createNewAccount" && userCredentials.usernameValid) || root.state == "signIn")
@@ -157,17 +157,6 @@ Dialog {
         id: startupWizardDoneWatcher
         Component.onCompleted: {
             var markerFile = StandardPaths.home + "/.jolla-startupwizard-usersession-done"
-            if (!testFileExists(markerFile)) {
-                fileName = markerFile
-            }
-        }
-        onExistsChanged: if (exists) fileName = ""
-    }
-
-    FileWatcher {
-        id: startupWizardSf2TutorialDoneWatcher
-        Component.onCompleted: {
-            var markerFile = StandardPaths.home + "/.jolla-startupwizard-sfos2-tutorial"
             if (!testFileExists(markerFile)) {
                 fileName = markerFile
             }

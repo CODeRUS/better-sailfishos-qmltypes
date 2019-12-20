@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Telephony 1.0
@@ -29,24 +36,28 @@ Page {
         }
         onSimPermanentlyLocked: {
             clear()
-            pageStack.animatorReplace(pinLockedNoticeComponent)
+            pageStack.animatorPush(pinLockedNoticeComponent)
         }
     }
 
     Component {
         id: pinQuerySkippedComponent
-        SimPinQuerySkippedNotice {
-            onContinueClicked: {
-                root.queryDone()
+        Page {
+            SimPinQuerySkippedNotice {
+                onContinueClicked: {
+                    root.queryDone()
+                }
             }
         }
     }
 
     Component {
         id: pinLockedNoticeComponent
-        SimLockedNotice {
-            onContinueClicked: {
-                root.queryDone()
+        Page {
+            SimLockedNotice {
+                onContinueClicked: {
+                    root.queryDone()
+                }
             }
         }
     }

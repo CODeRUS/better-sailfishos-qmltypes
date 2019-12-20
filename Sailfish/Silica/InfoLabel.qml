@@ -44,5 +44,5 @@ Label {
     }
     x: Theme.horizontalPageMargin
     width: parent.width - 2*x
-    color: Theme.secondaryHighlightColor
+    color: palette.secondaryHighlightColor
 }

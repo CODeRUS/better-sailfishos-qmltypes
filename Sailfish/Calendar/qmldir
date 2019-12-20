@@ -1,4 +1,5 @@
 module Sailfish.Calendar
+plugin sailfishcalendarplugin
 CalendarColorBar 1.0 CalendarColorBar.qml
 CalendarWidget 1.0 CalendarWidget.qml
 CalendarEventView 1.0 CalendarEventView.qml

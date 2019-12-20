@@ -1,4 +1,5 @@
 module Sailfish.WebView.Popups
+plugin sailfishwebviewpopupsplugin
 singleton LocationSettings 1.0 LocationSettings.qml
 UserPrompt 1.0 UserPrompt.qml
 AlertDialog 1.0 AlertDialog.qml

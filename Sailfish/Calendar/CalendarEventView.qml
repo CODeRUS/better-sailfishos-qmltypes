@@ -15,31 +15,7 @@ Column {
     property bool showSelector: !showHeader // by default, show calendar selector if colored header is not visible
 
     function setAttendees(attendeeList) {
-        var newOrganizer = ""
-        var newMandatory = ""
-        var newOptional = ""
-
-        for (var i = 0; i < attendeeList.length; ++i)  {
-            var attendee = attendeeList[i]
-
-            if (attendee.isOrganizer) {
-                newOrganizer = attendee.name
-            } else if (attendee.participationRole == Person.RequiredParticipant) {
-                if (newMandatory !== "") {
-                    newMandatory = newMandatory + ", "
-                }
-                newMandatory = newMandatory + attendee.name
-            } else if (attendee.participationRole == Person.OptionalParticipant) {
-                if (newOptional !== "") {
-                    newOptional = newOptional + ", "
-                }
-                newOptional = newOptional + attendee.name
-            }
-        }
-
-        attendees.organizer = newOrganizer
-        attendees.mandatoryAttendees = newMandatory
-        attendees.optionalAttendees = newOptional
+        attendeeView.model = attendeeList
     }
 
     width: parent.width
@@ -263,75 +239,84 @@ Column {
             }
         }
 
-        Item {
+        Column {
             id: attendees
 
-            property string organizer
-            property string mandatoryAttendees
-            property string optionalAttendees
-
-            visible: organizer.length > 0 || mandatoryAttendees.length > 0 || optionalAttendees.length > 0
-            width: parent.width - 2*Theme.horizontalPageMargin
-            height: Math.max(attendeeIcon.height, attendeeInfo.height)
+            width: parent.width - 2*x
             x: Theme.horizontalPageMargin
+            spacing: Theme.paddingMedium
+            visible: attendeeView.count > 0
 
-            Image {
-                id: attendeeIcon
-                source: "image://theme/icon-m-people"
+            Row {
+                spacing: Theme.paddingMedium
+                Image {
+                    id: attendeeIcon
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "image://theme/icon-m-people"
+                }
+                Label {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: attendees.width - attendeeIcon.width - spacing
+                    //% "%n people"
+                    text: qsTrId("sailfish_calendar-la-people_count", attendeeView.count)
+                }
             }
 
-            Column {
-                id: attendeeInfo
+            ColumnView {
+                id: attendeeView
 
-                width: parent.width - attendeeIcon.width
-                x: attendeeIcon.width
-                spacing: Theme.paddingSmall
+                itemHeight: Theme.itemSizeSmall
+                delegate: Item {
+                    width: attendees.width
+                    height: Theme.itemSizeSmall
+                    Row {
+                        spacing: Theme.paddingMedium
+                        anchors.verticalCenter: parent.verticalCenter
+                        Label {
+                            id: nameLabel
 
-                Label {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    visible: attendees.organizer != ""
-                    color: Theme.highlightColor
-                    font.pixelSize: Theme.fontSizeSmall
-                    wrapMode: Text.WordWrap
-                    textFormat: Text.StyledText
-                    //% "Organizer:"
-                    text: "<font size='4'>" + qsTrId("sailfish_calendar-la-event_organizer") + "</font> "
-                          + attendees.organizer
+                            text: modelData.name.length > 0 ? modelData.name : modelData.email
+                            width: Math.min(implicitWidth,
+                                            attendeeView.width - (statusIcon.source.length > 0
+                                                                  ? statusIcon.width + Theme.paddingMedium : 0)
+                                            - (extraText.text.length > 0 ? (extraText.width + parent.spacing) : 0))
+                            truncationMode: TruncationMode.Fade
+                        }
+                        Label {
+                            id: extraText
+
+                            color: Theme.secondaryColor
+                            font.pixelSize: Theme.fontSizeSmall
+                            anchors.baseline: nameLabel.baseline
+                            text: modelData.isOrganizer ? //% "organizer"
+                                                          qsTrId("sailfish_calendar-la-event_organizer")
+                                                        : modelData.participationRole == Person.OptionalParticipant
+                                                          ? //% "optional"
+                                                            qsTrId("sailfish-calendar-la-event_optional_attendee")
+                                                          : ""
+                        }
+                    }
+                    HighlightImage {
+                        id: statusIcon
+
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        highlighted: true
+                        source: modelData.participationStatus == Person.AcceptedParticipation
+                                ? "image://theme/icon-s-accept"
+                                : modelData.participationStatus == Person.DeclinedParticipation
+                                  ? "image://theme/icon-s-decline"
+                                  : modelData.participationStatus == Person.TentativeParticipation
+                                    ? "image://theme/icon-s-maybe"
+                                    : ""
+                    }
                 }
-
-                Label {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    visible: attendees.mandatoryAttendees != ""
-                    color: Theme.highlightColor
-                    font.pixelSize: Theme.fontSizeSmall
-                    wrapMode: Text.WordWrap
-                    textFormat: Text.StyledText
-                    //% "Mandatory:"
-                    text: "<font size='4'>" + qsTrId("sailfish_calendar-la-event_mandatory_attendees") + "</font> "
-                          + attendees.mandatoryAttendees
-                }
-
-                Label {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    visible: attendees.optionalAttendees != ""
-                    color: Theme.highlightColor
-                    font.pixelSize: Theme.fontSizeSmall
-                    wrapMode: Text.WordWrap
-                    textFormat: Text.StyledText
-                    //% "Optional:"
-                    text: "<font size='4'>" + qsTrId("sailfish-calendar-la-event_optional_attendees") +"</font> "
-                          + attendees.optionalAttendees
-                }
-
             }
         }
 
         SectionHeader {
             visible: descriptionText.visible && descriptionText.text != ""
-            //% "Description:"
+            //% "Description"
             text: qsTrId("sailfish_calendar-he-event_description")
         }
 
@@ -340,7 +325,7 @@ Column {
 
             width: parent.width - 2*Theme.horizontalPageMargin
             x: Theme.horizontalPageMargin
-            opacity: 0.7
+            color: Theme.secondaryColor
             font.pixelSize: Theme.fontSizeSmall
             wrapMode: Text.WordWrap
             plainText: root.event ? root.event.description : ""

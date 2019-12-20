@@ -9,16 +9,20 @@ import QtQuick 2.0
 import QtQuick.Window 2.1 as QtQuick
 import Sailfish.Silica 1.0
 import Sailfish.Lipstick 1.0
+import org.nemomobile.lipstick 0.1
 import org.nemomobile.configuration 1.0
 
 SystemDialogWindow {
     id: dialog
 
+    property alias layoutItem: layout
     property alias contentHeight: layout.contentHeight
-    property alias bottomPadding: layout.bottomPadding
+
     property alias allowedOrientations: window.allowedOrientations
     readonly property alias orientation: window.orientation
     readonly property alias screenHeight: window._screenHeight
+    property alias backgroundVisible: window._backgroundVisible
+    property alias backgroundRect: window._backgroundRect
     property bool autoDismiss: true
 
     property bool _closing
@@ -50,10 +54,12 @@ SystemDialogWindow {
         }
     }
 
+    useDialogBackground: true
+
     SystemDialogApplicationWindow {
         id: window
 
-        _backgroundVisible: true
+        _backgroundVisible: false
         cover: null
         allowedOrientations: lipstickSettings.dialog_orientation || QtQuick.Screen.primaryOrientation
         focus: true

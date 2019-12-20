@@ -42,7 +42,7 @@ Item {
         height: width
         fillMode: Image.PreserveAspectFit
         smooth: true
-        opacity: busy ? 0.5 : 1
+        opacity: busy ? Theme.opacityHigh : 1
         sourceSize.width: width
         source: {
             if (_source.indexOf("http") === 0) {

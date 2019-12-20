@@ -1,5 +1,7 @@
 module com.jolla.gallery.onedrive
+plugin jollagalleryonedriveplugin
 OneDriveGalleryIcon 1.0 OneDriveGalleryIcon.qml
 OneDriveUsersPage 1.0 OneDriveUsersPage.qml
 OneDriveAlbumsPage 1.0 OneDriveAlbumsPage.qml
 OneDriveFullscreenPhotoPage 1.0 OneDriveFullscreenPhotoPage.qml
+typeinfo plugins.qmltypes

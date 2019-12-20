@@ -26,13 +26,7 @@ SimSelectorBase {
         id: simIndicators
 
         width: parent.width
-        height: {
-            var tallest = 0
-            for (var i = 0; i < repeater.count; ++i) {
-                tallest = Math.max(tallest, repeater.itemAt(i).implicitHeight)
-            }
-            return tallest
-        }
+        height: 0
 
         Repeater {
             id: repeater
@@ -42,10 +36,12 @@ SimSelectorBase {
             delegate: BackgroundItem {
                 id: backgroundItem
 
-                readonly property bool canHighlight: (!simIndicator.selected || Telephony.voiceSimUsageMode === Telephony.AlwaysAskSim)
+                readonly property bool canHighlight: simInserted && (!simIndicator.selected || Telephony.voiceSimUsageMode === Telephony.AlwaysAskSim)
+                readonly property bool simInserted: errorState.errorState !== "noSimInserted"
 
                 width: parent.width / 2
                 implicitHeight: simIndicator.height + Theme.paddingMedium * 2
+                onImplicitHeightChanged: simIndicators.height = Math.max(simIndicators.height, implicitHeight)
                 height: simIndicators.height
 
                 // Disabling the whole component passes the event to the component under this.
@@ -54,8 +50,8 @@ SimSelectorBase {
                                                : "transparent"
 
                 // This assumes we have a DSDS modem, which is the only type supported at the moment.
-                enabled: !restrictToActive || modemManager.activeVoiceCallModems.length === 0 || modemManager.activeVoiceCallModems[0] === modem
-                opacity: !modemEnabled || errorState.errorState == "noSimInserted" || !enabled ? 0.4 : 1.0
+                enabled: simInserted && (!restrictToActive || modemManager.activeVoiceCallModems.length === 0 || modemManager.activeVoiceCallModems[0] === modem)
+                opacity: (!modemEnabled || !enabled) ? Theme.opacityLow : 1.0
                 Behavior on opacity {
                     FadeAnimation {}
                 }

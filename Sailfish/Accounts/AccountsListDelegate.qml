@@ -40,9 +40,9 @@ ListItem {
 
             MenuItem {
                 visible: !model.accountReadOnly
-                //: Removes a user account
-                //% "Remove"
-                text: qsTrId("components_accounts-me-remove_account")
+                //: Deletes a user account
+                //% "Delete"
+                text: qsTrId("components_accounts-me-delete_account")
                 onClicked: removeAccount()
             }
 
@@ -62,11 +62,7 @@ ListItem {
     }
 
     function removeAccount() {
-        //: Deleting this account in 5 seconds
-        //% "Removing account"
-        remorseAction(qsTrId("component_accounts-la-remove_account"),
-                      function() { delegateItem.accountRemoveRequested(model.accountId) })
-
+        remorseDelete(function() { delegateItem.accountRemoveRequested(model.accountId) })
     }
 
     ListView.onRemove: animateRemoval()

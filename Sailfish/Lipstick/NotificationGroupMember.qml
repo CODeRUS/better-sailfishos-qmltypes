@@ -48,7 +48,7 @@ BackgroundItem {
     highlighted: down && !Lipstick.compositor.eventsLayer.housekeeping
 
     // Fade out item in housekeeping mode, if not removable
-    property real _baseOpacity: Lipstick.compositor.eventsLayer.housekeeping && !userRemovable ? 0.4 : 1.0
+    property real _baseOpacity: Lipstick.compositor.eventsLayer.housekeeping && !userRemovable ? Theme.opacityLow : 1.0
     opacity: _baseOpacity * _animatedOpacity
 
     Behavior on _baseOpacity {

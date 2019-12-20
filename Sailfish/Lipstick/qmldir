@@ -1,4 +1,5 @@
 module Sailfish.Lipstick
+plugin sailfishlipstickplugin
 SystemDialog 1.0 SystemDialog.qml
 SystemDialogLayout 1.0 SystemDialogLayout.qml
 SystemDialogTextButton 1.0 SystemDialogTextButton.qml

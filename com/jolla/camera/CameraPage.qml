@@ -3,6 +3,7 @@ import Sailfish.Silica 1.0
 import Sailfish.Media 1.0
 import com.jolla.camera 1.0
 import QtMultimedia 5.4
+import Nemo.KeepAlive 1.2
 import "capture"
 import "gallery"
 
@@ -194,9 +195,9 @@ Page {
 
     DisabledByMdmView {}
 
-    ScreenBlank {
-        suspend: (galleryLoader.item && galleryLoader.item.playing)
-                 || captureView.camera.videoRecorder.recorderState == CameraRecorder.RecordingState
+    DisplayBlanking {
+        preventBlanking: (galleryLoader.item && galleryLoader.item.playing)
+                         || captureView.camera.videoRecorder.recorderState == CameraRecorder.RecordingState
     }
 
 

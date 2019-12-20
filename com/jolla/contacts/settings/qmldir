@@ -1,2 +1,3 @@
 module com.jolla.contacts.settings
+plugin jollacontactssettingsplugin
 typeinfo plugins.qmltypes

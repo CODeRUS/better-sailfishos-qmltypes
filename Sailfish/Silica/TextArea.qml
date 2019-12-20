@@ -84,13 +84,12 @@ TextBase {
         focus: true
         activeFocusOnPress: false
         color: textArea.color
-        selectionColor: Theme.rgba(Theme.primaryColor, 0.3)
-        selectedTextColor: Theme.highlightColor
+        selectionColor: Theme.rgba(textArea.palette.primaryColor, 0.3)
+        selectedTextColor: textArea.palette.highlightColor
         font: textArea.font
-        cursorDelegate: Rectangle {
+        cursorDelegate: Cursor {
             color: textArea.cursorColor
-            visible: parent.activeFocus && parent.selectedText == ""
-            width: 2
+            preedit: preeditText
         }
         wrapMode: TextEdit.Wrap
 

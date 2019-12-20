@@ -1,32 +1,28 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0
+import Sailfish.Contacts 1.0 as SailfishContacts
 import org.nemomobile.contacts 1.0
 import org.nemomobile.dbus 2.0
 import org.freedesktop.contextkit 1.0
-import "common/common.js" as CommonJs
 import "contactcard/contactcardmodelfactory.js" as ModelFactory
 import "contactcard"
 
 SilicaFlickable {
     id: root
 
-    property Person contact
+    property var contact
     property string activeDetail
     property bool readOnly
     property bool hidePhoneActions: cellular1Status.disabled && cellular2Status.disabled
     property bool disablePhoneActions: !cellular1Status.registered && !cellular2Status.registered
 
-    signal contactModified
-
-    property Item _activeDetailItem
     property QtObject _messagesInterface
-    property bool _handlingClick
-    property bool _repositionOnResize
+    property date _today: new Date()
 
     function refreshDetails() {
-        CommonJs.init(Person)
-        ModelFactory.init(CommonJs)
-
+        SailfishContacts.ContactsUtil.init()
+        ModelFactory.init(SailfishContacts.ContactsUtil)
         ModelFactory.getContactCardDetailsModel(details.model, contact)
     }
 
@@ -35,11 +31,6 @@ SilicaFlickable {
             contact.completeChanged.disconnect(_asyncRefresh)
             refreshDetails()
         }
-    }
-
-    function _updateAvatarUrl(avatarUrl) {
-        contact.avatarPath = avatarUrl
-        contactModified()
     }
 
     function startPhoneCall(number, modemPath) {
@@ -67,49 +58,11 @@ SilicaFlickable {
         return _messagesInterface
     }
 
-    function activate(delegate) {
-        if (_activeDetailItem != delegate) {
-            // Need to suppress onActiveDetailChanged handler. If there are two details with
-            // the same value the wrong one might be activated otherwise.
-            _handlingClick = true
-            _activeDetailItem = delegate
-            details._activationProgress = 0
-            details.activationAnimation.start()
-            _handlingClick = false
-        }
-    }
-
-    Timer {
-        id: repositionTimer
-        interval: 0
-        onTriggered: {
-            // We may need to reposition to make the active item visible
-            var detailY = root.mapFromItem(root._activeDetailItem, 0, 0).y
-            var detailEndY = detailY + Math.min(root._activeDetailItem.height, root.height)
-            if (detailY < 0) {
-                repositionAnimation.to = root.contentY + detailY
-                repositionAnimation.restart()
-            } else if (detailEndY > root.height) {
-                repositionAnimation.to = root.contentY + (detailEndY - root.height)
-                repositionAnimation.restart()
-            }
-        }
-    }
-
-    NumberAnimation {
-        id: repositionAnimation
-        target: root
-        property: "contentY"
-        easing.type: Easing.InOutQuad
-        duration: 200
-    }
-
-    Connections {
-        target: root._repositionOnResize ? root._activeDetailItem : null
-        onHeightChanged: {
-            repositionTimer.restart()
-            root._repositionOnResize = false
-        }
+    function _scrollToFit(item, newItemHeight) {
+        var newContentY = Math.max(item.mapToItem(root.contentItem, 0, newItemHeight).y - root.height,
+                                   root.contentY)
+        repositionAnimation.to = newContentY
+        repositionAnimation.start()
     }
 
     onContactChanged: {
@@ -125,51 +78,57 @@ SilicaFlickable {
     }
 
     Connections {
-        target: contact
+        target: contact || null
         onDataChanged: refreshDetails()
     }
 
-    on_ActiveDetailItemChanged: activeDetail = (_activeDetailItem ? _activeDetailItem.detailValue : '')
-
     width: parent ? parent.width : Screen.width
     height: parent ? parent.height : Screen.height
-    contentHeight: header.height + Theme.paddingSmall + details.height + Theme.paddingLarge
+    contentHeight: details.y + details.height
+
+    Timer {
+        id: repositionTimer
+
+        property var delegate
+
+        interval: 100   // wait briefly for delegate height to be corrected when expanded
+        onTriggered: {
+            root._scrollToFit(delegate, Math.min(Screen.height, delegate.height))
+        }
+    }
+
+    NumberAnimation {
+        id: repositionAnimation
+        target: root
+        property: "contentY"
+        easing.type: Easing.InOutQuad
+        duration: 300
+    }
 
     ContactHeader {
         id: header
 
-        width: parent.width
         contact: root.contact
         readOnly: root.readOnly
 
-        onAvatarFromGallery: {
-            // Life-cycle of avatar picker needs to follow contact card's life-cycle.
-            // Cropping is async operation and might take more than the page pop transition.
-            // AvatarPickerPage destoyes itself once finished.
-            var pickerPageComponent = Qt.createComponent('AvatarPickerPage.qml')
-            if (pickerPageComponent.status == Component.Ready) {
-                var picker = pickerPageComponent.createObject(root);
-                picker.avatarUrlChanged.connect(function(avatarUrl) {
-                    _updateAvatarUrl(avatarUrl)
-                    picker.destroy()
-                })
-                pageStack.animatorPush(picker)
-            } else {
-                console.log('Unable to load avatar picker - error:', pickerPageComponent.errorString())
+        onContactModified: {
+            if (root.contact.id !== 0) {
+                SailfishContacts.ContactModelCache.unfilteredModel().savePerson(root.contact)
             }
         }
-
-        onAvatarFromCamera: {
-            // TODO
+        onEditClicked: {
+            // Ensure we're modifying the canonical instance of this contact
+            var c = root.contact.id !== 0
+                  ? SailfishContacts.ContactModelCache.unfilteredModel().personById(root.contact.id)
+                  : root.contact
+            var ff = { "detailType": "name", "detailIndex": 0 }
+            pageStack.animatorPush("ContactEditorDialog.qml", { "subject": c, "focusField": ff })
         }
-
-        onContactModified: root.contactModified()
     }
 
     ListView {
         id: details
         interactive: false
-        spacing: Math.round(Theme.itemSizeSmall / 2)
 
         width: parent.width
         y: header.height + Theme.paddingLarge
@@ -179,24 +138,11 @@ SilicaFlickable {
         // This list view should not move to accommodate the context menu
         property int __silica_hidden_flickable
 
-        property real _activationProgress: 1
-        property QtObject activationAnimation: NumberAnimation {
-            target: details
-            property: '_activationProgress'
-            to: 1
-            duration: 200
-            easing.type: Easing.InOutQuad
-
-            onRunningChanged: {
-                if (!running) {
-                    repositionTimer.restart()
-                }
-            }
-        }
-
         model: ListModel {}
 
         delegate: Loader {
+            id: detailDelegateLoader
+
             width: parent.width
             sourceComponent: detailsType == "activity" ? activityDelegateComponent : detailDelegateComponent
 
@@ -206,27 +152,15 @@ SilicaFlickable {
                 ContactDetailDelegate {
                     id: detailDelegate
 
-                    active: _activeDetailItem === detailDelegate
                     width: details.width
-
+                    previousDetailType: model.index > 0 ? details.model.get(model.index - 1).detailsType : ""
                     detailType: detailsType
-                    detailTypeValue: detailsLabel
                     detailValue: detailsValue
                     detailData: detailsData
+                    detailMetadata: detailsLabel
+
                     hidePhoneActions: root.hidePhoneActions
                     disablePhoneActions: root.disablePhoneActions
-
-                    activationProgress: details._activationProgress
-
-                    Component.onCompleted: {
-                        if ((activeDetail === "" && index === 0) ||
-                            (activeDetail === detailValue) ||
-                            (Person.minimizePhoneNumber(activeDetail) === Person.minimizePhoneNumber(detailValue))) {
-                            _activeDetailItem = detailDelegate
-                        }
-                    }
-
-                    onContactDetailClicked: root.activate(detailDelegate)
 
                     onCallClicked: {
                         console.log("Call number: " + number + ", connection: " + connection + ", modem: " + modemPath)
@@ -254,9 +188,9 @@ SilicaFlickable {
                                                   addressParts["country"])
                     }
 
-                    onCopyAddressClicked: {
-                        console.log("Copy Address: " + address)
-                        Clipboard.text = address
+                    onCopyToClipboardClicked: {
+                        console.log("Copy to clipboard: " + detailValue)
+                        Clipboard.text = detailValue
                     }
 
                     onWebsiteClicked: {
@@ -282,13 +216,28 @@ SilicaFlickable {
                         calendarInterface.showDate(formatted)
                     }
 
-                    Connections {
-                        target: root
-                        onActiveDetailChanged: {
-                            if (!root._handlingClick && root.activeDetail == detailValue) {
-                                _activeDetailItem = detailDelegate
+                    onEditDetailClicked: {
+                        // Calculate the per-detail-type index of this detail.
+                        var globalIndex = model.index
+                        var detailIndex = globalIndex
+                        for (var i = globalIndex-1; i >= 0; --i) {
+                            var currDet = details.model.get(i)
+                            if (currDet.detailsType !== detailType) {
+                                detailIndex = globalIndex - (i + 1)
+                                break
                             }
                         }
+
+                        // Ensure we're modifying the canonical instance of this contact
+                        var c = root.contact.id !== 0
+                              ? SailfishContacts.ContactModelCache.unfilteredModel().personById(root.contact.id)
+                              : root.contact
+                        var ff = { "detailType": detailType, "detailIndex": detailIndex }
+                        pageStack.animatorPush("ContactEditorDialog.qml", { "subject": c, "focusField": ff })
+                    }
+
+                    onContentResized: {
+                        root._scrollToFit(item, newItemHeight)
                     }
                 }
             }
@@ -296,22 +245,36 @@ SilicaFlickable {
             Component {
                 id: activityDelegateComponent
 
-                ExpandingDelegate {
+                MouseArea {
                     id: activityDelegate
-
-                    active: _activeDetailItem === activityDelegate
                     width: details.width
+                    height: activityHeader.y + activityHeader.height + expandingContainer.height
 
-                    detailTypeValue: detailsLabel
-                    detailValue: detailsValue
+                    SectionHeader {
+                        id: activityHeader
+                        //% "Activity"
+                        text:  qsTrId("components_contacts-la-activity")
+                        font.pixelSize: Theme.fontSizeMedium
+                        y: Theme.paddingMedium
+                        opacity: loader.item && loader.item.activityCount > 0 ? 1 : 0
+                        Behavior on opacity { FadeAnimator {} }
+                    }
 
-                    activationProgress: details._activationProgress
+                    Item {
+                        id: expandingContainer
+                        anchors.top: activityHeader.bottom
+                        width: activityDelegate.width
+                        height: loader.item ? loader.item.height : Theme.itemSizeMedium
 
-                    onContactDetailClicked: root.activate(activityDelegate)
-
-                    onActiveChanged: {
-                        if (active && !loader.sourceComponent) {
-                            loader.sourceComponent = activityListComponent
+                        Loader {
+                            id: loader
+                            sourceComponent: activityListComponent
+                            anchors.fill: parent
+                        }
+                        BusyIndicator {
+                            anchors.centerIn: parent
+                            running: loader.status != Loader.Ready
+                            visible: running
                         }
                     }
 
@@ -319,40 +282,24 @@ SilicaFlickable {
                         id: activityListComponent
 
                         Item {
+                            readonly property int activityCount: activityList.count
+
                             width: parent.width
-                            height: Math.max(activityList.height + Math.max(showMore.height, seeAll.height), placeholder.height)
+                            height: activityList.height + Math.max(showMore.height, seeAll.height)
 
                             ContactActivityList {
                                 id: activityList
 
-                                property bool reduced: true
-                                property int reducedLimit: 3
-
-                                // This list view should not move to accommodate the context menu
-                                property int __silica_hidden_flickable
-
-                                function updateHeight() {
-                                    // Once we have content, the last item is suppressed if it indicates more items exist
-                                    var h = contentHeight - (hasMore && !reduced ? Theme.itemSizeMedium : 0)
-
-                                    // When reduced, items after the first three are not visible
-                                    var maxItems = reduced ? reducedLimit : limit
-                                    if (count > maxItems) {
-                                        h -= ((count - maxItems) * Theme.itemSizeMedium)
-                                    }
-
-                                    height = h
-                                }
-
+                                modelFactory: ModelFactory
                                 contact: root.contact
+                                reduced: true
+                                reducedLimit: 3
                                 limit: 15
-                                interactive: false
-                                clip: true
+                                hidePhoneActions: root.hidePhoneActions
+                                today: root._today
 
-                                // Until the model is resolved, assume we will have 3 items
-                                height: reducedLimit * Theme.itemSizeMedium
-                                onContentHeightChanged: updateHeight()
-                                onReducedChanged: updateHeight()
+                                opacity: count === 0 ? 0 : 1
+                                Behavior on opacity { FadeAnimation {} }
 
                                 onStartPhoneCall: root.startPhoneCall(number, modemPath)
                                 onStartSms: root.startSms(number)
@@ -363,40 +310,23 @@ SilicaFlickable {
                                 id: showMore
 
                                 anchors.top: activityList.bottom
-                                height: visible ? Theme.itemSizeSmall : 0
+                                height: visible ? Theme.itemSizeExtraSmall : 0
                                 visible: activityList.ready && activityList.reduced && activityList.count > activityList.reducedLimit
-
-                                Label {
-                                    id: showMoreLabel
-
-                                    anchors {
-                                        left: parent.left
-                                        leftMargin: activityList.leftMargin
-                                        verticalCenter: parent.verticalCenter
-                                    }
-
-                                    //% "Show more"
-                                    //: Should match the translation for sailfish-components-lipstick-la-show-more
-                                    text: qsTrId("components_contacts-la-show_more")
-                                    font.pixelSize: Theme.fontSizeExtraSmall
-                                    font.italic: true
-                                    color: showMore.down ? Theme.highlightColor : Theme.primaryColor
-                                }
-                                Image {
-                                    anchors {
-                                        left: showMoreLabel.right
-                                        leftMargin: Theme.paddingMedium
-                                        verticalCenter: parent.verticalCenter
-                                    }
-                                    source: "image://theme/icon-lock-more?" + (showMore.down ? Theme.highlightColor : Theme.primaryColor)
-                                    width: Theme.iconSizeMedium * 0.7
-                                    height: width
-                                    sourceSize.width: width
-                                }
+                                opacity: activityList.opacity
 
                                 onClicked: {
                                     activityList.reduced = false
-                                    root._repositionOnResize = true
+                                    repositionTimer.delegate = detailDelegateLoader
+                                    repositionTimer.start()
+                                }
+
+                                ShowMoreButton {
+                                    id: showMoreButton
+
+                                    x: Theme.horizontalPageMargin
+                                    y: showMore.height/2 - height/2
+                                    enabled: false
+                                    highlighted: showMore.highlighted
                                 }
                             }
 
@@ -429,15 +359,16 @@ SilicaFlickable {
                                 }
 
                                 onClicked: {
-                                    pageStack.pushAttached(activityPageComponent, {}, PageStackAction.Immediate)
-                                    pageStack.navigateForward()
+                                    pageStack.animatorPush(activityPageComponent)
                                 }
 
                                 Component {
                                     id: activityPageComponent
 
                                     ContactActivityPage {
+                                        hidePhoneActions: root.hidePhoneActions
                                         contact: root.contact
+                                        modelFactory: ModelFactory
 
                                         onStartPhoneCall: root.startPhoneCall(number, modemPath)
                                         onStartSms: root.startSms(number)
@@ -445,39 +376,8 @@ SilicaFlickable {
                                     }
                                 }
                             }
-
-                            Item {
-                                id: placeholder
-                                height: Theme.itemSizeMedium
-                                width: parent.width
-                                visible: activityList.ready && activityList.count === 0
-
-                                Label {
-                                    anchors.centerIn: parent
-                                    //% "No communications activity"
-                                    text: qsTrId("components_contacts-la-no_activity")
-                                    opacity: 0.6
-                                }
-                            }
                         }
                     }
-
-                    expandingContent: [
-                        Item {
-                            width: activityDelegate.width
-                            height: loader.item ? loader.item.height : Theme.itemSizeMedium
-
-                            Loader {
-                                id: loader
-                                anchors.fill: parent
-                            }
-                            BusyIndicator {
-                                anchors.centerIn: parent
-                                running: loader.status != Loader.Ready
-                                visible: running
-                            }
-                        }
-                    ]
                 }
             }
         }

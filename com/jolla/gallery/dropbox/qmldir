@@ -1,5 +1,7 @@
 module com.jolla.gallery.dropbox
+plugin jollagallerydropboxplugin
 DropboxAlbumsPage 1.0 DropboxAlbumsPage.qml
 DropboxGalleryIcon 1.0 DropboxGalleryIcon.qml
 DropboxFullscreenPhotoPage 1.0 DropboxFullscreenPhotoPage.qml
 DropboxUsersPage 1.0 DropboxUsersPage.qml
+typeinfo plugins.qmltypes

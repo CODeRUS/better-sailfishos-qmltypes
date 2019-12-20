@@ -45,8 +45,8 @@ Column {
         width: parent.width
 
         Button {
-            color: root.responseState === CalendarEvent.ResponseAccept ?
-                       root._selectedColor : root._color
+            color: root.responseState === CalendarEvent.ResponseAccept
+                   ? root._selectedColor : root._color
             enabled: root.enabled
             //: Yes calendar invitation button. Shall be short to fit in 1 row
             //% "Yes"
@@ -61,8 +61,8 @@ Column {
             }
         }
         Button {
-            color: root.responseState === CalendarEvent.ResponseTentative ?
-                       root._selectedColor : root._color
+            color: root.responseState === CalendarEvent.ResponseTentative
+                   ? root._selectedColor : root._color
             enabled: root.enabled
             //: Maybe calendar invitation button. Shall be short to fit in 1 row
             //% "Maybe"
@@ -77,8 +77,8 @@ Column {
             }
         }
         Button {
-            color: root.responseState === CalendarEvent.ResponseDecline ?
-                       root._selectedColor : root._color
+            color: root.responseState === CalendarEvent.ResponseDecline
+                   ? root._selectedColor : root._color
             enabled: root.enabled
             //: "No" calendar invitation button. Shall be short to fit in 1 row
             //% "No"

@@ -4,6 +4,7 @@ import Sailfish.Silica 1.0
 Item {
     property alias name: nameLabel.text
     property alias value: valueLabel.text
+    property alias valueLabel: valueLabel
 
     width: parent.width
     height: flow.height + Theme.paddingSmall*2

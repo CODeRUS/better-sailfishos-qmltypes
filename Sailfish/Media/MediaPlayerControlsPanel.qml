@@ -171,7 +171,8 @@ DockedPanel {
                 Switch {
                     width: row.childWidth
                     anchors.bottom: parent.bottom
-                    icon.source: panel.repeat == MediaPlayerControls.RepeatTrack ? "image://theme/icon-m-repeat-single" : "image://theme/icon-m-repeat"
+                    icon.source: panel.repeat == MediaPlayerControls.RepeatTrack ? "image://theme/icon-m-repeat-single"
+                                                                                 : "image://theme/icon-m-repeat"
                     automaticCheck: false
                     checked: panel.repeat != MediaPlayerControls.NoRepeat
                     onClicked: panel.repeatClicked()

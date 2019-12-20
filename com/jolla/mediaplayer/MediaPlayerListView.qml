@@ -35,6 +35,9 @@ FocusScope {
         }
 
         VerticalScrollDecorator {}
+
+        // close the vkb when the list is scrolled
+        onMovementStarted: listView.focus = true
     }
 
     /* This is a hack to place the header and footer over the */
@@ -47,6 +50,17 @@ FocusScope {
         Column {
             id: headerContainer
             width: scope.width
+
+            property real _prevHeight: height
+
+            // prevent contentY from jumping upwards when the header grows in height
+            onHeightChanged: {
+                var delta = (height - _prevHeight)
+                _prevHeight = height
+                if (delta > 0) {
+                    listView.contentY -= delta
+                }
+            }
         }
 
         Column {

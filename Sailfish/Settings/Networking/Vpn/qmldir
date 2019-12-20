@@ -1,0 +1,14 @@
+module Sailfish.Settings.Networking.Vpn
+ConfigComboBox 1.0 ConfigComboBox.qml
+ConfigPasswordField 1.0 ConfigPasswordField.qml
+ConfigPathField 1.0 ConfigPathField.qml
+ConfigTextField 1.0 ConfigTextField.qml
+PPPD 1.0 PPPD.qml
+VpnAdvancedSettingsPage 1.0 VpnAdvancedSettingsPage.qml
+VpnDetailItem 1.0 VpnDetailItem.qml
+VpnDetailsPage 1.0 VpnDetailsPage.qml
+VpnEditDialog 1.0 VpnEditDialog.qml
+VpnPlatformEditDialog 1.0 VpnPlatformEditDialog.qml
+VpnPlatformDetailsPage 1.0 VpnPlatformDetailsPage.qml
+VpnTypeItem 1.0 VpnTypeItem.qml
+VpnTypes 1.0 VpnTypes.js

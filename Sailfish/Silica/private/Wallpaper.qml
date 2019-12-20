@@ -44,14 +44,10 @@ GlassBackgroundBase {
     property real windowRotation
     property alias asynchronous: wallpaperTextureImage.asynchronous
     property alias status: wallpaperTextureImage.status
-    property int colorScheme: Theme.colorScheme
 
     property bool glassOnly
 
-    readonly property real _backgroundOpacity: colorScheme === Theme.DarkOnLight ? 0.6 : 0.4
-
-    brightenColor: colorScheme === Theme.DarkOnLight ? "white" : "transparent"
-    brightenOpacity: colorScheme === Theme.DarkOnLight ? 0.5 : 0.0
+    color: Theme._wallpaperOverlayColor
 
     visible: wallpaperTextureImage.status === Image.Ready || glassOnly
 
@@ -61,8 +57,9 @@ GlassBackgroundBase {
     patternItem: glassTextureImage
     backgroundItem: wallpaperTextureImage
 
-    backgroundOpacity: wallpaper.glassOnly ? 0.0 : _backgroundOpacity
     blending: !__silica_applicationwindow_instance._dimmingActive
+
+    fillMode: GlassBackgroundBase.PreserveAspectSquare
 
     Image {
         id: glassTextureImage

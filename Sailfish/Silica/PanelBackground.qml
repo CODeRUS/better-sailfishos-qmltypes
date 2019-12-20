@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Item {
+SilicaItem {
     id: root
 
     property int position: Dock.Bottom
@@ -59,8 +59,8 @@ Item {
         anchors.centerIn: parent
 
         gradient: Gradient {
-            GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.15) }
-            GradientStop { position: 1.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.3) }
+            GradientStop { position: 0.0; color: Theme.rgba(root.palette.highlightBackgroundColor, 0.15) }
+            GradientStop { position: 1.0; color: Theme.rgba(root.palette.highlightBackgroundColor, 0.3) }
         }
     }
 }

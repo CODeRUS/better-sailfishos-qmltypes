@@ -1,0 +1,3 @@
+Destroyed Bluetooth system agent
+InitManagerJob Error: Job was deleted before finished!
+Bluetooth manager could not be initialized: "Job was deleted before finished."

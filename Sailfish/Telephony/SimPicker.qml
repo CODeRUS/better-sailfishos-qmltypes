@@ -5,7 +5,7 @@ import Sailfish.Telephony 1.0
 
 // TODO: replace with standard component
 
-Item {
+MouseArea {
     id: simPicker
 
     property int actionType: Telephony.Call
@@ -43,6 +43,7 @@ Item {
         y: Theme.itemSizeSmall
         updateSelectedSim: false
         restrictToActive: actionType === Telephony.Call
+        enabled: simPicker.enabled
 
         onSimSelected: simPicker.simSelected(sim, modemPath)
     }

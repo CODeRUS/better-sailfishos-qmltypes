@@ -12,10 +12,11 @@ Column {
     property bool selectedDevicePaired
     readonly property bool empty: pairedDevices.count == 0 && nearbyDevices.count == 0
     readonly property bool discovering: adapter && adapter.discovering
-    property bool highlightSelectedDevice: true
+    property bool highlightSelectedDevice
     property bool requirePairing
 
     property bool showPairedDevicesHeader
+    property bool showPairedDevices: true
     property var excludedDevices: []    // addresses expected to be in upper case
     property int preferredProfileHint: -1  // darken devices that don't match this filter
 
@@ -24,13 +25,19 @@ Column {
 
     property QtObject _bluetoothManager : BluezQt.Manager
     readonly property bool _showDiscoveryProgress: adapter && adapter.discovering
-    readonly property bool _showPairedDevicesHeader: showPairedDevicesHeader && !_showDiscoveryProgress && pairedDevices.count > 0
+    readonly property bool _showPairedDevicesHeader: showPairedDevices && showPairedDevicesHeader && !_showDiscoveryProgress && pairedDevices.count > 0
     property QtObject _devicePendingPairing
-    property var _connectingDevices: []
     property bool _autoStartDiscoveryTriggered
 
     signal deviceClicked(string address)    
     signal devicePaired(string address)
+
+    onSelectedDeviceChanged: {
+        if (root.selectedDevice === "") {
+            pairedDevices.clearSelectedDevice()
+            nearbyDevices.clearSelectedDevice()
+        }
+    }
 
     function startDiscovery() {
         if (!adapter || adapter.discovering) {
@@ -47,32 +54,20 @@ Column {
     }
 
     function addConnectingDevice(addr) {
-        addr = addr.toUpperCase()
-        for (var i=0; i<_connectingDevices.length; i++) {
-            if (_connectingDevices[i].toUpperCase() == addr) {
-                return
-            }
-        }
-        var devices = _connectingDevices
-        devices.push(addr)
-        _connectingDevices = devices
+        pairedDevices.addConnectingDevice(addr)
+        nearbyDevices.addConnectingDevice(addr)
     }
 
     function removeConnectingDevice(addr) {
-        addr = addr.toUpperCase()
-        var devices = _connectingDevices
-        for (var i=0; i<devices.length; i++) {
-            if (devices[i].toUpperCase() == addr) {
-                devices.splice(i, 1)
-                _connectingDevices = devices
-                return
-            }
-        }
+        pairedDevices.removeConnectingDevice(addr)
+        nearbyDevices.removeConnectingDevice(addr)
     }
 
-    function _matchesProfileHint(profiles, classOfDevice) {
-        return preferredProfileHint < 0
-                || BluetoothProfiles.profileMatchesDeviceProperties(preferredProfileHint, profiles, classOfDevice)
+    function removeDevice(addr) {
+        var device = _bluetoothManager.deviceForAddress(addr)
+        if (device && root.adapter) {
+            root.adapter.removeDevice(device)
+        }
     }
 
     function _deviceClicked(address, paired) {
@@ -133,152 +128,22 @@ Column {
         }
     }
 
-    ColumnView {
+    function _deviceSettings(address) {
+        var device = root._bluetoothManager.deviceForAddress(address)
+        if (device) {
+            pageStack.animatorPush(Qt.resolvedUrl("PairedDeviceSettings.qml"), {"bluetoothDevice": device})
+        }
+    }
+
+    BluetoothDeviceColumnView {
         id: pairedDevices
-
-        width: parent.width
-        itemHeight: Theme.itemSizeSmall
-
-        model: BluezQt.DevicesModel {
-            id: knownDevicesModel
-            filters: BluezQt.DevicesModelPrivate.PairedDevices
-            hiddenAddresses: root.excludedDevices
-        }
-
-        delegate: ListItem {
-            id: pairedDelegate
-
-            property bool showConnectionStatus: model.Connected || isConnecting || minConnectionStatusTimeout.running
-            property bool isConnecting: _connectingDevices.indexOf(model.Address.toUpperCase()) >= 0
-
-            property bool matchesProfileHint: root._matchesProfileHint(model.Uuids, model.Class)
-            property bool useHighlight: highlighted || (highlightSelectedDevice && model.Address === root.selectedDevice)
-
-            function _removePairing() {
-                var device = _bluetoothManager.deviceForAddress(model.Address)
-                if (device && root.adapter) {
-                    root.adapter.removeDevice(device)
-                }
-            }
-
-            width: root.width
-
-            onIsConnectingChanged: {
-                if (isConnecting) {
-                    minConnectionStatusTimeout.start()
-                }
-            }
-
-            Timer {
-                id: minConnectionStatusTimeout
-                interval: 2000
-            }
-
-            menu: Component {
-                ContextMenu {
-                    MenuItem {
-                        //: Show settings for the selected bluetooth device
-                        //% "Device settings"
-                        text: qsTrId("components_bluetooth-me-device_settings")
-
-                        onClicked: {
-                            var device = _bluetoothManager.deviceForAddress(model.Address)
-                            if (device) {
-                                pageStack.animatorPush(Qt.resolvedUrl("PairedDeviceSettings.qml"), {"bluetoothDevice": device})
-                            }
-                        }
-                    }
-
-                    MenuItem {
-                        //: Remove the pairing with the selected bluetooth device
-                        //% "Remove pairing"
-                        text: qsTrId("components_bluetooth-me-pairing_remove")
-
-                        onClicked: {
-                            pairedDelegate._removePairing()
-                        }
-                    }
-                }
-            }
-
-            onClicked: {
-                root._deviceClicked(model.Address, model.Paired)
-            }
-
-            BluetoothDeviceInfo {
-                id: pairedDeviceInfo
-                address: model.Address
-                deviceClass: model.Class
-            }
-
-            Image {
-                id: icon
-                x: Theme.horizontalPageMargin
-                anchors.verticalCenter: parent.verticalCenter
-                source: "image://theme/" + pairedDeviceInfo.icon + (pairedDelegate.useHighlight ? "?" + Theme.highlightColor : "")
-                opacity: pairedDelegate.matchesProfileHint || pairedDelegate.useHighlight ? 1 : 0.5
-            }
-
-            Label {
-                id: deviceNameLabel
-                anchors {
-                    left: icon.right
-                    leftMargin: Theme.paddingMedium
-                    right: trustedIcon.left
-                    rightMargin: Theme.paddingMedium
-                }
-                y: pairedDelegate.contentHeight/2 - implicitHeight/2
-                   - (showConnectionStatus ? connectedLabel.implicitHeight/2 : 0)
-                text: model.FriendlyName
-                truncationMode: TruncationMode.Fade
-                color: pairedDelegate.useHighlight
-                       ? Theme.highlightColor
-                       : Theme.rgba(Theme.primaryColor, pairedDelegate.matchesProfileHint ? 1.0 : 0.5)
-
-                Behavior on y { NumberAnimation {} }
-            }
-
-            Label {
-                id: connectedLabel
-                anchors {
-                    left: deviceNameLabel.left
-                    top: deviceNameLabel.bottom
-                    right: parent.right
-                    rightMargin: Theme.paddingLarge
-                }
-                font.pixelSize: Theme.fontSizeExtraSmall
-                opacity: showConnectionStatus ? 1.0 : 0.0
-                color: pairedDelegate.useHighlight
-                       ? Theme.secondaryHighlightColor
-                       : Theme.secondaryColor
-
-                text: {
-                    if (model.Connected) {
-                        //% "Connected"
-                        return qsTrId("components_bluetooth-la-connected")
-                    } else if (pairedDelegate.isConnecting || minConnectionStatusTimeout.running) {
-                        //% "Connecting"
-                        return qsTrId("components_bluetooth-la-connecting")
-                    } else {
-                        return ""
-                    }
-                }
-
-                Behavior on opacity { FadeAnimation {} }
-            }
-
-            Image {
-                id: trustedIcon
-                anchors {
-                    right: parent.right
-                    rightMargin: Theme.horizontalPageMargin
-                    verticalCenter: icon.verticalCenter
-                }
-                visible: model.Trusted
-                source: "image://theme/icon-s-certificates" + (pairedDelegate.useHighlight ? "?" + Theme.highlightColor : "")
-                opacity: icon.opacity
-            }
-        }
+        filters: BluezQt.DevicesModelPrivate.PairedDevices
+        excludedDevices: root.excludedDevices
+        visible: root.showPairedDevices ? 1.0 : 0
+        highlightSelectedDevice: root.highlightSelectedDevice
+        onDeviceItemClicked: root._deviceClicked(address, paired)
+        onDeviceSettingsClicked: root._deviceSettings(address)
+        onRemoveDeviceClicked: root.removeDevice(address)
     }
 
     // Need this column for the height animation; if the animation is placed in the SectionHeader,
@@ -300,59 +165,14 @@ Column {
         }
     }
 
-    ColumnView {
+    BluetoothDeviceColumnView {
         id: nearbyDevices
-
-        width: parent.width
-        itemHeight: Theme.itemSizeSmall
-
-        model: BluezQt.DevicesModel {
-            id: nearbyDevicesModel
-            filters: BluezQt.DevicesModelPrivate.UnpairedDevices
-            hiddenAddresses: root.excludedDevices
-        }
-
-        delegate: BackgroundItem {
-            id: nearbyDeviceDelegate
-
-            property bool matchesProfileHint: root._matchesProfileHint(model.Uuids, model.Class)
-            property bool useHighlight: highlighted || (highlightSelectedDevice && model.Address === root.selectedDevice)
-
-            width: root.width
-
-            BluetoothDeviceInfo {
-                id: nearbyDeviceInfo
-                address: model.Address
-                deviceClass: model.Class
-            }
-
-            Image {
-                id: nearbyDeviceIcon
-                x: Theme.horizontalPageMargin
-                anchors.verticalCenter: parent.verticalCenter
-                source: "image://theme/" + nearbyDeviceInfo.icon + (nearbyDeviceDelegate.useHighlight ? "?" + Theme.highlightColor : "")
-                opacity: nearbyDeviceDelegate.matchesProfileHint || nearbyDeviceDelegate.useHighlight ? 1 : 0.5
-            }
-
-            Label {
-                anchors {
-                    left: nearbyDeviceIcon.right
-                    leftMargin: Theme.paddingMedium
-                    right: parent.right
-                    rightMargin: Theme.horizontalPageMargin
-                    verticalCenter: parent.verticalCenter
-                }
-                text: model.FriendlyName
-                truncationMode: TruncationMode.Fade
-                color: nearbyDeviceDelegate.useHighlight
-                       ? Theme.highlightColor
-                       : Theme.rgba(Theme.primaryColor, nearbyDeviceDelegate.matchesProfileHint ? 1.0 : 0.5)
-            }
-
-            onClicked: {
-                root._deviceClicked(model.Address, model.Paired)
-            }
-        }
+        filters: BluezQt.DevicesModelPrivate.UnpairedDevices
+        excludedDevices: root.excludedDevices
+        highlightSelectedDevice: root.highlightSelectedDevice
+        onDeviceItemClicked: root._deviceClicked(address, paired)
+        onDeviceSettingsClicked: root._deviceSettings(address)
+        onRemoveDeviceClicked: root.removeDevice(address)
     }
 
     Connections {

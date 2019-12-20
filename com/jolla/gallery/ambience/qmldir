@@ -1,4 +1,5 @@
 module com.jolla.gallery.ambience
+plugin jollagalleryambienceplugin
 AmbienceList 1.0 AmbienceList.qml
 AmbienceSettingsPage 1.0 AmbienceSettingsPage.qml
 AmbienceSettingsDialog 1.0 AmbienceSettingsDialog.qml
