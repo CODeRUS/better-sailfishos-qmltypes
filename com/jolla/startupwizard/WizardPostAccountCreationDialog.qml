@@ -165,29 +165,12 @@ Dialog {
             bottom: parent.bottom
         }
 
-        Column {
-            anchors.centerIn: parent
-            width: parent.width
-            spacing: Theme.paddingLarge
-
-            Label {
-                //: Displayed the same time with "Great! your account was successfully added!", and we might be fetching more than just one application.
-                //% "Fetching applications to install"
-                text: qsTrId("startupwizard-la-fetching_application_information")
-                x: Theme.horizontalPageMargin
-                width: parent.width - Theme.horizontalPageMargin*2
-                opacity: busyIndicator.opacity
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.Wrap
-                color: Theme.highlightColor
-            }
-
-            BusyIndicator {
-                id: busyIndicator
-                anchors.horizontalCenter: parent.horizontalCenter
-                size: BusyIndicatorSize.Large
-                running: !root.canAccept
-            }
+        BusyLabel {
+            //: Displayed the same time with "Great! your account was successfully added!", and we might be fetching more than just one application.
+            //% "Fetching applications to install"
+            text: qsTrId("startupwizard-la-fetching_application_information")
+            y: parent.height/2 - height/2
+            running: !root.canAccept
         }
     }
 
@@ -224,7 +207,7 @@ Dialog {
         Dialog {
             //: %1 is an operating system name, text displayed just before the tutorial to teach how to use Sailfish OS
             //% "Great! Next you'll learn to use %1"
-            property string _textOnwardsToTutorial: qsTrId("startupwizard-he-great_next_learn_to_use_sailfish_os").arg(aboutSettings.operatingSystemName)
+            property string _textOnwardsToTutorial: qsTrId("startupwizard-he-great_next_learn_to_use_sailfish_os").arg(aboutSettings.localizedOperatingSystemName)
 
             //% "Your apps are downloading and installing in the background."
             property string _textAppsDownloading: qsTrId("startupwizard-la-your_apps_are_installing_in_background")

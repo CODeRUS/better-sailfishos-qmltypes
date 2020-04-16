@@ -13,7 +13,7 @@ SilicaListView {
     property alias filter: transferMethodsModel.filter
 
     property alias containerPage: accountCreator.endDestination
-    property alias serviceFilter: accountCreator.serviceFilter
+    property var serviceFilter: []
     property bool showAddAccount: true
     property var shareEndDestination
 
@@ -58,10 +58,13 @@ SilicaListView {
         ShareMethodItem {
             id: addItem
 
-            visible: rootList.showAddAccount && transferMethodsModel.ready
+            visible: rootList.showAddAccount
+                     && transferMethodsModel.ready
+                     && transferMethodsModel.accountProviderNames.length > 0
             iconSource: "image://theme/icon-m-add" + (addItem.highlighted ? "?" + Theme.highlightColor : "")
             //% "Add account"
             text: qsTrId("transferui-la-add_account")
+
             onClicked: {
                 jolla_signon_ui_service.inProcessParent = containerPage
                 accountCreator.startAccountCreation()
@@ -84,5 +87,8 @@ SilicaListView {
 
     AccountCreationManager {
         id: accountCreator
+
+        // Only show account providers that support sharing of this content
+        providerFilter: transferMethodsModel.accountProviderNames
     }
 }

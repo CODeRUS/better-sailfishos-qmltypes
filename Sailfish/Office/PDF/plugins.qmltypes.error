@@ -1,1 +1,0 @@
-/usr/lib/qt5/bin/qmlplugindump: symbol lookup error: /usr/lib/qt5/qml/Sailfish/Office/PDF/libsailfishofficepdfplugin.so: undefined symbol: _ZN13PDFAnnotationC2EP7QObject

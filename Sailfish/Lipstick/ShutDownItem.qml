@@ -27,6 +27,7 @@ Rectangle {
 
     Label {
         id: shutDownMessage
+
         anchors.centerIn: parent
         width: parent.width - 2 * Theme.horizontalPageMargin
         // Non themable color since we always want it white over black

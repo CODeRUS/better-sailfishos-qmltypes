@@ -1,7 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Raine Mäkeläinen <raine.makelainen@jollamobile.com>
+** Copyright (c) 2013 - 2020 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
+** All rights reserved.
 **
 ****************************************************************************/
 
@@ -44,6 +45,8 @@ Dialog {
     canAccept: imageRotation !== 0 || brightness !== 0 || contrast !== 0 || (_cropType !== "none" || cropOnly)
     backNavigation: !_cropMenu
     forwardNavigation: !_cropMenu
+
+    _opaqueBackground: true
 
     // JB#44195: Page is inactive, but the page transition is ongoing. Delay page operation a bit
     onStatusChanged: if (status == PageStatus.Inactive) delayedCompletion.restart()
@@ -101,9 +104,11 @@ Dialog {
         }
     }
 
-    FadeBlocker {
+    Rectangle {
         z: -1
         anchors.fill: parent
+        color: "black"
+        parent: root._backgroundParent
     }
 
     Column {

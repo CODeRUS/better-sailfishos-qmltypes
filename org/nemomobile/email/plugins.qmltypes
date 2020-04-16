@@ -400,15 +400,15 @@ Module {
         }
         Method { name: "isOnline"; type: "bool" }
         Method {
-            name: "accountsSync"
-            Parameter { name: "syncOnlyInbox"; type: "bool" }
+            name: "accountsSyncInbox"
             Parameter { name: "minimum"; type: "uint" }
         }
+        Method { name: "accountsSyncInbox" }
         Method {
-            name: "accountsSync"
-            Parameter { name: "syncOnlyInbox"; type: "bool" }
+            name: "accountsSyncAllFolders"
+            Parameter { name: "minimum"; type: "uint" }
         }
-        Method { name: "accountsSync" }
+        Method { name: "accountsSyncAllFolders" }
         Method {
             name: "createFolder"
             Parameter { name: "name"; type: "string" }
@@ -573,6 +573,10 @@ Module {
         }
         Method {
             name: "synchronizeInbox"
+            Parameter { name: "accountId"; type: "int" }
+        }
+        Method {
+            name: "applyFolderSyncPolicy"
             Parameter { name: "accountId"; type: "int" }
         }
         Method {
@@ -864,6 +868,16 @@ Module {
         exportMetaObjectRevisions: [0]
     }
     Component {
+        name: "FolderListFilterTypeModel"
+        prototype: "QSortFilterProxyModel"
+        exports: ["org.nemomobile.email/FolderListFilterTypeModel 0.1"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "syncFolderList"; type: "QStringList"; isReadonly: true }
+        Property { name: "accountKey"; type: "int" }
+        Property { name: "typeFilter"; type: "QList<int>" }
+    }
+    Component {
         name: "FolderListModel"
         prototype: "QAbstractListModel"
         exports: ["org.nemomobile.email/FolderListModel 0.1"]
@@ -872,6 +886,7 @@ Module {
         Property { name: "canCreateTopLevelFolders"; type: "bool"; isReadonly: true }
         Property { name: "supportsFolderActions"; type: "bool"; isReadonly: true }
         Signal { name: "resyncNeeded" }
+        Signal { name: "countChanged" }
         Method {
             name: "folderId"
             type: "int"
@@ -937,5 +952,31 @@ Module {
         name: "QMailMessageModelBase"
         prototype: "QAbstractItemModel"
         Signal { name: "modelChanged" }
+    }
+    Component {
+        name: "QSortFilterProxyModel"
+        prototype: "QAbstractProxyModel"
+        Property { name: "filterRegExp"; type: "QRegExp" }
+        Property { name: "filterKeyColumn"; type: "int" }
+        Property { name: "dynamicSortFilter"; type: "bool" }
+        Property { name: "filterCaseSensitivity"; type: "Qt::CaseSensitivity" }
+        Property { name: "sortCaseSensitivity"; type: "Qt::CaseSensitivity" }
+        Property { name: "isSortLocaleAware"; type: "bool" }
+        Property { name: "sortRole"; type: "int" }
+        Property { name: "filterRole"; type: "int" }
+        Method {
+            name: "setFilterRegExp"
+            Parameter { name: "pattern"; type: "string" }
+        }
+        Method {
+            name: "setFilterWildcard"
+            Parameter { name: "pattern"; type: "string" }
+        }
+        Method {
+            name: "setFilterFixedString"
+            Parameter { name: "pattern"; type: "string" }
+        }
+        Method { name: "clear" }
+        Method { name: "invalidate" }
     }
 }

@@ -120,6 +120,7 @@ Module {
         Property { name: "count"; type: "int"; isReadonly: true }
         Property { name: "ready"; type: "bool"; isReadonly: true }
         Property { name: "filter"; type: "string" }
+        Property { name: "accountProviderNames"; type: "QStringList"; isReadonly: true }
         Signal { name: "rowCountChanged" }
         Method {
             name: "get"

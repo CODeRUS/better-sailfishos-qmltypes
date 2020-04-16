@@ -119,7 +119,8 @@ Module {
                 "TopLeft": 1,
                 "TopRight": 2,
                 "BottomRight": 4,
-                "BottomLeft": 8
+                "BottomLeft": 8,
+                "AllCorners": 15
             }
         }
         Property { name: "radius"; type: "float" }
@@ -2208,6 +2209,7 @@ Module {
         defaultProperty: "data"
         Property { name: "running"; type: "bool" }
         Property { name: "size"; type: "int" }
+        Property { name: "_forceAnimation"; type: "bool" }
         Property { name: "color"; type: "QColor" }
         Property { name: "palette"; type: "Silica::Palette"; isReadonly: true; isPointer: true }
         Property { name: "highlighted"; type: "bool" }
@@ -2235,7 +2237,7 @@ Module {
         isCreatable: false
         isSingleton: true
         defaultProperty: "data"
-        Property { name: "pageStack"; type: "PageStack_QMLTYPE_11"; isPointer: true }
+        Property { name: "pageStack"; type: "PageStack_QMLTYPE_12"; isPointer: true }
         Property {
             name: "errorNotification"
             type: "FileManagerNotification_QMLTYPE_0"
@@ -2434,7 +2436,6 @@ Module {
         Property { name: "_navigation"; type: "int" }
         Property { name: "_navigationPending"; type: "int" }
         Property { name: "_direction"; type: "int" }
-        Property { name: "_wallpaperOrientation"; type: "int" }
         Property { name: "_allowedOrientations"; type: "int" }
         Property { name: "_horizontalDimension"; type: "int" }
         Property { name: "_verticalDimension"; type: "int" }
@@ -2444,9 +2445,10 @@ Module {
         Property { name: "_forwardDestinationInstance"; type: "QQuickItem"; isPointer: true }
         Property { name: "_forwardDestinationReplaceTarget"; type: "QVariant" }
         Property { name: "_depth"; type: "int" }
+        Property { name: "_backgroundParent"; type: "QQuickItem"; isPointer: true }
+        Property { name: "_opaqueBackground"; type: "bool" }
         Property { name: "_exposed"; type: "bool" }
         Property { name: "_belowTop"; type: "bool" }
-        Property { name: "_defaultTransition"; type: "bool" }
         Property { name: "_clickablePageIndicators"; type: "bool" }
         Property { name: "__silica_page"; type: "int" }
         Property {
@@ -2457,6 +2459,23 @@ Module {
         }
         Property { name: "defaultOrientationTransition"; type: "QQuickTransition"; isPointer: true }
         Property { name: "_windowOrientation"; type: "int" }
+        Property { name: "_windowOpacity"; type: "float" }
+        Property { name: "palette"; type: "Silica::Palette"; isReadonly: true; isPointer: true }
+        Property { name: "highlighted"; type: "bool" }
+    }
+    Component {
+        prototype: "QQuickItem"
+        name: "PageBusyIndicator -1.-1"
+        exports: ["PageBusyIndicator -1.-1"]
+        exportMetaObjectRevisions: [-1]
+        isComposite: true
+        defaultProperty: "data"
+        Property { name: "_page"; type: "QQuickItem"; isPointer: true }
+        Property { name: "_portrait"; type: "bool"; isReadonly: true }
+        Property { name: "running"; type: "bool" }
+        Property { name: "size"; type: "int" }
+        Property { name: "_forceAnimation"; type: "bool" }
+        Property { name: "color"; type: "QColor" }
         Property { name: "palette"; type: "Silica::Palette"; isReadonly: true; isPointer: true }
         Property { name: "highlighted"; type: "bool" }
     }
@@ -2485,6 +2504,13 @@ Module {
         defaultProperty: "animations"
         Property { name: "targetPage"; type: "QObject"; isPointer: true }
         Property { name: "fadeTarget"; type: "QObject"; isPointer: true }
+        Property { name: "fadeProperty"; type: "string" }
+        Property {
+            name: "orientationChangeActions"
+            type: "QQuickAbstractAnimation"
+            isList: true
+            isReadonly: true
+        }
     }
     Component {
         prototype: "QQuickItem"
@@ -2495,7 +2521,6 @@ Module {
         defaultProperty: "data"
         Property { name: "acceptAnimationRunning"; type: "bool"; isReadonly: true }
         Property { name: "_currentOrientation"; type: "int"; isReadonly: true }
-        Property { name: "_currentWallpaperOrientation"; type: "int"; isReadonly: true }
         Property { name: "_currentWidth"; type: "double"; isReadonly: true }
         Property { name: "_currentHeight"; type: "double"; isReadonly: true }
         Property { name: "_transitionDuration"; type: "int" }

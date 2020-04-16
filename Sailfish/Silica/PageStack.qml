@@ -1,8 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Copyright (c) 2019 Open Mobile Platform LLC.
-** Contact: Joona Petrell <joona.petrell@jollamobile.com>
+** Copyright (c) 2013-2020 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Sailfish Silica UI component package.
@@ -97,7 +96,6 @@ PageStackBase {
     readonly property bool acceptAnimationRunning: _pageStackIndicator == null ? false : _pageStackIndicator.animatingPosition
 
     readonly property int _currentOrientation: currentPage ? currentPage.orientation : Orientation.Portrait
-    readonly property int _currentWallpaperOrientation: currentPage ? currentPage._wallpaperOrientation : Orientation.Portrait
 
     readonly property real _currentWidth: currentPage ? currentPage.width : 0
     readonly property real _currentHeight: currentPage ? currentPage.height : 0
@@ -609,7 +607,7 @@ PageStackBase {
     Binding {
         target: flash
         property: "opacity"
-        when: _rightFlickDifference > 0 && _preventForwardNavigation
+        when: root.pressed && _rightFlickDifference > 0 && _preventForwardNavigation
         value: 0.3
     }
     Binding {
@@ -814,14 +812,15 @@ PageStackBase {
                 FadeAnimator {
                     target: newPage
                     to: 1.0
-                    onStopped: destroy()
+                    onStopped: {
+                        placeholder.newPage._backgroundParent = placeholder.parent
+                        destroy()
+                    }
                 }
             }
 
-            BusyIndicator {
+            PageBusyIndicator {
                 id: busyIndicator
-                size: BusyIndicatorSize.Large
-                anchors.centerIn: parent
                 running: (page || (pageFade && pageFade.running)) && Qt.application.active
                 opacity: 0.0
 
@@ -877,6 +876,7 @@ PageStackBase {
                             newPage.visible = true
                             newPage.opacity = 0.0
                             newPage.pageContainer = placeholder.pageContainer
+                            newPage._backgroundParent = newPage
                             newPage._navigation = placeholder._navigation
                             newPage.pageContainer._setPageStatus(newPage, placeholder.status)
                             container.page = newPage
@@ -885,6 +885,7 @@ PageStackBase {
                             var creationTime = new Date().getTime() - startTime
                             var differentOrientation = container.transitionPartner.page.orientation === newPage.orientation
                             var multiplier = Math.max(0.0, Math.min(1.0, creationTime/_transitionDuration))
+                            placeholder._exposed = false
 
                             pageFade = pageFadeComponent.createObject(placeholder)
                             pageFade.duration = multiplier * (differentOrientation ? 250 : 400)
@@ -1260,7 +1261,10 @@ PageStackBase {
                 // When the container is top of the stack, or involved in a transition with the top of stack
                 target: container.page
                 property: '_exposed'
-                value: (_currentContainer === container) || (_currentContainer !== null && (_currentContainer === container.transitionPartner))
+                value: __silica_applicationwindow_instance.visible
+                        && __silica_applicationwindow_instance.__quickWindow
+                        && __silica_applicationwindow_instance.__quickWindow.visible
+                        && ((_currentContainer === container) || (_currentContainer !== null && (_currentContainer === container.transitionPartner)))
             }
             Binding {
                 // When the container is active, but not the top of the stack

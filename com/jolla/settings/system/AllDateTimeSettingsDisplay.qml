@@ -1,6 +1,14 @@
+/****************************************************************************
+**
+** Copyright (c) 2013-2019 Jolla Ltd.
+** Copyright (c) 2019 Open Mobile Platform LLC.
+** License: Proprietary
+**
+****************************************************************************/
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.systemsettings 1.0
+import org.nemomobile.ofono 1.0
 import Sailfish.Policy 1.0
 
 Column {
@@ -30,7 +38,7 @@ Column {
         onClicked: {
             var newValue = !checked
             dateTimeSettings.automaticTimeUpdate = newValue
-            if (capabilityDataContextProperty.value || capabilityDataContextProperty.value === undefined) {
+            if (modemManager.availableModems.length > 0) {
                 dateTimeSettings.automaticTimezoneUpdate = newValue
             } else {
                 // Automatic time zone update requires mobile data
@@ -59,5 +67,9 @@ Column {
 
     Use24HourClockSettingDisplay {
         dateTimeSettings: root.dateTimeSettings
+    }
+
+    OfonoModemManager {
+        id: modemManager
     }
 }

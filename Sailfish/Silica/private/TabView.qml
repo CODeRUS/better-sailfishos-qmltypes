@@ -249,7 +249,7 @@ SilicaControl {
                 property bool loading: Qt.application.active && isCurrentItem && tabLoader.status !== Loader.Ready
                 running: !delayBusy.running && loading
 
-                y: Screen.height/3 - height/2 - headerLoader.height
+                y: root.height/3 - height/2 - headerLoader.height
                 anchors.horizontalCenter: parent.horizontalCenter
                 size: BusyIndicatorSize.Large
 

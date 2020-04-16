@@ -1,6 +1,8 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
+import Sailfish.Policy 1.0
+import com.jolla.settings.system 1.0
 
 Page {
     id: root
@@ -21,12 +23,17 @@ Page {
         Column {
             id: content
             width: parent.width
+            enabled: AccessPolicy.accountCreationEnabled
 
             PageHeader {
                 id: header
                 //: Heading of the main Accounts page
                 //% "Accounts"
                 title: qsTrId("settings_accounts-he-page_accounts")
+            }
+
+            DisabledByMdmBanner {
+                active: !content.enabled
             }
 
             SectionHeader {
@@ -95,7 +102,6 @@ Page {
                     source: "image://theme/icon-m-add" + (addItem.highlighted ? "?" + Theme.highlightColor : "")
                 }
                 Label {
-                    id: label
                     //: Initiates adding a new account
                     //% "Add account"
                     text: qsTrId("components_accounts-me-add_account")

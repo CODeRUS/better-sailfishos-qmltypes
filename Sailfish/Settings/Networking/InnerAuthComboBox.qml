@@ -9,10 +9,10 @@ ComboBox {
     //: Method used inside PEAP/TTLS tunnel to authenticate user, most commonly MSCHAPv2
     //% "Inner authentication"
     label: qsTrId("settings_network-la-eap_inner_authentication")
-    visible: network && network.securityType === Connman.NetworkService.SecurityIEEE802 && menu.visibleChildren.length > 0
-    currentIndex: network ? findIndex(repeater.model, function (item) { return item.value == network.phase2 }, findIndex(repeater.model, function (item) { return item.validFor.indexOf(network.eapMethod) !== -1 }, 0)) : 0
+    visible: network && network.securityType === Connman.NetworkService.SecurityIEEE802 && _findIndex(repeater.model, _isValidForFilter(network.eapMethod), -1) !== -1
+    currentIndex: network ? _findKeyIndex(repeater.model, "value", network.phase2, _findIndex(repeater.model, _isValidForFilter(network.eapMethod), 0)) : 0
 
-    function findIndex(arr, cb, notfound) {
+    function _findIndex(arr, cb, notfound) {
         if (notfound === undefined)
             notfound = -1
         for (var i = 0; i < arr.length; i++) {
@@ -22,17 +22,28 @@ ComboBox {
         return notfound
     }
 
+    function _findKeyIndex(arr, key, value, notfound) {
+        return _findIndex(arr, function (i) { return i[key] === value }, notfound)
+    }
+
+    function _isValidFor(item, val) {
+        return item.validFor.indexOf(val) !== -1
+    }
+
+    function _isValidForFilter(val) {
+        return function (item) { return _isValidFor(item, val) }
+    }
+
     Connections {
         target: network
 
         onEapMethodChanged: {
-           if (repeater.model[currentIndex].validFor.indexOf(network.eapMethod) === -1) {
-               currentIndex = findIndex(repeater.model, function (mtod) { return mtod.validFor.indexOf(network.eapMethod) !== -1 })
+           if (currentIndex === -1 || !_isValidFor(repeater.model[currentIndex], network.eapMethod)) {
+               currentIndex = _findIndex(repeater.model, _isValidForFilter(network.eapMethod), 0)
            }
         }
 
-        onPhase2Changed: currentIndex = findIndex(repeater.model, function (item) { return item.value == network.phase2 },
-                                                  findIndex(repeater.model, function (item) { return item.validFor.indexOf(network.eapMethod) !== -1 }, 0))
+        onPhase2Changed: currentIndex = _findKeyIndex(repeater.model, "value", network.phase2, _findIndex(repeater.model, _isValidForFilter(network.eapMethod), 0))
     }
 
     menu: ContextMenu {
@@ -53,13 +64,17 @@ ComboBox {
 
             delegate: MenuItem {
                 text: modelData.label
-                visible: modelData.validFor.indexOf(network.eapMethod) !== -1
+                visible: _isValidFor(modelData, network.eapMethod)
             }
         }
     }
 
     onCurrentIndexChanged: {
-        if (immediateUpdate)
-            network.phase2 = repeater.model[currentIndex].value
+        if (immediateUpdate) {
+            if (currentIndex >= 0)
+                network.phase2 = repeater.model[currentIndex].value
+            else
+                network.phase2 = ''
+        }
     }
 }

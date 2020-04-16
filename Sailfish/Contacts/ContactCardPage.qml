@@ -50,12 +50,9 @@ Page {
         }
     }
 
-    BusyIndicator {
+    PageBusyIndicator {
         id: contactLoadingBusy
 
-        anchors.centerIn: parent
-
-        size: BusyIndicatorSize.Large
         running: contact == null
     }
 

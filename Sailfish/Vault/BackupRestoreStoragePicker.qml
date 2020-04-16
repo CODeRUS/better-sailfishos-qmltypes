@@ -13,6 +13,8 @@ Column {
     property bool backupMode
     property int cloudAccountId
     property string memoryCardPath
+    property bool selectedStorageMounted
+    property bool selectedStorageLocked
 
     property string fileToRestore: {
         if (!selectionValid) {
@@ -38,6 +40,10 @@ Column {
 
     property BackupRestoreStorageListModel storageListModel: BackupRestoreStorageListModel {}
 
+    function activeItem() {
+        return storageListModel.get(storageCombo.currentIndex)
+    }
+
     function refresh() {
         var prevIndex = storageCombo.currentIndex
         storageCombo.currentIndex = -1
@@ -46,9 +52,6 @@ Column {
         }
         storageCombo.currentIndex = prevIndex
     }
-
-
-    // ------
 
     property string _errorText
 
@@ -67,15 +70,27 @@ Column {
         root.memoryCardPath = ""
         var data = storageListModel.get(storageCombo.currentIndex)
         if (data.type === storageListModel.storageTypeMemoryCard) {
-            if (root.backupMode && !backupUtils.verifyWritable(data.path)) {
+            if (data.deviceStatus === storageListModel.storageLocked) {
+                root.memoryCardPath = ""
+                _errorText = ""
+                selectedStorageLocked = true
+                selectedStorageMounted = false
+            } else if (root.backupMode && !data.path) {
+                root.memoryCardPath = ""
+                _errorText = ""
+                selectedStorageMounted = false
+            } else if (root.backupMode && !backupUtils.verifyWritable(data.path)) {
                 root.memoryCardPath = ""
                 //% "The selected storage is not writable."
                 _errorText = qsTrId("vault-la-cloud-la-storage_unwritable")
             } else {
                 root.memoryCardPath = data.path
                 _errorText = ""
+                selectedStorageMounted = true
             }
         } else if (data.type === storageListModel.storageTypeCloud) {
+            selectedStorageMounted = true
+            selectedStorageLocked = false
             root.cloudAccountId = data.accountId
             _errorText = _accountErrorText(root.cloudAccountId)
             if (_errorText.length == 0 && networkManager.state != "online") {
@@ -133,15 +148,26 @@ Column {
         onStateChanged: root._update()
     }
 
-    Connections {
-        target: root.storageListModel
-        // This should be fixed separately. See JB#46110.
-        onReadyChanged: {
-            if (root.storageListModel.ready) {
-                root._setInitialSelection()
-            }
+    function checkMemoryCardMountStatus() {
+        if (root.storageListModel.ready)
+            root._setInitialSelection()
+
+        if (storageListModel.count > 0 && storageCombo.currentIndex >= 0) {
+            var data = storageListModel.get(storageCombo.currentIndex)
+            selectedStorageMounted = (data.deviceStatus === storageListModel.storageMounted)
+            selectedStorageLocked = (data.deviceStatus === storageListModel.storageLocked)
         }
     }
+
+    // MainPage overrides the storageListModel. Hence, Connections.
+    Connections {
+        target: root.storageListModel
+
+        onMemoryCardMounted: checkMemoryCardMountStatus()
+        onReadyChanged: checkMemoryCardMountStatus()
+    }
+
+    Component.onCompleted: checkMemoryCardMountStatus()
 
     ComboBox {
         id: storageCombo
@@ -173,6 +199,17 @@ Column {
             if (root._errorText.length > 0) {
                 return root._errorText
             }
+
+            if (root.selectedStorageLocked) {
+                //% "The selected storage is locked."
+                return qsTrId("vault-la-cloud-la-storage_is_locked")
+            }
+
+            if (!root.selectedStorageMounted) {
+                //% "The selected storage is not mounted."
+                return qsTrId("vault-la-cloud-la-storage_not_mounted")
+            }
+
             if (root.backupMode) {
                 if (root.memoryCardPath.length > 0) {
                     //: Explains how data will be backed up to the memory card

@@ -1,8 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2015 Jolla Ltd.
-** Contact: Matt Vogt <matthew.vogt@jolla.com>
-** Contact: Sami Kananoja <matthew.vogt@jolla.com>
+** Copyright (c) 2013-2020 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Sailfish Silica UI component package.
@@ -37,8 +36,12 @@ import QtQuick 2.2
 import Sailfish.Silica 1.0
 
 Transition {
+    id: transition
+
     property alias targetPage: propertyAction.target
     property alias fadeTarget: fadeOutAnimation.target
+    property alias fadeProperty: fadeOutAnimation.property
+    property alias orientationChangeActions: orientationChangeActionsContainer.animations
 
     to: 'Portrait,Landscape,PortraitInverted,LandscapeInverted'
     from: 'Portrait,Landscape,PortraitInverted,LandscapeInverted'
@@ -49,40 +52,37 @@ Transition {
             property: 'orientationTransitionRunning'
             value: true
         }
-        PropertyAction {
-            target: targetPage
-            properties: '_wallpaperOrientation'
-        }
         NumberAnimation {
             id: fadeOutAnimation
-            target: __silica_applicationwindow_instance._backgroundVisible
-                    ? __silica_applicationwindow_instance
-                    : __silica_applicationwindow_instance.contentItem
+            target: {
+                if (targetPage._opaqueBackground) {
+                    return targetPage
+                } else if (__silica_applicationwindow_instance._backgroundVisible) {
+                    return  __silica_applicationwindow_instance
+                } else {
+                    return  __silica_applicationwindow_instance.contentItem
+                }
+            }
             property: '_windowOpacity'
             easing.type: Easing.InOutQuad
             to: 0
             duration: 150
         }
         PropertyAction {
-            target: targetPage
             properties: 'width,height,rotation,orientation'
         }
-        ScriptAction {
-            script: {
-                // Restores the Bindings to width, height and rotation
-                targetPage._defaultTransition = false
-                targetPage._defaultTransition = true
-            }
+        SequentialAnimation {
+            id: orientationChangeActionsContainer
         }
         NumberAnimation {
             target: fadeOutAnimation.target
-            property: '_windowOpacity'
+            property: fadeOutAnimation.property
             easing.type: Easing.InOutQuad
             to: 1
             duration: 150
         }
         PropertyAction {
-            target: targetPage
+            target: propertyAction.target
             property: 'orientationTransitionRunning'
             value: false
         }
@@ -90,7 +90,7 @@ Transition {
 
     Component.onCompleted: {
         if (!targetPage) {
-            console.warn("PageOrientationTransition: targetPage property is missing")
+            console.warn("PageOrientationTransition: target property is missing")
         }
     }
 }

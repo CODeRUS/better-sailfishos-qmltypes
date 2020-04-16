@@ -1,7 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 - 2019 Jolla Ltd.
-** Copyright (c) 2019 Open Mobile Platform LLC.
+** Copyright (C) 2013 - 2020 Jolla Ltd.
+** Copyright (c) 2019 - 2020 Open Mobile Platform LLC.
 ** Contact: Martin Jones <martin.jones@jollamobile.com>
 ** All rights reserved.
 **
@@ -46,9 +46,8 @@ RemorseBase {
     property Item _item
 
     function execute(item, text, callback, timeout) {
-        if (text === undefined || text.length === 0) {
-            //% "Deleted"
-            remorseItem.text = qsTrId("components-la-deleted")
+        if (text === undefined) {
+            remorseItem.text = ""
         } else {
             remorseItem.text = text
         }
@@ -115,7 +114,7 @@ RemorseBase {
             PropertyChanges {
                 target: remorseItem
                 anchors.fill: _item
-                opacity: remorseItem.width > 0 ? 1 - Math.abs(remorseItem.contentItem.x / remorseItem.width) : 1
+                opacity: remorseItem.width > 0 ? 1 - Math.abs(remorseItem.contentItem.x / (_page ? _page.width : Screen.width)) : 1
                 visible: true
                 _contentOpacity: 1
             }

@@ -107,7 +107,8 @@ Module {
                 "TopLeft": 1,
                 "TopRight": 2,
                 "BottomRight": 4,
-                "BottomLeft": 8
+                "BottomLeft": 8,
+                "AllCorners": 15
             }
         }
         Property { name: "radius"; type: "float" }

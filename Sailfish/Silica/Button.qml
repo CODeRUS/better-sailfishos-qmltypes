@@ -61,7 +61,8 @@ SilicaMouseArea {
     onPressed: button.DragFilter.begin(mouse.x, mouse.y)
     onPreventStealingChanged: if (preventStealing) button.DragFilter.end()
 
-    height: Theme.itemSizeExtraSmall
+    height: implicitHeight
+    implicitHeight: Theme.itemSizeExtraSmall
     implicitWidth: Math.max(preferredWidth, buttonText.width+Theme.paddingLarge)
 
     highlighted: _showPress
@@ -69,7 +70,7 @@ SilicaMouseArea {
     Rectangle {
         anchors {
             fill: parent
-            topMargin: (button.height-Theme.itemSizeExtraSmall)/2
+            topMargin: (button.height - button.implicitHeight)/2
             bottomMargin: anchors.topMargin
         }
         radius: Theme.paddingSmall

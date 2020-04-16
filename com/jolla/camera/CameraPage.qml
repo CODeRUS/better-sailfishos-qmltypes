@@ -1,9 +1,17 @@
-import QtQuick 2.0
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Media 1.0
+import Sailfish.Policy 1.0
 import com.jolla.camera 1.0
 import QtMultimedia 5.4
 import Nemo.KeepAlive 1.2
+import com.jolla.settings.system 1.0
 import "capture"
 import "gallery"
 
@@ -22,35 +30,29 @@ Page {
         switcherView.returnToCaptureMode()
     }
 
+    palette.colorScheme: Theme.LightOnDark
+
+    _opaqueBackground: true
+
     allowedOrientations: captureView.inButtonLayout ? page.orientation : Orientation.All
-    orientationTransitions: Transition {
-        to: 'Portrait,Landscape,PortraitInverted,LandscapeInverted'
-        from: 'Portrait,Landscape,PortraitInverted,LandscapeInverted'
-        SequentialAnimation {
-            PropertyAction {
-                target: page
-                property: 'orientationTransitionRunning'
-                value: true
-            }
-            FadeAnimation {
-                target: pageStack
-                to: 0
-                duration: 150
-            }
-            PropertyAction {
-                target: page
-                properties: 'width,height,rotation,orientation'
-            }
-            FadeAnimation {
-                target: pageStack
-                to: 1
-                duration: 150
-            }
-            PropertyAction {
-                target: page
-                property: 'orientationTransitionRunning'
-                value: false
-            }
+
+
+    Item {
+        parent: page.parent
+
+        width: page.width
+        height: page.height
+        rotation: page.rotation
+
+        anchors.centerIn: parent
+        z: -1
+
+        Rectangle {
+            x: galleryItem.x - switcherView.contentX
+            y: galleryItem.y - switcherView.contentY
+            width: galleryItem.width
+            height: galleryItem.height
+            color: "black"
         }
     }
 
@@ -117,11 +119,9 @@ Page {
                 }
 
                 BusyIndicator {
-                    id: galleryIndicator
-                    visible: galleryLoader.status == Loader.Loading
                     anchors.centerIn: parent
                     size: BusyIndicatorSize.Large
-                    running: true
+                    running: galleryLoader.status == Loader.Loading
                 }
             }
 
@@ -193,12 +193,14 @@ Page {
     }
 
 
-    DisabledByMdmView {}
+    DisabledByMdmView {
+        //% "Camera"
+        activity: qsTrId("sailfish_browser-la-camera");
+        enabled: !AccessPolicy.cameraEnabled
+    }
 
     DisplayBlanking {
         preventBlanking: (galleryLoader.item && galleryLoader.item.playing)
                          || captureView.camera.videoRecorder.recorderState == CameraRecorder.RecordingState
     }
-
-
 }

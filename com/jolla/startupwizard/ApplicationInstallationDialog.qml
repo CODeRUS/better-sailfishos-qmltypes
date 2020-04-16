@@ -131,9 +131,9 @@ Dialog {
         }
     }
 
-    LoadingPlaceholder {
+    BusyLabel {
         y: Math.max(root.height/2 - height/2, appGrid.headerItem.height)
-        visible: !root.applicationModel.populated
+        running: !root.applicationModel.populated
     }
 
     ViewPlaceholder {

@@ -429,6 +429,8 @@ FocusScope {
                                 0,
                                 camera.imageCapture.resolution)
                 }
+
+                Settings.completePhoto(Qt.resolvedUrl(path))
             }
             onImageExposed: {
                 shutterEvent.play()

@@ -12,6 +12,7 @@ ZoomableFlickable {
     property bool active: true
     readonly property bool _active: active || viewMoving
     readonly property bool error: photo.status == Image.Error
+    readonly property alias imageMetaData: metadata
 
     property alias photo: photo
     property alias largePhoto: largePhoto
@@ -86,7 +87,7 @@ ZoomableFlickable {
     }
 
     MouseArea {
-        parent: flickable
+        parent: _dragDetector // don't catch multi touch events (position behind ZoomableFlickable.pinchArea)
         anchors {
             fill: parent
             margins: Theme.paddingLarge // don't react near display edges

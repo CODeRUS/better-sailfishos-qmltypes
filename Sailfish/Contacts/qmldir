@@ -4,6 +4,7 @@ singleton ContactCreator 1.0 ContactCreator.qml
 singleton ContactModelCache 1.0 ContactModelCache.qml
 ContactsUtil 1.0 common/common.js
 ContactActivityDelegate 1.0 ContactActivityDelegate.qml
+ContactActivitySimIndicator 1.0 ContactActivitySimIndicator.qml
 ContactAvatar 1.0 ContactAvatar.qml
 ContactCard 1.0 ContactCard.qml
 ContactCardPage 1.0 ContactCardPage.qml

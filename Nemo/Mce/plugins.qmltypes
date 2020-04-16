@@ -130,6 +130,14 @@ Module {
         Property { name: "state"; type: "State"; isReadonly: true }
     }
     Component {
+        name: "QMceNameOwner"
+        prototype: "QObject"
+        exports: ["Nemo.Mce/MceNameOwner 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "nameOwner"; type: "string"; isReadonly: true }
+    }
+    Component {
         name: "QMcePowerSaveMode"
         prototype: "QObject"
         exports: ["Nemo.Mce/McePowerSaveMode 1.0"]

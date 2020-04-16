@@ -7,6 +7,7 @@ ListItem {
 
     property string firstText
     property string secondText
+    property string matchText
     property bool unnamed
     property int presenceState
     property alias iconSource: icon.source
@@ -19,7 +20,8 @@ ListItem {
     // Same as: SearchField.textLeftMargin
     property real searchLeftMargin: Theme.itemSizeSmall + Theme.paddingMedium
 
-    contentHeight: Theme.itemSizeSmall
+    property bool _matchTextVisible: searchString.length > 0 && matchText.length > 0
+    contentHeight: _matchTextVisible ? Theme.itemSizeMedium : Theme.itemSizeSmall
 
     function _regExpFor(term) {
         // Escape any significant chars in the search term
@@ -37,6 +39,7 @@ ListItem {
             leftMargin: root.leftMargin + root.leftMarginOffset
             rightMargin: icon.width ? spacing : 0
             verticalCenter: parent.verticalCenter
+            verticalCenterOffset: _matchTextVisible ? -matchDataText.height/2 : 0
         }
         Label {
             id: firstNameText
@@ -63,6 +66,23 @@ ListItem {
             visible: width > 0
         }
     }
+
+    Label {
+        id: matchDataText
+
+        anchors {
+            left: row.left
+            right: row.right
+            top: row.bottom
+        }
+
+        text: matchText
+        color: highlighted ? Theme.secondaryHighlightColor: Theme.secondaryColor
+        truncationMode: TruncationMode.Fade
+        textFormat: Text.AutoText
+        visible: _matchTextVisible
+    }
+
     Image {
         id: icon
 
@@ -105,6 +125,11 @@ ListItem {
         PropertyChanges {
             target: lastNameText
             text: Theme.highlightText(secondText, _regExpFor(searchString), Theme.highlightColor)
+            textFormat: Text.StyledText
+        }
+        PropertyChanges {
+            target: matchDataText
+            text: Theme.highlightText(matchText, _regExpFor(searchString), Theme.highlightColor)
             textFormat: Text.StyledText
         }
     }

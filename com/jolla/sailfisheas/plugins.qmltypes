@@ -52,6 +52,48 @@ Module {
         Method { name: "cancelAutoDiscovery" }
     }
     Component {
+        name: "CertificateHelper"
+        prototype: "QObject"
+        exports: ["com.jolla.sailfisheas/CertificateHelper 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "certificatePath"; type: "string"; isReadonly: true }
+        Property { name: "certificateIssuer"; type: "string"; isReadonly: true }
+        Property { name: "certificatePassphrase"; type: "string"; isReadonly: true }
+        Property { name: "credentialsId"; type: "uint"; isReadonly: true }
+        Signal {
+            name: "storeDataSucceeded"
+            Parameter { name: "id"; type: "int" }
+        }
+        Signal {
+            name: "storeDataFailed"
+            Parameter { name: "errorMessage"; type: "string" }
+        }
+        Signal { name: "certificateInfoChanged" }
+        Signal { name: "certificateExtractionFailed" }
+        Method {
+            name: "loadData"
+            Parameter { name: "credentialsId"; type: "uint" }
+            Parameter { name: "filePath"; type: "string" }
+        }
+        Method { name: "storeData" }
+        Method {
+            name: "setCertificatePath"
+            Parameter { name: "path"; type: "string" }
+        }
+        Method {
+            name: "extractCertificate"
+            type: "bool"
+            Parameter { name: "passphrase"; type: "string" }
+            Parameter { name: "storeIfPossible"; type: "bool" }
+        }
+        Method {
+            name: "extractCertificate"
+            type: "bool"
+            Parameter { name: "passphrase"; type: "string" }
+        }
+        Method { name: "cleanupData" }
+    }
+    Component {
         name: "CheckCredentials"
         prototype: "QObject"
         exports: ["com.jolla.sailfisheas/CheckCredentials 1.0"]
@@ -73,6 +115,29 @@ Module {
         Signal {
             name: "checkCredentialsFailed"
             Parameter { name: "error"; type: "int" }
+        }
+        Method {
+            name: "checkCredentials"
+            Parameter { name: "user"; type: "string" }
+            Parameter { name: "password"; type: "string" }
+            Parameter { name: "host"; type: "string" }
+            Parameter { name: "port"; type: "int" }
+            Parameter { name: "isSecure"; type: "bool" }
+            Parameter { name: "domain"; type: "string" }
+            Parameter { name: "ignoreSSLErrors"; type: "bool" }
+            Parameter { name: "sslCertificatePath"; type: "string" }
+            Parameter { name: "sslCertificatePassword"; type: "string" }
+        }
+        Method {
+            name: "checkCredentials"
+            Parameter { name: "user"; type: "string" }
+            Parameter { name: "password"; type: "string" }
+            Parameter { name: "host"; type: "string" }
+            Parameter { name: "port"; type: "int" }
+            Parameter { name: "isSecure"; type: "bool" }
+            Parameter { name: "domain"; type: "string" }
+            Parameter { name: "ignoreSSLErrors"; type: "bool" }
+            Parameter { name: "sslCertificatePath"; type: "string" }
         }
         Method {
             name: "checkCredentials"
@@ -144,6 +209,83 @@ Module {
             Parameter { name: "accountId"; type: "int" }
         }
         Method { name: "cancelCheck" }
+    }
+    Component {
+        name: "GALSearchModel"
+        prototype: "QAbstractListModel"
+        exports: ["com.jolla.sailfisheas/GalSearchModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Roles"
+            values: {
+                "PhoneRole": 257,
+                "OfficeRole": 258,
+                "TitleRole": 259,
+                "CompanyRole": 260,
+                "AliasRole": 261,
+                "FirstNameRole": 262,
+                "LastNameRole": 263,
+                "HomePhoneRole": 264,
+                "MobilePhoneRole": 265,
+                "EmailAddressRole": 266
+            }
+        }
+        Enum {
+            name: "Status"
+            values: {
+                "Idle": 0,
+                "Initiating": 1,
+                "Searching": 2,
+                "Fetching": 3,
+                "Error": 4
+            }
+        }
+        Property { name: "accountId"; type: "int" }
+        Property { name: "deepTraversal"; type: "bool" }
+        Property { name: "range"; type: "int" }
+        Property { name: "hasMore"; type: "bool"; isReadonly: true }
+        Property { name: "totalCount"; type: "int"; isReadonly: true }
+        Property { name: "busy"; type: "bool"; isReadonly: true }
+        Property { name: "status"; type: "Status"; isReadonly: true }
+        Property { name: "minimumCharactersRequired"; type: "int"; isReadonly: true }
+        Signal { name: "searchUpdated" }
+        Signal { name: "searchFailed" }
+        Signal {
+            name: "galItemReceived"
+            Parameter { name: "row"; type: "int" }
+        }
+        Signal { name: "selectedChanged" }
+        Method {
+            name: "search"
+            Parameter { name: "query"; type: "string" }
+        }
+        Method { name: "fetchMore" }
+        Method {
+            name: "get"
+            type: "QVariant"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "role"; type: "int" }
+        }
+        Method {
+            name: "get"
+            type: "QVariant"
+            Parameter { name: "row"; type: "int" }
+        }
+        Method { name: "clear" }
+        Method {
+            name: "select"
+            Parameter { name: "row"; type: "int" }
+        }
+        Method {
+            name: "unselect"
+            Parameter { name: "row"; type: "int" }
+        }
+        Method { name: "selectedList"; type: "QList<int>" }
+        Method {
+            name: "getContact"
+            type: "QVariantMap"
+            Parameter { name: "row"; type: "int" }
+        }
     }
     Component {
         name: "OofSettings"

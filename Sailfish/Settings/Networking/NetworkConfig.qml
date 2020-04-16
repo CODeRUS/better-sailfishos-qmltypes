@@ -16,6 +16,12 @@ QtObject {
     property string phase2: 'MSCHAPV2'
     property string caCert
     property string caCertFile
+    property string clientCert
+    property string clientCertFile
+    property string privateKey
+    property string privateKeyFile
+    property string privateKeyPassphrase
+    property bool privateKeyPassphraseAvailable: true
     property string domainSuffixMatch
     property bool eapMethodAvailable: true
     property bool autoConnect: true
@@ -96,7 +102,7 @@ QtObject {
             }
         }
         if (identityRequired) {
-            if (passphrase.length > 0) {
+            if (identity.length >= 3 && identity.length <= 63) {
                 settings.Identity = identity
             } else {
                 console.log("Error! Identity required, not defined!")
@@ -116,6 +122,12 @@ QtObject {
                 settings.CACert = caCert
             if (caCertFile)
                 settings.CACertFile = caCertFile
+            if (clientCertFile)
+                settings.ClientCertFile = clientCertFile
+            if (privateKeyFile)
+                settings.PrivateKeyFile = privateKeyFile
+            if (privateKeyPassphrase)
+                settings.PrivateKeyPassphrase = privateKeyPassphrase
             if (domainSuffixMatch)
                 settings.DomainSuffixMatch = domainSuffixMatch
         }

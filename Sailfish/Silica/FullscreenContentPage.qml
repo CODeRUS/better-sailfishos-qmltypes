@@ -1,7 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2018 Jolla Ltd.
-** Contact: Joona Petrell <joona.petrell@jollamobile.com>
+** Copyright (c) 2018-2020 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Sailfish Silica UI component package.
@@ -32,14 +32,24 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "private"
 
 Page {
+    id: page
+
     palette.colorScheme: Theme.LightOnDark
 
     clip: status !== PageStatus.Active || pageStack.dragInProgress
     navigationStyle: PageNavigation.Vertical
-    FadeBlocker {}
+    _opaqueBackground: true
+
+    // Parent the background to the page container item to decouple it from the page's opacity.
+    Rectangle {
+        parent: page.parent
+        z: -1000
+        anchors.fill: parent
+        color: "black"
+    }
 }

@@ -16,6 +16,9 @@ Loader {
     signal imported
 
     width: parent.width
+
+    property bool _isGnuPGPlugin: keyManagerLoader.storagePluginName.indexOf("gnupg") >= 0 || keyManagerLoader.storagePluginName.indexOf("smime") >= 0
+
     sourceComponent: Column {
         property alias keyManager: keyManager
 
@@ -31,7 +34,8 @@ Loader {
         Button {
             //% "Generate new key"
             text: qsTrId("secrets_ui-me-generate_new_key")
-            enabled: !keyManager.busy
+            enabled: !keyManager.busy && visible
+            visible: !_isGnuPGPlugin
             anchors.horizontalCenter: parent.horizontalCenter
             onClicked: {
                 var obj = pageStack.animatorPush("Sailfish.Secrets.Ui.KeyGenerationDialog")
@@ -59,7 +63,8 @@ Loader {
         Button {
             //% "Import key"
             text: qsTrId("secrets_ui-me-import_key")
-            enabled: !keyManager.busy
+            enabled: !keyManager.busy && visible
+            visible: !_isGnuPGPlugin // GnuPG secret key files are .asc not .pem. TODO: support those.
             anchors.horizontalCenter: parent.horizontalCenter
             onClicked: {
                 var obj = pageStack.animatorPush("Sailfish.Pickers.FilePickerPage", {

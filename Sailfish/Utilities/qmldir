@@ -1,0 +1,4 @@
+module Sailfish.Utilities
+plugin sailfishutilitiesplugin
+ActionItem 1.0 ActionItem.qml
+typeinfo plugins.qmltypes

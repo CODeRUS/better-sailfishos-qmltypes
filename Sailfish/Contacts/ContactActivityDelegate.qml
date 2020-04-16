@@ -81,7 +81,7 @@ ListItem {
         id: timestampSecondaryLabel
 
         anchors {
-            verticalCenter: durationIcon.visible || simIcon.visible
+            verticalCenter: durationIcon.visible || simIndicator.visible
                             ? durationIcon.verticalCenter
                             : metadataLabel.verticalCenter
             right: parent.right
@@ -147,47 +147,18 @@ ListItem {
         truncationMode: TruncationMode.Fade
     }
 
-    HighlightImage {
-        id: simIcon
+    ContactActivitySimIndicator {
+        id: simIndicator
 
         anchors {
             left: durationLabel.visible ? durationLabel.right : titleLabel.left
             leftMargin: durationLabel.visible ? Theme.paddingSmall : Math.round(-Theme.paddingSmall/2)
             verticalCenter: durationLabel.verticalCenter
         }
-        visible: status === Image.Ready
-        source: {
-            if (!simManager.valid || simManager.enabledModems.length <= 1) {
-                return ""
-            }
-            switch (root.modemIndex) {
-                case  0: return "image://theme/icon-s-sim-1"
-                case  1: return "image://theme/icon-s-sim-2"
-                default: return ""
-            }
-        }
 
-        color: Theme.secondaryColor
-        highlightColor: Theme.secondaryHighlightColor
-        highlighted: root.highlighted
-    }
+        simManager: root.simManager
+        imsi: model.subscriberIdentity
 
-    Label {
-        id: simLabel
-
-        anchors {
-            verticalCenter: simIcon.verticalCenter
-            left: simIcon.right
-            right: timestampSecondaryLabel.left
-            rightMargin: Theme.paddingSmall
-        }
-
-        text: simIcon.visible
-              ? simManager.modemSimModel.get(modemIndex).operatorDescription
-              : ""
-        font.pixelSize: Theme.fontSizeExtraSmall
-        color: root.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
-        truncationMode: TruncationMode.Fade
     }
 
     Label {

@@ -10,12 +10,15 @@ import Sailfish.Silica 1.0
 import org.nemomobile.systemsettings 1.0
 import Nemo.Mce 1.0
 
-Item {
+SilicaItem {
     id: batteryStatusIndicator
+
+    property string iconSuffix
     property alias icon: batteryStatusIndicatorImage.source
     property alias text: batteryStatusIndicatorText.text
     property alias color: batteryStatusIndicatorText.color
     property real totalHeight: height
+    property bool usbPreparingMode
 
     height: Theme.iconSizeExtraSmall
     width: batteryStatusIndicatorText.x+batteryStatusIndicatorText.width
@@ -29,7 +32,7 @@ Item {
 
     readonly property bool isCharging: batteryStatus.chargerStatus == BatteryStatus.Connected
 
-    Item {
+    Icon {
         id: chargeItem
         anchors.verticalCenter: parent.verticalCenter
         height: chargeCableIcon.height
@@ -44,7 +47,7 @@ Item {
             Behavior on x { NumberAnimation { id: chargeCableAnim; duration: 500; easing.type: Easing.InOutQuad } }
         }
 
-        layer.enabled: usbModeSelector.preparingMode != ""
+        layer.enabled: usbPreparingMode
         layer.effect: ShaderEffect {
             property real pulse
             NumberAnimation on pulse {
@@ -79,7 +82,7 @@ Item {
         }
     }
 
-    Image {
+    Icon {
         id: batteryStatusIndicatorImage
         anchors.verticalCenter: parent.verticalCenter
         x: Math.max(chargeItem.width, Theme.paddingMedium)
@@ -121,6 +124,6 @@ Item {
             pixelSize: Theme.fontSizeSmall
         }
         text: batteryStatus.chargePercentage < 0 ? "" : batteryStatus.chargePercentage + "%"
-        color: Theme.primaryColor
+        color: batteryStatusIndicator.palette.primaryColor
     }
 }

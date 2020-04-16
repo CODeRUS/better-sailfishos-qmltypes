@@ -2,6 +2,8 @@ import QtQuick 2.1
 import Sailfish.Silica 1.0
 import Sailfish.Secrets.Ui 1.0
 import Sailfish.Crypto 1.0
+import Sailfish.FileManager 1.0
+import Sailfish.Gallery 1.0
 
 Dialog {
     id: root
@@ -28,7 +30,7 @@ Dialog {
             }
 
             FileInfoItem {
-                source: root.keySource
+                fileInfo: FileInfo { source: root.keySource }
             }
 
             TextField {

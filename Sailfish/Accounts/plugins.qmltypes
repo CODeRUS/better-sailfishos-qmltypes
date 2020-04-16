@@ -51,6 +51,8 @@ Module {
         Property { name: "providerName"; type: "string"; isReadonly: true }
         Property { name: "displayName"; type: "string" }
         Property { name: "defaultCredentialsUserName"; type: "string"; isReadonly: true }
+        Property { name: "provisioned"; type: "bool"; isReadonly: true }
+        Property { name: "readonly"; type: "bool"; isReadonly: true }
         Property { name: "supportedServiceNames"; type: "QStringList"; isReadonly: true }
         Property { name: "status"; type: "Status"; isReadonly: true }
         Property { name: "error"; type: "ErrorType"; isReadonly: true }
@@ -574,7 +576,13 @@ Module {
         prototype: "QAbstractListModel"
         exports: ["Sailfish.Accounts/ProviderModel 1.0"]
         exportMetaObjectRevisions: [0]
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "providerNames"; type: "QStringList"; isReadonly: true }
         Property { name: "serviceFilter"; type: "QStringList" }
+        Property { name: "providerFilter"; type: "QStringList" }
+        Property { name: "excludeProvidersForUncreatableAccounts"; type: "bool" }
+        Property { name: "otherExcludedProviders"; type: "QStringList" }
+        Signal { name: "rowCountChanged" }
     }
     Component {
         name: "Service"

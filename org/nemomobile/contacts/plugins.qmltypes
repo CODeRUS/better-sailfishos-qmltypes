@@ -9,6 +9,24 @@ import QtQuick.tooling 1.2
 Module {
     dependencies: ["QtQuick 2.0"]
     Component {
+        name: "KnownContacts"
+        prototype: "QObject"
+        exports: ["org.nemomobile.contacts/KnownContacts 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "storeContact"
+            type: "bool"
+            Parameter { name: "contact"; type: "QVariantMap" }
+        }
+        Method {
+            name: "storeContacts"
+            type: "bool"
+            Parameter { name: "contacts"; type: "QVariantList" }
+        }
+    }
+    Component {
         name: "SeasideDisplayLabelGroupModel"
         prototype: "QAbstractListModel"
         exports: ["org.nemomobile.contacts/PeopleDisplayLabelGroupModel 1.0"]
@@ -72,7 +90,8 @@ Module {
                 "NoPropertyRequired": 0,
                 "AccountUriRequired": 1,
                 "PhoneNumberRequired": 2,
-                "EmailAddressRequired": 4
+                "EmailAddressRequired": 4,
+                "OrganizationRequired": 8
             }
         }
         Enum {
@@ -117,7 +136,9 @@ Module {
                 "NoteDetailsRole": 275,
                 "CompanyNameRole": 276,
                 "TitleRole": 277,
-                "RoleRole": 278
+                "RoleRole": 278,
+                "NameDetailsRole": 279,
+                "FilterMatchDataRole": 280
             }
         }
         Property { name: "populated"; type: "bool"; isReadonly: true }

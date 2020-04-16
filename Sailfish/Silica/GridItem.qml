@@ -40,57 +40,89 @@ import "private"
 ViewItem {
     id: gridItem
 
+    property bool openRemorseBelow: width < Theme.itemSizeHuge
     property Item _gridView
-    readonly property int _gridViewColumns: _gridView ? Math.round(_gridView.width/_gridView.cellWidth) : 0
-    readonly property int _gridViewIndex: model.index
-    property Item _page
+    property Item __silica_remorse_content
+    property Item _flickable
 
     width: _gridView ? _gridView.cellWidth : Screen.width/3
     contentHeight: _gridView ? _gridView.cellHeight : Screen.width/3
+    contentItem.y: { 0 }
 
     Component.onCompleted: {
         _gridView = Util.findParentWithProperty(gridItem, "__silica_gridview")
-        _page = Util.findPage(gridItem)
+        _flickable = Util.findFlickable(gridItem)
     }
 
-    Item {
+    function remorseDelete(action, timeout) {
+        return remorseAction("", action, timeout)
+    }
+
+    function remorseAction(text, action, timeout) {
+        var previousRemorse = _gridView ? _gridView.__silica_remorse_item : null
+        if (previousRemorse && previousRemorse.state == "active") {
+            _gridView.__silica_remorse_item._trigger()
+        }
+
+        if (!openRemorseBelow) {
+            return Remorse.itemAction(contentItem, text, action, timeout)
+        } else {
+            remorseContainer.active = true
+            __silica_remorse_item = Remorse.itemAction(__silica_remorse_content, text, action, timeout)
+            __silica_remorse_item._belowGridItem = true
+            if (_gridView) _gridView.__silica_remorse_item = __silica_remorse_item
+            return __silica_remorse_item
+        }
+    }
+
+    function _calculateMenuOffset() {
+        if (_gridView) {
+            var columns = Math.round(_gridView.width/_gridView.cellWidth)
+            _gridView._menuOpenOffsetItemsIndex = model.index - (model.index % columns) + columns
+        }
+    }
+
+    StateGroup {
         states: [
             State {
                 name: "menuOpen"
-                when: !!(!_gridView && gridItem._menuItem && gridItem._menuItem.parent)
+                when: !!(gridItem._menuItem && gridItem._menuItem.parent)
 
                 PropertyChanges {
                     target: gridItem._menuItem
-                    width: _page ? _page.width : Screen.width
+                    width: _flickable ? _flickable.width : Screen.width
                 }
                 PropertyChanges {
                     target: gridItem
                     z: 1000
                 }
-            },
-            State {
-                name: "gridViewMenuOpen"
-                when: !!(_gridView && gridItem._menuItem && gridItem._menuItem.parent)
-                extend: "menuOpen"
-                PropertyChanges {
-                    target: _gridView
-                    _menuOpenOffsetItemsIndex: _gridViewIndex - (_gridViewIndex % _gridViewColumns) + _gridViewColumns
-                }
             }
         ]
+        transitions: Transition {
+            to: "menuOpen"
+            ScriptAction {
+                script: {
+                    var previousRemorse = _gridView ? _gridView.__silica_remorse_item : null
+                    if (previousRemorse && previousRemorse.state == "active") {
+                        _gridView.__silica_remorse_item._trigger()
+                    }
+                    _calculateMenuOffset()
+                }
+            }
+        }
+    }
+
+    Loader {
+        id: remorseContainer
+
+        active: false
+        source: "private/GridItemRemorseContainer.qml"
     }
 
     Binding {
-        when: !!(_gridView && _gridView.__silica_contextmenu_instance
-                 && model.index >= _gridView._menuOpenOffsetItemsIndex)
+        when: !!(_gridView && model.index >= _gridView._menuOpenOffsetItemsIndex)
         target: gridItem.contentItem
         property: "y"
-        value: {
-            if (_gridView && _gridView.__silica_contextmenu_instance) {
-                return _gridView.__silica_contextmenu_instance.height
-            } else {
-                return 0
-            }
-        }
+        value: _gridView ? _gridView.__silica_menu_height : 0
     }
 }

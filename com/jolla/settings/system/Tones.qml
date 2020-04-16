@@ -1,10 +1,17 @@
+/****************************************************************************
+**
+** Copyright (c) 2013-2019 Jolla Ltd.
+** Copyright (c) 2019 Open Mobile Platform LLC.
+** License: Proprietary
+**
+****************************************************************************/
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Media 1.0
 import com.jolla.settings 1.0
 import com.jolla.settings.system 1.0
 import org.nemomobile.systemsettings 1.0
-import org.freedesktop.contextkit 1.0
+import org.nemomobile.ofono 1.0
 
 Item {
     // Object which should contain tone related properties.
@@ -17,14 +24,8 @@ Item {
         id: metadataReader
     }
 
-    ContextProperty {
-        id: capabilityVoiceContextProperty
-        key: "Cellular.CapabilityVoice"
-    }
-
-    ContextProperty {
-        id: capabilityDataContextProperty
-        key: "Cellular.CapabilityData"
+    OfonoModemManager {
+        id: modemManager
     }
 
     Column {
@@ -33,7 +34,7 @@ Item {
         width: parent.width
 
         ToneItem {
-            visible: capabilityVoiceContextProperty.value || capabilityVoiceContextProperty.value === undefined
+            visible: modemManager.availableModems.length > 0
             //% "Ringtone"
             defaultText: qsTrId("settings_sound-la-ringtone")
             //% "Current ringtone"
@@ -55,7 +56,7 @@ Item {
 */
 
         ToneItem {
-            visible: capabilityDataContextProperty.value || capabilityDataContextProperty.value === undefined
+            visible: modemManager.availableModems.length > 0
             //% "Message"
             defaultText: qsTrId("settings_sound-la-message")
             //% "Current message tone"

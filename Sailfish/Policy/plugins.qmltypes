@@ -37,6 +37,7 @@ Module {
         Property { name: "vpnConnectionSettingsEnabled"; type: "bool"; isReadonly: true }
         Property { name: "vpnConfigurationSettingsEnabled"; type: "bool"; isReadonly: true }
         Property { name: "browserEnabled"; type: "bool"; isReadonly: true }
+        Property { name: "accountCreationEnabled"; type: "bool"; isReadonly: true }
     }
     Component {
         name: "Sailfish::PolicyValue"
@@ -75,7 +76,8 @@ Module {
                 "MobileDataAccessPointSettingsEnabled": 26,
                 "VpnConnectionSettingsEnabled": 27,
                 "VpnConfigurationSettingsEnabled": 28,
-                "BrowserEnabled": 29
+                "BrowserEnabled": 29,
+                "AccountCreationEnabled": 30
             }
         }
         Property { name: "policyType"; type: "int" }

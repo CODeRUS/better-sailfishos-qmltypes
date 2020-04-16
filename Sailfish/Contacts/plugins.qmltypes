@@ -119,7 +119,8 @@ Module {
                 "TopLeft": 1,
                 "TopRight": 2,
                 "BottomRight": 4,
-                "BottomLeft": 8
+                "BottomLeft": 8,
+                "AllCorners": 15
             }
         }
         Property { name: "radius"; type: "float" }
@@ -1172,6 +1173,24 @@ Module {
         Property { name: "rightMargin"; type: "float" }
     }
     Component {
+        name: "KnownContacts"
+        prototype: "QObject"
+        exports: ["org.nemomobile.contacts/KnownContacts 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "storeContact"
+            type: "bool"
+            Parameter { name: "contact"; type: "QVariantMap" }
+        }
+        Method {
+            name: "storeContacts"
+            type: "bool"
+            Parameter { name: "contacts"; type: "QVariantList" }
+        }
+    }
+    Component {
         name: "MInverseMouseArea"
         defaultProperty: "data"
         prototype: "QQuickItem"
@@ -1585,7 +1604,8 @@ Module {
                 "NoPropertyRequired": 0,
                 "AccountUriRequired": 1,
                 "PhoneNumberRequired": 2,
-                "EmailAddressRequired": 4
+                "EmailAddressRequired": 4,
+                "OrganizationRequired": 8
             }
         }
         Enum {
@@ -1630,7 +1650,9 @@ Module {
                 "NoteDetailsRole": 275,
                 "CompanyNameRole": 276,
                 "TitleRole": 277,
-                "RoleRole": 278
+                "RoleRole": 278,
+                "NameDetailsRole": 279,
+                "FilterMatchDataRole": 280
             }
         }
         Property { name: "populated"; type: "bool"; isReadonly: true }

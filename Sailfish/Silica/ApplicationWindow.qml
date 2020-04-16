@@ -1,7 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Matt Vogt <matthew.vogt@jollamobile.com>
+** Copyright (c) 2013-2020 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Sailfish Silica UI component package.
@@ -170,11 +170,6 @@ Window {
     focus: true
     objectName: "rootWindow"
 
-    _windowOpacity: ambienceChangeTimer.running ? 0.0 : 1.0
-    Behavior on _windowOpacity {
-        NumberAnimation { easing.type: Easing.InOutQuad; duration: 400; alwaysRunToEnd: true }
-    }
-
     // If we have anything assigned to cover, then we let lipstick know that a cover window may be coming.
     _haveCoverHint: !!cover
 
@@ -234,6 +229,46 @@ Window {
         Timer {
             id: ambienceChangeTimer
             interval: 600
+        }
+
+        StateGroup {
+            id: ambienceChangeStates
+
+            states: State {
+                name: "Changing"
+                when: ambienceChangeTimer.running
+
+                PropertyChanges {
+                    target: window.pageStack.currentPage && window.pageStack.currentPage._opaqueBackground
+                            ? window.pageStack.currentPage
+                            : window
+                    _windowOpacity: 0
+                }
+            }
+
+            transitions: [
+                Transition {
+                    to: "Changing"
+
+                    NumberAnimation {
+                        id: ambienceChangeFadeOut
+
+                        property: "_windowOpacity"
+                        easing.type: Easing.InOutQuad
+                        duration: 400;
+                        alwaysRunToEnd: true
+                    }
+                }, Transition {
+                    from: "Changing"
+
+                    NumberAnimation {
+                        property: "_windowOpacity"
+                        easing.type: Easing.InOutQuad
+                        duration: 400;
+                        alwaysRunToEnd: true
+                    }
+                }
+            ]
         }
 
         Item {

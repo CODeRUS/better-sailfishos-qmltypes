@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
-import Sailfish.Crypto 1.0
+import Sailfish.Crypto 1.0 as Crypto
 import Sailfish.Secrets 1.0 as Secrets
 import Sailfish.Secrets.Ui 1.0
 
@@ -12,6 +12,9 @@ Column {
     property alias storagePluginName: collectionKeysView.storagePluginName
     property alias collectionName: collectionKeysView.collectionName
     property bool isCollectionLocked
+
+    property bool _isGnuPGImportCollection: (storagePluginName.indexOf("gnupg") >= 0 || storagePluginName.indexOf("smime") >= 0) && collectionName == "import"
+    visible: !_isGnuPGImportCollection
 
     BackgroundItem {
         id: backgroundItem

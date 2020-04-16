@@ -9,6 +9,8 @@ SilicaGridView {
     property bool highlightEnabled: true
     property bool unfocusHighlightEnabled
     property bool forceUnfocusHighlight
+    property alias highlightActive: highlightItem.active
+    property alias highlightOpacity: highlightItem.opacity
     property real _unfocusedOpacity: unfocusHighlightEnabled && (currentItem != null && currentItem.pressedAndHolded)
                                      || forceUnfocusHighlight
                                      ? Theme.opacityFaint : 1.0

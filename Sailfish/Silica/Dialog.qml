@@ -95,16 +95,10 @@ Page {
     }
 
     function accept() {
-        if (canAccept) {
-            _dialogDone(DialogResult.Accepted)
-        }
-
-        // Attempt to navigate even if it will fail, so that feedback can be generated
         pageStack.navigateForward()
     }
 
     function reject() {
-        _dialogDone(DialogResult.Rejected)
         pageStack.navigateBack()
     }
 

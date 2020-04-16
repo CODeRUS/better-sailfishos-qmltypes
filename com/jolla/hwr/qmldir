@@ -1,0 +1,3 @@
+module com.jolla.hwr
+plugin jollahwrplugin
+typeinfo plugins.qmltypes

@@ -4,7 +4,6 @@ import Sailfish.Accounts 1.0
 import MeeGo.Connman 0.2
 import com.jolla.settings.accounts 1.0
 import org.nemomobile.configuration 1.0
-import "accountcreationmanager.js" as ManagerScript
 
 /*
 This can be used to start the UI flow for creating a specific account (e.g. a Jolla account)
@@ -77,6 +76,7 @@ Item {
     property var endDestinationReplaceTarget
 
     property var serviceFilter: []
+    property var providerFilter: []
 
     signal accountCreated(int newAccountId, string providerName)
     signal accountCreationError(string errorMessage, string providerName)
@@ -84,9 +84,6 @@ Item {
     signal finished(bool success)   // success=true if all selected accounts were created, false otherwise
 
     property var _trackedObjects: ({})
-
-    // xxxxxx for legacy versions of email and active sync plugins xxxxxx
-    property QtObject _currSettingsPage
 
     function startAccountCreation() {
         pageStack.animatorPush(accountProviderPickerComponent)
@@ -118,15 +115,6 @@ Item {
         }
     }
 
-    // xxxxxx for legacy versions of email and active sync plugins xxxxxx
-    function createSettingsPage(providerName, properties) {
-        if (_currSettingsPage != null) {
-            _currSettingsPage.destroy()
-        }
-        _currSettingsPage = ManagerScript.createSettingsPage(providerName, properties)
-        return _currSettingsPage
-    }
-
     function deleteAccount(accountId) {
         var account = _accountManager.account(accountId)
         if (account === null) {
@@ -142,7 +130,7 @@ Item {
                 }
                 var accountIdentifier = account.identifier
                 account.remove()
-                syncAdapter.triggerSync(providerName, accountIdentifier)
+                syncAdapter.triggerSync(accountIdentifier)
             }
         })
     }
@@ -186,13 +174,13 @@ Item {
 
     AccountSyncAdapter { id: syncAdapter }
 
-     // used by accountcreationmanager.js
     property AccountManager _accountManager: AccountManager {}
     property NetworkManager _networkManager: NetworkManager {}
     readonly property bool hasNetworkConnectivity: _networkManager.state == "online"
 
     Component {
         id: accountProviderPickerComponent
+
         Page {
             SilicaFlickable {
                 anchors.fill: parent
@@ -200,21 +188,27 @@ Item {
 
                 PageHeader {
                     id: accountPickerHeader
+                    //% "Add account"
+                    title: qsTrId("settings-accounts-la-add_account")
                 }
+
                 AccountProviderPicker {
                     id: accountPicker
+
                     anchors {
                         left: parent.left
                         right: parent.right
                         top: accountPickerHeader.bottom
                     }
+                    excludeProvidersForUncreatableAccounts: true
                     serviceFilter: accountCreationManager.serviceFilter
-                    _accountManager: accountCreationManager._accountManager
+                    providerFilter: accountCreationManager.providerFilter
 
                     onProviderSelected: {
                         accountCreationManager.startAccountCreationForProvider(providerName, {})
                     }
                 }
+
                 VerticalScrollDecorator {}
             }
         }

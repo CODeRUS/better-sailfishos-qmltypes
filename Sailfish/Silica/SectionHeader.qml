@@ -37,7 +37,8 @@ import Sailfish.Silica 1.0
 
 Label {
     x: Theme.horizontalPageMargin
-    height: Theme.itemSizeExtraSmall
+    height: Theme.itemSizeSmall
+    topPadding: Theme.paddingMedium
     width: (parent ? parent.width : Screen.width) - x*2
     verticalAlignment: Text.AlignVCenter
     horizontalAlignment: Text.AlignRight

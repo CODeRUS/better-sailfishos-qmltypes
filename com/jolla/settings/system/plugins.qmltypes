@@ -86,19 +86,20 @@ Module {
             }
         }
         Property { name: "locationEnabled"; type: "bool" }
+        Property { name: "locationMode"; type: "LocationMode" }
+        Property { name: "pendingAgreements"; type: "QStringList"; isReadonly: true }
+        Property { name: "allowedDataSources"; type: "DataSources" }
+        Property { name: "gpsAvailable"; type: "bool"; isReadonly: true }
         Property { name: "gpsEnabled"; type: "bool" }
         Property { name: "gpsFlightMode"; type: "bool" }
-        Property { name: "gpsAvailable"; type: "bool"; isReadonly: true }
-        Property { name: "hereState"; type: "OnlineAGpsState" }
+        Property { name: "locationProviders"; type: "QStringList"; isReadonly: true }
         Property { name: "hereAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "hereState"; type: "OnlineAGpsState" }
+        Property { name: "mlsAvailable"; type: "bool"; isReadonly: true }
         Property { name: "mlsEnabled"; type: "bool" }
         Property { name: "mlsOnlineState"; type: "OnlineAGpsState" }
-        Property { name: "mlsAvailable"; type: "bool"; isReadonly: true }
-        Property { name: "yandexLocatorEnabled"; type: "bool" }
-        Property { name: "yandexLocatorOnlineState"; type: "OnlineAGpsState" }
-        Property { name: "yandexLocatorAvailable"; type: "bool"; isReadonly: true }
-        Property { name: "locationMode"; type: "LocationMode" }
-        Property { name: "allowedDataSources"; type: "DataSources" }
+        Property { name: "yandexAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "yandexOnlineState"; type: "OnlineAGpsState" }
     }
     Component {
         name: "ModemFeatureReader"

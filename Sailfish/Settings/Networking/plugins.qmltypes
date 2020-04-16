@@ -30,6 +30,7 @@ Module {
             name: "readCert"
             type: "string"
             Parameter { name: "fileName"; type: "string" }
+            Parameter { name: "fileType"; type: "string" }
         }
     }
     Component {
@@ -916,8 +917,8 @@ Module {
         Property { name: "ipv4"; type: "QVariantMap" }
         Property { name: "ipv6"; type: "QVariantMap" }
         Property { name: "nameservers"; type: "QStringList" }
-        Property { name: "userRoutes"; type: "QVariantList" }
-        Property { name: "serverRoutes"; type: "QVariantList" }
+        Property { name: "userRoutes"; type: "QVariant" }
+        Property { name: "serverRoutes"; type: "QVariant" }
         Property { name: "properties"; type: "QVariantMap" }
         Property { name: "providerProperties"; type: "QVariantMap" }
         Property { name: "connected"; type: "bool"; isReadonly: true }

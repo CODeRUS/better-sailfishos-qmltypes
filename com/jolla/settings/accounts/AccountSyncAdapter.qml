@@ -13,14 +13,10 @@ QtObject {
         Warning: if any missing profiles are created, this will sync the account, so it should be
         synced before this function is called to avoid losing existing setting changes.
     */
-    function triggerSync(accountIdOrObject, legacyArg) {
+    function triggerSync(accountIdOrObject) {
         if (!accountIdOrObject) {
             console.log("AccountSyncAdapter.qml: cannot sync - invalid account ID or instance")
             return
-        }
-        if (legacyArg !== undefined) {
-            // this function used to accept (providerName, accountId) arguments
-            accountIdOrObject = legacyArg
         }
         if (isNaN(accountIdOrObject)) {
             _triggerSyncForAccount(accountIdOrObject)
@@ -34,14 +30,10 @@ QtObject {
             console.log("AccountSyncAdapter.qml: not syncing account", account.identifier, "because it is disabled")
             return
         }
-        if (account.providerName === "activesync") {
-            asdaemon.typedCall("sync", [{"type":"t", "value": account.identifier}])
-            _finishedWithAccount(account)
-        } else {
-            var waitForProfileCreation = createMissingProfiles(account)
-            if (!waitForProfileCreation) {
-                _doProfileSync(account)
-            }
+
+        var waitForProfileCreation = createMissingProfiles(account)
+        if (!waitForProfileCreation) {
+            _doProfileSync(account)
         }
     }
 
@@ -126,11 +118,5 @@ QtObject {
         service: "com.meego.msyncd"
         path: "/synchronizer"
         iface: "com.meego.msyncd"
-    }
-
-    property DBusInterface asdaemon: DBusInterface {
-        service: "com.nokia.asdbus"
-        path: "/com/nokia/asdbus"
-        iface: "com.nokia.asdbus"
     }
 }

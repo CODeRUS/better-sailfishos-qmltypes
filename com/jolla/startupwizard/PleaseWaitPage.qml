@@ -22,7 +22,6 @@ Page {
     Label {
         id: startLabel
 
-        anchors.centerIn: parent
         horizontalAlignment: Text.AlignHCenter
         width: parent.width - Theme.horizontalPageMargin*2
         wrapMode: Text.Wrap
@@ -49,8 +48,14 @@ Page {
                 return startupWizardManager.translatedText("startupwizard-la-starting_sailfish_please_wait", root.localeName)
             }
         }
-        font.pixelSize: Theme.fontSizeLarge
+        font.pixelSize: Theme.fontSizeExtraLarge
         color: startupWizardManager.defaultHighlightColor()
+
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: busyIndicator.bottom
+            topMargin: Theme.paddingLarge
+        }
     }
 
     BusyIndicator {
@@ -60,12 +65,10 @@ Page {
         onWaitedChanged: if (waited) root.waitingStopped()
 
         running: true
+        y: Math.round(parent.height/4)
+        size: BusyIndicatorSize.Large
         color: startLabel.color
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            top: startLabel.bottom
-            topMargin: Theme.paddingSmall
-        }
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 
     Image {

@@ -33,6 +33,7 @@ Module {
                 "AccountAvailable": 3
             }
         }
+        Property { name: "accessDenied"; type: "bool"; isReadonly: true }
         Property { name: "updateStatus"; type: "UpdateStatus"; isReadonly: true }
         Property { name: "updateProgress"; type: "int"; isReadonly: true }
         Property { name: "osVersion"; type: "string"; isReadonly: true }

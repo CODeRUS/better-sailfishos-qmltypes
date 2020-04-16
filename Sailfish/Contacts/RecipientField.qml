@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 – 2020 Jolla Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import org.nemomobile.contacts 1.0
@@ -13,6 +20,8 @@ Item {
     readonly property alias hasFocus: namesList.editing
     property alias fullSummary: namesList.fullSummary
     property QtObject contactSearchModel
+    property alias onlineSearchModel: namesList.onlineSearchModel
+    property alias onlineSearchDisplayName: namesList.onlineSearchDisplayName
     property bool empty: namesList.summary == ""
     // Supported properties is a combination of: PeopleModel.EmailAddressRequired, AccountUriRequired, PhoneNumberRequired
     property int requiredProperty: PeopleModel.EmailAddressRequired
@@ -52,6 +61,10 @@ Item {
 
     function updateSummary() {
         namesList.updateSummary()
+    }
+
+    function saveNewContacts() {
+        namesList.saveNewContacts()
     }
 
     onMultipleAllowedChanged: {

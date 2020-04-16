@@ -18,6 +18,7 @@ Column {
     property AccountManager accountManager
     property alias account: accountObj
     property int accountId
+    property alias nextFocusItem: mainAccountSettings.nextFocusItem
 
     property alias accountUserName: mainAccountSettings.accountUserName
 
@@ -26,6 +27,7 @@ Column {
     signal aboutToSaveAccount()
     signal accountInitialized()
     signal accountSaveCompleted(var success)
+    signal accountSaveSynced()
 
     function reload(newAccountId) {
         accountId = 0
@@ -78,6 +80,14 @@ Column {
         }
     }
 
+    function testHasCheckedSwitch(repeater) {
+        var hasCheckedSwitch = false
+        for (var i = 0; i < repeater.count; ++i) {
+            hasCheckedSwitch |= repeater.itemAt(i).checked
+        }
+        return hasCheckedSwitch
+    }
+
     property bool _initialized
     property bool _originalEnabled
     property string _originalDisplayName
@@ -114,6 +124,7 @@ Column {
                 root.accountInitialized()
             } else if (status === Account.Synced) {
                 // success
+                accountSaveSynced()
                 if (root._syncProfileWhenAccountSaved) {
                     root._syncProfileWhenAccountSaved = false
                     syncAdapter.triggerSync(account)

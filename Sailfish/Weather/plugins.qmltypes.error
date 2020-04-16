@@ -1,1 +1,1 @@
-DiskUsage::DiskUsage(QObject*) DiskUsage is deprecated in org.nemomobile.systemsettings package 0.5.22 (Sept 2019), use DiskUsage from Nemo.FileManager instead.
+Geoclue client path: "/org/freedesktop/Geoclue/Master/client3"

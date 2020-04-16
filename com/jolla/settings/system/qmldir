@@ -11,6 +11,7 @@ DeviceLockInputPage 1.0 DeviceLockInputPage.qml
 DeviceLockQuery 1.0 DeviceLockQuery.qml
 DisabledByMdmBanner 1.0 DisabledByMdmBanner.qml
 DisabledByMdmView 1.0 DisabledByMdmView.qml
+EncryptionUnlocker 1.0 EncryptionUnlocker.qml
 LanguagePickerPage 1.0 LanguagePickerPage.qml
 MandatoryDeviceLockInputPage 1.0 MandatoryDeviceLockInputPage.qml
 NetworkAddressField 1.0 NetworkAddressField.qml

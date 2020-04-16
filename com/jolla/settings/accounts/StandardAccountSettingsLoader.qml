@@ -2,7 +2,6 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
 import com.jolla.settings.accounts 1.0
-import "accountutil.js" as AccountUtil
 
 QtObject {
     id: root
@@ -54,14 +53,15 @@ QtObject {
         }
         var found = false
         var foundProfileName = ""
-        for (var i=0; i<profiles.length; i++) {
+        var i
+        for (i = 0; i < profiles.length; i++) {
             if (profiles[i] === profileId) {
                 foundProfileName = profiles[i]
                 found = true
             }
         }
         if (found === false) {
-            for (var i=0; i<profiles.length; i++) {
+            for (i = 0; i < profiles.length; i++) {
                 if (profiles[i].indexOf(profileId) === 0) {
                     foundProfileName = profiles[i]
                     found = true
@@ -138,13 +138,10 @@ QtObject {
             if (service.serviceType == "sync" && service.name.indexOf("-sync", service.name.length - 5) !== -1) {
                 labelText = "" // deliberately unset the labelText for "sync" (signon) services.
             } else {
-                labelText = AccountUtil.serviceDisplayName(service.name, service.displayName)
-                if (labelText.length === 0) {
-                    labelText = AccountUtil.serviceDisplayNameFromType(service.serviceType, service.displayName)
-                }
+                labelText = AccountsUtil.serviceDisplayNameForService(service)
             }
 
-            description = AccountUtil.serviceDescription(service.serviceType, accountProvider.displayName, accountProvider.name)
+            description = AccountsUtil.serviceDescription(service.serviceType, accountProvider.displayName, accountProvider.name)
             var props = {
                 "serviceName": service.name,
                 "iconName": service.iconName,

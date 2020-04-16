@@ -43,8 +43,8 @@ BackgroundItem {
                 width: height
                 height: parent.height
                 anchors.verticalCenter: parent.verticalCenter
-                source: weather && weather.weatherType.length > 0 ? "image://theme/graphic-l-weather-" + weather.weatherType
-                                                                    + "?" + (highlighted ? Theme.highlightColor : Theme.primaryColor)
+                source: weather && weather.weatherType.length > 0 ? "image://theme/icon-l-weather-" + weather.weatherType
+                                                                    + (highlighted ? ("?" + Theme.highlightColor) : "")
                                                                   : ""
             }
             Label {

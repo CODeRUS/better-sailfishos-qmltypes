@@ -79,5 +79,9 @@ Module {
             type: "QUrl"
             Parameter { name: "file"; type: "QUrl" }
         }
+        Method {
+            name: "completePhoto"
+            Parameter { name: "file"; type: "QUrl" }
+        }
     }
 }

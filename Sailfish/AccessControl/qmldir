@@ -1,0 +1,3 @@
+module Sailfish.AccessControl
+plugin sailfishaccesscontrolplugin
+typeinfo plugins.qmltypes

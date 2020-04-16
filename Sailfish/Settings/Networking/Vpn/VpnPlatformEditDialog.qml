@@ -114,7 +114,12 @@ VpnEditDialog {
         }
         var userRoutes = root.connectionProperties['userRoutes']
         if (userRoutes instanceof Array) {
-            props['userRoutes'] = userRoutes
+            // Unclear why this is necessary, but using userRoutes directly gives a corrupted result
+            var routeArray = []
+            for (var i = 0; i < userRoutes.length; i++) {
+                routeArray.push(userRoutes[i])
+            }
+            props['userRoutes'] = routeArray
         }
 
         if (newConnection) {

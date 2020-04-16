@@ -118,10 +118,10 @@ Module {
         }
         Signal {
             name: "pageFinished"
-            Parameter { name: "index"; type: "int" }
+            Parameter { name: "requestId"; type: "int" }
             Parameter { name: "resolution"; type: "int" }
             Parameter { name: "subpart"; type: "QRect" }
-            Parameter { name: "page"; type: "QSGTexture"; isPointer: true }
+            Parameter { name: "page"; type: "QImage" }
             Parameter { name: "extraData"; type: "int" }
         }
         Signal {
@@ -145,27 +145,6 @@ Module {
             Parameter { name: "page"; type: "int" }
         }
         Method {
-            name: "requestPage"
-            Parameter { name: "index"; type: "int" }
-            Parameter { name: "size"; type: "int" }
-            Parameter { name: "window"; type: "QQuickWindow"; isPointer: true }
-            Parameter { name: "subpart"; type: "QRect" }
-            Parameter { name: "extraData"; type: "int" }
-        }
-        Method {
-            name: "requestPage"
-            Parameter { name: "index"; type: "int" }
-            Parameter { name: "size"; type: "int" }
-            Parameter { name: "window"; type: "QQuickWindow"; isPointer: true }
-            Parameter { name: "subpart"; type: "QRect" }
-        }
-        Method {
-            name: "requestPage"
-            Parameter { name: "index"; type: "int" }
-            Parameter { name: "size"; type: "int" }
-            Parameter { name: "window"; type: "QQuickWindow"; isPointer: true }
-        }
-        Method {
             name: "prioritizeRequest"
             Parameter { name: "index"; type: "int" }
             Parameter { name: "size"; type: "int" }
@@ -178,6 +157,7 @@ Module {
         }
         Method {
             name: "cancelPageRequest"
+            type: "bool"
             Parameter { name: "index"; type: "int" }
         }
         Method { name: "requestPageSizes" }

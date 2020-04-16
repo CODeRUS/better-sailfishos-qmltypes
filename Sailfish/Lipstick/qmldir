@@ -20,4 +20,5 @@ Pannable 1.0 Pannable.qml
 PannableItem 1.0 PannableItem.qml
 BatteryStatusIndicator 1.0 BatteryStatusIndicator.qml
 ClockItem 1.0 ClockItem.qml
+SwitcherGrid 1.0 SwitcherGrid.qml
 typeinfo plugins.qmltypes

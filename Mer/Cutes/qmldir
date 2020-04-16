@@ -1,3 +1,0 @@
-module Mer.Cutes
-plugin cutesqml
-typeinfo plugins.qmltypes

@@ -1,7 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
-import MeeGo.Connman 0.2
 import com.jolla.settings.accounts 1.0
 
 Item {
@@ -15,36 +14,20 @@ Item {
     signal credentialsUpdated(int updatedAccountId)
     signal credentialsUpdateError(string errorMessage)
 
-    function showCredentialsPromptDialog(providerName, accountId, endDestination) {
-        var props = {
-            "providerName" : providerName,
-            "accountId": accountId,
-            "endDestination": endDestination,
-            "endDestinationReplaceTarget": pageStack.currentPage
-        }
-        var credentialsPromptDialog = credentialsPromptDialogComponent.createObject(root, props)
-        _trackedObjects[credentialsPromptDialog] = undefined
-        credentialsPromptDialog.finished.connect(function() {
-            delete _trackedObjects[credentialsPromptDialog]
-            credentialsPromptDialog.destroy()
-            root.running = false
-        })
-        credentialsPromptDialog.credentialsUpdated.connect(credentialsUpdated)
-        pageStack.animatorPush(credentialsPromptDialog)
-        root.running = true
+    function pushCredentialsUpdatePage(accountId, endDestination) {
+        _showCredentialsUpdatePage(accountId, PageStackAction.Push, endDestination)
     }
 
-    function pushCredentialsUpdatePage(accountId, userName) {
-        _showCredentialsUpdatePage(accountId, userName, PageStackAction.Push)
-    }
-    function replaceWithCredentialsUpdatePage(accountId) {
-        _showCredentialsUpdatePage(accountId, "", PageStackAction.Replace)
+    function replaceWithCredentialsUpdatePage(accountId, endDestination) {
+        _showCredentialsUpdatePage(accountId, PageStackAction.Replace, endDestination)
     }
 
-    function _showCredentialsUpdatePage(accountId, userName, pageStackAction) {
+    function _showCredentialsUpdatePage(accountId, pageStackAction, endDestination) {
         var currentPage = pageStack.currentPage
-        var replaceTarget = PageStackAction.Replace ? pageStack.previousPage(currentPage) : undefined
-        var credentialsUpdater = _newCredentialsUpdater(userName)
+        var action = pageStackAction
+        var replaceTarget = (action === PageStackAction.Replace) ? endDestination || pageStack.previousPage(currentPage) : undefined
+
+        var credentialsUpdater = _newCredentialsUpdater()
         _trackedObjects[credentialsUpdater] = undefined
         credentialsUpdater.finished.connect(function() {
             delete _trackedObjects[credentialsUpdater]
@@ -52,7 +35,7 @@ Item {
             root.running = false
         })
         credentialsUpdater.credentialsAgentReady.connect(function(credentialsAgent) {
-            switch (pageStackAction) {
+            switch (action) {
             case PageStackAction.Push:
                 credentialsAgent.endDestination = currentPage
                 credentialsAgent.endDestinationAction = PageStackAction.Pop
@@ -68,27 +51,24 @@ Item {
                 pageStack.animatorReplaceAbove(replaceTarget, credentialsAgent.initialPage)
                 break
             default:
-                throw new Error("AccountCredentialsManager: unsupported pageStackAction!", pageStackAction)
+                throw new Error("AccountCredentialsManager: unsupported pageStackAction!", action)
             }
         })
         credentialsUpdater.start(accountId)
         root.running = true
     }
 
-    function _newCredentialsUpdater(userName) {
-        var updater = credentialsUpdateComponent.createObject(root, { "userName": userName })
+    function _newCredentialsUpdater() {
+        var updater = credentialsUpdateComponent.createObject(root)
         updater.credentialsUpdated.connect(root.credentialsUpdated)
         updater.credentialsUpdateError.connect(root.credentialsUpdateError)
         return updater
     }
 
-    property NetworkManager _networkManager: NetworkManager {}
-
     Component {
         id: credentialsUpdateComponent
         Account {
             property bool hasFinished
-            property string userName
 
             property var _credentialsAgentRunner
             property bool _saving
@@ -152,8 +132,7 @@ Item {
                 }
                 var agentProperties = {
                     "accountManager": accountManager,
-                    "accountProvider": accountManager.provider(providerName),
-                    "userName": userName
+                    "accountProvider": accountManager.provider(providerName)
                 }
                 if (agentProperties["accountProvider"] == null) {
                     throw new Error("Unable to obtain provider with name: " + providerName)
@@ -173,6 +152,9 @@ Item {
                 credentialsAgentReady(_credentialsAgentRunner.agent)
             }
 
+            // In reality this Component should be only used if Account has "CredentialsNeedUpdate"
+            // set to true. Currently all <providerName>-settings.qml plugins and others are already
+            // checking that flag. There's accountNotSignedIn in the AccountSettingsAgent.
             onStatusChanged: {
                 if (identifier == 0) {
                     return
@@ -221,138 +203,5 @@ Item {
     Component {
         id: agentRunnerComponent
         AccountAgentRunner {}
-    }
-
-    Component {
-        id: credentialsPromptDialogComponent
-        Dialog {
-            property string providerName
-            property int accountId
-            property var endDestination
-            property var endDestinationReplaceTarget
-
-            property Provider _provider: accountManager.provider(providerName)
-            property var _credentialsUpdater
-
-            signal credentialsUpdated(int updatedAccountId)
-            signal finished()
-
-            function _checkFinished() {
-                if (_credentialsUpdater != null && _credentialsUpdater.hasFinished
-                        && pageContainer == null) {
-                    finished()
-                }
-            }
-
-            function _credentialsAgentReady(credentialsAgent) {
-                credentialsAgent.endDestination = endDestination
-                credentialsAgent.endDestinationAction = PageStackAction.Replace
-                credentialsAgent.endDestinationProperties = {}
-                credentialsAgent.endDestinationReplaceTarget = endDestinationReplaceTarget
-
-                if (_networkManager.state == "online") {
-                    acceptDestination = credentialsAgent.initialPage
-                } else {
-                    acceptDestination = networkCheckComponent
-                    acceptDestinationProperties = {
-                        "acceptDestination": credentialsAgent.initialPage,
-                        "acceptDestinationAction": PageStackAction.Replace
-                    }
-                }
-            }
-
-            onPageContainerChanged: {
-                _checkFinished()
-            }
-
-            Component.onCompleted: {
-                _credentialsUpdater = _newCredentialsUpdater(accountId)
-                _credentialsUpdater.credentialsUpdated.connect(credentialsUpdated)
-                _credentialsUpdater.finished.connect(_checkFinished)
-                _credentialsUpdater.credentialsAgentReady.connect(_credentialsAgentReady)
-                _credentialsUpdater.start(accountId)
-            }
-
-            DialogHeader {
-                id: header
-                //: Sign in to the account
-                //% "Sign in"
-                acceptText: qsTrId("settings_accounts-he-sign_in")
-            }
-
-            Column {
-                anchors {
-                    top: header.bottom
-                    left: parent.left
-                    leftMargin: Theme.horizontalPageMargin
-                    right: parent.right
-                    rightMargin: Theme.horizontalPageMargin
-                }
-                spacing: Theme.paddingLarge
-
-                Label {
-                    //: User needs to sign in to account
-                    //% "Not signed in"
-                    text: qsTrId("settings_accounts-he-not_signed_in")
-                    font.pixelSize: Theme.fontSizeExtraLarge
-                    width: parent.width
-                    wrapMode: Text.Wrap
-                    color: Theme.highlightColor
-                }
-
-                Label {
-                    //: User needs to sign in to account to update the account credentials
-                    //% "Sign in now to update your credentials for this account."
-                    text: qsTrId("settings_accounts-la-sign_in_now_to_update_credentials")
-                    font.pixelSize: Theme.fontSizeSmall
-                    width: parent.width
-                    height: implicitHeight + Theme.paddingMedium
-                    wrapMode: Text.Wrap
-                    color: Theme.rgba(Theme.highlightColor, 0.9)
-                }
-
-                Item {
-                    width: parent.width
-                    height: icon.height
-
-                    AccountIcon {
-                        id: icon
-                        source: _provider.iconName
-                    }
-                    Label {
-                        id: accountName
-                        anchors {
-                            left: icon.right
-                            leftMargin: Theme.paddingLarge
-                            right: parent.right
-                            rightMargin: Theme.horizontalPageMargin
-                            verticalCenter: parent.verticalCenter
-                            verticalCenterOffset: -implicitHeight/2
-                        }
-                        truncationMode: TruncationMode.Fade
-                        text: _provider.displayName
-                        color: Theme.highlightColor
-                    }
-                    Label {
-                        anchors {
-                            left: icon.right
-                            leftMargin: Theme.paddingLarge
-                            top: accountName.bottom
-                            right: parent.right
-                        }
-                        truncationMode: TruncationMode.Fade
-                        text: _credentialsUpdater.displayName
-                        color: Theme.secondaryHighlightColor
-                    }
-                }
-            }
-        }
-    }
-
-    Component {
-        id: networkCheckComponent
-        NetworkCheckDialog {
-            networkManager: root._networkManager
-        }
     }
 }

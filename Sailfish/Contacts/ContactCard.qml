@@ -1,10 +1,16 @@
+/****************************************************************************
+**
+** Copyright (C) 2013-2019 Jolla Ltd.
+** Copyright (c) 2019 Open Mobile Platform LLC.
+**
+****************************************************************************/
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 import Sailfish.Contacts 1.0 as SailfishContacts
+import MeeGo.QOfono 0.2
 import org.nemomobile.contacts 1.0
 import org.nemomobile.dbus 2.0
-import org.freedesktop.contextkit 1.0
 import "contactcard/contactcardmodelfactory.js" as ModelFactory
 import "contactcard"
 
@@ -421,17 +427,26 @@ SilicaFlickable {
         }
     }
 
-    ContextProperty {
-        id: cellular1Status
-        property bool disabled: value == "disabled" || value == undefined
-        property bool registered: value == "registered" || value == "roaming"
-        key: "Cellular.Status"
+    OfonoManager {
+        id: ofonoManager
     }
-    ContextProperty {
+
+    OfonoNetworkRegistration {
+        id: cellular1Status
+
+        property bool disabled: status == ""
+        property bool registered: status == "registered" || status == "roaming"
+
+        modemPath: ofonoManager.modems[0] || ""
+    }
+
+    OfonoNetworkRegistration {
         id: cellular2Status
-        property bool disabled: value == "disabled" || value == undefined
-        property bool registered: value == "registered" || value == "roaming"
-        key: "Cellular_1.Status"
+
+        property bool disabled: status == ""
+        property bool registered: status == "registered" || status == "roaming"
+
+        modemPath: ofonoManager.modems[1] || ""
     }
 
     VerticalScrollDecorator {}

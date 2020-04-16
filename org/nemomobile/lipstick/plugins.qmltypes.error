@@ -1,2 +1,0 @@
-unable to lock lockfile /run/user/100000/../../display/wayland-0.lock, maybe another compositor is running
-Fatal: Failed to open server socket

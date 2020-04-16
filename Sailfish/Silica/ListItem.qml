@@ -64,6 +64,14 @@ ViewItem {
         closeMenu()
     }
 
+    function remorseDelete(action, timeout) {
+        return remorseAction("", action, timeout)
+    }
+
+    function remorseAction(text, action, timeout) {
+        return Remorse.itemAction(contentItem, text, action, timeout)
+    }
+
     Component {
         id: removeComponent
         RemoveAnimation {

@@ -9,16 +9,13 @@ ComboBox {
     //% "EAP method"
     label: qsTrId("settings_network-la-eap_method")
     visible: network && network.securityType === Connman.NetworkService.SecurityIEEE802
-    currentIndex: findIndex(repeater.model, function (item) { return item.value == network.eapMethod }, 0)
 
-    Connections {
-        target: network
-        onEapMethodChanged: {
-            currentIndex = findIndex(repeater.model, function (item) { return item.value == network.eapMethod }, 0)
-        }
+    Binding on currentIndex {
+        when: network
+        value: _findIndex(repeater.model, function (item) { return item.value === network.eapMethod }, 0)
     }
 
-    function findIndex(arr, cb, notfound) {
+    function _findIndex(arr, cb, notfound) {
         if (notfound === undefined)
             notfound = -1
         for (var i = 0; i < arr.length; i++) {
@@ -33,7 +30,8 @@ ComboBox {
             id: repeater
             model: [
                 { label: 'PEAP', value: Connman.NetworkService.EapPEAP },
-                { label: 'TTLS', value: Connman.NetworkService.EapTTLS }
+                { label: 'TTLS', value: Connman.NetworkService.EapTTLS },
+                { label: 'TLS', value: Connman.NetworkService.EapTLS }
             ]
 
             delegate: MenuItem {

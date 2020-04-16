@@ -45,10 +45,12 @@ SilicaItem {
     property real verticalOffset
     property real leftMargin: Theme.horizontalPageMargin
     property real rightMargin: Theme.horizontalPageMargin
+    readonly property int _yBase: __silica_applicationwindow_instance._rotatingItem.height/3 - height/2 + verticalOffset
 
     // stay centered in screen
     x: (flickable ? flickable.originX : 0) + (__silica_applicationwindow_instance._rotatingItem.width - width) / 2
-    y: (flickable ? flickable.originY : 0) + (__silica_applicationwindow_instance._rotatingItem.height - height) / 2 + verticalOffset
+    y: (flickable ? flickable.originY : 0) + _yBase
+
     width: (flickable ? flickable.width : screen.width)
     height: mainLabel.height + (hintLabel.text.length > 0 ? hintLabel.height : 0)
     enabled: false
@@ -88,9 +90,10 @@ SilicaItem {
         id: activeContent
         PulleyAnimationHint {
             flickable: placeholder.flickable
-            width: parent.width
-            height: width
-            anchors.centerIn: parent
+            width: parent.width - 2 * Theme.paddingLarge
+            height: flickable ? flickable.height - 2 * Theme.paddingLarge : 0
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: -_yBase + Theme.paddingLarge
         }
     }
 

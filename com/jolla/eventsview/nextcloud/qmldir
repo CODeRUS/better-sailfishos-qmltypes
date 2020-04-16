@@ -1,0 +1,5 @@
+module com.jolla.eventsview.nextcloud
+plugin jollaeventsviewnextcloudplugin
+NextcloudFeed 1.0 NextcloudFeed.qml
+NextcloudFeedItem 1.0 NextcloudFeedItem.qml
+typeinfo plugins.qmltypes

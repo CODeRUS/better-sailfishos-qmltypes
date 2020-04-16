@@ -8,7 +8,6 @@ import MeeGo.QOfono 0.2
 import org.nemomobile.dbus 2.0
 import org.nemomobile.ofono 1.0
 import org.nemomobile.contacts 1.0
-import org.freedesktop.contextkit 1.0
 import org.nemomobile.messages.internal 1.0
 
 QtObject {
@@ -19,8 +18,8 @@ QtObject {
     readonly property bool multipleEnabledSimCards: simManager.valid && simManager.activeSimCount > 1
 
     // cellular configs will have one account by default(SMS) installed by telepathy-ring
-    readonly property bool hasModemOrIMaccounts: _capabilityDataContextProperty.value || telepathyAccounts.count > 0
-    readonly property bool hasModem: _capabilityDataContextProperty.value || _capabilityDataContextProperty.value === undefined
+    readonly property bool hasModemOrIMaccounts: hasModem || telepathyAccounts.count > 0
+    readonly property bool hasModem: simManager.enabledModems.length > 0
 
     readonly property string voiceModemPath: {
         if (simManager.valid) {
@@ -72,10 +71,6 @@ QtObject {
         // Use FilterNone to suppress any contact results, since we don't need to
         // report any contacts except when used in the search function of NewMessagePage
         filterType: PeopleModel.FilterNone
-    }
-
-    property var _capabilityDataContextProperty: ContextProperty {
-        key: "Cellular.CapabilityData"
     }
 
     property var _settingsDBus: DBusInterface {

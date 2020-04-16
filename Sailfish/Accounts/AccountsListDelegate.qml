@@ -7,11 +7,14 @@ ListItem {
     property bool entriesInteractive
     property bool allowRemoveOnly
 
+    readonly property bool notSignedIn: model.accountError === AccountModel.AccountNotSignedInError
+    readonly property bool valid: notSignedIn || model.accountError === AccountModel.NoAccountError
+
     signal accountRemoveRequested(int accountId)
     signal accountSyncRequested(int accountId)
     signal accountClicked(int accountId, string providerName)
 
-    contentHeight: visible ? Math.max(Theme.itemSizeMedium, column.height + 2*Theme.paddingSmall) : 0
+    contentHeight: visible ? Math.max(Theme.itemSizeMedium, column.height + (notSignedIn ? errorLabel.height + Theme.paddingMedium : 0) + 2*Theme.paddingSmall) : 0
     menu: entriesInteractive ? menuComponent : null
 
     Component {
@@ -50,9 +53,9 @@ ListItem {
                 //: Syncs the data for this account
                 //% "Sync"
                 text: qsTrId("components_accounts-me-sync")
-                visible: model.accountEnabled
-                        && (model.providerName === "activesync" || accountSyncManager.profileIds(model.accountId).length > 0)
-                        && !delegateItem.allowRemoveOnly
+                visible: !notSignedIn && model.accountEnabled
+                         && (model.providerName === "activesync" || accountSyncManager.profileIds(model.accountId).length > 0)
+                         && !delegateItem.allowRemoveOnly
 
                 onClicked: {
                     delegateItem.accountSyncRequested(model.accountId)
@@ -77,7 +80,7 @@ ListItem {
     AccountIcon {
         id: icon
         x: Theme.horizontalPageMargin
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenter: column.verticalCenter
         source: model.accountIcon
     }
     BusyIndicator {
@@ -95,15 +98,14 @@ ListItem {
             right: parent.right
             rightMargin: Theme.horizontalPageMargin
             verticalCenter: parent.verticalCenter
+            verticalCenterOffset: notSignedIn ? -Theme.paddingMedium : 0
         }
         Label {
-            id: accountName
-
             width: parent.width
             truncationMode: TruncationMode.Fade
             text: model.accountDisplayName
             color: {
-                if (highlighted || model.accountError !== AccountModel.NoAccountError) {
+                if (highlighted || !valid) {
                     return Theme.highlightColor
                 }
                 return model.accountEnabled
@@ -112,16 +114,10 @@ ListItem {
             }
         }
         Label {
-            id: accountUserName
             width: parent.width
             visible: text.length > 0
             truncationMode: TruncationMode.Fade
             text: {
-                if (model.accountError === AccountModel.AccountNotSignedInError) {
-                    //: The user has not logged into this account and needs to do so
-                    //% "Not signed in"
-                    return qsTrId("component_accounts-la-not_signed_in")
-                }
                 if (model.performingInitialSync) {
                     //: In the process of setting up this account
                     //% "Setting up account..."
@@ -130,7 +126,7 @@ ListItem {
                 return model.accountUserName
             }
             color: {
-                if (highlighted || model.accountError !== AccountModel.NoAccountError) {
+                if (highlighted || !valid) {
                     return Theme.secondaryHighlightColor
                 }
                 return model.accountEnabled
@@ -138,6 +134,26 @@ ListItem {
                         : Theme.rgba(Theme.secondaryColor, 0.3)
             }
         }
+    }
+
+    Label {
+        id: errorLabel
+        anchors {
+            left: icon.right
+            leftMargin: Theme.paddingLarge
+            right: parent.right
+            rightMargin: Theme.horizontalPageMargin
+            top: column.bottom
+        }
+
+        width: parent.width
+        visible: notSignedIn
+        truncationMode: TruncationMode.Fade
+        color: Theme.errorColor
+        //: The user has not logged into this account
+        //% "Account not signed in"
+        text: qsTrId("component_accounts-la-not_signed_in2")
+        font.pixelSize: Theme.fontSizeSmall
     }
 
     onClicked: {

@@ -572,6 +572,7 @@ Item {
 
                 favoritesModel: root.favoriteContactsModel
                 selectionModel: root._selectionModel
+                symbolScrollBarWidth: root._searchFiltered ? 0 : symbolScrollBar.width
 
                 onContactPressed: _closeVirtualKeyboard()
                 onContactClicked: root._contactClicked(delegateItem, contact)
@@ -624,7 +625,7 @@ Item {
             leftMarginOffset: root._searchFiltered && root._isLandscape && pageStack._pageStackIndicator && pageStack._pageStackIndicator.leftWidth
                               ? (pageStack._pageStackIndicator.leftWidth + Theme.paddingMedium)
                               : 0
-            extraRightMargin: root._searchFiltered ? 0 : symbolScrollBar.width
+            symbolScrollBarWidth: root._searchFiltered ? 0 : symbolScrollBar.width
 
             contactId: model.contactId
             selectionModel: root._selectionModel
@@ -633,6 +634,7 @@ Item {
 
             firstText: model.primaryName
             secondText: model.secondaryName
+            matchText: typeof model.filterMatchData === "string" ? model.filterMatchData : model.filterMatchData.join(", ")
             unnamed: model.primaryName == allContactsModel.placeholderDisplayLabel
             presenceState: model.globalPresenceState
 

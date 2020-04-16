@@ -1,0 +1,3 @@
+module Sailfish.Crypto
+plugin sailfishcryptoplugin
+typeinfo plugins.qmltypes

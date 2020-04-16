@@ -12,6 +12,7 @@ Item {
     property int columns: width / avatarSize
     property bool menuOpen
     property Item menuItem
+    property int symbolScrollBarWidth
 
     readonly property int avatarSize: {
         // use the maximum size available depending on the minimum number of columns
@@ -141,46 +142,18 @@ Item {
                 onPressAndHold: contactPressAndHold(contactItem, model.person)
                 onClicked: contactClicked(contactItem, model.person)
 
+                openMenuOnPressAndHold: false
+                highlighted: down || menuOpen || selectionModelIndex >= 0
+                symbolScrollBarWidth: favoriteBar.symbolScrollBarWidth
+
                 onMenuOpenChanged: {
                     if (menuOpen) {
-                        favoriteBar.menuItem = _contextMenu
-                    } else if (favoriteBar.menuItem === _contextMenu) {
+                        favoriteBar.menuItem = _menuItem
+                    } else if (favoriteBar.menuItem === _menuItem) {
                         favoriteBar.menuItem = null
                     }
                     favoriteBar.menuOpen = menuOpen
                 }
-            }
-        }
-
-        Component {
-            id: removalComponent
-            Item {
-                id: remorseContainer
-                property alias remorse: remorseItem
-
-                function clear() {
-                    remorseContainer.destroy()
-                }
-
-                x: -x - parent.x
-                y: parent.height - height
-                width: favoriteBar.width
-                height: Theme.itemSizeSmall
-
-                SequentialAnimation {
-                    id: destroyAnim
-                    NumberAnimation { target: remorseContainer; property: "height"; to: 0; duration: 200 }
-                    ScriptAction { script: remorseContainer.clear() }
-                }
-
-                RemorseItem {
-                    id: remorseItem
-                    onTriggered: destroyAnim.start()
-                    onCanceled: destroyAnim.start()
-                    rightMargin: Theme.paddingMedium
-                }
-
-                Component.onDestruction: destroyAnim.start()
             }
         }
     }

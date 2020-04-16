@@ -383,19 +383,20 @@ Module {
             }
         }
         Property { name: "locationEnabled"; type: "bool" }
+        Property { name: "locationMode"; type: "LocationMode" }
+        Property { name: "pendingAgreements"; type: "QStringList"; isReadonly: true }
+        Property { name: "allowedDataSources"; type: "DataSources" }
+        Property { name: "gpsAvailable"; type: "bool"; isReadonly: true }
         Property { name: "gpsEnabled"; type: "bool" }
         Property { name: "gpsFlightMode"; type: "bool" }
-        Property { name: "gpsAvailable"; type: "bool"; isReadonly: true }
-        Property { name: "hereState"; type: "OnlineAGpsState" }
+        Property { name: "locationProviders"; type: "QStringList"; isReadonly: true }
         Property { name: "hereAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "hereState"; type: "OnlineAGpsState" }
+        Property { name: "mlsAvailable"; type: "bool"; isReadonly: true }
         Property { name: "mlsEnabled"; type: "bool" }
         Property { name: "mlsOnlineState"; type: "OnlineAGpsState" }
-        Property { name: "mlsAvailable"; type: "bool"; isReadonly: true }
-        Property { name: "yandexLocatorEnabled"; type: "bool" }
-        Property { name: "yandexLocatorOnlineState"; type: "OnlineAGpsState" }
-        Property { name: "yandexLocatorAvailable"; type: "bool"; isReadonly: true }
-        Property { name: "locationMode"; type: "LocationMode" }
-        Property { name: "allowedDataSources"; type: "DataSources" }
+        Property { name: "yandexAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "yandexOnlineState"; type: "OnlineAGpsState" }
     }
     Component {
         name: "MDConfGroup"
@@ -486,6 +487,15 @@ Module {
         }
         Method { name: "connect" }
         Method { name: "disconnect" }
+    }
+    Component {
+        name: "NfcSettings"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/NfcSettings 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "available"; type: "bool"; isReadonly: true }
+        Property { name: "enabled"; type: "bool" }
     }
     Component {
         name: "PartitionModel"

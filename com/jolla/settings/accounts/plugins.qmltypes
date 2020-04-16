@@ -180,7 +180,8 @@ Module {
                 "ServiceUnavailableError": 6,
                 "InvalidServerResponseError": 7,
                 "CurrentUserPrincipalNotFoundError": 8,
-                "CalendarHomeNotFoundError": 9
+                "CalendarHomeNotFoundError": 9,
+                "NoDetectedCalendarError": 10
             }
         }
         Signal { name: "success" }
@@ -256,6 +257,40 @@ Module {
             Parameter { name: "providerName"; type: "string" }
             Parameter { name: "serviceName"; type: "string" }
             Parameter { name: "keyName"; type: "string" }
+        }
+    }
+    Component {
+        prototype: "QObject"
+        name: "AccountsUtil 1.0"
+        exports: ["AccountsUtil 1.0"]
+        exportMetaObjectRevisions: [0]
+        isComposite: true
+        isCreatable: false
+        isSingleton: true
+        Method { name: "_serviceTranslations"; type: "QVariant" }
+        Method {
+            name: "serviceDisplayNameForService"
+            type: "QVariant"
+            Parameter { name: "service"; type: "QVariant" }
+        }
+        Method {
+            name: "serviceDisplayName"
+            type: "QVariant"
+            Parameter { name: "serviceName"; type: "QVariant" }
+            Parameter { name: "serviceDisplayName"; type: "QVariant" }
+        }
+        Method {
+            name: "serviceDisplayNameFromType"
+            type: "QVariant"
+            Parameter { name: "serviceType"; type: "QVariant" }
+            Parameter { name: "serviceDisplayName"; type: "QVariant" }
+        }
+        Method {
+            name: "serviceDescription"
+            type: "QVariant"
+            Parameter { name: "serviceType"; type: "QVariant" }
+            Parameter { name: "providerDisplayName"; type: "QVariant" }
+            Parameter { name: "providerName"; type: "QVariant" }
         }
     }
 }

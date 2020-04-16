@@ -1,0 +1,2 @@
+Error: SEGV
+QMutex: destroying locked mutex

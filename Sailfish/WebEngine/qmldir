@@ -1,0 +1,3 @@
+module Sailfish.WebEngine
+plugin sailfishwebengineplugin
+typeinfo plugins.qmltypes

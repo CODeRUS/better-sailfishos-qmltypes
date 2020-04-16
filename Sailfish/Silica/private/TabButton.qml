@@ -43,19 +43,25 @@ MouseArea {
     property bool isCurrentTab: _tabView && _tabView.currentIndex >= 0 && _tabView.currentIndex === tabIndex
     property alias title: label.text
 
+    property Item _page
+    readonly property bool _portrait: _page && _page.isPortrait
     readonly property Item _tabView: Util.findParentWithProperty(root, '__silica_tab_view')
     readonly property bool _becomingCurrentTab: _tabView && _tabView._nextIndex === tabIndex
     property bool _activatingByClick
 
     implicitWidth: 2 * label.x + label.width
-    implicitHeight: Math.max(Theme.itemSizeMedium, label.implicitHeight + 2*Theme.paddingMedium)
+    implicitHeight: Math.max(_portrait ? Theme.itemSizeLarge : Theme.itemSizeSmall,
+                             label.implicitHeight + 2 * (_portrait ? Theme.paddingLarge : Theme.paddingMedium))
+
 
     Component.onCompleted: {
         if (!parent.hasOwnProperty("__silica_tab_button_row")) {
             console.warn("TabButton should be always created within TabButtonRow")
         }
+        _page = Util.findPage(root)
         parent._registerButton(root)
     }
+
     Component.onDestruction: parent._deregisterButton(root)
 
     onClicked: {

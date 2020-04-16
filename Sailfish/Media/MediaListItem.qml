@@ -13,7 +13,7 @@ ListItem {
     property alias subtitleTextFormat: subtitleLabel.textFormat
     property bool playing
 
-    contentHeight: Math.max(Theme.itemSizeSmall, column.height + column.y*2)
+    contentHeight: Math.max(Theme.itemSizeMedium, column.height + 2 * Theme.paddingMedium)
 
     Label {
         id: durationLabel
@@ -35,6 +35,11 @@ ListItem {
             family: Theme.fontFamilyHeading
             pixelSize: Theme.fontSizeExtraLarge
         }
+        anchors {
+            top: column.top
+            topMargin: -Theme.paddingSmall
+        }
+
         color: highlighted || playing ? Theme.highlightColor : Theme.primaryColor
         width: Theme.itemSizeExtraLarge - Theme.paddingMedium
         fontSizeMode: Text.HorizontalFit
@@ -45,7 +50,7 @@ ListItem {
 
         anchors {
             left: durationLabel.right; leftMargin: Theme.paddingMedium
-            top: parent.top; topMargin: Theme.paddingSmall
+            verticalCenter: parent.verticalCenter
             right: parent.right; rightMargin: Theme.horizontalPageMargin
         }
         Label {

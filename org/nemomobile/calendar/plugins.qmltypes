@@ -188,11 +188,11 @@ Module {
             Parameter { name: "response"; type: "int" }
         }
         Method {
-            name: "vCalendar"
+            name: "iCalendar"
             type: "string"
             Parameter { name: "prodId"; type: "string" }
         }
-        Method { name: "vCalendar"; type: "string" }
+        Method { name: "iCalendar"; type: "string" }
     }
     Component {
         name: "CalendarEventModification"

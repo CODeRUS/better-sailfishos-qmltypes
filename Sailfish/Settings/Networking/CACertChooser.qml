@@ -7,9 +7,10 @@ Column {
 
     signal fromFileSelected()
     property QtObject network
-    property bool immediateUpdate: true
+    property bool immediateUpdate
     property alias labelColor: certComboBox.labelColor
     property alias valueColor: certComboBox.valueColor
+    property Item domainField: domainSuffixField
 
     readonly property bool required: network &&
              network.securityType === NetworkService.SecurityIEEE802 &&
@@ -18,6 +19,10 @@ Column {
                  network.eapMethod === NetworkService.EapTLS)
     visible: required
     width: parent.width
+
+    function cancel() {
+        certComboBox.currentIndex = network.caCertFile === '/etc/ssl/certs/ca-bundle.crt' ? 0 : (network.caCert || network.caCertFile ? 2 : 1)
+    }
 
     ComboBox {
         id: certComboBox
@@ -46,12 +51,11 @@ Column {
                 //% "File system"
                 text: qsTrId("settings_network-la-file_system")
                 onClicked: {
-                    network.caCert = 'custom'
                     root.fromFileSelected()
                 }
             }
         }
-        onCurrentIndexChanged: if (immediateUpdate) {
+        onCurrentIndexChanged: {
             if (currentIndex === 0) {
                 network.caCert = ''
                 network.caCertFile = '/etc/ssl/certs/ca-bundle.crt'
@@ -78,8 +82,9 @@ Column {
     }
 
     TextField {
+        id: domainSuffixField
         text: network ? network.domainSuffixMatch : ""
-        visible: certComboBox.currentIndex === 0
+        visible: root.visible && certComboBox.currentIndex === 0
         width: parent.width
 
         //: Option to restrict accepted certificates to certain domain
@@ -89,6 +94,12 @@ Column {
 
         onTextChanged: if (immediateUpdate) {
             network.domainSuffixMatch = text
+        }
+
+        onActiveFocusChanged: {
+            if (!immediateUpdate && !activeFocus) {
+                network.domainSuffixMatch = text
+            }
         }
 
         Binding on text {

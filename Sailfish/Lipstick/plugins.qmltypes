@@ -170,6 +170,9 @@ Module {
         Property { name: "orientation"; type: "Qt::ScreenOrientation" }
         Property { name: "pressDelay"; type: "int" }
         Property { name: "activeTouches"; type: "int"; isReadonly: true }
+        Property { name: "keyboardHeight"; type: "float" }
+        Property { name: "keyboardBoundaryWidth"; type: "float" }
+        Property { name: "keyboardBoundaryHeight"; type: "float" }
         Method { name: "invalidate" }
         Method { name: "cancelGesture" }
     }

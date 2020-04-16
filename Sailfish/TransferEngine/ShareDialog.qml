@@ -5,7 +5,7 @@ Dialog {
     id: root
 
     property url source
-    property variant content: ({})
+    property var content: ({})
     property string methodId
     property string displayName
     property int accountId

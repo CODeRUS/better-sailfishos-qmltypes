@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
-import Sailfish.Crypto 1.0
+import Sailfish.Crypto 1.0 as Crypto
 import Sailfish.Secrets 1.0 as Secrets
 import Sailfish.Secrets.Ui 1.0
 
@@ -82,7 +82,7 @@ Column {
                     openMenu()
                 }
 
-                root.clicked(model.object, CryptoManager.DigestSha256)
+                root.clicked(model.object, Crypto.CryptoManager.DigestSha256)
             }
 
             onRemove: collectionKeysModel.removeAt(model.index)

@@ -1,9 +1,9 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Matt Vogt <matthew.vogt@jollamobile.com>
+** Copyright (c) 2013-2020 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
 ** All rights reserved.
-** 
+**
 ** This file is part of Sailfish Silica UI component package.
 **
 ** You may use this file under the terms of BSD license as follows:
@@ -18,7 +18,7 @@
 **     * Neither the name of the Jolla Ltd nor the
 **       names of its contributors may be used to endorse or promote products
 **       derived from this software without specific prior written permission.
-** 
+**
 ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -95,7 +95,7 @@ Private.SilicaMouseArea {
     property Item pageContainer
 
     property int allowedOrientations: __silica_applicationwindow_instance._defaultPageOrientations
-    property int orientation: Orientation.Portrait
+    property int orientation: orientationState.orientation
 
     property alias orientationTransitions: orientationState.transitions
     property alias defaultOrientationTransition: orientationState.defaultTransition
@@ -107,7 +107,6 @@ Private.SilicaMouseArea {
     property int _navigation: PageNavigation.NoNavigation
     property int _navigationPending: PageNavigation.NoNavigation
     property int _direction: PageNavigation.NoDirection
-    property int _wallpaperOrientation: Orientation.Portrait
 
     property int _allowedOrientations: {
         var allowed = allowedOrientations & __silica_applicationwindow_instance.allowedOrientations
@@ -129,54 +128,26 @@ Private.SilicaMouseArea {
     property var _forwardDestinationReplaceTarget
     property int _depth: parent && parent.hasOwnProperty("pageStackIndex") ? parent.pageStackIndex : -1
 
-    property bool _exposed
+    property alias _windowOpacity: page.opacity
+    property Item _backgroundParent: parent
+
+    property bool _opaqueBackground
+    property bool _exposed: { return false }
     property bool _belowTop
-    property bool _defaultTransition
     property bool _clickablePageIndicators: true
 
     property int __silica_page
 
+    rotation: orientationState.rotation
     visible: false
     focus: true
     // This unusual binding avoids a warning when the page is destroyed.
     anchors.centerIn: page ? parent : null
 
-    width: isPortrait ? _horizontalDimension : _verticalDimension
-    height: isPortrait ? _verticalDimension : _horizontalDimension
+    width: orientationState.width
+    height: orientationState.height
 
-    Binding on orientation {
-        when: !orientationTransitionRunning && !blocker.running
-        value: orientationState.pageOrientation
-    }
-
-    Binding on width {
-        when: _defaultTransition || (!orientationTransitionRunning && !blocker.running)
-        value: isPortrait ? _horizontalDimension : _verticalDimension
-    }
-
-    Binding on height {
-        when: _defaultTransition || (!orientationTransitionRunning && !blocker.running)
-        value: isPortrait ? _verticalDimension : _horizontalDimension
-    }
-
-    Binding on rotation {
-        when: !orientationTransitionRunning && !blocker.running
-        value: orientation === Orientation.Landscape
-               ? 90
-               : orientation === Orientation.PortraitInverted
-                 ? 180
-                 : orientation === Orientation.LandscapeInverted
-                   ? 270
-                   : 0
-    }
-
-    Timer {
-        // this is needed because the transition starts asynchronously
-        id: blocker
-        interval: 1
-    }
-
-    Item {
+    StateGroup {
         id: orientationState
 
         property bool completed
@@ -185,14 +156,35 @@ Private.SilicaMouseArea {
         property int desiredPageOrientation: __silica_applicationwindow_instance._selectOrientation(page._allowedOrientations, __silica_applicationwindow_instance.deviceOrientation)
         property bool desiredPageOrientationSuitable: desiredPageOrientation & __silica_applicationwindow_instance.deviceOrientation
 
+        // These are the state managed orientation derived properties. Normally the pages properties
+        // of the same name are bound to these but just prior to the orientation state changing those
+        // bindings will be broken so property changes due to state fast-forwarding aren't propagated.
+        property real width: page.isPortrait ? page._horizontalDimension : page._verticalDimension
+        property real height: page.isPortrait ? page._verticalDimension : page._horizontalDimension
+        property real orientation:  Orientation.Portrait
+        property real rotation
+
         onDesiredPageOrientationChanged: _updatePageOrientation()
         onDesiredPageOrientationSuitableChanged: _updatePageOrientation()
 
         function _updatePageOrientation() {
             if (pageOrientation !== desiredPageOrientation) {
-                blocker.restart()
-                _defaultTransition = (transitions.length === 1 && transitions[0] === defaultTransition)
+
+                // Lock in the current values of the orientation properties, when the pageOrientation
+                // property and the states which derive from it change the fast-forwarded values
+                // will be the same as the
+                page.orientation = page.orientation
+                page.rotation = page.rotation
+                page.width = page.width
+                page.height = page.height
+
                 pageOrientation = desiredPageOrientation
+
+                // State fast forwarding is done, restore the bindings.
+                page.orientation = Qt.binding(function() { return orientationState.orientation })
+                page.rotation = Qt.binding(function() { return orientationState.rotation })
+                page.width = Qt.binding(function() { return orientationState.width })
+                page.height = Qt.binding(function() { return orientationState.height })
             }
         }
 
@@ -201,62 +193,63 @@ Private.SilicaMouseArea {
             State {
                 name: 'Unanimated'
                 when: !page.pageContainer || !page._exposed || !completed
+                PropertyChanges {
+                    target: page
+                    restoreEntryValues: false
+                    // If a transition is interrupted part way through reset page constants a
+                    // transition may have animated to fixed values and not finalised.
+                    orientationTransitionRunning: false
+                    opacity: 1
+                    scale: 1
+                }
             },
             State {
                 name: 'Portrait'
                 when: orientationState.pageOrientation === Orientation.Portrait ||
                       orientationState.pageOrientation ===  Orientation.None
                 PropertyChanges {
-                    target: page
-                    explicit: true
+                    target: orientationState
                     restoreEntryValues: false
-                    width: _horizontalDimension
-                    height: _verticalDimension
+                    width: page._horizontalDimension
+                    height: page._verticalDimension
                     rotation: 0
                     orientation: Orientation.Portrait
-                    _wallpaperOrientation: Orientation.Portrait
                 }
             },
             State {
                 name: 'Landscape'
                 when: orientationState.pageOrientation === Orientation.Landscape
                 PropertyChanges {
-                    target: page
-                    explicit: true
+                    target: orientationState
                     restoreEntryValues: false
-                    width: _verticalDimension
-                    height: _horizontalDimension
+                    width: page._verticalDimension
+                    height: page._horizontalDimension
                     rotation: 90
                     orientation: Orientation.Landscape
-                    _wallpaperOrientation: Orientation.Landscape
                 }
             },
             State {
                 name: 'PortraitInverted'
                 when: orientationState.pageOrientation === Orientation.PortraitInverted
                 PropertyChanges {
-                    target: page
-                    explicit: true
+                    target: orientationState
                     restoreEntryValues: false
-                    width: _horizontalDimension
-                    height: _verticalDimension
+                    width: page._horizontalDimension
+                    height: page._verticalDimension
                     rotation: 180
                     orientation: Orientation.PortraitInverted
-                    _wallpaperOrientation: Orientation.PortraitInverted
                 }
             },
             State {
                 name: 'LandscapeInverted'
                 when: orientationState.pageOrientation === Orientation.LandscapeInverted
                 PropertyChanges {
-                    target: page
-                    explicit: true
+                    target: orientationState
                     restoreEntryValues: false
-                    width: _verticalDimension
-                    height: _horizontalDimension
+                    width: page._verticalDimension
+                    height: page._horizontalDimension
                     rotation: 270
                     orientation: Orientation.LandscapeInverted
-                    _wallpaperOrientation: Orientation.LandscapeInverted
                 }
             }
         ]
@@ -274,6 +267,6 @@ Private.SilicaMouseArea {
 
     Component.onCompleted: {
         orientationState.completed = true
-        page.orientation = orientationState.pageOrientation
+        orientation = orientationState.pageOrientation
     }
 }

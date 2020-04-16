@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013 – 2019 Jolla Ltd.
- * Copyright (c) 2019 Open Mobile Platform LLC.
+ * Copyright (c) 2019 – 2020 Open Mobile Platform LLC.
  *
  * License: Proprietary
  */
@@ -32,6 +32,15 @@ Item {
     property string action
     property alias originalMessageId: originalMessage.messageId
     property int accountId
+
+    // Destroy online search model upon account change
+    onAccountIdChanged: {
+        if (onlineSearchModel)
+            onlineSearchModel.destroy()
+
+        createOnlineSearchModel()
+    }
+
     property string signature
     property bool validSignatureSet
     property bool hasRecipients: !to.empty || !cc.empty || !bcc.empty
@@ -64,6 +73,15 @@ Item {
         to.updateSummary()
         cc.updateSummary()
         bcc.updateSummary()
+    }
+
+    function createOnlineSearchModel() {
+        if (accountListModel.customFieldFromAccountId("globalAddressList", accountId) == "true") {
+            var onlineSearchModelComponent = Qt.createComponent("OnlineSearchModel.qml")
+            if (onlineSearchModelComponent.status == Component.Ready) {
+                onlineSearchModel = onlineSearchModelComponent.createObject(messageComposer, { "accountId": accountId })
+            }
+        }
     }
 
     onSignatureChanged: {
@@ -118,6 +136,8 @@ Item {
         id: contactSearchModel
     }
 
+    property QtObject onlineSearchModel
+
     Component {
         id: accountCreatorComponent
         AccountCreation {
@@ -128,7 +148,8 @@ Item {
     }
 
     function _messagePriority(index) {
-        return (index === 1 ? EmailMessage.HighPriority : (index === 2 ? EmailMessage.LowPriority : EmailMessage.NormalPriority))
+        return (index === 1 ? EmailMessage.HighPriority : (index === 2 ? EmailMessage.LowPriority
+                                                                       : EmailMessage.NormalPriority))
     }
 
     function setOriginalMessageAttachments() {
@@ -187,6 +208,12 @@ Item {
         undownloadedAttachmentsCount = 0
     }
 
+    function saveNewContacts() {
+        to.saveNewContacts()
+        cc.saveNewContacts()
+        bcc.saveNewContacts()
+    }
+
     function buildMessage() {
         message.to = to.recipientsToString()
         message.cc = cc.recipientsToString()
@@ -215,6 +242,7 @@ Item {
         if (!_originalMessageAttachmentsDownloaded()) {
             removeUndownloadedAttachments()
         }
+        saveNewContacts()
         buildMessage()
         messageComposer.enabled = false
         message.send()
@@ -225,6 +253,7 @@ Item {
         if (!_originalMessageAttachmentsDownloaded()) {
             removeUndownloadedAttachments()
         }
+        saveNewContacts()
         buildMessage()
         message.saveDraft()
         if (popOnDraftSaved) {
@@ -294,8 +323,10 @@ Item {
 
     function forwardContentAvailable() {
         if (!_originalMessageAttachmentsDownloaded()) {
-            pageStack.animatorPush(Qt.resolvedUrl('AttachmentDownloadPage.qml'), {email: originalMessage,
-                                       composerItem: messageComposer, undownloadedAttachmentsCount: undownloadedAttachmentsCount})
+            pageStack.animatorPush(Qt.resolvedUrl('AttachmentDownloadPage.qml'),
+                                   { email: originalMessage,
+                                       composerItem: messageComposer,
+                                       undownloadedAttachmentsCount: undownloadedAttachmentsCount })
         }
     }
 
@@ -441,6 +472,9 @@ Item {
                 width: parent.width
 
                 Column {
+                    property string accountDisplayName: accountListModel.displayNameFromAccountId(accountId)
+                    property string accountEmailAddress: accountListModel.emailAddressFromAccountId(accountId)
+
                     width: parent.width
 
                     EmailRecipientField {
@@ -448,6 +482,8 @@ Item {
 
                         compressible: false
                         contactSearchModel: contactSearchModel
+                        onlineSearchModel: messageComposer.onlineSearchModel
+                        onlineSearchDisplayName: parent.accountDisplayName ? parent.accountDisplayName : parent.accountEmailAddress
                         showLabel: _isPortrait
 
                         //: 'To' recipient label
@@ -468,6 +504,8 @@ Item {
                         id: cc
 
                         contactSearchModel: contactSearchModel
+                        onlineSearchModel: messageComposer.onlineSearchModel
+                        onlineSearchDisplayName: parent.accountDisplayName ? parent.accountDisplayName : parent.accountEmailAddress
                         showLabel: _isPortrait
 
                         //: 'CC' recipient label
@@ -486,6 +524,8 @@ Item {
                         id: bcc
 
                         contactSearchModel: contactSearchModel
+                        onlineSearchModel: messageComposer.onlineSearchModel
+                        onlineSearchDisplayName: parent.accountDisplayName ? parent.accountDisplayName : parent.accountEmailAddress
                         showLabel: _isPortrait
 
                         //: 'BCC' recipient label
@@ -621,7 +661,8 @@ Item {
                         Item {
                             width: parent.width
                             // Padding small between this and subject field
-                            implicitHeight: attachmentBg.height + (attachmentSizeLabel.visible && attachmentSizeLabel.text.length ? attachmentSizeLabel.height : 0) + Theme.paddingSmall
+                            implicitHeight: attachmentBg.height + (attachmentSizeLabel.visible && attachmentSizeLabel.text.length
+                                                                   ? attachmentSizeLabel.height : 0) + Theme.paddingSmall
 
                             ListItem {
                                 id: attachmentBg
@@ -649,6 +690,7 @@ Item {
                                     readOnly: true
                                     // Disable mouse handling so that List
                                     enabled: false
+                                    opacity: 1.0 // shouldn't look disabled
 
                                     //: Attachments selector
                                     //% "Add attachment"
@@ -789,9 +831,7 @@ Item {
         VerticalScrollDecorator {}
     }
 
-    BusyIndicator {
-        size: BusyIndicatorSize.Large
-        anchors.centerIn: parent
+    PageBusyIndicator {
         running: !messageComposer.enabled
     }
 
@@ -995,6 +1035,8 @@ Item {
                 }
             }
         }
+
+        createOnlineSearchModel()
     }
 
     ConfigurationValue {

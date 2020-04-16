@@ -4,6 +4,7 @@ AddNetworkNotifications 1.0 AddNetworkNotifications.qml
 EncryptionComboBox 1.0 EncryptionComboBox.qml
 HiddenSwitch 1.0 HiddenSwitch.qml
 IdentityField 1.0 IdentityField.qml
+MobileNetworkStatusIndicator 1.0 MobileNetworkStatusIndicator.qml
 NetworkingMobileDataConnection 1.0 NetworkingMobileDataConnection.qml
 NetworkAddressField 1.0 NetworkAddressField.qml
 NetworkField 1.0 NetworkField.qml
@@ -15,4 +16,5 @@ SimDependentSettingsToggle 1.0 SimDependentSettingsToggle.qml
 CACertChooser 1.0 CACertChooser.qml
 EapComboBox 1.0 EapComboBox.qml
 InnerAuthComboBox 1.0 InnerAuthComboBox.qml
+ClientCertChooser 1.0 ClientCertChooser.qml
 typeinfo plugins.qmltypes

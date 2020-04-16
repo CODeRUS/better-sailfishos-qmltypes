@@ -4,6 +4,7 @@ pragma Singleton
 import QtQuick 2.0
 import com.jolla.mediaplayer 1.0
 import org.nemomobile.mpris 1.0
+import Nemo.Notifications 1.0
 
 Container {
     id: player
@@ -179,6 +180,18 @@ Container {
         }
     }
 
+    function remove(itemMedia, listItem, playlists) {
+        listItem.remorseDelete(function() {
+            // Remove item from the playqueue
+            removeItemFromQueue(itemMedia)
+
+            if (File.removeFile(itemMedia.url)) {
+                // Remove the item from the playlists
+                playlists.removeItem(itemMedia.url)
+            }
+        })
+    }
+
     on_SeekingChanged: {
         if (_seeking) {
             _resume = state == Audio.Playing
@@ -237,6 +250,13 @@ Container {
     Timer { id: nextTimer; interval: 500; onTriggered: audio.playNext() }
     Timer { id: previousTimer; interval: 500; onTriggered: audio.playPrevious() }
 
+    Notification {
+        id: errorNotification
+        isTransient: true
+        urgency: Notification.Critical
+        icon: "icon-system-warning"
+    }
+
     Audio {
         id: audio
 
@@ -251,6 +271,14 @@ Container {
             } else {
                 stop()
                 playbackState = Audio.Stopped
+            }
+        }
+        onErrorChanged: {
+            if (error === Audio.FormatError) {
+                //: %1 is replaced with specific codec
+                //% "Unsupported codec: %1"
+                errorNotification.previewBody = qsTrId("mediaplayer-la-unsupported-codec").arg(errorString)
+                errorNotification.publish()
             }
         }
         model.onShuffledChanged: if (player.shuffle != model.shuffled) player.shuffle = !player.shuffle
@@ -307,6 +335,7 @@ Container {
             model.currentIndex = model.currentIndex < model.count - 1
                     ? model.currentIndex + 1
                     : 0
+
             play()
             changingItem = false
             playbackState = state

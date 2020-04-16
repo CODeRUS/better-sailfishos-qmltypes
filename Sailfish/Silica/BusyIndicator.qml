@@ -41,6 +41,7 @@ SilicaItem {
     property bool running
     property int size: BusyIndicatorSize.Medium
     property alias color: busyIndicator.color
+    property bool _forceAnimation
 
     implicitWidth: busyIndicator.implicitWidth
     implicitHeight: busyIndicator.implicitHeight
@@ -77,7 +78,7 @@ SilicaItem {
         RotationAnimator on rotation {
             from: 0; to: 360
             duration: 2000
-            running: (root.running || opacity > 0) && root.visible && Qt.application.active
+            running: (root.running || opacity > 0) && (_forceAnimation || (root.visible && Qt.application.active))
             loops: Animation.Infinite
         }
     }

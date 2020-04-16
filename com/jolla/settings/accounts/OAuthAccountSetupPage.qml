@@ -79,6 +79,8 @@ AccountBusyPage {
 
     function cancelSignIn() {
         if (_busy) {
+            root.busyDescription = ""
+            webViewLoadedTimer.stop()
             if (_accountToUpdate != null && _recreatingCredentials == false) {
                 _accountToUpdate.cancelSignInOperation()
             } else {

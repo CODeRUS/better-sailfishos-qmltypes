@@ -23,13 +23,13 @@ Item {
         remorse.canceled.connect(function() { deletingAccountId = -1 })
     }
 
-    function _showSettings(providerName, accountId, showCredentialsPromptDialog) {
+    function _showSettings(providerName, accountId, credentialsNeedUpdate) {
         if (_settingsLoader != null) {
             _settingsLoader.destroy()
         }
         _settingsLoader = settingsLoaderComponent.createObject(accountsPage)
         _settingsLoader.finished.connect(function() {
-            if (showCredentialsPromptDialog) {
+            if (credentialsNeedUpdate) {
                 var delayedSettingsAgent = _accountSettingsAgent(providerName, 0)  // accountId is not set until credentials are updated
                 if (_credentialsUpdater != null) {
                     _credentialsUpdater.destroy()
@@ -43,24 +43,25 @@ Item {
                     // ensure the settingsAgent resets its account details when the credentials are updated
                     delayedSettingsAgent.accountId = updatedAccountId
                 })
-                _credentialsUpdater.showCredentialsPromptDialog(providerName, accountId, delayedSettingsAgent.initialPage)
+                _credentialsUpdater.pushCredentialsUpdatePage(accountId, delayedSettingsAgent.initialPage)
             } else {
                 var settingsAgent = _accountSettingsAgent(providerName, accountId)
                 pageStack.push(settingsAgent.initialPage)
-                var accountRef = model.getByAccount(accountId)
-                settingsAgent.accountIsReadOnly = accountRef.accountReadOnly
-                settingsAgent.accountIsProvisioned = accountRef.accountProvisioned
             }
         })
         _settingsLoader.start(accountId)
     }
 
     function _accountSettingsAgent(providerName, accountId) {
+        var accountRef = model.getByAccount(accountId)
         var agentProperties = {
             "accountManager": accountManager,
             "accountProvider": accountManager.provider(providerName),
             "accountsHeaderText": title,
-            "accountId": accountId
+            "accountId": accountId,
+            "accountIsReadOnly": accountRef.accountReadOnly,
+            "accountIsProvisioned": accountRef.accountProvisioned,
+            "accountNotSignedIn": (accountRef.accountError === AccountModel.AccountNotSignedInError)
         }
         if (agentProperties["accountProvider"] == null) {
             throw new Error("Unable to obtain provider with name: " + providerName)
@@ -129,8 +130,8 @@ Item {
     }
 
     function accountClicked(accountId, providerName) {
-        var showCredentialsPrompt = model.getByAccount(accountId).accountError == AccountModel.AccountNotSignedInError
-        _showSettings(providerName, accountId, showCredentialsPrompt)
+        var credentialsNeedUpdate = model.getByAccount(accountId).accountError === AccountModel.AccountNotSignedInError
+        _showSettings(providerName, accountId, credentialsNeedUpdate)
     }
 
     function accountRemoveRequested(accountId) {

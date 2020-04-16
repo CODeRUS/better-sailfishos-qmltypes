@@ -258,7 +258,7 @@ Page {
                         text: qsTrId("filemanager-me-share")
                         onClicked: {
                             pageStack.animatorPush("Sailfish.TransferEngine.SharePage", {
-                                               source: Qt.resolvedUrl(model.absolutePath),
+                                               source: FileManager.pathToUrl(model.absolutePath),
                                                mimeType: model.mimeType,
                                                serviceFilter: ["sharing", "e-mail"]
                                            })

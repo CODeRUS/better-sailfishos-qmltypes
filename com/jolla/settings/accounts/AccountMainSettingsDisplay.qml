@@ -10,8 +10,9 @@ Item {
     property bool accountEnabled
     property bool accountEnabledReadOnly
     property bool accountIsProvisioned
-    property alias accountUserName: usernameLabel.text
+    property alias accountUserName: accountSummary.userName
     property alias accountDisplayName: accountDisplayNameField.text
+    property var nextFocusItem
 
     AboutSettings {
         id: aboutSettings
@@ -20,7 +21,7 @@ Item {
     property bool _changingAccountStatus
 
     width: parent.width
-    height: accountIcon.height
+    height: accountSummary.height
             + statusCombo.height
             + statusCombo.anchors.topMargin
             + accountDisplayNameField.height
@@ -42,52 +43,16 @@ Item {
         _changingAccountStatus = false
     }
 
-    Image {
-        id: accountIcon
-        x: Theme.horizontalPageMargin
-        width: Theme.iconSizeLarge
-        height: width
-        source: root.accountProvider.iconName
-    }
+    AccountSummary {
+        id: accountSummary
 
-    Label {
-        id: displayNameLabel
-        anchors {
-            left: accountIcon.right
-            leftMargin: Theme.paddingLarge
-            right: parent.right
-            rightMargin: Theme.horizontalPageMargin
-            verticalCenter: accountIcon.verticalCenter
-            verticalCenterOffset: usernameLabel.text != ""
-                                  ? (-usernameLabel.implicitHeight - Theme.paddingMedium)/2
-                                  : 0
-        }
-        color: Theme.highlightColor
-        font.pixelSize: Theme.fontSizeLarge
-        truncationMode: TruncationMode.Fade
-        text: root.accountProvider.displayName
-    }
-
-
-    Label {
-        id: usernameLabel
-        anchors {
-            top: displayNameLabel.bottom
-            topMargin: Theme.paddingSmall
-            left: displayNameLabel.left
-            right: displayNameLabel.right
-        }
-        truncationMode: TruncationMode.Fade
-        font.pixelSize: Theme.fontSizeSmall
-        color: Theme.secondaryHighlightColor
+        icon: root.accountProvider.iconName
+        accountName:  root.accountProvider.displayName
     }
 
     ComboBox {
         id: statusCombo
-        anchors {
-            top: accountIcon.bottom
-            topMargin: Theme.paddingLarge
-        }
+        anchors.top: accountSummary.bottom
         enabled: !root.accountEnabledReadOnly
         description: {
             if (root.accountIsProvisioned && root.accountEnabledReadOnly) {
@@ -139,7 +104,15 @@ Item {
         label: qsTrId("components_accounts-la-account_description")
         placeholderText: label
 
-        EnterKey.iconSource: "image://theme/icon-m-enter-close"
-        EnterKey.onClicked: root.focus = true
+        EnterKey.iconSource: !!root.nextFocusItem
+                             ? "image://theme/icon-m-enter-next"
+                             : "image://theme/icon-m-enter-close"
+        EnterKey.onClicked: {
+            if (!!root.nextFocusItem) {
+                root.nextFocusItem.focus = true
+            } else {
+                root.focus = true
+            }
+        }
     }
 }

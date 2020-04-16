@@ -21,6 +21,42 @@ QtObject {
             var list
             var i
 
+            if (attributes.hasOwnProperty('note')) {
+                details.push({
+                    'type': Person.NoteType,
+                    'subTypes': [ Person.NoSubType ],
+                    'label': Person.NoLabel,
+                    'note': attributes['note'][0],
+                    'index': -1
+                })
+                lastCreatedContact.noteDetails = details
+                details = []
+            }
+
+            if (attributes.hasOwnProperty('postal')) {
+                details.push({
+                    'type': Person.AddressType,
+                    'subTypes': [ Person.AddressSubTypePostal ],
+                    'label': Person.NoLabel,
+                    'address': attributes['postal'][0],
+                    'index': -1
+                })
+                lastCreatedContact.addressDetails = details
+                details = []
+            }
+
+            if (attributes.hasOwnProperty('nickname')) {
+                details.push({
+                    'type': Person.NicknameType,
+                    'subTypes': [ Person.NoSubType ],
+                    'label': Person.NoLabel,
+                    'nickname': attributes['nickname'][0],
+                    'index': -1
+                })
+                lastCreatedContact.nicknameDetails = details
+                details = []
+            }
+
             if (attributes.hasOwnProperty('phoneNumbers')) {
                 list = attributes['phoneNumbers']
                 if (SailfishContacts.ContactsUtil.isArray(list)) {

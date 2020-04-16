@@ -263,7 +263,7 @@ FocusScope {
         property int availableSpace: pinInput.y
 
         y: root._inputOrCancelEnabled || root.emergency
-           ? Math.min(availableSpace/4 + headingVerticalOffset, availableSpace - height - Theme.paddingMedium)
+           ? availableSpace/4 + headingVerticalOffset
            : (parent.height / 2) - headingLabel.height - subHeadingLabel.height
         width: (root._twoColumnMode ? parent.width / 2 : parent.width)
                - x - (root._twoColumnMode ? Theme.paddingLarge : x)
@@ -580,9 +580,10 @@ FocusScope {
     Keypad {
         id: keypad
 
-        y: root.height + pageStack.panelSize - height - (Screen.sizeCategory > Screen.Medium && pageStack.currentPage.isPortrait
-                            ? 2 * Theme.paddingLarge
-                            : Theme.paddingLarge)
+        y: root.height + pageStack.panelSize - height
+           - (pageStack.currentPage.isPortrait ? Math.round(parent.height/20)
+                                               : Theme.paddingLarge)
+
         anchors.right: parent.right
         width: root._twoColumnMode ? parent.width / 2 : parent.width
 

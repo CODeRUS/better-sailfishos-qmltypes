@@ -15,7 +15,7 @@ ContactItem {
     readonly property int selectionModelIndex: selectionModel !== null ? (selectionModel.count > 0, selectionModel.findContactId(contactId)) : -1 // count to retrigger on change.
     property var propertyPicker
 
-    property int extraRightMargin
+    property int symbolScrollBarWidth
 
     signal contactClicked(var contact)
     signal contactPressAndHold(var contact)
@@ -30,7 +30,7 @@ ContactItem {
             var item = remorseDelete(function () {
                 model.removePerson(person)
             })
-            item.rightMargin = Theme.paddingMedium + extraRightMargin
+            item.rightMargin = Theme.paddingMedium + symbolScrollBarWidth
         }
     }
 

@@ -50,11 +50,32 @@ GridView {
     property Item pushUpMenu
     property QtObject _scrollAnimation
     property bool _pulleyDimmerActive: pullDownMenu && pullDownMenu._activeDimmer || pushUpMenu && pushUpMenu._activeDimmer
+
     property alias _quickScrollItem: quickScrollItem
     property alias _quickScrollRightMargin: quickScrollItem.rightMargin
+
     property Item __silica_contextmenu_instance
+    property Item __silica_remorse_item: null
+    property real __silica_menu_height: Math.max(__silica_contextmenu_instance ? __silica_contextmenu_instance.height : 0, __silica_remorse_height)
+    property real __silica_remorse_height
+
+    NumberAnimation {
+        id: remorseHeightAnimation
+        target: gridView
+        property: "__silica_remorse_height"
+        duration: 200
+        to: 0.0
+        easing.type: Easing.InOutQuad
+    }
+
+    on__Silica_remorse_itemChanged: {
+        if (!__silica_remorse_item) {
+            remorseHeightAnimation.restart()
+        }
+    }
+
     property int __silica_gridview
-    property int _menuOpenOffsetItemsIndex
+    property int _menuOpenOffsetItemsIndex: { -1 }
 
     function scrollToTop() {
         FastScroll.scrollToTop(gridView, quickScrollItem)

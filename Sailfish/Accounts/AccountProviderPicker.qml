@@ -5,45 +5,42 @@ import Sailfish.Accounts 1.0
 Column {
     id: root
 
-    property alias serviceFilter: providerModel.serviceFilter
+    property var serviceFilter: []
+    property var providerFilter: []
+    property bool excludeProvidersForUncreatableAccounts
 
     signal providerSelected(int index, string providerName)
-    signal providerDeselected(int index, string providerName)   // deprecated
 
     //--- end of public api
 
-    property AccountManager _accountManager: AccountManager {}
+    // List of account providers that are not in the other lists below.
+    Repeater {
+        model: ProviderModel {
+            id: uncategorizedProviders
 
-    function _isCloudStorageProvider(providerName) {
-        var provider = _accountManager.provider(providerName)
-        if (provider) {
-            var serviceNames = provider.serviceNames
-            for (var i=0; i<serviceNames.length; i++) {
-                var service = _accountManager.service(serviceNames[i])
-                if (service && service.serviceType == "storage") {
-                    return true
+            serviceFilter: root.serviceFilter
+            providerFilter: root.providerFilter
+            excludeProvidersForUncreatableAccounts: root.excludeProvidersForUncreatableAccounts
+
+            otherExcludedProviders: {
+                // Don't show any providers already visible in the other two lists.
+                var cloud = cloudProviders.providerNames
+                var other = otherProviders.providerNames
+                var excluded = []
+                var i
+                for (i = 0; i < cloud.length; ++i) {
+                    excluded.push(cloud[i])
                 }
+                for (i = 0; i < other.length; ++i) {
+                    excluded.push(other[i])
+                }
+                return excluded
             }
         }
-        return false
-    }
 
-    function _isOtherProvider(providerName) {
-        return providerName.indexOf("email") == 0
-            || providerName.indexOf("onlinesync") == 0
-    }
-
-    ProviderModel {
-        id: providerModel
-    }
-
-    Repeater {
-        model: providerModel
         delegate: AccountProviderPickerDelegate {
             width: root.width
-            visible: !root._isOtherProvider(model.providerName)
-                     && !root._isCloudStorageProvider(model.providerName)
-                     && canCreateAccount
+            onClicked: root.providerSelected(model.index, model.providerName)
         }
     }
 
@@ -51,17 +48,33 @@ Column {
         //: List of account providers that offer cloud storage
         //% "Cloud storage"
         text: qsTrId("components_accounts-la-service_name_cloud_storage")
-        // Returns true when serviceFilter contains "sharing" or "storage" or "sync" or is empty
-        visible: !serviceFilter.join(",") || /sharing|storage|sync/.test(serviceFilter)
+        visible: cloudProviders.count > 0
     }
 
+    // List of account providers that support storage services.
     Repeater {
         id: cloudStorageRepeater
-        model: providerModel
+
+        model: ProviderModel {
+            id: cloudProviders
+
+            serviceFilter: {
+                if (root.serviceFilter.length > 0) {
+                    // Don't use storage filter if it should be excluded according to root.serviceFilter
+                    if (root.serviceFilter.indexOf("storage") < 0) {
+                        return []
+                    }
+                }
+                return ["storage"]
+            }
+            providerFilter: root.providerFilter
+            otherExcludedProviders: otherProviders.providerNames
+            excludeProvidersForUncreatableAccounts: root.excludeProvidersForUncreatableAccounts
+        }
+
         delegate: AccountProviderPickerDelegate {
-            id: csPickerDelegate
             width: root.width
-            visible: root._isCloudStorageProvider(model.providerName) && canCreateAccount
+            onClicked: root.providerSelected(model.index, model.providerName)
         }
     }
 
@@ -69,17 +82,44 @@ Column {
         //: List of other types of account providers
         //% "Other"
         text: qsTrId("components_accounts-la-other")
-        // Returns true when serviceFilter contains "caldav" or "carddav" or "e-mail" or is empty
-        visible: !serviceFilter.join(",") || /caldav|carddav|e\-mail/.test(serviceFilter)
+        visible: otherProviders.count > 0
     }
 
+    // List of generic account providers.
     Repeater {
         id: otherRepeater
-        model: providerModel
-        delegate: AccountProviderPickerDelegate {
-            id: opPickerDelegate
-            width: root.width
-            visible: root._isOtherProvider(model.providerName) && canCreateAccount
+
+        model: ProviderModel {
+            id: otherProviders
+
+            serviceFilter: root.serviceFilter
+            providerFilter: {
+                var otherProviders = ["email", "onlinesync"]
+                if (root.providerFilter.length > 0) {
+                    // Remove any providers that should be filtered out according to providerFilter.
+                    for (var i = 0; i < otherProviders.length; ++i) {
+                        if (root.providerFilter.indexOf(otherProviders[i]) < 0) {
+                            otherProviders.pop(i)
+                        }
+                    }
+                }
+                return otherProviders
+            }
+            excludeProvidersForUncreatableAccounts: root.excludeProvidersForUncreatableAccounts
         }
+
+        delegate: AccountProviderPickerDelegate {
+            width: root.width
+            onClicked: root.providerSelected(model.index, model.providerName)
+        }
+    }
+
+    ViewPlaceholder {
+        enabled: uncategorizedProviders.count === 0
+                 && cloudProviders.count === 0
+                 && otherProviders.count === 0
+
+        //% "No account providers available"
+        text: qsTrId("components_accounts-la-no_account_providers_available")
     }
 }

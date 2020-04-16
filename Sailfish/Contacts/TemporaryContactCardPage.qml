@@ -95,10 +95,8 @@ Page {
                     contactPage._popPage()
                 }
             }
-
-            BusyIndicator {
-                anchors.centerIn: parent
-                size: BusyIndicatorSize.Large
+            PageBusyIndicator {
+                running: true
             }
         }
     }

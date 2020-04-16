@@ -42,7 +42,17 @@ SequentialAnimation {
     property real distance
     signal completed
 
-    function animate(target, startX, distance) {
+    function dismiss(target, distance) {
+        slideAnimation.target = target
+        root.distance = distance
+        slideAnimation.duration = 200
+        slideAnimation.to = -distance
+        slideAnimation.easing.type = Easing.InOutQuad
+        start()
+    }
+
+    function animate(target, startX, distance, force) {
+        var active = false
         slideAnimation.target = target
         root.startX = startX
         root.distance = distance
@@ -50,7 +60,7 @@ SequentialAnimation {
         var delta = target.x - startX
         var progress = Math.abs(delta)
 
-        if (progress > Theme.itemSizeMedium) {
+        if (progress > Theme.itemSizeMedium || force) {
             slideAnimation.duration = 300 * (distance - progress) / distance
             if (delta > 0) {
                 slideAnimation.to = distance
@@ -58,6 +68,7 @@ SequentialAnimation {
                 slideAnimation.to = -distance
             }
             slideAnimation.easing.type = Easing.Linear
+            active = true
         } else {
             // play cancel animation
             slideAnimation.duration = 100
@@ -65,6 +76,7 @@ SequentialAnimation {
             slideAnimation.easing.type = Easing.InOutQuad
         }
         start()
+        return active
     }
 
     function reset() {

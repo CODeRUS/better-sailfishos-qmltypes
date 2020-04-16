@@ -23,6 +23,10 @@ Dialog {
         id: applicationList
     }
 
+    BusyLabel {
+        running: !applicationModel.populated
+    }
+
     SilicaFlickable {
         anchors.fill: parent
         contentHeight: header.height + contentColumn.height + Theme.paddingLarge
@@ -47,14 +51,9 @@ Dialog {
             opacity: applicationModel.populated ? 0 : 1
             Behavior on opacity { FadeAnimation {} }
 
-            //: Heading for page that allows user to install Android app support.
-            //% "Get Android™ app support"
+            //: Heading for page that allows user to install Android™ App Support.
+            //% "Get Android™ App Support"
             text: qsTrId("startupwizard-he-get_android_app_support")
-        }
-
-        LoadingPlaceholder {
-            y: root.height/2 - height/2
-            visible: !applicationModel.populated
         }
 
         Column {
@@ -74,7 +73,7 @@ Dialog {
                 font.family: Theme.fontFamilyHeading
                 color: Theme.highlightColor
 
-                //: Heading for page that allows user to install Android app support.
+                //: Heading for page that allows user to install Android™ App Support.
                 //% "Do you want to use Android™ apps?"
                 text: qsTrId("startupwizard-he-do_you_want_to_use_android_apps")
             }
@@ -88,8 +87,8 @@ Dialog {
                 font.pixelSize: Theme.fontSizeExtraSmall
                 visible: applicationModel.androidSupportPackageAvailable
 
-                //: Hint to user to install Android support.
-                //% "If you want to use Android™ apps on the device, select this to install Android™ support."
+                //: Hint to user to install Android™ App Support.
+                //% "If you want to use Android apps on the device, select this to install Android App Support."
                 text: qsTrId("startupwizard-la-install_android_support")
             }
 
@@ -126,7 +125,7 @@ Dialog {
                 font.pixelSize: Theme.fontSizeExtraSmall
 
                 //: Explains how to install Android apps and stores later on.
-                //% "You can install additional stores to your device to find your favorite Android™ apps like Facebook, Twitter and WhatsApp. For more Android™ apps and stores, visit the Store app later."
+                //% "You can install additional stores to your device to find your favorite Android apps like Facebook, Twitter and WhatsApp. For more Android apps and stores, visit the Store app later."
                 text: qsTrId("startupwizard-la-install_additional_android_stores")
             }
 

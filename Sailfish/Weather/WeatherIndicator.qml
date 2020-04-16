@@ -19,7 +19,7 @@ Row {
         id: image
         anchors.verticalCenter: parent.verticalCenter
         source: weather && weather.weatherType.length > 0
-                ? "image://theme/graphic-m-weather-" + weather.weatherType
+                ? "image://theme/icon-m-weather-" + weather.weatherType
                 : ""
         // JB#43864 don't yet have weather graphics in small-plus size, so set size manually
         sourceSize.width: Theme.iconSizeSmallPlus

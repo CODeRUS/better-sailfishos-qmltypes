@@ -178,7 +178,8 @@ Module {
                 "TopLeft": 1,
                 "TopRight": 2,
                 "BottomRight": 4,
-                "BottomLeft": 8
+                "BottomLeft": 8,
+                "AllCorners": 15
             }
         }
         Property { name: "radius"; type: "float" }
@@ -367,18 +368,6 @@ Module {
         Signal { name: "removingFailed" }
         Method { name: "removeDeviceContacts" }
         Method { name: "cancel" }
-    }
-    Component {
-        name: "ContextPropertyDeclarative"
-        defaultProperty: "value"
-        prototype: "QObject"
-        exports: ["org.freedesktop.contextkit/ContextProperty 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "key"; type: "string" }
-        Property { name: "value"; type: "QVariant" }
-        Property { name: "subscribed"; type: "bool" }
-        Method { name: "subscribe" }
-        Method { name: "unsubscribe" }
     }
     Component {
         name: "ConversationChannel"
@@ -1461,6 +1450,24 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "leftMargin"; type: "float" }
         Property { name: "rightMargin"; type: "float" }
+    }
+    Component {
+        name: "KnownContacts"
+        prototype: "QObject"
+        exports: ["org.nemomobile.contacts/KnownContacts 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "storeContact"
+            type: "bool"
+            Parameter { name: "contact"; type: "QVariantMap" }
+        }
+        Method {
+            name: "storeContacts"
+            type: "bool"
+            Parameter { name: "contacts"; type: "QVariantList" }
+        }
     }
     Component {
         name: "MInverseMouseArea"
@@ -3811,7 +3818,8 @@ Module {
                 "NoPropertyRequired": 0,
                 "AccountUriRequired": 1,
                 "PhoneNumberRequired": 2,
-                "EmailAddressRequired": 4
+                "EmailAddressRequired": 4,
+                "OrganizationRequired": 8
             }
         }
         Enum {
@@ -3856,7 +3864,9 @@ Module {
                 "NoteDetailsRole": 275,
                 "CompanyNameRole": 276,
                 "TitleRole": 277,
-                "RoleRole": 278
+                "RoleRole": 278,
+                "NameDetailsRole": 279,
+                "FilterMatchDataRole": 280
             }
         }
         Property { name: "populated"; type: "bool"; isReadonly: true }
@@ -4772,7 +4782,6 @@ Module {
         Property { name: "simManager"; type: "QVariant" }
         Property { name: "telepathyAccounts"; type: "QVariant" }
         Property { name: "peopleModel"; type: "QVariant" }
-        Property { name: "_capabilityDataContextProperty"; type: "QVariant" }
         Property { name: "_settingsDBus"; type: "QVariant" }
         Property { name: "_pinQueryDBus"; type: "QVariant" }
         Method {

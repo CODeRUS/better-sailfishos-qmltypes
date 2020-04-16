@@ -22,7 +22,7 @@ TermsOfUseDialog {
         //% "This device runs %1. By selecting '%2' and starting to use %1 you agree to the %1 End User License Agreement."
         qsTrId("startupwizard-la-sailfish_eula_intro") // trigger Qt Linguist translation
         return startupWizardManager.translatedText("startupwizard-la-sailfish_eula_intro", root.localeName)
-                .arg(aboutSettings.operatingSystemName)
+                .arg(aboutSettings.localizedOperatingSystemName)
                 .arg(dialogHeader.acceptText)
     }
     linkText: {
@@ -30,21 +30,21 @@ TermsOfUseDialog {
         //% "Please read the %2%1 End User License Agreement%3 carefully before accepting."
         qsTrId("startupwizard-la-sailfish_eula_read_carefully") // trigger Qt Linguist translation
         return startupWizardManager.translatedText("startupwizard-la-sailfish_eula_read_carefully", root.localeName)
-                .arg(aboutSettings.operatingSystemName)
+                .arg(aboutSettings.localizedOperatingSystemName)
     }
     rejectLinkText: {
         //: %1 is an operating system name, text surrounded by %2 and %3 is underlined and colored differently
         //% "%2Reject the %1 End User License Agreement%3 and turn the device off"
         qsTrId("startupwizard-la-reject_sailfish_eula_and_turn_off") // trigger Qt Linguist translation
         return startupWizardManager.translatedText("startupwizard-la-reject_sailfish_eula_and_turn_off", root.localeName)
-                .arg(aboutSettings.operatingSystemName)
+                .arg(aboutSettings.localizedOperatingSystemName)
     }
     rejectHeaderText: {
         //: %1 = an operating system name
         //% "Are you sure you want to reject the %1 End User License Agreement?"
         qsTrId("startupwizard-he-reject_eula_heading_text") // trigger Qt Linguist translation
         return startupWizardManager.translatedText("startupwizard-he-reject_eula_heading_text", root.localeName)
-                .arg(aboutSettings.operatingSystemName)
+                .arg(aboutSettings.localizedOperatingSystemName)
     }
     rejectBodyText: {
         //% "If you cannot accept the terms of this Agreement after having purchased a product incorporating Software, please return the product containing the Software to the seller in accordance with the applicable return policy."

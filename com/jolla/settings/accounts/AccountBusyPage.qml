@@ -66,37 +66,22 @@ Page {
     states: [
         State {
             name: "busy"
-            PropertyChanges { target: busyIndicator; running: true }
+            PropertyChanges { target: busyLabel; running: true }
             PropertyChanges { target: infoColumn; opacity: 0 }
             PropertyChanges { target: infoButton; enabled: false }
         },
         State {
             name: "info"
-            PropertyChanges { target: busyIndicator; running: false }
+            PropertyChanges { target: busyLabel; running: false }
             PropertyChanges { target: infoColumn; opacity: 1 }
             PropertyChanges { target: infoButton; enabled: infoButton.text.length > 0 }
         }
     ]
 
-    Column {
-        anchors.centerIn: parent
-        spacing: Theme.paddingLarge
-        opacity: busyIndicator.opacity
 
-        Label {
-            width: root.width - Theme.horizontalPageMargin*2
-            visible: text.length > 0
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.Wrap
-            color: Theme.highlightColor
-            text: root.busyDescription
-        }
-
-        BusyIndicator {
-            id: busyIndicator
-            anchors.horizontalCenter: parent.horizontalCenter
-            size: BusyIndicatorSize.Large
-        }
+    BusyLabel {
+        id: busyLabel
+        text: root.busyDescription
     }
 
     Column {

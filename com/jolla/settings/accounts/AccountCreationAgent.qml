@@ -22,8 +22,7 @@ import com.jolla.settings.accounts 1.0
        account asynchronously in the background. (AccountBusyPage.qml can be used for this purpose.)
 
        - If the account is created, show the account settings dialog to allow the user to confirm
-         or customize particular settings. (AccountSettingsDialog.qml can be used for this
-         purpose.)
+         or customize particular settings.
              When the settings dialog is accepted, save the updated settings and move onto the
          endDestination. If the save operation is asynchronous, set delayDeletion=true until the save
          is done (or fails) to prevent the agent instance from being deleted until the operation

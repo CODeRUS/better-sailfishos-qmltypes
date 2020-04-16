@@ -14,7 +14,7 @@ ListItem {
     property var formatFilter
     property real leftPadding: Theme.horizontalPageMargin
 
-    contentHeight: Math.max(Theme.itemSizeSmall, column.height + Theme.paddingSmall*2)
+    contentHeight: Math.max(Theme.itemSizeMedium, column.height + 2 * Theme.paddingMedium)
 
     Column {
         id: column

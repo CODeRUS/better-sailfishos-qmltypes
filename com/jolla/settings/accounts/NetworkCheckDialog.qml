@@ -97,10 +97,8 @@ Dialog {
 
     // The dialog may be visible briefly after the connection dialog is closed and
     // before the dialog is auto-accepted, so show a busy indicator as a placeholder.
-    BusyIndicator {
-        anchors.centerIn: parent
+    PageBusyIndicator {
         running: root._connectionSelectorClosed && root._connectionSelected
-        size: BusyIndicatorSize.Large
     }
 
     Column {

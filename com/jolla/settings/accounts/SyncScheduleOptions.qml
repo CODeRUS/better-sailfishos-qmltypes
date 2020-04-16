@@ -80,6 +80,10 @@ ValueButton {
     }
 
     onScheduleChanged: {
+        if (!schedule) {
+            return
+        }
+
         // If the schedule uses a daily sync time rather than an interval, force
         // it to use an interval instead, since the UI doesn't allow a daily sync
         // time to be used.
