@@ -19,6 +19,7 @@ ShareDialog {
 
     property alias shareItem: shareItem
     property alias remoteDirName: targetFolderLabel.text
+    property alias remoteDirReadOnly: targetFolderLabel.readOnly
     property alias fileInfo: fileInfo
 
     property alias imageScaleVisible: scaleComboBox.visible
@@ -43,7 +44,8 @@ ShareDialog {
         userData: {
             "description": descriptionTextField.text,
             "accountId": root.accountId,
-            "scalePercent": root._scalePercent
+            "scalePercent": root._scalePercent,
+            "remoteDirName": root.remoteDirName,
         }
     }
 
@@ -175,27 +177,16 @@ ShareDialog {
                 }
             }
 
-            Column {
-                x: Theme.horizontalPageMargin
-                width: parent.width - x*2
-                visible: targetFolderLabel.text.length > 0
+            TextField {
+                id: targetFolderLabel
 
-                Label {
-                    width: parent.width
-                    truncationMode: TruncationMode.Fade
-                    color: Theme.highlightColor
-                    //% "Destination folder"
-                    text: qsTrId("transferui-la-destination_folder")
-                }
-
-                Label {
-                    id: targetFolderLabel
-
-                    width: parent.width
-                    color: Theme.secondaryHighlightColor
-                    truncationMode: TruncationMode.Fade
-                    font.pixelSize: Theme.fontSizeSmall
-                }
+                width: parent.width
+                visible: targetFolderLabel.text.length > 0 || !targetFolderLabel.readOnly
+                readOnly: true
+                color: readOnly ? Theme.highlightColor : Theme.primaryColor
+                //% "Destination folder"
+                label: qsTrId("transferui-la-destination_folder")
+                placeholderText: label
             }
         }
 

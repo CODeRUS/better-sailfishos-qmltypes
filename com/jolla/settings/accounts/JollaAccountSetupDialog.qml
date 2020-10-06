@@ -192,7 +192,7 @@ Dialog {
                 width: parent.width - x*2
                 height: implicitHeight + Theme.paddingLarge * 2
                 verticalAlignment: Text.AlignVCenter
-                wrapMode: Text.WordWrap
+                wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeExtraSmall
                 color: Theme.highlightColor
                 visible: !root.runningFromSettingsApp
@@ -470,7 +470,7 @@ Dialog {
                         x: Theme.horizontalPageMargin
                         width: parent.width - x*2
                         height: implicitHeight + Theme.paddingLarge*3
-                        wrapMode: Text.WordWrap
+                        wrapMode: Text.Wrap
                         color: Theme.highlightColor
                         font.pixelSize: Theme.fontSizeExtraSmall
                         //: Description of what user will miss if the option to set up a Jolla account is missed

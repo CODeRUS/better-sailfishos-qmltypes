@@ -8,15 +8,20 @@ Column {
 
     property int responseState: CalendarEvent.ResponseUnspecified
     property string subject
-    property color _color: Theme.primaryColor
-    property color _selectedColor: Theme.highlightColor
+    property color _color: attendingLabel.palette.primaryColor
+    property color _selectedColor: attendingLabel.palette.highlightColor
+    property alias _backgroundColor: acceptButton.backgroundColor
+    property alias preferredButtonWidth: buttonLayout.preferredWidth
+    property alias labelFont: attendingLabel.font
 
     signal calendarInvitationResponded(int response, string responseSubject)
 
     Label {
+        id: attendingLabel
+
         x: Theme.horizontalPageMargin
         width: parent.width - 2*x
-        color: Theme.highlightColor
+        color: palette.highlightColor
         text: {
             switch (root.responseState) {
             case CalendarEvent.ResponseAccept:
@@ -41,10 +46,14 @@ Column {
     }
 
     ButtonLayout {
+        id: buttonLayout
+
         preferredWidth: Theme.buttonWidthExtraSmall
         width: parent.width
 
         Button {
+            id: acceptButton
+
             color: root.responseState === CalendarEvent.ResponseAccept
                    ? root._selectedColor : root._color
             enabled: root.enabled
@@ -63,6 +72,7 @@ Column {
         Button {
             color: root.responseState === CalendarEvent.ResponseTentative
                    ? root._selectedColor : root._color
+            backgroundColor: root._backgroundColor
             enabled: root.enabled
             //: Maybe calendar invitation button. Shall be short to fit in 1 row
             //% "Maybe"
@@ -79,6 +89,7 @@ Column {
         Button {
             color: root.responseState === CalendarEvent.ResponseDecline
                    ? root._selectedColor : root._color
+            backgroundColor: root._backgroundColor
             enabled: root.enabled
             //: "No" calendar invitation button. Shall be short to fit in 1 row
             //% "No"

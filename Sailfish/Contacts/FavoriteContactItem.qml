@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2012 - 2019 Jolla Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+*/
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Contacts 1.0 as Contacts
@@ -107,7 +114,7 @@ GridItem {
         }
 
         Label {
-            text: model.companyName
+            text: model.companyName !== model.displayLabel ? model.companyName : ""
             width: parent.width
             font.pixelSize: Theme.fontSizeTiny
             truncationMode: TruncationMode.Fade

@@ -63,6 +63,13 @@ Module {
         }
     }
     Component {
+        name: "OpaqueBackgroundItem"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        exports: ["com.jolla.keyboard/OpaqueBackgroundItem 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
+    Component {
         name: "PaPlayer"
         prototype: "QObject"
         exports: ["com.jolla.keyboard/SampleCache 1.0"]

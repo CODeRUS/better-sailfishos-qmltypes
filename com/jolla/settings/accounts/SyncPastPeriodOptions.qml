@@ -7,7 +7,9 @@ ComboBox {
     id: root
 
     property AccountSyncOptions syncOptions
-    property bool isSync
+
+    // i.e. is a two-way sync, rather than a one-way download
+    property bool isSync: true
 
     function _resetCurrentIndex() {
         if (!syncOptions) {

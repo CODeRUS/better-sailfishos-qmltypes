@@ -71,7 +71,7 @@ MouseArea {
         TemperatureLabel {
             anchors.right: parent.right
             temperature: weather ? TemperatureConverter.formatWithoutUnit(weather.temperature) : ""
-            temperatureFeel: weather ? TemperatureConverter.formatWithoutUnit(weather.temperatureFeel) : ""
+            feelsLikeTemperature: weather ? TemperatureConverter.formatWithoutUnit(weather.feelsLikeTemperature) : ""
             color: highlighted ? Theme.highlightColor : Theme.primaryColor
         }
     }

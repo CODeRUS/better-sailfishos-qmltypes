@@ -21,6 +21,7 @@ QtObject {
     property string privateKey
     property string privateKeyFile
     property string privateKeyPassphrase
+    property string anonymousIdentity
     property bool privateKeyPassphraseAvailable: true
     property string domainSuffixMatch
     property bool eapMethodAvailable: true
@@ -130,6 +131,8 @@ QtObject {
                 settings.PrivateKeyPassphrase = privateKeyPassphrase
             if (domainSuffixMatch)
                 settings.DomainSuffixMatch = domainSuffixMatch
+            if (eapMethod !== NetworkService.EapTTLS && anonymousIdentity)
+                settings.AnonymousIdentity = anonymousIdentity
         }
         if (nameserversConfig.length > 0) {
             settings.Nameservers = nameserversConfig.join(";")

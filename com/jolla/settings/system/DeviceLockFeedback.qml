@@ -131,7 +131,7 @@ Connections {
             break
         case AuthenticationInput.UnrecognizedFinger:
             warn(data.message || (attemptsRemaining === 0
-                    //% "Unrecognized finger. Enter your security code"
+                    //% "Too many unrecognized fingers. Enter your security code"
                     ? qsTrId("settings_devicelock-la-devicelock_unrecognized_finger_enter_security_code")
                     //% "Unrecognized finger"
                     : qsTrId("settings_devicelock-la-devicelock_unrecognized_finger")), !data.persistWarning)

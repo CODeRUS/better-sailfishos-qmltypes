@@ -7,6 +7,7 @@ Rectangle {
 
     property bool compressed
     property bool active: true
+    property bool limited
     property alias text: lockedLabel.text
     property alias font: lockedLabel.font
 
@@ -26,12 +27,21 @@ Rectangle {
         width: parent.width - 2*Theme.horizontalPageMargin
         font.pixelSize: root.compressed ? Theme.fontSizeMedium : Theme.fontSizeExtraLarge
         horizontalAlignment: Text.AlignHCenter
-        wrapMode: Text.WordWrap
+        wrapMode: Text.Wrap
         textFormat: Text.StyledText
-        //: %1 is operating system name without OS suffix
-        //% "Disabled by %1 Device Manager"
-        text: qsTrId("settings_system-la-disabled_by_device_manager")
-            .arg(aboutSettings.baseOperatingSystemName)
+        text: {
+            if (!limited) {
+                //: %1 is operating system name without OS suffix
+                //% "Disabled by %1 Device Manager"
+		qsTrId("settings_system-la-disabled_by_device_manager")
+                    .arg(aboutSettings.baseOperatingSystemName)
+            } else {
+                //: %1 is operating system name without OS suffix
+                //% "Changes limited by %1 Device Manager"
+		qsTrId("settings_system-la-limited_by_device_manager")
+                    .arg(aboutSettings.baseOperatingSystemName)
+            }
+        }
         color: Theme.highlightColor
     }
 

@@ -857,14 +857,14 @@ Item {
             var attachmentObj = attachmentFiles.get(i)
             names.push(attachmentObj.title)
             totalAttachmentSize += attachmentObj.fileSize
-            attachments.text = names.join(", ")
+            attachments.text = names.join(Format.listSeparator)
             if (!attachmentTextUpdated && attachments.implicitWidth > attachments.width) {
                 while (names.length > 1 && attachments.implicitWidth > attachments.width) {
                     names.pop()
                     //: Number of additional attachments that are not currently shown
                     //% "%n other(s)"
-                    var more = qsTrId("jolla-components_email-la-attchements_summary", attachmentFiles.count - names.length)
-                    attachments.text = names.join(", ") + ", " + more
+                    var more = qsTrId("jolla-components_email-la-attachments_summary", attachmentFiles.count - names.length)
+                    attachments.text = names.join(Format.listSeparator) + Format.listSeparator + more
                 }
                 attachmentTextUpdated = true
             }
@@ -877,7 +877,7 @@ Item {
         if (attachments.implicitWidth > attachments.width) {
             //: Number of attachments, should have singular and plurar formats. Text should be relatively short (max 24 chars).
             //% "%n attachment(s)"
-            attachments.text = qsTrId("jolla-components_email-la-attchements", attachmentFiles.count) + attachmentSizeText
+            attachments.text = qsTrId("jolla-components_email-la-attachments", attachmentFiles.count) + attachmentSizeText
         }
 
         attachments.text = attachmentFiles.count > 0 ? attachments.text : ""
@@ -962,33 +962,37 @@ Item {
                     var replyTo = originalMessage.replyTo ? originalMessage.replyTo : originalMessage.fromAddress
 
                     // Use slice() to create a new array object that can be modified (QML limitation, should implicitly happen when you start to modify array var)
-                    var recipients = originalMessage.recipients.slice()
                     var recipientsUsed = false
+                    var toRecipients = originalMessage.toEmailAddresses.slice()
+                    var ccRecipients = originalMessage.ccEmailAddresses.slice()
 
                     // don't reply to yourself when choosing reply for message you sent
                     var usersEmailAddress = accountListModel.emailAddressFromAccountId(messageComposer.accountId)
-                    if ((action == 'reply' || action == 'replyAll') && usersEmailAddress == replyTo && recipients.length > 0) {
-                        replyTo = recipients
+                    if ((action == 'reply' || action == 'replyAll') && usersEmailAddress == replyTo && originalMessage.recipients.length > 0) {
                         recipientsUsed = true
+                        replyTo = toRecipients
+                        cc.setRecipients(ccRecipients)
                     }
 
                     to.setRecipients(replyTo)
+
                     if (action == 'replyAll') {
                         message.responseType = EmailMessage.ReplyToAll
 
                         if (!recipientsUsed) {
-                            var fromIndex = recipients.indexOf(accountListModel.emailAddress(currentIndex >= 0 ? currentIndex : 0))
+                            var fromIndex = toRecipients.indexOf(accountListModel.emailAddress(currentIndex >= 0 ? currentIndex : 0))
                             if (fromIndex != -1) {
                                 // Remove current from address from the list
-                                recipients.splice(fromIndex, 1)
-                            }
-                            var replyToIndex = recipients.indexOf(replyTo)
-                            if (replyToIndex != -1) {
-                                // Remove to address from the list
-                                recipients.splice(replyToIndex, 1)
+                                toRecipients.splice(fromIndex, 1)
                             }
 
-                            cc.setRecipients(recipients)
+                            var fromCcIndex = ccRecipients.indexOf(accountListModel.emailAddress(currentIndex >= 0 ? currentIndex : 0))
+                            if (fromCcIndex != -1) {
+                                ccRecipients.splice(fromCcIndex, 1)
+                            }
+
+                            to.setRecipients(toRecipients)
+                            cc.setRecipients(ccRecipients)
                         }
                     } else {
                         message.responseType = EmailMessage.Reply

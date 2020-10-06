@@ -53,6 +53,7 @@ Module {
         Property { name: "defaultCredentialsUserName"; type: "string"; isReadonly: true }
         Property { name: "provisioned"; type: "bool"; isReadonly: true }
         Property { name: "readonly"; type: "bool"; isReadonly: true }
+        Property { name: "limited"; type: "bool"; isReadonly: true }
         Property { name: "supportedServiceNames"; type: "QStringList"; isReadonly: true }
         Property { name: "status"; type: "Status"; isReadonly: true }
         Property { name: "error"; type: "ErrorType"; isReadonly: true }
@@ -191,6 +192,68 @@ Module {
         }
     }
     Component {
+        name: "AccountAuthenticator"
+        prototype: "QObject"
+        exports: ["Sailfish.Accounts/AccountAuthenticator 1.0"]
+        exportMetaObjectRevisions: [0]
+        Signal {
+            name: "signInCompleted"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "credentials"; type: "AccountAuthenticatorCredentials" }
+        }
+        Signal {
+            name: "signInError"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "errorString"; type: "string" }
+        }
+        Signal {
+            name: "authenticatedRequestFinished"
+            Parameter { name: "success"; type: "bool" }
+            Parameter { name: "errorString"; type: "string" }
+        }
+        Signal {
+            name: "ocsUserRequestFinished"
+            Parameter { name: "success"; type: "bool" }
+            Parameter { name: "errorString"; type: "string" }
+        }
+        Method {
+            name: "signIn"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "serviceName"; type: "string" }
+        }
+        Method {
+            name: "sendAuthenticatedRequest"
+            Parameter { name: "url"; type: "QUrl" }
+            Parameter { name: "credentials"; type: "AccountAuthenticatorCredentials" }
+            Parameter { name: "ignoreSslErrors"; type: "bool" }
+        }
+        Method {
+            name: "sendOcsUserRequest"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "serviceName"; type: "string" }
+            Parameter { name: "credentials"; type: "AccountAuthenticatorCredentials" }
+            Parameter { name: "ignoreSslErrors"; type: "bool" }
+        }
+        Method {
+            name: "setCredentialsNeedUpdate"
+            type: "bool"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "serviceName"; type: "string" }
+        }
+    }
+    Component {
+        name: "AccountAuthenticatorCredentials"
+        exports: ["Sailfish.Accounts/AccountAuthenticatorCredentials 1.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Property { name: "username"; type: "string" }
+        Property { name: "password"; type: "string" }
+        Property { name: "accessToken"; type: "string" }
+        Property { name: "serviceSettings"; type: "QVariantMap" }
+    }
+    Component {
         name: "AccountManager"
         prototype: "QObject"
         exports: ["Sailfish.Accounts/AccountManager 1.0"]
@@ -244,6 +307,12 @@ Module {
             type: "bool"
             Parameter { name: "accountId"; type: "int" }
         }
+        Method {
+            name: "enabledAccounts"
+            type: "QList<int>"
+            Parameter { name: "providerName"; type: "string" }
+            Parameter { name: "serviceName"; type: "string" }
+        }
     }
     Component {
         name: "AccountModel"
@@ -270,6 +339,7 @@ Module {
         }
         Property { name: "filterType"; type: "FilterType" }
         Property { name: "filter"; type: "string" }
+        Property { name: "filterByEnabled"; type: "bool" }
         Property { name: "count"; type: "int"; isReadonly: true }
         Method {
             name: "setAccountEnabled"
@@ -306,6 +376,15 @@ Module {
                 "SyncFinished": 2,
                 "SyncAborted": 3,
                 "SyncError": 4
+            }
+        }
+        Enum {
+            name: "BackupOperationType"
+            values: {
+                "InvalidOperation": 0,
+                "Backup": 1,
+                "BackupQuery": 2,
+                "BackupRestore": 3
             }
         }
         Signal {
@@ -360,6 +439,10 @@ Module {
             Parameter { name: "profileId"; type: "string" }
         }
         Method {
+            name: "abortProfileSync"
+            Parameter { name: "profileId"; type: "string" }
+        }
+        Method {
             name: "createAllProfiles"
             type: "int"
             Parameter { name: "accountId"; type: "int" }
@@ -381,6 +464,21 @@ Module {
             Parameter { name: "profileId"; type: "string" }
         }
         Method {
+            name: "nextSyncTime"
+            type: "QDateTime"
+            Parameter { name: "profileId"; type: "string" }
+        }
+        Method {
+            name: "lastSyncTime"
+            type: "QDateTime"
+            Parameter { name: "profileId"; type: "string" }
+        }
+        Method {
+            name: "lastSuccessfulSyncTime"
+            type: "QDateTime"
+            Parameter { name: "profileId"; type: "string" }
+        }
+        Method {
             name: "templateProfilesAvailable"
             type: "bool"
             Parameter { name: "templateProfiles"; type: "QStringList" }
@@ -390,6 +488,17 @@ Module {
             type: "QStringList"
             Parameter { name: "accountId"; type: "int" }
             Parameter { name: "serviceName"; type: "string" }
+        }
+        Method {
+            name: "profileProperties"
+            type: "QVariantMap"
+            Parameter { name: "profileId"; type: "string" }
+        }
+        Method {
+            name: "findBackupOperationProfile"
+            type: "string"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "operation"; type: "BackupOperationType" }
         }
     }
     Component {
@@ -415,10 +524,20 @@ Module {
                 "TwoWaySync": 2
             }
         }
+        Enum {
+            name: "NetworkConnection"
+            values: {
+                "Ethernet": 1,
+                "Wlan": 2,
+                "Cellular": 4,
+                "Bluetooth": 8
+            }
+        }
         Property { name: "automaticSyncEnabled"; type: "bool" }
         Property { name: "syncExternallyEnabled"; type: "bool" }
         Property { name: "pastSyncPeriod"; type: "PastSyncPeriod" }
         Property { name: "direction"; type: "Direction" }
+        Property { name: "allowedConnectionTypes"; type: "int" }
         Property { name: "schedule"; type: "AccountSyncSchedule"; isPointer: true }
         Property { name: "modified"; type: "bool"; isReadonly: true }
     }
@@ -439,6 +558,15 @@ Module {
             }
         }
         Enum {
+            name: "LongInterval"
+            values: {
+                "MonthLongInterval": 0,
+                "FirstDayOfMonthInterval": 1,
+                "LastDayOfMonthInterval": 2,
+                "NoLongInterval": 100
+            }
+        }
+        Enum {
             name: "Day"
             values: {
                 "Monday": 1,
@@ -447,13 +575,17 @@ Module {
                 "Thursday": 8,
                 "Friday": 16,
                 "Saturday": 32,
-                "Sunday": 64
+                "Sunday": 64,
+                "WeekDays": 31,
+                "WeekendDays": 96,
+                "EveryDay": 127
             }
         }
         Property { name: "enabled"; type: "bool" }
         Property { name: "days"; type: "int"; isReadonly: true }
         Property { name: "dailySyncTime"; type: "QTime"; isReadonly: true }
         Property { name: "interval"; type: "Interval"; isReadonly: true }
+        Property { name: "longInterval"; type: "LongInterval"; isReadonly: true }
         Property { name: "peakScheduleEnabled"; type: "bool" }
         Property { name: "syncExternallyDuringPeak"; type: "bool" }
         Property { name: "peakStartTime"; type: "QTime"; isReadonly: true }
@@ -480,6 +612,11 @@ Module {
             Parameter { name: "interval"; type: "Interval" }
         }
         Method {
+            name: "setLongIntervalSyncMode"
+            Parameter { name: "interval"; type: "LongInterval" }
+            Parameter { name: "time"; type: "QTime" }
+        }
+        Method {
             name: "setPeakSchedule"
             Parameter { name: "peakStart"; type: "QTime" }
             Parameter { name: "peakEnd"; type: "QTime" }
@@ -487,78 +624,6 @@ Module {
             Parameter { name: "peakDays"; type: "int" }
         }
         Method { name: "setDefaultPeakSchedule" }
-    }
-    Component {
-        name: "CloudBackupSyncTrigger"
-        prototype: "QObject"
-        exports: ["Sailfish.Accounts/CloudBackupSyncTrigger 1.0"]
-        exportMetaObjectRevisions: [0]
-        Signal {
-            name: "cloudSyncProgress"
-            Parameter { name: "accountId"; type: "int" }
-            Parameter { name: "status"; type: "int" }
-            Parameter { name: "errorString"; type: "string" }
-        }
-        Signal {
-            name: "requestedListing"
-            Parameter { name: "accountId"; type: "int" }
-            Parameter { name: "listing"; type: "QVariantList" }
-        }
-        Signal {
-            name: "requestListingFailed"
-            Parameter { name: "accountId"; type: "int" }
-            Parameter { name: "message"; type: "string" }
-        }
-        Method {
-            name: "downloadFromCloud"
-            type: "bool"
-            Parameter { name: "accountId"; type: "int" }
-            Parameter { name: "localDir"; type: "string" }
-            Parameter { name: "remotePath"; type: "string" }
-            Parameter { name: "remoteFile"; type: "string" }
-        }
-        Method {
-            name: "downloadFromCloud"
-            type: "bool"
-            Parameter { name: "accountId"; type: "int" }
-            Parameter { name: "localDir"; type: "string" }
-            Parameter { name: "remotePath"; type: "string" }
-        }
-        Method {
-            name: "downloadFromCloud"
-            type: "bool"
-            Parameter { name: "accountId"; type: "int" }
-            Parameter { name: "localDir"; type: "string" }
-        }
-        Method {
-            name: "downloadFromCloud"
-            type: "bool"
-            Parameter { name: "accountId"; type: "int" }
-        }
-        Method {
-            name: "uploadToCloud"
-            type: "bool"
-            Parameter { name: "accountId"; type: "int" }
-            Parameter { name: "localDir"; type: "string" }
-            Parameter { name: "remotePath"; type: "string" }
-        }
-        Method {
-            name: "uploadToCloud"
-            type: "bool"
-            Parameter { name: "accountId"; type: "int" }
-            Parameter { name: "localDir"; type: "string" }
-        }
-        Method {
-            name: "uploadToCloud"
-            type: "bool"
-            Parameter { name: "accountId"; type: "int" }
-        }
-        Method {
-            name: "requestListing"
-            type: "bool"
-            Parameter { name: "accountId"; type: "int" }
-        }
-        Method { name: "resetState" }
     }
     Component {
         name: "Provider"

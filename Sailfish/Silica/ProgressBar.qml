@@ -48,13 +48,14 @@ SilicaItem {
     property alias label: labelText.text
     property real leftMargin: Math.round(Screen.width/8)
     property real rightMargin: Math.round(Screen.width/8)
+    readonly property real barCenterY: contentColumn.y + background.y + background.height/2
 
     property alias _timer: progressBarTimer
     property real _grooveWidth: Math.max(0, width - leftMargin - rightMargin)
     property real _glassItemPadding: background.height/2
     property Item _valueTextItem
 
-    implicitHeight: contentColumn.y + contentColumn.height + Theme.paddingSmall
+    implicitHeight: contentColumn.y + contentColumn.height + Theme.paddingMedium
 
     onValueTextChanged: {
         if (valueText && !_valueTextItem) {
@@ -62,17 +63,12 @@ SilicaItem {
         }
     }
 
-    Column {
+    Item {
         id: contentColumn
 
-        y: Theme.paddingSmall
+        y: Theme.paddingMedium
         width: parent.width
-
-        // compensate empty space in GlassItem
-        spacing: -Theme.paddingSmall - (progressBar.palette.colorScheme === Theme.DarkOnLight ? Theme.paddingLarge : 0)
-                 + (indeterminate ? (progressBar.palette.colorScheme === Theme.DarkOnLight ? Theme.paddingMedium : Theme.paddingSmall)
-                                  : 0)
-
+        height: labelText.y + (labelText.visible ? labelText.height : 0)
 
         Item {
             id: valueTextPlaceholder
@@ -84,11 +80,19 @@ SilicaItem {
         GlassItem {
             id: background
 
-            // extra painting margins (Theme.paddingMedium on both sides) are needed,
-            // because glass item doesn't visibly paint across the full width of the item
-            x: progressBar.leftMargin - _glassItemPadding
+            anchors {
+                // extra painting margins (Theme.paddingMedium on both sides) are needed,
+                // because glass item doesn't visibly paint across the full width of the item
+                leftMargin: progressBar.leftMargin - _glassItemPadding
+                left: parent.left
+
+                // compensate empty space in GlassItem
+                topMargin: -Theme.paddingSmall - (progressBar.palette.colorScheme === Theme.DarkOnLight ? Theme.paddingLarge : 0)
+                top: valueTextPlaceholder.bottom
+            }
+
             width: progressBar._grooveWidth + 2*_glassItemPadding
-            height: (palette.colorScheme === Theme.LightOnDark ? 2 : (indeterminate ? 3 : 4)) * Theme.paddingLarge
+            height: (palette.colorScheme === Theme.LightOnDark ? 2 : 4) * Theme.paddingLarge
 
             dimmed: true
             radius: palette.colorScheme === Theme.LightOnDark ? 0.06 : 0.05
@@ -134,15 +138,21 @@ SilicaItem {
             }
         }
 
-        Text {
+        Label {
             id: labelText
 
+            anchors {
+                top: background.verticalCenter
+                topMargin: Theme.paddingMedium
+                horizontalCenter: background.horizontalCenter
+            }
+            width: background.width - _glassItemPadding*2
+            truncationMode: TruncationMode.Fade
             visible: text.length
             font.pixelSize: Theme.fontSizeSmall
             font.family: Theme.fontFamily
             color: progressBar.highlighted ? palette.secondaryHighlightColor : palette.secondaryColor
             textFormat: Text.PlainText
-            anchors.horizontalCenter: parent.horizontalCenter
         }
     }
 

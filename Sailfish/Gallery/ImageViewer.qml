@@ -86,13 +86,26 @@ ZoomableFlickable {
         anchors.fill: parent
     }
 
-    MouseArea {
-        parent: _dragDetector // don't catch multi touch events (position behind ZoomableFlickable.pinchArea)
-        anchors {
-            fill: parent
-            margins: Theme.paddingLarge // don't react near display edges
+    Item {
+        width: flickable.transpose ? parent.height : parent.width
+        height: flickable.transpose ? parent.width : parent.height
+
+        anchors.centerIn: parent
+        rotation: -flickable.contentRotation
+
+        MouseArea {
+            x: width > parent.width
+                    ? (parent.width - width) / 2
+                    : flickable.contentX + Theme.paddingLarge
+            y: height > parent.height
+                    ? (parent.height - height) / 2
+                    : flickable.contentY + Theme.paddingLarge
+
+            width: flickable.width - (2 * Theme.paddingLarge)
+            height: flickable.height - (2 * Theme.paddingLarge)
+
+            onClicked: flickable.clicked()
         }
-        onClicked: flickable.clicked()
     }
 
     ImageMetadata {

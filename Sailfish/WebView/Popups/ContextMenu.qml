@@ -28,6 +28,8 @@ Rectangle {
     readonly property bool active: visible
     readonly property bool landscape: width > height
 
+    property bool downloadsEnabled: true
+
     readonly property string url: !isJavascriptFunction ? linkHref : ""
     readonly property bool knownPlatformProtocol: isMailto || isTel || isSMS || isGeo
     readonly property bool isJavascriptFunction: linkProtocol === "javascript"
@@ -172,7 +174,7 @@ Rectangle {
         }
 
         DownloadMenuItem {
-            visible: root.isNavigable && downloadFileTargetUrl
+            visible: root.downloadsEnabled && root.isNavigable && downloadFileTargetUrl
             //: This menu item saves link to downloads.
             //% "Save link"
             text: qsTrId("sailfish_components_webview_popups-me-save_link")
@@ -195,7 +197,7 @@ Rectangle {
         }
 
         DownloadMenuItem {
-            visible: root.isImage && downloadFileTargetUrl
+            visible: root.downloadsEnabled && root.isImage && downloadFileTargetUrl
             //: This menu item saves image to Gallery application
             //% "Save to Gallery"
             text: qsTrId("sailfish_components_webview_popups-me-save_image_to_gallery")

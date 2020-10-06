@@ -1,7 +1,7 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Petri M. Gerdt <petri.gerdt@jollamobile.com>
+** Copyright (c) 2013 - 2019 Jolla Ltd.
+** Copyright (c) 2019 - 2020 Open Mobile Platform LLC.
 **
 ****************************************************************************/
 
@@ -60,6 +60,7 @@ SystemDialogWindow {
         id: window
 
         _backgroundVisible: false
+        _opaque: false
         cover: null
         allowedOrientations: lipstickSettings.dialog_orientation || QtQuick.Screen.primaryOrientation
         focus: true

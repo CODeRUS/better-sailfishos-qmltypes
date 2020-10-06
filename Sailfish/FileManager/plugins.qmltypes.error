@@ -1,10 +1,10 @@
 Suspicious DPI value (100.0). Check your device configuration!
 file:///usr/lib/qt5/qml/Sailfish/Silica/InfoLabel.qml:46: TypeError: Cannot read property of null
-file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:112: ReferenceError: __silica_applicationwindow_instance is not defined
-file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:97: ReferenceError: __silica_applicationwindow_instance is not defined
+file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:114: ReferenceError: __silica_applicationwindow_instance is not defined
+file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:99: ReferenceError: __silica_applicationwindow_instance is not defined
 file:///usr/lib/qt5/qml/Sailfish/Silica/private/PageOrientationTransition.qml:60: ReferenceError: __silica_applicationwindow_instance is not defined
-file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:157: ReferenceError: __silica_applicationwindow_instance is not defined
-file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:156: ReferenceError: __silica_applicationwindow_instance is not defined
+file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:159: ReferenceError: __silica_applicationwindow_instance is not defined
+file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:158: ReferenceError: __silica_applicationwindow_instance is not defined
 file:///usr/lib/qt5/qml/Sailfish/Silica/PageBusyIndicator.qml:48: TypeError: Cannot read property of null
 file:///usr/lib/qt5/qml/Sailfish/Silica/private/PageEdgeTransition.qml:45: TypeError: Cannot read property '_currentContainer' of null
 PageOrientationTransition: target property is missing

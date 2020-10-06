@@ -154,6 +154,7 @@ ListView {
                         playerLoader.active = true
                         player.togglePlay()
                     }
+                    onDoubleClicked: overlay.seekForward()
 
                     contentWidth: root.width
                     contentHeight: root.height
@@ -184,11 +185,10 @@ ListView {
             active: false
             width: root.width
             height: root.height
-            sourceComponent: VideoOutput {
-                property alias player: mediaPlayer
-                visible: player.playbackState !== MediaPlayer.StoppedState
-                source: GalleryMediaPlayer {
+            sourceComponent: GalleryVideoOutput {
+                player: GalleryMediaPlayer {
                     id: mediaPlayer
+
                     active: currentItem && !currentItem.isImage && Qt.application.active
                     source: active ? currentItem.source : ""
                     onPlayingChanged: {
@@ -198,11 +198,7 @@ ListView {
                         }
                     }
                     onLoadedChanged: if (loaded) playerLoader.anchors.centerIn = currentItem
-                    onStatusChanged: {
-                        if (status === MediaPlayer.InvalidMedia) {
-                            root.currentItem.item.displayError()
-                        }
-                    }
+                    onDisplayError: root.currentItem.item.displayError()
                 }
             }
         }

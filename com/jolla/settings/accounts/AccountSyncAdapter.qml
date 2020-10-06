@@ -1,9 +1,21 @@
-import QtQuick 2.0
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
+import QtQuick 2.6
 import Sailfish.Accounts 1.0
 import Nemo.DBus 2.0
+import MeeGo.Connman 0.2
 
 QtObject {
     id: root
+
+    // Backup profiles have schedules independent of general sync profiles for an account
+    // so are normally synced separately.
+    property var _excludedServiceTypes: ["storage"]
 
     property var _trackedObjects: ({})
 
@@ -18,6 +30,11 @@ QtObject {
             console.log("AccountSyncAdapter.qml: cannot sync - invalid account ID or instance")
             return
         }
+        if (_networkManagerFactory.instance.state !== "online") {
+            _connectionSelector.call('openConnectionNow', ['wifi'])
+            return
+        }
+
         if (isNaN(accountIdOrObject)) {
             _triggerSyncForAccount(accountIdOrObject)
         } else {
@@ -50,6 +67,9 @@ QtObject {
     /*
         Warning: if any missing profiles are created, this will sync the account, so it should be
         synced before this function is called to avoid losing existing setting changes.
+
+        E.g. if email app is not installed, the Google email profiles will not be created when the
+        Google account is created.
       */
     function createMissingProfiles(account) {
         var syncObj = _missingProfileCreator.createObject(root, {"account": account})
@@ -71,6 +91,10 @@ QtObject {
         var services = account.supportedServiceNames
         for (var i=0; i<services.length; i++) {
             var service = accountManager.service(services[i])
+            if (_excludedServiceTypes.indexOf(service.serviceType) >= 0) {
+                continue
+            }
+
             if (account.isEnabledWithService(service.name)) {
                 var profileIds = _syncManager.profileIds(account.identifier, service.name)
                 for (var j = 0; j<profileIds.length; j++) {
@@ -119,4 +143,13 @@ QtObject {
         path: "/synchronizer"
         iface: "com.meego.msyncd"
     }
+
+    property DBusInterface _connectionSelector: DBusInterface {
+        service: "com.jolla.lipstick.ConnectionSelector"
+        path: "/"
+        iface: "com.jolla.lipstick.ConnectionSelectorIf"
+        signalsEnabled: true
+    }
+
+    property var _networkManagerFactory: NetworkManagerFactory {}
 }

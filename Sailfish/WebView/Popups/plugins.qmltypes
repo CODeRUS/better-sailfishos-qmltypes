@@ -148,6 +148,14 @@ Module {
                 "RemovingPackages": 4
             }
         }
+        Enum {
+            name: "InstallationType"
+            values: {
+                "None": 0,
+                "DeveloperMode": 1,
+                "DebugHome": 2
+            }
+        }
         Property { name: "wlanIpAddress"; type: "string"; isReadonly: true }
         Property { name: "usbIpAddress"; type: "string"; isReadonly: true }
         Property { name: "username"; type: "string"; isReadonly: true }
@@ -155,6 +163,12 @@ Module {
         Property { name: "workStatus"; type: "DeveloperModeSettings::Status"; isReadonly: true }
         Property { name: "workProgress"; type: "int"; isReadonly: true }
         Property { name: "repositoryAccessRequired"; type: "bool"; isReadonly: true }
+        Property { name: "debugHomeEnabled"; type: "bool"; isReadonly: true }
+        Property {
+            name: "installationType"
+            type: "DeveloperModeSettings::InstallationType"
+            isReadonly: true
+        }
         Method {
             name: "setDeveloperMode"
             Parameter { name: "enabled"; type: "bool" }
@@ -164,6 +178,10 @@ Module {
             Parameter { name: "usbIpAddress"; type: "string" }
         }
         Method { name: "refresh" }
+        Method {
+            name: "moveDebugToHome"
+            Parameter { name: "enabled"; type: "bool" }
+        }
     }
     Component {
         name: "DeviceInfo"
@@ -737,6 +755,151 @@ Module {
             name: "get"
             type: "VpnConnection*"
             Parameter { name: "index"; type: "int" }
+        }
+    }
+    Component {
+        name: "UserInfo"
+        prototype: "QObject"
+        exports: ["org.nemomobile.systemsettings/UserInfo 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "UserType"
+            values: {
+                "User": 0,
+                "DeviceOwner": 1,
+                "Guest": 2
+            }
+        }
+        Property { name: "displayName"; type: "string"; isReadonly: true }
+        Property { name: "username"; type: "string"; isReadonly: true }
+        Property { name: "name"; type: "string"; isReadonly: true }
+        Property { name: "type"; type: "UserType"; isReadonly: true }
+        Property { name: "uid"; type: "int" }
+        Property { name: "current"; type: "bool"; isReadonly: true }
+        Property { name: "alone"; type: "bool"; isReadonly: true }
+        Property { name: "watched"; type: "bool" }
+        Method { name: "reset" }
+    }
+    Component {
+        name: "UserModel"
+        prototype: "QAbstractListModel"
+        exports: ["org.nemomobile.systemsettings/UserModel 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Roles"
+            values: {
+                "UsernameRole": 256,
+                "NameRole": 257,
+                "TypeRole": 258,
+                "UidRole": 259,
+                "CurrentRole": 260,
+                "PlaceholderRole": 261,
+                "TransitioningRole": 262
+            }
+        }
+        Enum {
+            name: "UserType"
+            values: {
+                "User": 0,
+                "DeviceOwner": 1,
+                "Guest": 2
+            }
+        }
+        Enum {
+            name: "ErrorType"
+            values: {
+                "Failure": 2,
+                "OtherError": 1,
+                "InvalidArgs": 15,
+                "Busy": 100,
+                "HomeCreateFailed": 101,
+                "HomeRemoveFailed": 102,
+                "GroupCreateFailed": 103,
+                "UserAddFailed": 104,
+                "UserModifyFailed": 105,
+                "UserRemoveFailed": 106,
+                "GetUidFailed": 107,
+                "UserNotFound": 108,
+                "AddToGroupFailed": 109,
+                "RemoveFromGroupFailed": 110,
+                "MaximumNumberOfUsersReached": 111
+            }
+        }
+        Property { name: "placeholder"; type: "bool" }
+        Property { name: "count"; type: "int"; isReadonly: true }
+        Property { name: "maximumCount"; type: "int"; isReadonly: true }
+        Property { name: "guestEnabled"; type: "bool" }
+        Signal {
+            name: "userGroupsChanged"
+            Parameter { name: "row"; type: "int" }
+        }
+        Signal {
+            name: "userAddFailed"
+            Parameter { name: "error"; type: "int" }
+        }
+        Signal {
+            name: "userModifyFailed"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "error"; type: "int" }
+        }
+        Signal {
+            name: "userRemoveFailed"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "error"; type: "int" }
+        }
+        Signal {
+            name: "setCurrentUserFailed"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "error"; type: "int" }
+        }
+        Signal {
+            name: "addGroupsFailed"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "error"; type: "int" }
+        }
+        Signal {
+            name: "removeGroupsFailed"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "error"; type: "int" }
+        }
+        Signal {
+            name: "setGuestEnabledFailed"
+            Parameter { name: "enabling"; type: "bool" }
+            Parameter { name: "error"; type: "int" }
+        }
+        Method { name: "createUser" }
+        Method {
+            name: "removeUser"
+            Parameter { name: "row"; type: "int" }
+        }
+        Method {
+            name: "reset"
+            Parameter { name: "row"; type: "int" }
+        }
+        Method {
+            name: "setCurrentUser"
+            Parameter { name: "row"; type: "int" }
+        }
+        Method { name: "getCurrentUser"; type: "UserInfo*" }
+        Method {
+            name: "hasGroup"
+            type: "bool"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "group"; type: "string" }
+        }
+        Method {
+            name: "addGroups"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "groups"; type: "QStringList" }
+        }
+        Method {
+            name: "removeGroups"
+            Parameter { name: "row"; type: "int" }
+            Parameter { name: "groups"; type: "QStringList" }
+        }
+        Method {
+            name: "setGuestEnabled"
+            Parameter { name: "enabled"; type: "bool" }
         }
     }
     Component {

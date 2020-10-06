@@ -99,6 +99,12 @@ Module {
             Parameter { name: "index"; type: "int" }
         }
         Method { name: "markAllRead"; type: "bool" }
+        Method {
+            name: "createOutgoingCallEvent"
+            type: "int"
+            Parameter { name: "localUid"; type: "string" }
+            Parameter { name: "remoteUid"; type: "string" }
+        }
     }
     Component {
         name: "CommHistory::CallModel"

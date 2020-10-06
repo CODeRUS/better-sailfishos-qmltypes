@@ -1,4 +1,11 @@
-import QtQuick 2.0
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
 
@@ -8,7 +15,6 @@ Item {
     property var model
     property int deletingAccountId: -1
 
-    property QtObject _accountSyncAdapter
     property QtObject _settingsLoader
     property QtObject _settingsAgentRunner
     property QtObject _credentialsUpdater
@@ -60,6 +66,7 @@ Item {
             "accountsHeaderText": title,
             "accountId": accountId,
             "accountIsReadOnly": accountRef.accountReadOnly,
+            "accountIsLimited": accountRef.accountLimited,
             "accountIsProvisioned": accountRef.accountProvisioned,
             "accountNotSignedIn": (accountRef.accountError === AccountModel.AccountNotSignedInError)
         }
@@ -103,9 +110,8 @@ Item {
         id: accountDeletionRemorse
     }
 
-    Component {
-        id: accountSyncAdapterComponent
-        AccountSyncAdapter { }
+    AccountSyncAdapter {
+        id: accountSyncAdapter
     }
 
     Component {
@@ -139,9 +145,6 @@ Item {
     }
 
     function accountSyncRequested(accountId) {
-        if (_accountSyncAdapter == null) {
-            _accountSyncAdapter = accountSyncAdapterComponent.createObject(accountsPage)
-        }
-        _accountSyncAdapter.triggerSync(accountId)
+        accountSyncAdapter.triggerSync(accountId)
     }
 }

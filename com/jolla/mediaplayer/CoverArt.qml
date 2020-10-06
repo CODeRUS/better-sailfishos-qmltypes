@@ -2,8 +2,6 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 Item {
-    id: coverArt
-
     property alias status: coverImage.status
     property alias source: coverImage.source
 

@@ -281,6 +281,7 @@ Module {
         Property { name: "_allowedOrientations"; type: "DeclarativeOrientation::Orientations" }
         Property { name: "screenRotation"; type: "int"; isReadonly: true }
         Property { name: "_backgroundVisible"; type: "bool" }
+        Property { name: "_opaque"; type: "bool" }
         Property { name: "_persistentOpenGLContext"; type: "bool" }
         Property { name: "_persistentSceneGraph"; type: "bool" }
         Property { name: "_haveCoverHint"; type: "bool" }
@@ -294,6 +295,7 @@ Module {
         Signal { name: "_orientationLockedChanged" }
         Signal { name: "backgroundColorChanged" }
         Signal { name: "backgroundVisibleChanged" }
+        Signal { name: "opaqueChanged" }
         Signal { name: "coverIsPrimaryWindowChanged" }
         Signal { name: "coverVisibleChanged" }
         Signal { name: "proxyWindowChanged" }
@@ -337,6 +339,15 @@ Module {
         Method { name: "reset" }
     }
     Component {
+        name: "DrawingArea"
+        defaultProperty: "data"
+        prototype: "LineItem"
+        exports: ["Sailfish.Silica.private/DrawingArea 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "threshold"; type: "float" }
+        Property { name: "mask"; type: "QQuickItem"; isPointer: true }
+    }
+    Component {
         name: "GlassBackground"
         defaultProperty: "data"
         prototype: "Silica::Item"
@@ -358,6 +369,42 @@ Module {
         Property { name: "patternOpacity"; type: "float" }
         Property { name: "fillMode"; type: "FillMode" }
         Property { name: "blending"; type: "bool" }
+    }
+    Component {
+        name: "LineGraph"
+        defaultProperty: "data"
+        prototype: "LineItem"
+        exports: ["Sailfish.Silica.private/LineGraph 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "values"; type: "QVariantList" }
+    }
+    Component {
+        name: "LineItem"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        Property { name: "curveDensity"; type: "float" }
+        Property { name: "lineWidth"; type: "float" }
+        Property { name: "color"; type: "QColor" }
+        Property { name: "blur"; type: "float" }
+        Signal {
+            name: "arcStarted"
+            Parameter { name: "x"; type: "float" }
+            Parameter { name: "y"; type: "float" }
+        }
+        Signal {
+            name: "arcPointAdded"
+            Parameter { name: "x"; type: "float" }
+            Parameter { name: "y"; type: "float" }
+        }
+        Signal { name: "arcFinished" }
+        Signal { name: "arcCanceled" }
+        Method { name: "clear" }
+        Method {
+            name: "addPoint"
+            type: "bool"
+            Parameter { name: "point"; type: "QVector2D" }
+        }
+        Method { name: "closeLine" }
     }
     Component {
         name: "OverlayBackground"
@@ -639,6 +686,29 @@ Module {
         Method { name: "requestUpdate"; revision: 3 }
     }
     Component {
+        name: "QuickScrollDirection"
+        prototype: "QObject"
+        exports: ["Sailfish.Silica.private/QuickScrollDirection 1.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Direction"
+            values: {
+                "Up": 1,
+                "Down": 2,
+                "UpAndDown": 3
+            }
+        }
+        Enum {
+            name: "Directions"
+            values: {
+                "Up": 1,
+                "Down": 2,
+                "UpAndDown": 3
+            }
+        }
+    }
+    Component {
         name: "RemorseCache"
         prototype: "QObject"
         exports: ["Sailfish.Silica.private/RemorseCache 1.0"]
@@ -792,6 +862,48 @@ Module {
         Property { name: "propertyName"; type: "string" }
         Property { name: "strings"; type: "QStringList" }
         Property { name: "count"; type: "int"; isReadonly: true }
+    }
+    Component {
+        name: "SwipeGestureArea"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        exports: ["Sailfish.Silica.private/SwipeGestureArea 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Direction"
+            values: {
+                "DirectionNone": 0,
+                "DirectionLeft": 1,
+                "DirectionRight": 2,
+                "DirectionUp": 4,
+                "DirectionDown": 8,
+                "DirectionHorizontal": 3,
+                "DirectionVertical": 12,
+                "DirectionAll": 15
+            }
+        }
+        Enum {
+            name: "Directions"
+            values: {
+                "DirectionNone": 0,
+                "DirectionLeft": 1,
+                "DirectionRight": 2,
+                "DirectionUp": 4,
+                "DirectionDown": 8,
+                "DirectionHorizontal": 3,
+                "DirectionVertical": 12,
+                "DirectionAll": 15
+            }
+        }
+        Property { name: "swipeEnabled"; type: "bool" }
+        Property { name: "thresholdX"; type: "int" }
+        Property { name: "thresholdY"; type: "int" }
+        Property { name: "swipeAmount"; type: "int"; isReadonly: true }
+        Property { name: "gestureInProgress"; type: "bool"; isReadonly: true }
+        Property { name: "direction"; type: "Direction"; isReadonly: true }
+        Property { name: "allowedDirections"; type: "SwipeGestureArea::Directions" }
+        Property { name: "forceDirections"; type: "SwipeGestureArea::Directions" }
+        Method { name: "endGesture" }
     }
     Component {
         name: "TextLayoutModel"

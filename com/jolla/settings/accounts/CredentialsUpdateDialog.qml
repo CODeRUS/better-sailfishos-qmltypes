@@ -15,6 +15,7 @@ Dialog {
     acceptDestinationAction: PageStackAction.Push // has to be, so this page continues to live, so it can call _updateCredentials() AFTER accepted()
     acceptDestination: AccountBusyPage { // intermediate page - to handle success/errors
         busyDescription: updatingAccountText
+        infoDescription: accountUpdateErrorText
     }
 
     property alias account: account
@@ -32,6 +33,24 @@ Dialog {
 
     signal credentialsUpdated(var data, int identifier)
     signal credentialsUpdateError(string message)
+
+    function setBusyStatus(busy, description, title) {
+        var busyPage = acceptDestination
+        if (busy) {
+            busyPage.state = 'busy'
+            if (!!description) {
+                busyPage.busyDescription = description
+            }
+        } else {
+            busyPage.state = 'info'
+            if (!!title) {
+                busyPage.infoHeading = title
+            }
+            if (!!description) {
+                busyPage.infoDescription = description
+            }
+        }
+    }
 
     function _updateCredentials() {
         if (account.hasSignInCredentials(applicationName, credentialsName)) {
@@ -66,6 +85,9 @@ Dialog {
         // would fail.  So, we wait until the initial transition is complete, first.
         if (status == PageStatus.Inactive && result == DialogResult.Accepted) {
             _updateCredentials()
+        } else if (status == PageStatus.Active) {
+            // Reset the busy page status.
+            setBusyStatus(true, acceptDestination.updatingAccountText)
         }
     }
 
@@ -104,7 +126,7 @@ Dialog {
                 //: Shown when sigin credentials need to be refreshed
                 //% "Sign in to refresh credentials"
                 text: qsTrId("components_accounts-la-sign_in_to_refresh_credentials")
-                wrapMode: Text.WordWrap
+                wrapMode: Text.Wrap
                 //font.pixelSize: Theme.fontSizeExtraLarge
                 x: Theme.horizontalPageMargin
                 width: parent.width - x*2
@@ -131,9 +153,7 @@ Dialog {
         // For recreateAccountCredentials path
         onError: {
             var busyPage = acceptDestination
-            busyPage.state = 'info'
-            busyPage.infoHeading = busyPage.errorHeadingText
-            busyPage.infoDescription = busyPage.accountUpdateErrorText
+            root.setBusyStatus(false, busyPage.accountUpdateErrorText, busyPage.errorHeadingText)
             root.credentialsUpdateError(message)
         }
         onSuccess: root.credentialsUpdated(responseData, account.identifier)
@@ -147,9 +167,7 @@ Dialog {
 
         onSignInError: {
             var busyPage = acceptDestination
-            busyPage.state = 'info'
-            busyPage.infoHeading = busyPage.errorHeadingText
-            busyPage.infoDescription = busyPage.accountUpdateErrorText
+            root.setBusyStatus(false, busyPage.accountUpdateErrorText, busyPage.errorHeadingText)
             root.credentialsUpdateError(message)
         }
     }

@@ -173,6 +173,7 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "active"; type: "bool"; isReadonly: true }
         Property { name: "compositor"; type: "QObject"; isReadonly: true; isPointer: true }
+        Property { name: "notificationSystemApplicationName"; type: "string"; isReadonly: true }
         Method {
             name: "takeScreenshot"
             type: "ScreenshotResult*"
@@ -739,6 +740,7 @@ Module {
         isCreatable: false
         exportMetaObjectRevisions: [0]
         Property { name: "windowVisible"; type: "bool" }
+        Signal { name: "userSwitchFailed" }
     }
     Component {
         name: "USBModeSelector"

@@ -814,6 +814,7 @@ PageStackBase {
                     to: 1.0
                     onStopped: {
                         placeholder.newPage._backgroundParent = placeholder.parent
+                        placeholder.newPage.parent.backgroundParent = placeholder.parent
                         destroy()
                     }
                 }
@@ -881,6 +882,7 @@ PageStackBase {
                             newPage.pageContainer._setPageStatus(newPage, placeholder.status)
                             container.page = newPage
                             container.owner = container
+                            container.backgroundParent = newPage
                             PageStack.connectForwardDestinationHandlers(container)
                             var creationTime = new Date().getTime() - startTime
                             var differentOrientation = container.transitionPartner.page.orientation === newPage.orientation
@@ -925,6 +927,9 @@ PageStackBase {
             property int __silica_pagestack_container
             property int direction
             property bool useAnimator
+            readonly property bool soleVisiblePage: direction === PageNavigation.NoDirection
+                        && dragOffset === 0
+            property alias backgroundParent: background.parent
 
             property real transitionDistance: {
                 switch (direction) {
@@ -983,15 +988,27 @@ PageStackBase {
             Behavior on x {
                 enabled: useAnimator && (_currentOrientation == Orientation.Portrait || _currentOrientation == Orientation.PortraitInverted)
                 SequentialAnimation {
-                    onRunningChanged: {
-                        if (running && page.hasOwnProperty("__placeholder")) {
-                            page.createPage(container)
+                    // We need to ensure that the XAnimator starts before the page creation,
+                    // in order to synchronize it with the page edge transition.
+                    // However, we can't use XAnimator onRunningChanged because it doesn't work inside a group.
+                    ParallelAnimation {
+                        XAnimator {
+                            target: container
+                            duration: _transitionDuration
+                            easing.type: Easing.InOutQuad
                         }
-                    }
-                    XAnimator {
-                        target: container
-                        duration: _transitionDuration
-                        easing.type: Easing.InOutQuad
+                        SequentialAnimation {
+                            PauseAnimation {
+                                duration: 1
+                            }
+                            ScriptAction {
+                                script: {
+                                    if (page.hasOwnProperty("__placeholder")) {
+                                        page.createPage(container)
+                                    }
+                                }
+                            }
+                        }
                     }
                     ScriptAction {
                         script: useAnimator = false
@@ -1002,15 +1019,24 @@ PageStackBase {
             Behavior on y {
                 enabled: useAnimator && (_currentOrientation == Orientation.Landscape || _currentOrientation == Orientation.LandscapeInverted)
                 SequentialAnimation {
-                    onRunningChanged: {
-                        if (running && page.hasOwnProperty("__placeholder")) {
-                            page.createPage(container)
+                    ParallelAnimation {
+                        YAnimator {
+                            target: container
+                            duration: _transitionDuration
+                            easing.type: Easing.InOutQuad
                         }
-                    }
-                    YAnimator {
-                        target: container
-                        duration: _transitionDuration
-                        easing.type: Easing.InOutQuad
+                        SequentialAnimation {
+                            PauseAnimation {
+                                duration: 1
+                            }
+                            ScriptAction {
+                                script: {
+                                    if (page.hasOwnProperty("__placeholder")) {
+                                        page.createPage(container)
+                                    }
+                                }
+                            }
+                        }
                     }
                     ScriptAction {
                         script: useAnimator = false
@@ -1321,6 +1347,18 @@ PageStackBase {
                 id: delayedTransitionTimer
                 interval: 1
                 onTriggered: container.animation.restart()
+            }
+
+            Rectangle {
+                id: background
+
+                width: container.width
+                height: container.height
+                z: -10000
+
+                color: container.page ? container.page.backgroundColor : "transparent"
+                visible: !container.soleVisiblePage
+
             }
         }
     }

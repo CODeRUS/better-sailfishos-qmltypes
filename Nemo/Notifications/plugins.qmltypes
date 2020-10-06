@@ -29,6 +29,12 @@ Module {
                 "Closed": 2
             }
         }
+        Enum {
+            name: "Progress"
+            values: {
+                "ProgressIndeterminate": -1
+            }
+        }
         Property { name: "category"; type: "string" }
         Property { name: "appName"; type: "string" }
         Property { name: "replacesId"; type: "uint" }
@@ -51,6 +57,7 @@ Module {
         Property { name: "origin"; type: "string" }
         Property { name: "maxContentLines"; type: "int" }
         Property { name: "isTransient"; type: "bool" }
+        Property { name: "progress"; type: "QVariant" }
         Signal { name: "clicked" }
         Signal {
             name: "closed"

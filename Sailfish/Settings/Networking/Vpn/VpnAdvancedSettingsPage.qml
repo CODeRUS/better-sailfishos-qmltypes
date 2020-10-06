@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 - 2019 Jolla Ltd.
+ * Copyright (c) 2018 - 2020 Jolla Ltd.
  * Copyright (c) 2019 Open Mobile Platform LLC.
  *
  * License: Proprietary
@@ -21,6 +21,7 @@ Page {
     property var providerProperties
     property var userRoutes
     property ListModel routesModel: ListModel {}
+    property var _propertiesAlreadySet: {}
 
     signal propertiesUpdated(var connectionProperties, var providerProperties)
 
@@ -32,7 +33,12 @@ Page {
         }
         domainName.text = domain
 
+        // By default default route is not being set, in ConnMan it defaults to true for all.
+        var defroute = connectionProperties['defaultRoute']
+        defaultRoute.checked = defroute !== false
+
         if (providerOptions.item) {
+            _propertiesAlreadySet = {}
             providerOptions.item.setProperties(providerProperties)
         }
 
@@ -52,6 +58,8 @@ Page {
         if (domainName.text != '') {
             connectionProperties['domain'] = domainName.text
         }
+
+        connectionProperties['defaultRoute'] = defaultRoute.checked
 
         userRoutes = []
         for (var i = 0; i < routesModel.count; i++) {
@@ -133,6 +141,14 @@ Page {
                 //% "Domain"
                 label: qsTrId("settings_network-la-vpn_domain")
             }
+
+            TextSwitch {
+                id: defaultRoute
+
+                //% "Use as default route"
+                text: qsTrId("settings_network-la-vpn_default_route")
+            }
+
 
             SectionHeader {
                 //: Section header for the vpn network user routes
@@ -222,6 +238,26 @@ Page {
                 width: parent.width
                 asynchronous: false
 
+                function getProperty(name) {
+                    if (providerProperties) {
+                        if (providerProperties[name]) {
+                            _propertiesAlreadySet[name] = true
+                        }
+                        return providerProperties[name] || ''
+                    }
+                    return ''
+                }
+
+                function updateProvider(name, value) {
+                    if (value === '_default') {
+                        value = ''
+                    }
+                    // Only include empty values if they were previously set
+                    if (value != '' || _propertiesAlreadySet[name]) {
+                        providerProperties[name] = value
+                    }
+                }
+
                 Component.onCompleted: {
                     var src = VpnTypes.advancedSettingsPath(vpnType)
 
@@ -230,7 +266,10 @@ Page {
                     }
                 }
 
-                onLoaded: item.setProperties(providerProperties)
+                onLoaded: {
+                    _propertiesAlreadySet = {}
+                    item.setProperties(providerProperties)
+                }
             }
         }
     }

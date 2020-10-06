@@ -30,9 +30,21 @@ Timer {
     property var authDialogData
     property var authDialogWinId
 
+    property bool downloadsEnabled: true
+
     property Component _contextMenuComponent
 
     signal aboutToOpenContextMenu(var data)
+
+    function getCheckbox(data) {
+        var inputs = data.inputs
+        for (var i = 0; inputs && (i < inputs.length); ++i) {
+            if (inputs[i].hint === "preventAddionalDialog") {
+                return inputs[i]
+            }
+        }
+        return null
+    }
 
     // Returns true if message is handled.
     function message(topic, data) {
@@ -50,44 +62,74 @@ Timer {
             return false
         }
 
-        var winid = data.winid
+        var winId = data.winId
         switch (topic) {
         case "embed:alert": {
-            var obj = pageStack.animatorPush(Qt.resolvedUrl("AlertDialog.qml"), { "text": data.text })
+            var obj = pageStack.animatorPush(Qt.resolvedUrl("AlertDialog.qml"), {
+                                                 "text": data.text,
+                                                 "checkbox": getCheckbox(data)
+                                             })
             obj.pageCompleted.connect(function(dialog) {
                 // TODO: also the Async message must be sent when window gets closed
                 dialog.done.connect(function() {
-                    contentItem.sendAsyncMessage("alertresponse", {"winid": winid})
+                    contentItem.sendAsyncMessage("alertresponse", {
+                                                     "winId": winId,
+                                                     "checkvalue": dialog.checkboxValue
+                                                 })
                 })
             })
             break
         }
         case "embed:confirm": {
-            var obj = pageStack.animatorPush(Qt.resolvedUrl("ConfirmDialog.qml"), { "text": data.text })
+            var obj = pageStack.animatorPush(Qt.resolvedUrl("ConfirmDialog.qml"), {
+                                                 "text": data.text,
+                                                 "checkbox": getCheckbox(data)
+                                             })
             obj.pageCompleted.connect(function(dialog) {
                 // TODO: also the Async message must be sent when window gets closed
                 dialog.accepted.connect(function() {
                     contentItem.sendAsyncMessage("confirmresponse",
-                                                 { "winid": winid, "accepted": true })
+                                                 {
+                                                     "winId": winId,
+                                                     "accepted": true,
+                                                     "checkvalue": dialog.checkboxValue
+                                                 })
                 })
                 dialog.rejected.connect(function() {
                     contentItem.sendAsyncMessage("confirmresponse",
-                                                 { "winid": winid, "accepted": false })
+                                                 {
+                                                     "winId": winId,
+                                                     "accepted": false,
+                                                     "checkvalue": dialog.checkboxValue
+                                                 })
                 })
             })
             break
         }
         case "embed:prompt": {
-            var obj = pageStack.animatorPush(Qt.resolvedUrl("PromptDialog.qml"), { "text": data.text, "value": data.defaultValue })
+            var obj = pageStack.animatorPush(Qt.resolvedUrl("PromptDialog.qml"), {
+                                                 "text": data.text,
+                                                 "value": data.defaultValue,
+                                                 "checkbox": getCheckbox(data)
+                                             })
             obj.pageCompleted.connect(function(dialog) {
                 // TODO: also the Async message must be sent when window gets closed
                 dialog.accepted.connect(function() {
                     contentItem.sendAsyncMessage("promptresponse",
-                                                 { "winid": winid, "accepted": true, "promptvalue": dialog.value })
+                                                 {
+                                                     "winId": winId,
+                                                     "accepted": true,
+                                                     "promptvalue": dialog.value,
+                                                     "checkvalue": dialog.checkboxValue
+                                                 })
                 })
                 dialog.rejected.connect(function() {
                     contentItem.sendAsyncMessage("promptresponse",
-                                                 { "winid": winid, "accepted": false })
+                                                 {
+                                                     "winId": winId,
+                                                     "accepted": false,
+                                                     "checkvalue": dialog.checkboxValue
+                                                 })
                 })
             })
             break
@@ -99,7 +141,7 @@ Timer {
             break
         }
         case "embed:auth": {
-            root.openAuthDialog(contentItem, data, winid)
+            root.openAuthDialog(contentItem, data, winId)
             break
         }
         case "embed:permissions": {
@@ -153,36 +195,53 @@ Timer {
         return listeners.indexOf(topic) >= 0
     }
 
-    function openAuthDialog(contentItem, data, winid) {
+    function openAuthDialog(contentItem, data, winId) {
         if (pageStack.busy) {
-            root._delayedOpenAuthDialog(contentItem, data, winid)
+            root._delayedOpenAuthDialog(contentItem, data, winId)
         } else {
-            root._immediateOpenAuthDialog(contentItem, data, winid)
+            root._immediateOpenAuthDialog(contentItem, data, winId)
         }
     }
 
-    function _delayedOpenAuthDialog(contentItem, data, winid) {
+    function _delayedOpenAuthDialog(contentItem, data, winId) {
         authDialogContentItem = contentItem
         authDialogData = data
-        authDialogWinId = winid
+        authDialogWinId = winId
         start()
     }
 
-    function _immediateOpenAuthDialog(contentItem, data, winid) {
+    function _immediateOpenAuthDialog(contentItem, data, winId) {
+        var inputs = data.inputs
+        var username
+        var password
+        var remember
+
+        for (var i = 0; i < inputs.length; ++i) {
+            if (inputs[i].hint === "username") {
+                username = inputs[i]
+            } else if (inputs[i].hint === "password") {
+                password = inputs[i]
+            } else if (inputs[i].hint === "remember") {
+                remember = inputs[i]
+            }
+        }
+
+        var passwordOnly = !username
         var obj = pageStack.animatorPush(Qt.resolvedUrl("AuthDialog.qml"),
                                     {"hostname": data.text, "realm": data.title,
-                                     "username": data.storedUsername, "password": data.storedPassword,
-                                     "passwordOnly": data.passwordOnly })
+                                     "username": username, "password": password,
+                                     "remember": remember, "passwordOnly": passwordOnly,
+                                     "privateBrowsing": data.privateBrowsing})
         obj.pageCompleted.connect(function(dialog) {
             dialog.accepted.connect(function () {
                 contentItem.sendAsyncMessage("authresponse",
-                                             { "winid": winid, "accepted": true,
-                                                 "username": dialog.username, "password": dialog.password,
-                                                 "dontsave": dialog.dontsave })
+                                             { "winId": winId, "accepted": true,
+                                                 "username": dialog.usernameValue, "password": dialog.passwordValue,
+                                                 "remember": dialog.rememberValue })
             })
             dialog.rejected.connect(function() {
                 contentItem.sendAsyncMessage("authresponse",
-                                             { "winid": winid, "accepted": false})
+                                             { "winId": winId, "accepted": false})
             })
         })
     }
@@ -212,12 +271,13 @@ Timer {
                                                             {
                                                                 "linkHref": linkHref,
                                                                 "imageSrc": imageSrc,
-                                                                "linkTitle": linkTitle.trim(),
+                                                                "linkTitle": linkTitle && linkTitle.trim() || "",
                                                                 "linkProtocol": data.linkProtocol,
                                                                 "contentType": contentType,
                                                                 "tabModel": root.tabModel,
                                                                 "viewId": contentItem.uniqueID(),
-                                                                "pageStack": pageStack
+                                                                "pageStack": pageStack,
+                                                                "downloadsEnabled": root.downloadsEnabled
                                                             })
                     contextMenu.show()
                 } else {

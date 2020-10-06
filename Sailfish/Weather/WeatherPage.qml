@@ -64,16 +64,13 @@ Page {
     SilicaListView {
         id: weatherForecastList
 
-        // Show 5 items on normal phones, 7 on larger screens
         readonly property int availableWidth: Screen.sizeCategory >= Screen.Large ? Screen.width : root.width
-        readonly property int columnCount: Math.round(availableWidth / (540 * Theme.pixelRatio/5)) >= 7 ? 7 : 5
-        readonly property int itemWidth: availableWidth/columnCount
+        readonly property int itemWidth: availableWidth/forecastModel.visibleCount
 
-        width: columnCount * itemWidth
+        width: forecastModel.visibleCount * itemWidth
         opacity: forecastModel.count > 0 ? 1.0 : 0.0
         Behavior on opacity { OpacityAnimator { easing.type: Easing.InOutQuad;  duration: 400 } }
 
-        interactive: false
         model: WeatherForecastModel {
             id: forecastModel
             weather: root.weather
@@ -112,7 +109,7 @@ Page {
                 }
             }
 
-            WeatherForecastItem {
+            DailyForecastItem {
                 highlighted: down
             }
         }

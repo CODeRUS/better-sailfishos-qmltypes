@@ -6,8 +6,6 @@ import Sailfish.Media 1.0
 import com.jolla.mediaplayer 1.0
 
 Page {
-    id: playQueue
-
     objectName: "PlayQueuePage"
     FilterModel {
         id: playModel
@@ -23,12 +21,9 @@ Page {
         anchors.fill: parent
 
         PullDownMenu {
-            id: playQueueMenu
-
             visible: view.count > 1
-            MenuItem {
-                id: menuItemSearch
 
+            MenuItem {
                 //: Search menu entry
                 //% "Search"
                 text: qsTrId("mediaplayer-me-search")

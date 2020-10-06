@@ -40,7 +40,7 @@ Loader {
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: Theme.fontSizeExtraLarge
             horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WordWrap
+            wrapMode: Text.Wrap
             //: %1 is the name of the disabled action, %2 is an operating system name without the OS suffix
             //% "%1 disabled by %2 Device Manager."
             text: qsTrId("settings_system-la-activity_disabled_by_device_manager")

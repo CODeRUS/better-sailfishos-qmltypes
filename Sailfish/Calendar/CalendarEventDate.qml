@@ -2,11 +2,18 @@ import QtQuick 2.6
 import Sailfish.Silica 1.0
 
 Row {
+    id: root
+
     property date eventDate
     property bool showTime
     property bool timeContinued
     property bool useTwoLines: !fitsOneLine
-    readonly property bool fitsOneLine: metrics.width < (parent.width - (timeText.visible ? (timeText.width + spacing) : 0))
+    readonly property bool fitsOneLine: metrics.width < (maximumWidth - (timeText.visible ? (timeText.width + spacing) : 0))
+    property alias font: timeText.font
+
+    property real maximumWidth: parent.width
+
+    property color color: Theme.highlightColor
 
     readonly property string _oneLineText: {
         var d = eventDate
@@ -36,12 +43,12 @@ Row {
         Text {
             visible: useTwoLines
             font.pixelSize: Theme.fontSizeSmall
-            color: Theme.highlightColor
+            color: root.color
             text: Format.formatDate(eventDate, Format.WeekdayNameStandalone)
         }
         Text {
-            font.pixelSize: Theme.fontSizeMedium
-            color: Theme.highlightColor
+            font: timeText.font
+            color: root.color
             text: {
                 if (useTwoLines) {
                     var d = eventDate
@@ -71,7 +78,7 @@ Row {
         anchors.bottom: parent.bottom
         visible: showTime
         font.pixelSize: Theme.fontSizeMedium
-        color: Theme.highlightColor
+        color: root.color
         text: Format.formatDate(eventDate, Formatter.TimeValue) + (timeContinued ? " -" : "")
     }
 }

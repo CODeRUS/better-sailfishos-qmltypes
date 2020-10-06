@@ -28,9 +28,9 @@ Page {
 
     //------ informational text provided for convenience:
 
-    //: Heading displayed when an account cannot be created.
-    //% "Oops, something went wrong"
-    property string errorHeadingText: qsTrId("components_accounts-he-account_creation_error")
+    //: Generic heading displayed when an account cannot be created or updated.
+    //% "Account error"
+    property string errorHeadingText: qsTrId("components_accounts-he-account_error")
 
     //% "The account could not be created."
     property string accountCreationErrorText: qsTrId("components_accounts-he-cannot_create_account")

@@ -22,13 +22,25 @@ ListItem {
 
         ContextMenu {
             MenuLabel {
-                //: Displayed if the account is read-only
-                //% "Account is read-only"
-                text: qsTrId("components_accounts-la-account_read_only")
-                visible: model.accountReadOnly
+                text: {
+                    if (model.accountReadOnly && model.accountLimited) {
+                        //: Displayed if the account is read-only and limited
+                        //% "Account is read-only and limited"
+                        return qsTrId("components_accounts-la-account_read_only_limited")
+                    }
+                    if (model.accountReadOnly) {
+                        //: Displayed if the account is read-only
+                        //% "Account is read-only"
+                        return qsTrId("components_accounts-la-account_read_only")
+                    }
+                    //: Displayed if the account is limited
+                    //% "Account is limited"
+                    return qsTrId("components_accounts-la-account_limited")
+                }
+                visible: model.accountReadOnly || model.accountLimited
             }
             MenuItem {
-                visible: model.providerName !== "jolla" && !model.accountReadOnly && !delegateItem.allowRemoveOnly
+                visible: model.providerName !== "jolla" && !model.accountReadOnly && !model.accountLimited && !delegateItem.allowRemoveOnly
                 text: model.accountEnabled
                         //: Disables a user account
                         //% "Disable"
@@ -42,7 +54,7 @@ ListItem {
             }
 
             MenuItem {
-                visible: !model.accountReadOnly
+                visible: !model.accountReadOnly && !model.accountLimited
                 //: Deletes a user account
                 //% "Delete"
                 text: qsTrId("components_accounts-me-delete_account")

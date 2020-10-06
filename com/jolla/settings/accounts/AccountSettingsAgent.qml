@@ -33,6 +33,9 @@ Item {
     // This will be set to true if the account should be read only (not editable) in the UI.
     property bool accountIsReadOnly
 
+    // This will be set to true if only limited editing is enabled in the UI
+    property bool accountIsLimited
+
     // This will be set to true if the account is a provisioned (MDM) account.
     property bool accountIsProvisioned
 

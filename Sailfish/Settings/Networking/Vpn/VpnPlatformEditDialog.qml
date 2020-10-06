@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 - 2019 Jolla Ltd.
+ * Copyright (c) 2018 - 2020 Jolla Ltd.
  * Copyright (c) 2019 Open Mobile Platform LLC.
  *
  * License: Proprietary
@@ -74,7 +74,8 @@ VpnEditDialog {
                 domain: connection.domain,
                 storeCredentials: connection.storeCredentials,
                 networks: connection.networks,
-                userRoutes: connection.userRoutes
+                userRoutes: connection.userRoutes,
+                defaultRoute: connection.defaultRoute
             }
 
             providerProperties = connection.providerProperties
@@ -121,6 +122,10 @@ VpnEditDialog {
             }
             props['userRoutes'] = routeArray
         }
+
+        // If default route is not set it defaults to true in ConnMan
+        var defaultRoute = root.connectionProperties['defaultRoute']
+        props['defaultRoute'] = defaultRoute !== false
 
         if (newConnection) {
             SettingsVpnModel.createConnection(props)

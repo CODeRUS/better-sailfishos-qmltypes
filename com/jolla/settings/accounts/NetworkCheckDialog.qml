@@ -1,4 +1,11 @@
-import QtQuick 2.0
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
 import MeeGo.Connman 0.2
@@ -12,11 +19,10 @@ Dialog {
     property alias bodyText: bodyLabel.text
     property alias skipText: skipLabel.text
     property alias skipPressed: skipLabel.pressed
-    property NetworkManager networkManager: NetworkManager {}
 
     signal skipClicked()
 
-    property bool _connectionSelected: networkManager.state == "online"
+    property bool _connectionSelected: networkManagerFactory.instance.state == "online"
     property bool _connectionSelectorClosed
     property bool _shouldAccept
     readonly property bool _applicationActive: Qt.application.active
@@ -66,15 +72,19 @@ Dialog {
     }
 
     Connections {
-        target: root.networkManager
+        target: networkManagerFactory.instance
         onStateChanged: {
-            if (root.networkManager.state == "online"
+            if (networkManagerFactory.instance.state == "online"
                     && root == pageStack.currentPage) {
                 root._connectionSelected = true
                 root._connectionSelectorClosed = true
                 root._tryAccept()
             }
         }
+    }
+
+    NetworkManagerFactory {
+        id: networkManagerFactory
     }
 
     DBusInterface {

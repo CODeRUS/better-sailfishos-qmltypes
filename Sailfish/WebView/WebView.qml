@@ -1,7 +1,7 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 Jolla Ltd.
-** Contact: Chris Adams <chris.adams@jollamobile.com>
+** Copyright (c) 2016 - 2020 Jolla Ltd.
+** Copyright (c) 2019 - 2020 Open Mobile Platform LLC.
 **
 ****************************************************************************/
 
@@ -13,14 +13,20 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as SilicaPrivate
 import Sailfish.WebView 1.0
+import Sailfish.WebView.Controls 1.0
 import Sailfish.WebView.Popups 1.0
 import Sailfish.WebView.Pickers 1.0
 
 RawWebView {
     id: webview
 
-    property WebViewPage webViewPage
-    property int __sailfish_webview
+    property WebViewPage webViewPage: _findParentWithProperty(webview, '__sailfish_webviewpage')
+    property bool canShowSelectionMarkers: true
+    property real _indicatorVerticalOffset
+
+    readonly property bool textSelectionActive: textSelectionController && textSelectionController.active
+    property Item textSelectionController: null
+    readonly property int _pageOrientation: webViewPage ? webViewPage.orientation : Orientation.None
 
     signal linkClicked(string url)
 
@@ -39,32 +45,55 @@ RawWebView {
         return (webview.webViewPage != null && webview.webViewPage != undefined)
     }
 
-    function _setActiveInPage() {
-        if (webview.active) {
-            if (!_hasWebViewPage()) {
-                webview.webViewPage = webview._findParentWithProperty(webview, '__sailfish_webviewpage')
-            }
-
-            if (_hasWebViewPage()) {
-                webview.webViewPage.activeWebView = webview
-            }
-        }
-
-        if (!_hasWebViewPage()) {
-            console.warn("WebView.qml it is mandatory to declare webViewPage property to get orientation change working correctly!")
+    function clearSelection() {
+        if (textSelectionActive) {
+            textSelectionController.clearSelection()
         }
     }
 
-    active: true
-    onActiveChanged: webview._setActiveInPage()
-    Component.onCompleted: webview._setActiveInPage()
+    active: !webViewPage
+            || webViewPage.status === PageStatus.Active
+            || webViewPage.status === PageStatus.Deactivating
+    _acceptTouchEvents: !textSelectionActive
+
+    viewportHeight: webViewPage
+            ? ((webViewPage.orientation & Orientation.PortraitMask) ? Screen.height : Screen.width)
+            : undefined
+
+    orientation: {
+        switch (_pageOrientation) {
+        case Orientation.Portrait:
+            return Qt.PortraitOrientation
+        case Orientation.Landscape:
+            return Qt.LandscapeOrientation
+        case Orientation.PortraitInverted:
+            return Qt.InvertedPortraitOrientation
+        case Orientation.LandscapeInverted:
+            return Qt.InvertedLandscapeOrientation
+        default:
+            return Qt.PrimaryOrientation
+        }
+    }
+
+    onOrientationChanged: {
+        if (visible) {
+            orientationDelayOverlay.opacity = 1
+        }
+    }
 
     onViewInitialized: {
         webview.loadFrameScript("chrome://embedlite/content/embedhelper.js");
-        webview.loadFrameScript("chrome://embedlite/content/SelectAsyncHelper.js");
         webview.addMessageListeners([
                                         "embed:linkclicked",
+                                        "Content:ContextMenu",
+                                        "Content:SelectionRange",
+                                        "Content:SelectionCopied",
+                                        "Content:SelectionSwap"
                                     ]);
+    }
+
+    onContentOrientationChanged: {
+        orientationFadeOut.restart()
     }
 
     onRecvAsyncMessage: {
@@ -77,9 +106,51 @@ RawWebView {
                 webview.linkClicked(data.uri)
                 break
             }
+            case "Content:SelectionRange": {
+                if (textSelectionController === null) {
+                    textSelectionController = textSelectionControllerComponent.createObject(
+                                webview, {"contentItem" : webview})
+                }
+                textSelectionController.selectionRangeUpdated(data)
+                break
+            }
+            case "Content:SelectionSwap": {
+                if (textSelectionController) {
+                    textSelectionController.swap()
+                }
+
+                break
+            }
             default: {
                 break
             }
+        }
+    }
+    onRecvSyncMessage: {
+        // sender expects that this handler will update `response` argument
+        switch (message) {
+        case "Content:SelectionCopied": {
+            if (data.succeeded && textSelectionController) {
+                textSelectionController.showNotification()
+            }
+            response.message = {"": ""}
+            break
+        }
+        }
+    }
+
+    Component {
+        id: textSelectionControllerComponent
+
+        TextSelectionController {
+            opacity: canShowSelectionMarkers ? 1.0 : 0.0
+            contentWidth: Math.max(webview.contentWidth, webview.width)
+            contentHeight: Math.max(webview.contentHeight, webview.height)
+            anchors {
+                fill: parent
+            }
+
+            Behavior on opacity { FadeAnimator {} }
         }
     }
 
@@ -96,19 +167,56 @@ RawWebView {
         id: popupOpener
 
         pageStack: pickerOpener.pageStack
-        parentItem: webview
+        parentItem: webview.webViewPage || webview
         contentItem: webview
+        downloadsEnabled: false
 
         onAboutToOpenContextMenu: {
             if (Qt.inputMethod.visible) {
                 webview.parent.focus = true
             }
+
+            if (data.types.indexOf("content-text") !== -1) {
+                // we want to select some content text
+                webview.sendAsyncMessage("Browser:SelectionStart", {"xPos": data.xPos, "yPos": data.yPos})
+            }
         }
+    }
+
+    Rectangle {
+        id: orientationDelayOverlay
+
+        width: webview.width
+        height: webview.height
+
+        opacity: 0
+        color: webview.bgcolor
+
+        NumberAnimation on opacity {
+            id: orientationFadeOut
+
+            running: false
+            duration: 200
+            easing.type: Easing.InOutQuad
+
+            to: 0
+        }
+    }
+
+    Timer {
+        id: orientationDelayFailsafe
+        running: !orientationFadeOut.running && orientationDelayOverlay.opacity === 1
+        onTriggered: {
+            orientationFadeOut.start()
+        }
+        interval: 1000
     }
 
     BusyIndicator {
         id: busySpinner
-        anchors.centerIn: parent
+        x: (webview.viewportWidth - width) / 2
+        y: webview._indicatorVerticalOffset
+           + ((webview.viewportHeight - webview._indicatorVerticalOffset - height) / 2)
         running: true
         visible: webview.loading
         size: BusyIndicatorSize.Large
@@ -127,19 +235,7 @@ RawWebView {
             }
         }
 
-        orientation: {
-            if (webview.webViewPage != null) {
-                return webview.webViewPage.orientation
-            } else if (pageStack != undefined && pageStack != null) {
-                if (pageStack.currentPage !== undefined && pageStack.currentPage !== null) {
-                    return pageStack.currentPage.orientation
-                } else {
-                    return Orientation.Portrait
-                }
-            } else {
-                return Orientation.Portrait
-            }
-        }
+        orientation: webview._pageOrientation
 
         onOpenedChanged: {
             if (opened) {

@@ -1,53 +1,50 @@
+/****************************************************************************
+**
+** Copyright (c) 2016 - 2020 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
+**
+****************************************************************************/
+
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 import QtQuick 2.1
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0 as SilicaPrivate
 import Sailfish.WebView 1.0
 
-Item {
+SilicaFlickable {
+    id: viewFlickable
+
     property alias webView: webView
 
-    // TODO: add header once WebView::setMargins() works
-    property alias footer: footerLoader.sourceComponent
-    property Item footerItem: footerLoader.item
+    property alias header: headerLoader.sourceComponent
+    property alias headerItem: headerLoader.item
 
-    default property alias _data: flickable.data
+    contentWidth: width
+    contentHeight: height
+
+    quickScrollEnabled: false
+    pressDelay: 0
+
+    interactive: !webView.textSelectionActive
 
     WebView {
         id: webView
-        width: parent.width
-        height: parent.height
-        flickable: flickable
-        bottomMargin: footerItem && footerItem.height || 0
-        clip: false
 
-        y: Math.min(Math.max(0, -flickable.contentY), flickable.contentHeight-flickable.height - flickable.contentY)
+        y: headerLoader.implicitHeight
+        _indicatorVerticalOffset: -y
+        width: viewFlickable.width
+        height: viewFlickable.contentHeight - headerLoader.implicitHeight
 
-        onScrollableOffsetChanged: if (!flickable.moving) flickable.contentY = scrollableOffset.y
+        viewportHeight: Math.max(viewFlickable.contentHeight, (webViewPage
+                ? ((webViewPage.orientation & Orientation.PortraitMask) ? Screen.height : Screen.width)
+                : viewFlickable.height)) - headerLoader.implicitHeight
+    }
 
-        SilicaFlickable {
-            id: flickable
-
-            y: -webView.y
-
-            width: parent.width
-            height: parent.height
-
-            contentHeight: Math.max(webView.contentHeight+webView.bottomMargin, webView.height)
-            contentWidth: width
-
-            quickScrollEnabled: false
-
-            onContentYChanged: if (flickable.moving) webView.scrollTo(webView.scrollableOffset.x, flickable.contentY)
-
-            SilicaPrivate.Wallpaper {
-                anchors.fill: footerLoader
-                verticalOffset: flickable.contentHeight - flickable.contentY - height
-            }
-            Loader {
-                id: footerLoader
-                width: flickable.width
-                y: Math.ceil(webView.y + flickable.contentHeight - height + (flickable.contentY - webView.scrollableOffset.y))
-            }
-        }
+    Loader {
+        id: headerLoader
+        width: viewFlickable.width
     }
 }

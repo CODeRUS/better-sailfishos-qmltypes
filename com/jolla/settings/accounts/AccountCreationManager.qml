@@ -1,9 +1,19 @@
-import QtQuick 2.0
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
+import Sailfish.Policy 1.0
 import MeeGo.Connman 0.2
 import com.jolla.settings.accounts 1.0
 import org.nemomobile.configuration 1.0
+import org.nemomobile.systemsettings 1.0
+import Nemo.Notifications 1.0
 
 /*
 This can be used to start the UI flow for creating a specific account (e.g. a Jolla account)
@@ -86,7 +96,10 @@ Item {
     property var _trackedObjects: ({})
 
     function startAccountCreation() {
-        pageStack.animatorPush(accountProviderPickerComponent)
+        if (AccessPolicy.accountCreationEnabled)
+            pageStack.animatorPush(accountProviderPickerComponent)
+        else
+            disableByMdm.publish()
     }
 
     function startAccountCreationForProvider(providerName, properties, pageStackOperation) {
@@ -175,8 +188,8 @@ Item {
     AccountSyncAdapter { id: syncAdapter }
 
     property AccountManager _accountManager: AccountManager {}
-    property NetworkManager _networkManager: NetworkManager {}
-    readonly property bool hasNetworkConnectivity: _networkManager.state == "online"
+    property var _networkManagerFactory: NetworkManagerFactory {}
+    readonly property bool hasNetworkConnectivity: _networkManagerFactory.instance.state == "online"
 
     Component {
         id: accountProviderPickerComponent
@@ -217,12 +230,27 @@ Item {
     Component {
         id: networkCheckComponent
         NetworkCheckDialog {
-            networkManager: accountCreationManager._networkManager
         }
     }
 
     Component {
         id: agentRunnerComponent
         AccountAgentRunner {}
+    }
+
+    Notification {
+        id: disableByMdm
+
+        isTransient: true
+        urgency: Notification.Critical
+        icon: "icon-lock-warning"
+
+        //: %1 is operating system name without OS suffix
+        //% "Account creation disabled by %1 Device Manager"
+        previewBody: qsTrId("settings_accounts-la-account_creation_disabled_by_device_manager").arg(aboutSettings.baseOperatingSystemName)
+    }
+
+    AboutSettings {
+        id: aboutSettings
     }
 }

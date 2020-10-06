@@ -103,12 +103,6 @@ Window {
     property QtObject __quickWindow
     onWindowChanged: {
         __quickWindow = window ? window : null
-
-        if (window) {
-            // Use black background when running Silica on desktop without ambiences
-            // Force binding so the state gets restored after Binding override
-            window.color = Qt.binding(function() { return Config.desktop ? "black" : "transparent" })
-        }
     }
     property var _coverIncubator: null
     function _loadCover() {
@@ -165,7 +159,22 @@ Window {
     // For page stack applications, bind orientation to the Page at the top of the stack
     _allowedOrientations: stack.currentPage ? stack.currentPage._allowedOrientations : allowedOrientations
     _pageOrientation: stack.currentPage ? stack.currentPage._windowOrientation : undefined
-    _backgroundVisible: { true } // Force binding so the state gets restored after Binding override
+    _backgroundVisible: !stack.currentPage
+                || !stack.currentPage._opaqueBackground
+                || !stack._currentContainer
+                || !stack._currentContainer.soleVisiblePage
+    _backgroundColor: {
+        if (stack.currentPage
+                && stack._currentContainer
+                && stack._currentContainer.soleVisiblePage) {
+            return stack.currentPage.backgroundColor
+        } else if (Config.desktop) {
+            // Use black background when running Silica on desktop without ambiences
+            return "black"
+        } else {
+            return "transparent"
+        }
+    }
 
     focus: true
     objectName: "rootWindow"

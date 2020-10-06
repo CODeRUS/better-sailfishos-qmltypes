@@ -25,7 +25,7 @@ EMPTY_DEPS="$CURRENT_DIR/empty.json"
 #   fi
 # done
 
-
+# exit 0
 
 QML=$(find /usr/share -name "*.qml" 2>/dev/null)
 
@@ -139,17 +139,21 @@ import Nemo.Policy 1.0
 import Nemo.Ssu 1.0
 import Nemo.Thumbnailer 1.0
 import Nemo.Time 1.0
+import Sailfish.AccessControl 1.0
 import Sailfish.Accounts 1.0
 import Sailfish.Ambience 1.0
 import Sailfish.Bluetooth 1.0
 import Sailfish.Calculator 1.0
 import Sailfish.Calendar 1.0
 import Sailfish.Contacts 1.0
+import Sailfish.Crypto 1.0
 import Sailfish.Email 1.1
+import Sailfish.Encryption 1.0
 import Sailfish.FileManager 1.0
 import Sailfish.Gallery 1.0
 import Sailfish.Gallery.private 1.0
 import Sailfish.Lipstick 1.0
+import Sailfish.Mdm 1.0
 import Sailfish.Media 1.0
 import Sailfish.Messages 1.0
 import Sailfish.Office 1.0
@@ -168,7 +172,9 @@ import Sailfish.Telephony 1.0
 import Sailfish.TextLinking 1.0
 import Sailfish.Timezone 1.0
 import Sailfish.TransferEngine 1.0
+import Sailfish.TransferEngine.Nextcloud 1.0
 import Sailfish.Tutorial 1.0
+import Sailfish.Utilities 1.0
 import Sailfish.Vault 1.0
 import Sailfish.Weather 1.0
 import Sailfish.WebEngine 1.0
@@ -180,13 +186,16 @@ import com.jolla.camera 1.0
 import com.jolla.connection 1.0
 import com.jolla.contacts.settings 1.0
 import com.jolla.email 1.1
+import com.jolla.eventsview.nextcloud 1.0
 import com.jolla.gallery 1.0
 import com.jolla.gallery.ambience 1.0
 import com.jolla.gallery.dropbox 1.0
 import com.jolla.gallery.extensions 1.0
 import com.jolla.gallery.facebook 1.0
+import com.jolla.gallery.nextcloud 1.0
 import com.jolla.gallery.onedrive 1.0
 import com.jolla.gallery.vk 1.0
+import com.jolla.hwr 1.0
 import com.jolla.keyboard 1.0
 import com.jolla.mediaplayer 1.0
 import com.jolla.sailfisheas 1.0

@@ -8,4 +8,5 @@ ConversationTypeMenu 1.0 ConversationTypeMenu.qml
 ErrorLabel 1.0 ErrorLabel.qml
 MessageComposerPage 1.0 MessageComposerPage.qml
 TypeMenuItem 1.0 TypeMenuItem.qml
+SmsDisabledBanner 1.0 SmsDisabledBanner.qml
 typeinfo plugins.qmltypes

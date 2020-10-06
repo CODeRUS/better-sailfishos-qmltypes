@@ -28,9 +28,9 @@ ListModel {
             //% "Twice a day"
             return qsTrId("settings-accounts-me-sync_twice_a_day")
         case AccountSyncSchedule.NoInterval:
-            //: Only sync when user manually requests it; do not sync automatically
-            //% "Manually"
-            return qsTrId("settings-accounts-me-sync_manually")
+            //: Sync schedule is turned off
+            //% "Off"
+            return qsTrId("settings-accounts-me-sync_schedule_off")
         }
         return ""
     }

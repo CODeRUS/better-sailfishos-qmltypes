@@ -13,6 +13,7 @@ Module {
         prototype: "QObject"
         exports: ["Sailfish.Telephony/AsYouTypeFormatter 1.0"]
         exportMetaObjectRevisions: [0]
+        Property { name: "rememberPosition"; type: "bool" }
         Property { name: "rawPhoneNumber"; type: "string" }
         Property { name: "regionCode"; type: "string" }
         Property { name: "formattedNumber"; type: "string"; isReadonly: true }

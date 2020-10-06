@@ -1,9 +1,17 @@
+/*
+ * Copyright (c) 2013 - 2020 Jolla Ltd.
+ * Copyright (c) 2019 - 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
 pragma Singleton
 
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Contacts 1.0
 import Sailfish.Telephony 1.0
+import Sailfish.AccessControl 1.0
 import MeeGo.QOfono 0.2
 import org.nemomobile.dbus 2.0
 import org.nemomobile.ofono 1.0
@@ -20,6 +28,7 @@ QtObject {
     // cellular configs will have one account by default(SMS) installed by telepathy-ring
     readonly property bool hasModemOrIMaccounts: hasModem || telepathyAccounts.count > 0
     readonly property bool hasModem: simManager.enabledModems.length > 0
+    readonly property bool messagingPermitted: AccessControl.hasGroup(AccessControl.RealUid, "sailfish-messages")
 
     readonly property string voiceModemPath: {
         if (simManager.valid) {

@@ -104,7 +104,7 @@ Item {
                 color: Theme.highlightColor
                 font.pixelSize: Theme.fontSizeHuge
                 anchors.centerIn: windDirectionIcon
-                text: model ? model.windSpeed : ""
+                text: model ? model.maximumWindSpeed : ""
             }
             Label {
                 anchors {

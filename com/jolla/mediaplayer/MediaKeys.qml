@@ -41,8 +41,6 @@ Item {
     }
 
     MediaKey {
-        id: forwardKey
-
         enabled: _grabKeys
         key: Qt.Key_AudioForward
         onPressed: AudioPlayer.forwarding = true
@@ -54,8 +52,6 @@ Item {
     }
 
     MediaKey {
-        id: rewindKey
-
         enabled: _grabKeys
         key: Qt.Key_AudioRewind
         onPressed: AudioPlayer.rewinding = true

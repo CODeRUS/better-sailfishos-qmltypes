@@ -168,6 +168,11 @@ MouseArea {
                              expires, imageId, accessToken)
     }
 
+    function downloadWithAccessToken(url, specificAccessToken) {
+        downloader.imageFile(url, accountId, container,
+                             expires, imageId, specificAccessToken)
+    }
+
     BusyIndicator {
         anchors.centerIn: parent
         size: BusyIndicatorSize.Large

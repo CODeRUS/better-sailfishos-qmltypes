@@ -62,6 +62,10 @@ Module {
             name: "pairWithDevice"
             Parameter { name: "deviceAddress"; type: "string" }
         }
+        Method {
+            name: "cancelPairWithDevice"
+            Parameter { name: "deviceAddress"; type: "string" }
+        }
     }
     Component {
         name: "BluezQt::Agent"
@@ -401,6 +405,22 @@ Module {
             Parameter { name: "msec"; type: "int" }
         }
         Method { name: "requestUpdate"; revision: 3 }
+    }
+    Component {
+        name: "ShutdownMode"
+        prototype: "QObject"
+        exports: ["Sailfish.Lipstick/ShutdownMode 1.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "ShutdownModeType"
+            values: {
+                "Shutdown": 0,
+                "Reboot": 1,
+                "UserSwitch": 2,
+                "UserSwitchFailed": 3
+            }
+        }
     }
     Component {
         name: "StackItem"

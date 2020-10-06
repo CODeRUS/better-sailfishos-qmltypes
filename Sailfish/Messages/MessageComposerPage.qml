@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019 - 2020 Jolla Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Messages 1.0
@@ -155,10 +162,20 @@ Page {
                 onHasFocusChanged: if (!hasFocus) focusTextInput()
             }
 
+            SmsDisabledBanner {
+                id: smsDisabledBanner
+                // Move banner down by Theme.paddingLarge
+                compressed: false
+                // without changing font size
+                font.pixelSize: Theme.fontSizeMedium
+                localUid: root.validatedLocalUid
+                visible: !recipientField.hasFocus
+            }
+
             AccountErrorLabel {
                 id: errorLabel
 
-                visible: !recipientField.hasFocus
+                visible: !recipientField.hasFocus && !smsDisabledBanner.active
                 padding: Theme.paddingLarge
 
                 anchors {

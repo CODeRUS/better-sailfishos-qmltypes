@@ -44,6 +44,7 @@ SilicaItem {
     property alias wrapMode: headerText.wrapMode
     property alias extraContent: extraContentPlaceholder
     property string description
+    property int descriptionWrapMode: Text.NoWrap
     property Item page
     property alias titleColor: headerText.color
     property real leftMargin: Theme.horizontalPageMargin
@@ -54,7 +55,8 @@ SilicaItem {
         if (description.length > 0 && !_descriptionLabel) {
             var component = Qt.createComponent(Qt.resolvedUrl("private/PageHeaderDescription.qml"))
             if (component.status === Component.Ready) {
-                _descriptionLabel = component.createObject(pageHeader)
+                _descriptionLabel = component.createObject(pageHeader,
+                    { "wrapMode": Qt.binding(function() { return pageHeader.descriptionWrapMode }) })
             } else {
                 console.warn("PageHeaderDescription.qml instantiation failed " + component.errorString())
             }
@@ -76,7 +78,7 @@ SilicaItem {
         // Don't allow the label to extend over the page stack indicator
         width: Math.min(implicitWidth, parent.width - leftMargin - rightMargin)
         truncationMode: TruncationMode.Fade
-        color: pageHeader.palette.highlightColor
+        color: highlighted ? palette.primaryColor : palette.highlightColor
         // align first line with page indicator
         y: Math.floor(_preferredHeight/2 - metrics.height/2)
         anchors {

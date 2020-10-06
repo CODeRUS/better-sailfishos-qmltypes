@@ -69,7 +69,7 @@ Dialog {
                 height: implicitHeight + Theme.paddingLarge*2
                 verticalAlignment: Text.AlignVCenter
                 visible: text != ""
-                wrapMode: Text.WordWrap
+                wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeExtraSmall
                 color: Theme.highlightColor
             }

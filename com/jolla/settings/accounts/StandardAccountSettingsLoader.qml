@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 - 2020 Jolla Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
@@ -141,7 +148,7 @@ QtObject {
                 labelText = AccountsUtil.serviceDisplayNameForService(service)
             }
 
-            description = AccountsUtil.serviceDescription(service.serviceType, accountProvider.displayName, accountProvider.name)
+            description = AccountsUtil.serviceDescription(service, accountProvider.displayName, accountProvider.name)
             var props = {
                 "serviceName": service.name,
                 "iconName": service.iconName,

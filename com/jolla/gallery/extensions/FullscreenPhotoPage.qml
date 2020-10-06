@@ -20,6 +20,7 @@ FullscreenContentPage {
     property alias currentSource: overlay.source
     property string accessToken
     property bool connectedToNetwork
+    property alias deletingAllowed: overlay.deletingAllowed
 
     // Private properties
     property int _toBeDeletedIndex: -1

@@ -5,7 +5,7 @@
 
 var playlistsSimpleSelect = "" +
     "SELECT " +
-        "\"grilo#Box\" " +
+        "\"grilo#Container\" " +
         "tracker:id(?urn) AS ?id " +
         "?url " +
         "tracker:coalesce(nie:title(?urn), tracker:string-from-filename(nfo:fileName(?urn))) AS ?title " +
@@ -13,7 +13,7 @@ var playlistsSimpleSelect = "" +
 
 var playlistsSearchSelect = "" +
     "SELECT " +
-        "\"grilo#Box\" " +
+        "\"grilo#Container\" " +
         "tracker:id(?urn) AS ?id " +
         "?url " +
         "?title " +

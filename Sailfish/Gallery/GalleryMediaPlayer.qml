@@ -7,12 +7,45 @@ import Nemo.KeepAlive 1.2
 MediaPlayer {
     id: root
 
+    property bool busy
+
+    onLoadedChanged: if (loaded) playerLoader.anchors.centerIn = currentItem
     property bool _minimizedPlaying
     property alias active: permissions.enabled
     readonly property bool playing: playbackState == MediaPlayer.PlayingState
-    readonly property bool loaded: status >= MediaPlayer.Loaded && status < MediaPlayer.EndOfMedia
+    readonly property bool loaded: status >= MediaPlayer.Loaded && status <= MediaPlayer.EndOfMedia
     readonly property bool hasError: error !== MediaPlayer.NoError
     property bool _reseting
+
+    signal displayError
+
+    onPositionChanged: {
+        // JB#50154: Work-around, force load frame preview when seeking the end
+        if (status === MediaPlayer.EndOfMedia) {
+            asyncPause.restart()
+        }
+        busy = false
+    }
+
+    property var asyncPause: Timer {
+        interval: 16
+        onTriggered: pause()
+    }
+
+    onHasErrorChanged: {
+        if (error === MediaPlayer.FormatError) {
+            //: %1 is replaced with specific codec
+            //% "Unsupported codec: %1"
+            errorNotification.previewBody = qsTrId("components_gallery-la-unsupported-codec").arg(errorString)
+            errorNotification.publish()
+        }
+    }
+    onStatusChanged: {
+        busy = false
+        if (status === MediaPlayer.InvalidMedia) {
+            displayError()
+        }
+    }
 
     autoLoad: false
 

@@ -134,9 +134,25 @@ Module {
                 "RecurDaily": 1,
                 "RecurWeekly": 2,
                 "RecurBiweekly": 3,
-                "RecurMonthly": 4,
-                "RecurYearly": 5,
-                "RecurCustom": 6
+                "RecurWeeklyByDays": 4,
+                "RecurMonthly": 5,
+                "RecurMonthlyByDayOfWeek": 6,
+                "RecurMonthlyByLastDayOfWeek": 7,
+                "RecurYearly": 8,
+                "RecurCustom": 9
+            }
+        }
+        Enum {
+            name: "Days"
+            values: {
+                "NoDays": 0,
+                "Monday": 1,
+                "Tuesday": 2,
+                "Wednesday": 4,
+                "Thursday": 8,
+                "Friday": 16,
+                "Saturday": 32,
+                "Sunday": 64
             }
         }
         Enum {
@@ -171,6 +187,7 @@ Module {
         Property { name: "recur"; type: "CalendarEvent::Recur"; isReadonly: true }
         Property { name: "recurEndDate"; type: "QDateTime"; isReadonly: true }
         Property { name: "hasRecurEndDate"; type: "bool"; isReadonly: true }
+        Property { name: "recurWeeklyDays"; type: "CalendarEvent::Days"; isReadonly: true }
         Property { name: "reminder"; type: "int"; isReadonly: true }
         Property { name: "uniqueId"; type: "string"; isReadonly: true }
         Property { name: "recurrenceId"; type: "string"; isReadonly: true }
@@ -207,6 +224,7 @@ Module {
         Property { name: "allDay"; type: "bool" }
         Property { name: "recur"; type: "CalendarEvent::Recur" }
         Property { name: "recurEndDate"; type: "QDateTime"; isReadonly: true }
+        Property { name: "recurWeeklyDays"; type: "CalendarEvent::Days" }
         Property { name: "hasRecurEndDate"; type: "bool"; isReadonly: true }
         Property { name: "recurrenceId"; type: "string"; isReadonly: true }
         Property { name: "reminder"; type: "int" }

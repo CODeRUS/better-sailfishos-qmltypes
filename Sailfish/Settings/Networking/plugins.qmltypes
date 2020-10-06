@@ -138,6 +138,7 @@ Module {
         Property { name: "offlineMode"; type: "bool" }
         Property { name: "defaultRoute"; type: "NetworkService"; isReadonly: true; isPointer: true }
         Property { name: "connectedWifi"; type: "NetworkService"; isReadonly: true; isPointer: true }
+        Property { name: "connectingWifi"; type: "bool"; isReadonly: true }
         Property { name: "sessionMode"; type: "bool" }
         Property { name: "inputRequestTimeout"; type: "uint"; isReadonly: true }
         Property { name: "servicesEnabled"; type: "bool" }
@@ -392,6 +393,7 @@ Module {
         Property { name: "privateKeyAvailable"; type: "bool"; isReadonly: true }
         Property { name: "privateKeyFileAvailable"; type: "bool"; isReadonly: true }
         Property { name: "privateKeyPassphraseAvailable"; type: "bool"; isReadonly: true }
+        Property { name: "anonymousIdentityAvailable"; type: "bool"; isReadonly: true }
         Property { name: "bssid"; type: "string"; isReadonly: true }
         Property { name: "maxRate"; type: "uint"; isReadonly: true }
         Property { name: "frequency"; type: "ushort"; isReadonly: true }
@@ -411,6 +413,7 @@ Module {
         Property { name: "privateKeyPassphrase"; type: "string" }
         Property { name: "domainSuffixMatch"; type: "string" }
         Property { name: "phase2"; type: "string" }
+        Property { name: "anonymousIdentity"; type: "string" }
         Signal {
             name: "nameChanged"
             Parameter { name: "name"; type: "string" }
@@ -518,6 +521,10 @@ Module {
         Signal {
             name: "phase2Changed"
             Parameter { name: "phase2"; type: "string" }
+        }
+        Signal {
+            name: "anonymousIdentityChanged"
+            Parameter { name: "anonymousIdentity"; type: "string" }
         }
         Signal {
             name: "ethernetChanged"
@@ -628,6 +635,10 @@ Module {
         Method {
             name: "setPhase2"
             Parameter { name: "phase2"; type: "string" }
+        }
+        Method {
+            name: "setAnonymousIdentity"
+            Parameter { name: "anonymousIdentity"; type: "string" }
         }
         Method { name: "resetCounters" }
     }
@@ -919,6 +930,7 @@ Module {
         Property { name: "nameservers"; type: "QStringList" }
         Property { name: "userRoutes"; type: "QVariant" }
         Property { name: "serverRoutes"; type: "QVariant" }
+        Property { name: "defaultRoute"; type: "bool" }
         Property { name: "properties"; type: "QVariantMap" }
         Property { name: "providerProperties"; type: "QVariantMap" }
         Property { name: "connected"; type: "bool"; isReadonly: true }

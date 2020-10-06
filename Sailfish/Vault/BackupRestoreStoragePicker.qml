@@ -1,7 +1,18 @@
-import QtQuick 2.0
+/****************************************************************************************
+**
+** Copyright (c) 2013 - 2019 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
+**
+** License: Proprietary
+**
+****************************************************************************************/
+
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Vault 1.0
 import MeeGo.Connman 0.2
+import Nemo.Configuration 1.0
+import com.jolla.settings.accounts 1.0
 
 Column {
     id: root
@@ -10,189 +21,156 @@ Column {
     readonly property bool selectionValid: (cloudAccountId > 0 || memoryCardPath.length > 0)
                                             && _errorText.length === 0
 
-    property bool backupMode
     property int cloudAccountId
     property string memoryCardPath
-    property bool selectedStorageMounted
+    property bool selectedStorageMounted: true
     property bool selectedStorageLocked
 
-    property string fileToRestore: {
-        if (!selectionValid) {
-            return ""
-        }
-        return (latestBackupInfoLoader.active && latestBackupInfoLoader.status == Loader.Ready)
-                ? latestBackupInfoLoader.item.latestBackupFilePath
-                : ""
-    }
-
-    property bool showStorageInfo: true
     property real leftMargin: Theme.horizontalPageMargin
     property real rightMargin: Theme.horizontalPageMargin
-    property bool menuOpen: storageMenu.height > 0
 
-    property string actionText: backupMode
-            //: Displayed before the list of items allowing the user to choose where data will be backed up to
-            //% "Backup data to"
-          ? qsTrId("vault-la-backup_data_to")
-            //: Displayed before the list of items allowing the user to choose where data will be restored from
-            //% "Restore data from"
-          : qsTrId("vault-la-restore_data_from")
+    property var storageListModel
 
-    property BackupRestoreStorageListModel storageListModel: BackupRestoreStorageListModel {}
+    readonly property string _localBackupUnitsText: storageListModel.localBackupUnits.join(Format.listSeparator)
+    readonly property string _cloudBackupUnitsText: storageListModel.cloudBackupUnits.join(Format.listSeparator)
+
+    readonly property string _errorText: {
+        if (_memoryCardError.length > 0) {
+            return _memoryCardError
+        } else if (cloudAccountId > 0
+                   && networkManagerFactory.instance.state !== ""
+                   && networkManagerFactory.instance.state !== "online") {
+            return BackupUtils.cloudConnectErrorText
+        }
+        return ""
+    }
+
+    property string _memoryCardError
 
     function activeItem() {
         return storageListModel.get(storageCombo.currentIndex)
     }
 
-    function refresh() {
-        var prevIndex = storageCombo.currentIndex
-        storageCombo.currentIndex = -1
-        if (latestBackupInfoLoader.status == Loader.Ready) {
-            latestBackupInfoLoader.item.backupSource = null
+    function reselectLastStorageSelection() {
+        var accountIdOrPath = lastSelectedStorage.value
+        if (accountIdOrPath != null) {
+            for (var i = 0; i < storageListModel.count; ++i) {
+                if (_matchesComboIndex(i, accountIdOrPath)) {
+                    root.currentIndex = i
+                    _update()
+                    break
+                }
+            }
         }
-        storageCombo.currentIndex = prevIndex
     }
 
-    property string _errorText
+    function _matchesComboIndex(index, accountIdOrPath) {
+        var data = storageListModel.get(index)
+        return (typeof accountIdOrPath === 'number' && data.accountId === accountIdOrPath)
+                    || data.devPath === accountIdOrPath
+    }
 
-    //% "Cannot connect to the cloud service. Make sure there is an active internet connection and verify the account is enabled in Settings | Accounts."
-    property string _connectionErrorText: qsTrId("vault-la-backup_lookup_error")
+    function _delegateLoaded(index) {
+        if (lastSelectedStorage.value == null) {
+            storageCombo.currentIndex = 0
+            root._update()
+        } else if (_matchesComboIndex(index, lastSelectedStorage.value)) {
+            storageCombo.currentIndex = index
+            root._update()
+        }
+    }
 
     function _update() {
-        // No-op if already set.
-        _setInitialSelection()
-
-        if (storageCombo.currentIndex < 0 || storageCombo.currentIndex >= storageListModel.count) {
+        if (!root.storageListModel.ready || storageRepeater.count === 0) {
             return
         }
 
-        root.cloudAccountId = 0
-        root.memoryCardPath = ""
-        var data = storageListModel.get(storageCombo.currentIndex)
+        if (storageCombo.currentIndex < 0) {
+            storageCombo.currentIndex = 0
+        }
+
+        var data = activeItem()
         if (data.type === storageListModel.storageTypeMemoryCard) {
-            if (data.deviceStatus === storageListModel.storageLocked) {
-                root.memoryCardPath = ""
-                _errorText = ""
-                selectedStorageLocked = true
-                selectedStorageMounted = false
-            } else if (root.backupMode && !data.path) {
-                root.memoryCardPath = ""
-                _errorText = ""
-                selectedStorageMounted = false
-            } else if (root.backupMode && !backupUtils.verifyWritable(data.path)) {
-                root.memoryCardPath = ""
-                //% "The selected storage is not writable."
-                _errorText = qsTrId("vault-la-cloud-la-storage_unwritable")
-            } else {
-                root.memoryCardPath = data.path
-                _errorText = ""
-                selectedStorageMounted = true
-            }
+            selectedStorageMounted = data.path.length > 0
+            selectedStorageLocked = data.deviceStatus === storageListModel.storageLocked
+            cloudAccountId = 0
+            _memoryCardError = data.latestBackupInfo.error || ""
+            memoryCardPath = _memoryCardError.length ? "" : data.path
         } else if (data.type === storageListModel.storageTypeCloud) {
             selectedStorageMounted = true
             selectedStorageLocked = false
-            root.cloudAccountId = data.accountId
-            _errorText = _accountErrorText(root.cloudAccountId)
-            if (_errorText.length == 0 && networkManager.state != "online") {
-                _errorText = _connectionErrorText
-            }
-        }
-        if (latestBackupInfoLoader.status == Loader.Ready) {
-            latestBackupInfoLoader.item.active = _errorText.length === 0
-            if (latestBackupInfoLoader.item.active) {
-                latestBackupInfoLoader.item.backupSource = root.cloudAccountId > 0 ? root.cloudAccountId : root.memoryCardPath
-            }
+            cloudAccountId = data.accountId
+            _memoryCardError = ""
+            memoryCardPath = ""
+        } else {
+            console.warn("Unrecognized storage type!")
         }
     }
 
-    function _accountErrorText(accountId) {
-        var accountData = storageListModel.cloudAccountModel.getByAccount(accountId)
-        if (accountData && !accountData.accountEnabled) {
-            //: Label displayed if the cloud storage account is disabled.
-            //% "This account is disabled. To use it, enable it from Settings | Accounts."
-            return qsTrId("vault-la-cloud_account_disabled")
-        }
-        if (!storageListModel.cloudAccountModel.accountHasServiceOfTypeEnabled(accountId, "storage")) {
-            //: Label displayed if the Storage service of the cloud storage account is disabled.
-            //% "This account's Storage service is disabled. To use it, enable it from Settings | Accounts."
-            return qsTrId("vault-la-cloud_account_storage_disabled")
-        }
-        return ""
+    NetworkManagerFactory {
+        id: networkManagerFactory
     }
 
-    function _setInitialSelection() {
-        // Select the first option that is usable. This selects a cloud account even if there is no
-        // internet connection as the user may want to connect and then use it.
-        if (root.storageListModel.count == 0 || storageCombo.currentIndex >= 0 || storageCombo.hasInitialIndex) {
-            return
-        }
-
-
-        for (var i = 0; i < storageListModel.count; i++) {
-            var data = storageListModel.get(i)
-            if (data.type === storageListModel.storageTypeCloud && root._accountErrorText(data.accountId).length > 0) {
-                continue
-            }
-            storageCombo.currentIndex = i
-            break
-        }
-        storageCombo.hasInitialIndex = true
-    }
-
-    BackupUtils {
-        id: backupUtils
-    }
-
-    NetworkManager {
-        id: networkManager
-        onStateChanged: root._update()
-    }
-
-    function checkMemoryCardMountStatus() {
-        if (root.storageListModel.ready)
-            root._setInitialSelection()
-
-        if (storageListModel.count > 0 && storageCombo.currentIndex >= 0) {
-            var data = storageListModel.get(storageCombo.currentIndex)
-            selectedStorageMounted = (data.deviceStatus === storageListModel.storageMounted)
-            selectedStorageLocked = (data.deviceStatus === storageListModel.storageLocked)
-        }
-    }
-
-    // MainPage overrides the storageListModel. Hence, Connections.
     Connections {
         target: root.storageListModel
 
-        onMemoryCardMounted: checkMemoryCardMountStatus()
-        onReadyChanged: checkMemoryCardMountStatus()
+        onMemoryCardMounted: root._update()
+        onReadyChanged: root._update()
     }
-
-    Component.onCompleted: checkMemoryCardMountStatus()
 
     ComboBox {
         id: storageCombo
 
-        property bool hasInitialIndex
-
-        width: parent.width
         leftMargin: root.leftMargin
         rightMargin: root.rightMargin
-        label: root.actionText
-        menu: ContextMenu {
-            id: storageMenu
-            Repeater {
-                model: root.storageListModel
-                MenuItem {
-                    text: model.name
+
+        //: Displayed before the list of items allowing the user to choose where data will be backed up to
+        //% "Manually back up to"
+        label: qsTrId("vault-la-manually_back_up_to")
+        automaticSelection: false
+        currentIndex: -1
+        enabled: root.enabled
+
+        onCurrentIndexChanged: {
+            if (currentIndex >= 0) {
+                var data = root.storageListModel.get(currentIndex)
+                if (data.accountId > 0) {
+                    lastSelectedStorage.value = data.accountId
+                } else {
+                    lastSelectedStorage.value = data.devPath
                 }
             }
         }
-        currentIndex: -1
-        Component.onCompleted: root._update()
-        onCurrentIndexChanged: root._update()
 
-        descriptionColor: root._errorText.length > 0 || (latestBackupInfoLoader.status == Loader.Ready && latestBackupInfoLoader.item.error)
-               ? "#ff4d4d" // as per TextBase errorHighlight
+        menu: ContextMenu {
+            id: storageMenu
+
+            closeOnActivation: false
+
+            Repeater {
+                id: storageRepeater
+
+                model: root.storageListModel
+
+                // If model has changed after currentIndex is set, need to refresh the selection details.
+                onCountChanged: root._update()
+
+                MenuItem {
+                    text: model.name
+
+                    onClicked: {
+                        storageCombo.currentIndex = index
+                        root._update()
+                        storageMenu.close()
+                    }
+
+                    Component.onCompleted: root._delegateLoaded(model.index)
+                }
+            }
+        }
+
+        descriptionColor: root._errorText.length > 0
+               ? Theme.errorColor
                : (highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor)
 
         description: {
@@ -200,77 +178,15 @@ Column {
                 return root._errorText
             }
 
-            if (root.selectedStorageLocked) {
-                //% "The selected storage is locked."
-                return qsTrId("vault-la-cloud-la-storage_is_locked")
-            }
-
-            if (!root.selectedStorageMounted) {
-                //% "The selected storage is not mounted."
-                return qsTrId("vault-la-cloud-la-storage_not_mounted")
-            }
-
-            if (root.backupMode) {
-                if (root.memoryCardPath.length > 0) {
-                    //: Explains how data will be backed up to the memory card
-                    //% "Your data will be copied to the memory card. Please do not remove the memory card before the backup is completed."
-                    return qsTrId("vault-la-memory_card_backup_explain")
-                } else if (root.cloudAccountId > 0) {
-                    //: Explains how data will be backed up to cloud storage
-                    //% "Your data will be uploaded using your currently active internet connection. Note that Gallery images and videos are not included in the cloud backup."
-                    return qsTrId("vault-la-cloud_backup_explain")
-                } else {
-                    return ""
-                }
-            } else {
-                if (latestBackupInfoLoader.status != Loader.Ready
-                        || latestBackupInfoLoader.item.loading) {
-                    return ""
-                }
-                if (latestBackupInfoLoader.item.error) {
-                    return root._connectionErrorText
-                }
-                if (root.fileToRestore.length === 0) {
-                    //: No previous backups were found on the cloud or memory card storage
-                    //% "No previous backups found"
-                    return qsTrId("vault-la-no_previous_backups_found")
-                }
-                if (root.memoryCardPath.length > 0) {
-                    //: Explains how data will be restored from the memory card
-                    //% "Copying may take some time. Please wait without turning off your device and do not remove the memory card before the data is restored."
-                    return qsTrId("vault-la-memory_card_restore_explain")
-                } else if (root.cloudAccountId > 0) {
-                    //: Explains how data will be restored from the cloud
-                    //% "Downloading your backup might take some time. Use of Wi-Fi is recommended. Please wait without turning off your device."
-                    return qsTrId("vault-la-cloud_restore_explain")
-                } else {
-                    return ""
-                }
-            }
+            return root.cloudAccountId > 0
+                    ? BackupUtils.cloudBackupDescription(root._cloudBackupUnitsText)
+                    : BackupUtils.localBackupDescription(root._localBackupUnitsText)
         }
     }
 
-    Item {
-        x: root.leftMargin
-        width: parent.width - root.leftMargin - root.rightMargin
-        height: latestBackupInfoLoader.height
-        visible: root.showStorageInfo
+    ConfigurationValue {
+        id: lastSelectedStorage
 
-        Behavior on height {
-            enabled: !root.backupMode
-            NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
-        }
-
-        Loader {
-            id: latestBackupInfoLoader
-            width: parent.width
-            sourceComponent: root.backupMode ? null : latestBackupComponent
-
-            Component {
-                id: latestBackupComponent
-
-                LatestBackupInfo { }
-            }
-        }
+        key: "/sailfish/backup/last_selected_storage"
     }
 }

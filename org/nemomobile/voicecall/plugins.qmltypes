@@ -25,6 +25,7 @@ Module {
         }
         Property { name: "available"; type: "bool"; isReadonly: true }
         Property { name: "recording"; type: "bool"; isReadonly: true }
+        Property { name: "recordingsDirPath"; type: "string"; isReadonly: true }
         Signal {
             name: "recordingError"
             Parameter { name: "error"; type: "ErrorCondition" }

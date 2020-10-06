@@ -41,4 +41,5 @@ AddAccountMenuItem 1.0 AddAccountMenuItem.qml
 TermsWebView 1.0 TermsWebView.qml
 JollaAccountForgotPasswordInfo 1.0 JollaAccountForgotPasswordInfo.qml
 CredentialsUpdateDialog 1.0 CredentialsUpdateDialog.qml
+MinimumServiceEnabledNotification 1.0 MinimumServiceEnabledNotification.qml
 typeinfo plugins.qmltypes

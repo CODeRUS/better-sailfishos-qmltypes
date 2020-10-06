@@ -14,6 +14,7 @@ Column {
     property real itemWidth: width / columns
 
     SectionHeader {
+        visible: settingsModel.count > 0
         text: name
     }
 
@@ -24,6 +25,7 @@ Column {
             id: repeater
 
             model: SettingsModel {
+                id: settingsModel
                 path: root.entryPath.split("/")
                 depth: root.depth
             }

@@ -15,7 +15,12 @@ import Sailfish.Silica 1.0
 Dialog {
     id: dialog
     property alias acceptText: header.acceptText
+    property alias cancelText: header.cancelText
     property alias title: header.title
+
+    property var checkbox
+    property alias checkboxValue: preventDialogs.checked
+
     default property alias defaultContent: promptContent.children
 
     SilicaFlickable {
@@ -39,7 +44,18 @@ Dialog {
                 // So that anchoring works in user prompt dialog implementations
                 // and dialog looks visually good. This leaves annoying binding loop which happens
                 // when keyboard is opened as keyboard opening reduces dialog height.
-                height: Math.max(childrenRect.height, dialog.height - header.height) - Theme.paddingLarge * 2
+                height: Math.max(childrenRect.height, dialog.height - header.height - preventDialogs.height) - Theme.paddingLarge * 2
+            }
+
+            TextSwitch {
+                id: preventDialogs
+
+                height: visible ? implicitHeight : 0
+                visible: dialog.checkbox || false
+                checked: dialog.checkbox && dialog.checkbox.checked || false
+
+                //% "Prevent this page to create additional dialogs"
+                text: qsTrId("sailfish_components_webview_popups-prevent_additional_dialogs")
             }
         }
     }

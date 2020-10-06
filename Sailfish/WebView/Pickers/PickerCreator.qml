@@ -14,19 +14,14 @@ import Sailfish.Pickers 1.0
 
 Item {
     id: pickerCreator
-    property int winid
+    property int winId
     property QtObject contentItem
-    property int filter: _nsIFilePicker_filterAll
+    property string mimeType
     property int mode
     property Item pageStack
 
     readonly property int _nsIFilePicker_modeOpen: 0
     readonly property int _nsIFilePicker_modeOpenMultiple: 3
-    readonly property int _nsIFilePicker_filterAll: 1
-    readonly property int _nsIFilePicker_filterImages: 8
-    readonly property int _nsIFilePicker_filterAudio: 256
-    readonly property int _nsIFilePicker_filterVideo: 512
-
 
     function sendResponse(selectedContent) {
         var scheme = "file://"
@@ -38,7 +33,7 @@ Item {
 
         contentItem.sendAsyncMessage("filepickerresponse",
                                  {
-                                     "winid": winid,
+                                     "winId": winId,
                                      "accepted": filePath ? true : false,
                                                             "items": [filePath]
                                  })
@@ -58,7 +53,7 @@ Item {
 
         contentItem.sendAsyncMessage("filepickerresponse",
                                  {
-                                     "winid": winid,
+                                     "winId": winId,
                                      "accepted": result.length > 0,
                                      "items": result
                                  })
@@ -67,28 +62,28 @@ Item {
 
     Component.onCompleted: {
         if (mode == _nsIFilePicker_modeOpenMultiple) {
-            switch (filter) {
-            case _nsIFilePicker_filterImages:
+            switch (mimeType) {
+            case "image/*":
                 pageStack.animatorPush(Qt.resolvedUrl("MultiImagePicker.qml"), {"creator": pickerCreator})
                 break
-            case _nsIFilePicker_filterAudio:
+            case "audio/*":
                 pageStack.animatorPush(Qt.resolvedUrl("MultiMusicPicker.qml"), {"creator": pickerCreator})
                 break
-            case _nsIFilePicker_filterVideo:
+            case "video/*":
                 pageStack.animatorPush(Qt.resolvedUrl("MultiVideoPicker.qml"), {"creator": pickerCreator})
                 break
             default:
                 pageStack.animatorPush(Qt.resolvedUrl("MultiContentPicker.qml"), {"creator": pickerCreator})
             }
         } else if (mode == _nsIFilePicker_modeOpen) {
-            switch (filter) {
-            case _nsIFilePicker_filterImages:
+            switch (mimeType) {
+            case "image/*":
                 pageStack.animatorPush(Qt.resolvedUrl("ImagePicker.qml"), {"creator": pickerCreator})
                 break
-            case _nsIFilePicker_filterAudio:
+            case "audio/*":
                 pageStack.animatorPush(Qt.resolvedUrl("MusicPicker.qml"), {"creator": pickerCreator})
                 break
-            case _nsIFilePicker_filterVideo:
+            case "video/*":
                 pageStack.animatorPush(Qt.resolvedUrl("VideoPicker.qml"), {"creator": pickerCreator})
                 break
             default:

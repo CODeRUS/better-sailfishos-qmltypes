@@ -3,7 +3,6 @@ pragma Singleton
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Nemo.FileManager 1.0
-import org.nemomobile.contentaction 1.0
 
 Item {
     id: root

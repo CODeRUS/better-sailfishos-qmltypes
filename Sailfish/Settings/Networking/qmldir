@@ -17,4 +17,5 @@ CACertChooser 1.0 CACertChooser.qml
 EapComboBox 1.0 EapComboBox.qml
 InnerAuthComboBox 1.0 InnerAuthComboBox.qml
 ClientCertChooser 1.0 ClientCertChooser.qml
+AnonymousIdentityField 1.0 AnonymousIdentityField.qml
 typeinfo plugins.qmltypes

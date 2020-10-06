@@ -13,14 +13,20 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 UserPrompt {
-    id: dialog
+    id: root
 
     property string hostname
     property string realm
     property bool passwordOnly
-    property alias username: username.text
-    property alias password: password.text
-    property alias dontsave: dontsaveCheck.checked
+    property bool privateBrowsing
+
+    property var username
+    property var password
+    property var remember
+
+    property alias usernameValue: username.text
+    property alias passwordValue: password.text
+    property alias rememberValue: remember.checked
 
     //: Text on the Accept dialog button that accepts browser's auth request
     //% "Log In"
@@ -43,12 +49,14 @@ UserPrompt {
             id: username
 
             width: parent.width
-            focus: true
+            focus: root.username && root.username.autofocus || false
             visible: !passwordOnly
             //% "Enter your user name"
             placeholderText: qsTrId("sailfish_components_webview_popups-la-enter_username")
             //% "User name"
             label: qsTrId("sailfish_components_webview_popups-la-user_name")
+
+            text: root.username && root.username.value || ""
             inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
             EnterKey.iconSource: "image://theme/icon-m-enter-next"
             EnterKey.onClicked: password.focus = true
@@ -60,23 +68,36 @@ UserPrompt {
             width: parent.width
             //% "Enter password"
             placeholderText: qsTrId("sailfish_components_webview_popups-la-enter_password")
+            text: root.password && root.password.value || ""
+
             EnterKey.iconSource: (username.text.length > 0 && text.length > 0) ? "image://theme/icon-m-enter-accept"
                                                                                : "image://theme/icon-m-enter-next"
-            EnterKey.onClicked: dialog.accept()
+            EnterKey.onClicked: root.accept()
         }
 
         TextSwitch {
-            id: dontsaveCheck
+            id: remember
 
+            // If credentials are already remember removing them via this is not feasibible
+            // Better to hide the whole checkbox.
+            visible: !privateBrowsing && !(root.remember && root.remember.checked)
             checked: false
 
-            //: Do not save the entered credentials for later use
-            //% "Do not save"
-            text: qsTrId("sailfish_components_webview_popups-la-dont_save")
+            //: Remember entered credentials for later use
+            //% "Remember credentials"
+            text: qsTrId("sailfish_components_webview_popups-remember_credentials")
+        }
 
-            //: Explain to the user that checking the switch will prevent entered credentials from saving
-            //% "The credentials you enter won't be stored for later use"
-            description: qsTrId("sailfish_components_webview_popups-la-dont_save_description")
+        Label {
+            x: Theme.paddingLarge
+            width: parent.width - Theme.paddingLarge * 2
+            visible: privateBrowsing
+            wrapMode: Text.Wrap
+            color: Theme.highlightColor
+
+            //: Description label for user when private mode active (entered credentials are not saved)
+            //% "Credential storage is not available in private browsing mode"
+            text: qsTrId("sailfish_components_webview_popups-la-private_browsing_credentials_description")
         }
     }
 }

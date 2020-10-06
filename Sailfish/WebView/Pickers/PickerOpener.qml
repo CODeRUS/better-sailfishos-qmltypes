@@ -38,7 +38,7 @@ QtObject {
             return false
         }
 
-        var winid = data.winid
+        var winId = data.winId
         switch (topic) {
         case "embed:selectasync": {
             pageStack.animatorPush(data.multiple ? _multiSelectComponentUrl : _singleSelectComponentUrl,
@@ -53,9 +53,9 @@ QtObject {
             if (_filePickerComponent.status === Component.Ready) {
                 _filePickerComponent.createObject(pageStack, {
                                                       "pageStack": pageStack,
-                                                      "winid": winid,
+                                                      "winId": winId,
                                                       "contentItem": contentItem,
-                                                      "filter": data.filter,
+                                                      "mimeType": data.mimeType,
                                                       "mode": data.mode})
             } else if (_filePickerComponent.status === Component.Error) {
                 // Component development time issue, component creation should newer fail.

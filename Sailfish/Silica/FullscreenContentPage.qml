@@ -43,13 +43,6 @@ Page {
 
     clip: status !== PageStatus.Active || pageStack.dragInProgress
     navigationStyle: PageNavigation.Vertical
-    _opaqueBackground: true
 
-    // Parent the background to the page container item to decouple it from the page's opacity.
-    Rectangle {
-        parent: page.parent
-        z: -1000
-        anchors.fill: parent
-        color: "black"
-    }
+    backgroundColor: "black"
 }

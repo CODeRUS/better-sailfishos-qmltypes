@@ -1,13 +1,14 @@
 /****************************************************************************
 **
 ** Copyright (C) 2013-2019 Jolla Ltd.
-** Copyright (c) 2019 Open Mobile Platform LLC.
+** Copyright (c) 2019-2020 Open Mobile Platform LLC.
 **
 ****************************************************************************/
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 import Sailfish.Contacts 1.0 as SailfishContacts
+import Sailfish.AccessControl 1.0
 import MeeGo.QOfono 0.2
 import org.nemomobile.contacts 1.0
 import org.nemomobile.dbus 2.0
@@ -20,7 +21,9 @@ SilicaFlickable {
     property var contact
     property string activeDetail
     property bool readOnly
-    property bool hidePhoneActions: cellular1Status.disabled && cellular2Status.disabled
+    readonly property bool actionPermitted: AccessControl.hasGroup(AccessControl.RealUid, "sailfish-phone")
+                                         || AccessControl.hasGroup(AccessControl.RealUid, "sailfish-messages")
+    property bool hidePhoneActions: cellular1Status.disabled && cellular2Status.disabled || !actionPermitted
     property bool disablePhoneActions: !cellular1Status.registered && !cellular2Status.registered
 
     property QtObject _messagesInterface

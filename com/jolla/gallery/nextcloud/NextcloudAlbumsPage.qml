@@ -29,9 +29,12 @@ Page {
             accountId: model.accountId
             userId: model.userId
             albumId: model.albumId
-            albumName: model.albumName
+            albumName: model.albumName.length > 0
+                       ? model.albumName
+                       : "Photos" // not translated, this is the non-localized root Nextcloud photos directory
             albumThumbnailPath: model.thumbnailPath
             photoCount: model.photoCount
+            usePlaceholderColor: model.albumName.length === 0
 
             onClicked: {
                 var props = {
@@ -40,7 +43,7 @@ Page {
                     "albumId": albumId,
                     "albumName": albumName
                 }
-                pageStack.animatorPush(Qt.resolvedUrl("NextcloudPhotoGridPage.qml"), props)
+                pageStack.animatorPush(Qt.resolvedUrl("NextcloudPhotoListPage.qml"), props)
             }
         }
 

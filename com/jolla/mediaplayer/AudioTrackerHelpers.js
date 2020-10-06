@@ -68,22 +68,22 @@ var songsFromAlbumOrderBy = "" +
 // We are "overloading" tracker-urn to hold the artists id
 var albumsSimpleSelect = "" +
     "SELECT " +
-        "\"grilo#Box\" " +
+        "\"grilo#Container\" " +
         "tracker:coalesce(tracker:id(nmm:musicAlbum(?urn)), 0) AS ?id " +
         "tracker:coalesce(nie:title(nmm:musicAlbum(?urn)), \"%12\") AS ?title " +
         "IF(COUNT(DISTINCT(tracker:coalesce(nmm:performer(?urn), 0))) > 1, \"%13\", tracker:coalesce(nmm:artistName(nmm:performer(?urn)), \"%11\")) AS ?author " +
         "COUNT(DISTINCT(?urn)) AS ?childcount " +
-        "\"%3\" AS tracker-urn "
+        "\"%3\" AS ?tracker_urn "
 
 var albumsSearchSelect = "" +
     "SELECT " +
-        "\"grilo#Box\" " +
+        "\"grilo#Container\" " +
         "?id " +
         "?title " +
         "?author " +
         "?childcount " +
         "?year "+
-        "\"%3\" AS tracker-urn " +
+        "\"%3\" AS ?tracker_urn " +
     "WHERE { " +
         "{ SELECT " +
             "tracker:coalesce(tracker:id(nmm:musicAlbum(?urn)), 0) AS ?id " +
@@ -114,14 +114,14 @@ var albumsFromArtistOrderBy =
 // start to make sense :P
 var artistsSimpleSelect = "" +
     "SELECT " +
-        "\"grilo#Box\" " +
+        "\"grilo#Container\" " +
         "tracker:coalesce(tracker:id(nmm:performer(?urn)), 0) AS ?id " +
         "tracker:coalesce(nmm:artistName(nmm:performer(?urn)), \"%11\") AS ?title " +
         "SUM(nfo:duration(?urn)) AS ?childcount "
 
 var artistsSearchSelect = "" +
     "SELECT " +
-        "\"grilo#Box\" " +
+        "\"grilo#Container\" " +
         "?id " +
         "?title " +
         "SUM(nfo:duration(?urn)) AS ?childcount " +

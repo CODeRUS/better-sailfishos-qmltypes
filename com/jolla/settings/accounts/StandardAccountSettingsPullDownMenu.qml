@@ -7,6 +7,7 @@ PullDownMenu {
     property bool allowCredentialsUpdate: true
     property bool allowSync: true
     property bool allowDelete: true
+    property bool allowDeleteLimited: true
 
     signal credentialsUpdateRequested
     signal accountDeletionRequested
@@ -17,6 +18,13 @@ PullDownMenu {
         //% "Account is read-only"
         text: qsTrId("accounts-la-account_read_only")
         visible: !root.allowDelete
+    }
+
+    MenuLabel {
+        //: Displayed if the account is limited
+        //% "Changes to account are limited"
+        text: qsTrId("accounts-la-account_limited")
+        visible: !root.allowDeleteLimited
     }
 
     MenuItem {
@@ -33,7 +41,7 @@ PullDownMenu {
         //: Deletes the account
         //% "Delete account"
         text: qsTrId("accounts-me-delete_account")
-        visible: root.allowDelete
+        visible: root.allowDelete && root.allowDeleteLimited
         onClicked: {
             accountDeletionRequested()
         }

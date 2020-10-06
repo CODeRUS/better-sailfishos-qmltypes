@@ -198,10 +198,14 @@ Module {
         }
         Signal {
             name: "requestPhotoCountFailed"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "userId"; type: "string" }
             Parameter { name: "errorMessage"; type: "string" }
         }
         Signal {
             name: "requestPhotoCountFinished"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "userId"; type: "string" }
             Parameter { name: "photoCount"; type: "int" }
         }
         Signal {
@@ -268,6 +272,7 @@ Module {
             name: "photosDeleted"
             Parameter { name: "photos"; type: "QVector<SyncCache::Photo>" }
         }
+        Signal { name: "dataChanged" }
         Method {
             name: "openDatabase"
             Parameter { name: "accountType"; type: "string" }
@@ -289,7 +294,11 @@ Module {
             Parameter { name: "userId"; type: "string" }
             Parameter { name: "albumId"; type: "string" }
         }
-        Method { name: "requestPhotoCount" }
+        Method {
+            name: "requestPhotoCount"
+            Parameter { name: "accountId"; type: "int" }
+            Parameter { name: "userId"; type: "string" }
+        }
         Method {
             name: "populateUserThumbnail"
             Parameter { name: "idempToken"; type: "int" }

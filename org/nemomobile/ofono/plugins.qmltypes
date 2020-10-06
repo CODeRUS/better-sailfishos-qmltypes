@@ -52,6 +52,7 @@ Module {
         Property { name: "rssnr"; type: "int"; isReadonly: true }
         Property { name: "cqi"; type: "int"; isReadonly: true }
         Property { name: "timingAdvance"; type: "int"; isReadonly: true }
+        Property { name: "signalLevelDbm"; type: "int"; isReadonly: true }
         Signal {
             name: "propertyChanged"
             Parameter { name: "name"; type: "string" }

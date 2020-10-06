@@ -24,6 +24,7 @@ Item {
     readonly property bool down: videoMouse.pressed && videoMouse.containsMouse
 
     signal clicked
+    signal doubleClicked
 
     function displayError() {
         poster.errorLabel = errorLabelComponent.createObject(poster)
@@ -45,7 +46,16 @@ Item {
             fill: parent
             margins: Theme.paddingLarge // don't react near display edges
         }
-        onClicked: root.clicked()
+        onClicked: clickDelay.restart()
+        onDoubleClicked: {
+            clickDelay.stop()
+            root.doubleClicked()
+        }
+        Timer {
+            id: clickDelay
+            interval: 200
+            onTriggered: root.clicked()
+        }
     }
 
     // Poster

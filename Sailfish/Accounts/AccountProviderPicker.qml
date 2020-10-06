@@ -1,4 +1,13 @@
-import QtQuick 2.0
+/****************************************************************************************
+**
+** Copyright (c) 2013 - 2019 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
+**
+** License: Proprietary
+**
+****************************************************************************************/
+
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
 
@@ -49,6 +58,7 @@ Column {
         //% "Cloud storage"
         text: qsTrId("components_accounts-la-service_name_cloud_storage")
         visible: cloudProviders.count > 0
+                && (uncategorizedProviders.count > 0 || otherProviders.count > 0)
     }
 
     // List of account providers that support storage services.
@@ -83,6 +93,7 @@ Column {
         //% "Other"
         text: qsTrId("components_accounts-la-other")
         visible: otherProviders.count > 0
+                 && (uncategorizedProviders.count > 0 || cloudProviders.count > 0)
     }
 
     // List of generic account providers.

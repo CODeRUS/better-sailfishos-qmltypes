@@ -15,8 +15,6 @@ MediaContainerListDelegate {
     subtitle: qsTrId("mediaplayer-le-number-of-songs", songCount)
 
     Rectangle {
-        id: playlistRectangle
-
         width: Theme.iconSizeMedium
         height: Theme.iconSizeMedium
         anchors.verticalCenter: parent.verticalCenter

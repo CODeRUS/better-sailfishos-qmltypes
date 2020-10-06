@@ -169,33 +169,49 @@ Module {
         ]
         exportMetaObjectRevisions: [0]
         Enum {
+            name: "Status"
+            values: {
+                "UnknownStatus": 0,
+                "SigningIn": 1,
+                "RequestingUserPrincipalUrl": 2,
+                "RequestingCalendarHomeUrl": 3,
+                "RequestingCalendarListing": 4,
+                "Finalizing": 5,
+                "Finished": 6
+            }
+        }
+        Enum {
             name: "Error"
             values: {
                 "NoError": 0,
                 "InternalError": 1,
                 "InvalidUrlError": 2,
                 "SignInError": 3,
-                "NetworkRequestFailedError": 4,
-                "ContentNotFoundError": 5,
-                "ServiceUnavailableError": 6,
-                "InvalidServerResponseError": 7,
-                "CurrentUserPrincipalNotFoundError": 8,
-                "CalendarHomeNotFoundError": 9,
-                "NoDetectedCalendarError": 10
+                "YahooSignInError": 4,
+                "NetworkRequestFailedError": 5,
+                "ContentNotFoundError": 6,
+                "ServiceUnavailableError": 7,
+                "InvalidServerResponseError": 8,
+                "CurrentUserPrincipalNotFoundError": 9,
+                "CalendarHomeNotFoundError": 10,
+                "NoDetectedCalendarError": 11
             }
         }
+        Property { name: "status"; type: "Status"; isReadonly: true }
+        Property { name: "statusText"; type: "string"; isReadonly: true }
+        Property { name: "calendarHomePath"; type: "string"; isReadonly: true }
         Signal { name: "success" }
         Signal {
             name: "error"
             Parameter { name: "errorCode"; type: "int" }
             Parameter { name: "errorString"; type: "string" }
         }
-        Signal { name: "statusChanged" }
         Method {
             name: "start"
             Parameter { name: "account"; type: "Account"; isPointer: true }
             Parameter { name: "serviceName"; type: "string" }
             Parameter { name: "serverAddress"; type: "string" }
+            Parameter { name: "ignoreSslErrors"; type: "bool" }
             Parameter { name: "calendarHomePath"; type: "string" }
         }
         Method {
@@ -203,8 +219,8 @@ Module {
             Parameter { name: "account"; type: "Account"; isPointer: true }
             Parameter { name: "serviceName"; type: "string" }
             Parameter { name: "serverAddress"; type: "string" }
+            Parameter { name: "ignoreSslErrors"; type: "bool" }
         }
-        Method { name: "statusText"; type: "string" }
     }
     Component {
         name: "JollaAccountUtilities"
@@ -224,13 +240,22 @@ Module {
             name: "checkUsernameAvailability"
             Parameter { name: "username"; type: "string" }
         }
+        Method {
+            name: "joinServerPathInAddress"
+            type: "string"
+            Parameter { name: "serverAddress"; type: "string" }
+            Parameter { name: "serverPath"; type: "string" }
+        }
     }
     Component {
         name: "OnlineCalendarModel"
         prototype: "QAbstractListModel"
         exports: ["com.jolla.settings.accounts/OnlineCalendarModel 1.0"]
         exportMetaObjectRevisions: [0]
-        Property { name: "profileId"; type: "string" }
+        Property { name: "accountId"; type: "int" }
+        Property { name: "serviceName"; type: "string"; isReadonly: true }
+        Property { name: "valid"; type: "bool"; isReadonly: true }
+        Property { name: "count"; type: "int"; isReadonly: true }
         Method {
             name: "setCalendarEnabled"
             Parameter { name: "index"; type: "int" }
@@ -267,7 +292,7 @@ Module {
         isComposite: true
         isCreatable: false
         isSingleton: true
-        Method { name: "_serviceTranslations"; type: "QVariant" }
+        Property { name: "_accountUtil"; type: "JollaAccountUtilities"; isPointer: true }
         Method {
             name: "serviceDisplayNameForService"
             type: "QVariant"
@@ -288,9 +313,20 @@ Module {
         Method {
             name: "serviceDescription"
             type: "QVariant"
-            Parameter { name: "serviceType"; type: "QVariant" }
+            Parameter { name: "service"; type: "QVariant" }
             Parameter { name: "providerDisplayName"; type: "QVariant" }
             Parameter { name: "providerName"; type: "QVariant" }
+        }
+        Method {
+            name: "joinServerPathInAddress"
+            type: "QVariant"
+            Parameter { name: "serverAddress"; type: "QVariant" }
+            Parameter { name: "absolutePath"; type: "QVariant" }
+        }
+        Method {
+            name: "countCheckedSwitches"
+            type: "QVariant"
+            Parameter { name: "repeater"; type: "QVariant" }
         }
     }
 }

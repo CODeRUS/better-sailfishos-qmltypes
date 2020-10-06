@@ -27,6 +27,8 @@ Item {
     property alias availableModems: modemManager.availableModems
     property alias enabledModems: modemManager.enabledModems
     property var simNames: [ "", "" ] // placeholders due to code binding to simNames[0] etc
+    // TODO: Check whether simDescriptionSeparator is really needed, see JB#50515
+    property string simDescriptionSeparator: " | "
     property alias availableSimCount: simListModel.count // no. of SIMs that are not currently locked or otherwise unavailable
 
     // The control type of the SimManager
@@ -135,7 +137,7 @@ Item {
             var shortSimDescription = Telephony.shortSimDescription(i+1)
             var simName = shortSimDescription
             if (sim && sim.operatorDescription) {
-                simName += " | " + sim.operatorDescription
+                simName += simDescriptionSeparator + sim.operatorDescription
             }
             names.push(simName)
 

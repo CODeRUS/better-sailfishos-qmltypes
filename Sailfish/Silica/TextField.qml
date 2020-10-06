@@ -59,6 +59,7 @@ TextBase {
 
     property bool _cursorBlinkEnabled: true
     property real _minimumWidth: textField.width - Theme.paddingSmall - textField.textLeftMargin - textField.textRightMargin
+    property alias _wrapMode: textInput.wrapMode
     property bool __silica_textfield: true
 
     onHorizontalAlignmentChanged: {

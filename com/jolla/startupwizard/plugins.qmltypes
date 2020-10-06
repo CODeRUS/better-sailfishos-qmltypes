@@ -9,6 +9,18 @@ import QtQuick.tooling 1.2
 Module {
     dependencies: ["QtQuick 2.0"]
     Component {
+        name: "KeyboardSettings"
+        prototype: "QObject"
+        exports: ["com.jolla.startupwizard/KeyboardSettings 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Method {
+            name: "setVkbLayout"
+            Parameter { name: "locale"; type: "string" }
+        }
+    }
+    Component {
         name: "ScreenBlank"
         prototype: "QObject"
         exports: ["com.jolla.startupwizard/ScreenBlank 1.0"]

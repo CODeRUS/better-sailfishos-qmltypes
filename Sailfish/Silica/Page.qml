@@ -94,6 +94,8 @@ Private.SilicaMouseArea {
     readonly property bool _horizontalNavigationStyle: navigationStyle === PageNavigation.Horizontal
     property Item pageContainer
 
+    property color backgroundColor: "transparent"
+
     property int allowedOrientations: __silica_applicationwindow_instance._defaultPageOrientations
     property int orientation: orientationState.orientation
 
@@ -131,7 +133,7 @@ Private.SilicaMouseArea {
     property alias _windowOpacity: page.opacity
     property Item _backgroundParent: parent
 
-    property bool _opaqueBackground
+    property bool _opaqueBackground: backgroundColor.a === 1
     property bool _exposed: { return false }
     property bool _belowTop
     property bool _clickablePageIndicators: true

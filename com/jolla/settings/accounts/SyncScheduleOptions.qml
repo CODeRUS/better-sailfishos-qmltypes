@@ -8,13 +8,13 @@ ValueButton {
 
     property AccountSyncSchedule schedule
     property IntervalListModel intervalModel: IntervalListModel { }
-    property bool isSync
+    property bool isSync: true
     property bool isAlwaysOn
     property bool showAlwaysOn
 
-    //: Only sync when user manually requests it; do not sync automatically
-    //% "Manually"
-    property string _textManual: qsTrId("settings-accounts-la-sync_manually")
+    //: Sync schedule is turned off
+    //% "Off"
+    property string _textManual: qsTrId("settings-accounts-la-sync_schedule_off")
 
     //: Show custom options for data syncing
     //% "Custom"
@@ -69,11 +69,11 @@ ValueButton {
 
     label: isSync
              //: Click to show options on how often content should be synced with the server
-             //% "Sync content"
-           ? qsTrId("settings-accounts-la-sync_content")
+             //% "Sync schedule"
+           ? qsTrId("settings-accounts-la-sync_schedule")
              //: Click to show options on how often new content should be downloaded from the server
-             //% "Download new content"
-           : qsTrId("settings-accounts-la-download_new_content")
+             //% "Download schedule"
+           : qsTrId("settings-accounts-la-download_schedule")
 
     onClicked: {
         pageStack.animatorPush(optionsComponent)

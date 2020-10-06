@@ -62,6 +62,7 @@ Module {
         prototype: "QObject"
         exports: ["Sailfish.Telephony/AsYouTypeFormatter 1.0"]
         exportMetaObjectRevisions: [0]
+        Property { name: "rememberPosition"; type: "bool" }
         Property { name: "rawPhoneNumber"; type: "string" }
         Property { name: "regionCode"; type: "string" }
         Property { name: "formattedNumber"; type: "string"; isReadonly: true }
@@ -889,6 +890,7 @@ Module {
                 "PortableFilename": 1
             }
         }
+        Property { name: "listSeparator"; type: "string"; isReadonly: true }
         Method {
             name: "formatDate"
             type: "string"
@@ -1186,6 +1188,11 @@ Module {
         Property { name: "videos"; type: "string"; isReadonly: true }
         Property { name: "home"; type: "string"; isReadonly: true }
         Property { name: "temporary"; type: "string"; isReadonly: true }
+        Method {
+            name: "resolveImport"
+            type: "string"
+            Parameter { name: "page"; type: "string" }
+        }
     }
     Component {
         name: "DeclarativeTabViewAction"
@@ -1341,6 +1348,7 @@ Module {
         Property { name: "_allowedOrientations"; type: "DeclarativeOrientation::Orientations" }
         Property { name: "screenRotation"; type: "int"; isReadonly: true }
         Property { name: "_backgroundVisible"; type: "bool" }
+        Property { name: "_opaque"; type: "bool" }
         Property { name: "_persistentOpenGLContext"; type: "bool" }
         Property { name: "_persistentSceneGraph"; type: "bool" }
         Property { name: "_haveCoverHint"; type: "bool" }
@@ -1354,6 +1362,7 @@ Module {
         Signal { name: "_orientationLockedChanged" }
         Signal { name: "backgroundColorChanged" }
         Signal { name: "backgroundVisibleChanged" }
+        Signal { name: "opaqueChanged" }
         Signal { name: "coverIsPrimaryWindowChanged" }
         Signal { name: "coverVisibleChanged" }
         Signal { name: "proxyWindowChanged" }
@@ -1395,6 +1404,15 @@ Module {
         Property { name: "horizontalDragUnused"; type: "bool"; isReadonly: true }
         Property { name: "verticalDragUnused"; type: "bool"; isReadonly: true }
         Method { name: "reset" }
+    }
+    Component {
+        name: "DrawingArea"
+        defaultProperty: "data"
+        prototype: "LineItem"
+        exports: ["Sailfish.Silica.private/DrawingArea 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "threshold"; type: "float" }
+        Property { name: "mask"; type: "QQuickItem"; isPointer: true }
     }
     Component {
         name: "FilterType"
@@ -1468,6 +1486,42 @@ Module {
             type: "bool"
             Parameter { name: "contacts"; type: "QVariantList" }
         }
+    }
+    Component {
+        name: "LineGraph"
+        defaultProperty: "data"
+        prototype: "LineItem"
+        exports: ["Sailfish.Silica.private/LineGraph 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "values"; type: "QVariantList" }
+    }
+    Component {
+        name: "LineItem"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        Property { name: "curveDensity"; type: "float" }
+        Property { name: "lineWidth"; type: "float" }
+        Property { name: "color"; type: "QColor" }
+        Property { name: "blur"; type: "float" }
+        Signal {
+            name: "arcStarted"
+            Parameter { name: "x"; type: "float" }
+            Parameter { name: "y"; type: "float" }
+        }
+        Signal {
+            name: "arcPointAdded"
+            Parameter { name: "x"; type: "float" }
+            Parameter { name: "y"; type: "float" }
+        }
+        Signal { name: "arcFinished" }
+        Signal { name: "arcCanceled" }
+        Method { name: "clear" }
+        Method {
+            name: "addPoint"
+            type: "bool"
+            Parameter { name: "point"; type: "QVector2D" }
+        }
+        Method { name: "closeLine" }
     }
     Component {
         name: "MInverseMouseArea"
@@ -1921,12 +1975,11 @@ Module {
     }
     Component {
         name: "QOfonoCellBroadcast"
-        prototype: "QOfonoObject"
+        prototype: "QOfonoModemInterface"
         exports: ["MeeGo.QOfono/OfonoCellBroadcast 0.2"]
         exportMetaObjectRevisions: [0]
-        Property { name: "modemPath"; type: "string" }
         Property { name: "enabled"; type: "bool" }
-        Property { name: "topics"; type: "string"; isReadonly: true }
+        Property { name: "topics"; type: "string" }
         Signal {
             name: "enabledChanged"
             Parameter { type: "bool" }
@@ -1937,17 +1990,13 @@ Module {
         }
         Signal {
             name: "incomingBroadcast"
-            Parameter { type: "string" }
-            Parameter { type: "ushort" }
+            Parameter { name: "text"; type: "string" }
+            Parameter { name: "topic"; type: "ushort" }
         }
         Signal {
             name: "emergencyBroadcast"
-            Parameter { type: "string" }
-            Parameter { type: "QVariantMap" }
-        }
-        Signal {
-            name: "modemPathChanged"
-            Parameter { name: "path"; type: "string" }
+            Parameter { name: "text"; type: "string" }
+            Parameter { name: "properties"; type: "QVariantMap" }
         }
     }
     Component {
@@ -2140,6 +2189,7 @@ Module {
         Property { name: "rssnr"; type: "int"; isReadonly: true }
         Property { name: "cqi"; type: "int"; isReadonly: true }
         Property { name: "timingAdvance"; type: "int"; isReadonly: true }
+        Property { name: "signalLevelDbm"; type: "int"; isReadonly: true }
         Signal {
             name: "propertyChanged"
             Parameter { name: "name"; type: "string" }
@@ -3747,12 +3797,58 @@ Module {
         Method { name: "requestUpdate"; revision: 3 }
     }
     Component {
+        name: "QuickScrollDirection"
+        prototype: "QObject"
+        exports: ["Sailfish.Silica.private/QuickScrollDirection 1.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Direction"
+            values: {
+                "Up": 1,
+                "Down": 2,
+                "UpAndDown": 3
+            }
+        }
+        Enum {
+            name: "Directions"
+            values: {
+                "Up": 1,
+                "Down": 2,
+                "UpAndDown": 3
+            }
+        }
+    }
+    Component {
         name: "RemorseCache"
         prototype: "QObject"
         exports: ["Sailfish.Silica.private/RemorseCache 1.0"]
         isCreatable: false
         exportMetaObjectRevisions: [0]
         Property { name: "item"; type: "QQuickItem"; isPointer: true }
+    }
+    Component {
+        name: "Sailfish::AccessControl"
+        prototype: "QObject"
+        exports: ["Sailfish.AccessControl/AccessControl 1.0"]
+        isCreatable: false
+        isSingleton: true
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Uid"
+            values: {
+                "RealUid": -1,
+                "EffectiveUid": -2,
+                "UndefinedUid": -2147483647
+            }
+        }
+        Method {
+            name: "hasGroup"
+            type: "bool"
+            Parameter { name: "uid"; type: "int" }
+            Parameter { name: "groupName"; type: "string" }
+        }
+        Method { name: "systemUserUid"; type: "int" }
     }
     Component {
         name: "SeasideDisplayLabelGroupModel"
@@ -4652,6 +4748,48 @@ Module {
         Property { name: "count"; type: "int"; isReadonly: true }
     }
     Component {
+        name: "SwipeGestureArea"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        exports: ["Sailfish.Silica.private/SwipeGestureArea 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Direction"
+            values: {
+                "DirectionNone": 0,
+                "DirectionLeft": 1,
+                "DirectionRight": 2,
+                "DirectionUp": 4,
+                "DirectionDown": 8,
+                "DirectionHorizontal": 3,
+                "DirectionVertical": 12,
+                "DirectionAll": 15
+            }
+        }
+        Enum {
+            name: "Directions"
+            values: {
+                "DirectionNone": 0,
+                "DirectionLeft": 1,
+                "DirectionRight": 2,
+                "DirectionUp": 4,
+                "DirectionDown": 8,
+                "DirectionHorizontal": 3,
+                "DirectionVertical": 12,
+                "DirectionAll": 15
+            }
+        }
+        Property { name: "swipeEnabled"; type: "bool" }
+        Property { name: "thresholdX"; type: "int" }
+        Property { name: "thresholdY"; type: "int" }
+        Property { name: "swipeAmount"; type: "int"; isReadonly: true }
+        Property { name: "gestureInProgress"; type: "bool"; isReadonly: true }
+        Property { name: "direction"; type: "Direction"; isReadonly: true }
+        Property { name: "allowedDirections"; type: "SwipeGestureArea::Directions" }
+        Property { name: "forceDirections"; type: "SwipeGestureArea::Directions" }
+        Method { name: "endGesture" }
+    }
+    Component {
         name: "Telephony"
         prototype: "QObject"
         exports: ["Sailfish.Telephony/Telephony 1.0"]
@@ -4775,6 +4913,7 @@ Module {
         Property { name: "multipleEnabledSimCards"; type: "bool"; isReadonly: true }
         Property { name: "hasModemOrIMaccounts"; type: "bool"; isReadonly: true }
         Property { name: "hasModem"; type: "bool"; isReadonly: true }
+        Property { name: "messagingPermitted"; type: "bool"; isReadonly: true }
         Property { name: "voiceModemPath"; type: "string"; isReadonly: true }
         Property { name: "_ofonoModemManager"; type: "QVariant" }
         Property { name: "_ofonoManager"; type: "QVariant" }
@@ -4875,6 +5014,7 @@ Module {
         Property { name: "activeModem"; type: "string"; isReadonly: true }
         Property { name: "availableModemCount"; type: "int"; isReadonly: true }
         Property { name: "simNames"; type: "QVariant" }
+        Property { name: "simDescriptionSeparator"; type: "string" }
         Property { name: "controlType"; type: "int" }
         Property { name: "activeVoiceCallModems"; type: "QVariant" }
         Property { name: "valid"; type: "bool"; isReadonly: true }

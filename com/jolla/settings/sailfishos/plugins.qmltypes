@@ -54,6 +54,7 @@ Module {
         Property { name: "sufficientSpaceForInstall"; type: "bool"; isReadonly: true }
         Property { name: "sufficientBatteryForInstall"; type: "bool"; isReadonly: true }
         Property { name: "batteryChargerConnected"; type: "bool"; isReadonly: true }
+        Property { name: "offendingPackagesList"; type: "QStringList"; isReadonly: true }
         Signal { name: "updateInfoChanged" }
         Signal { name: "updateCheckCacheCleared" }
         Signal { name: "updateInstallationStarted" }

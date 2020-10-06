@@ -25,7 +25,7 @@ Dialog {
     property Person subject
     property var focusField
 
-    property variant _originalContactData
+    property var _originalContactData
     property Person _contact: subject && subject.complete ? subject : null
     property var _peopleModel: peopleModel || SailfishContacts.ContactModelCache.unfilteredModel()
     property var _editors: [name, company, phone, email, note, address, date, website, info]
@@ -36,7 +36,16 @@ Dialog {
         return nextItem === name.detailEditors.itemAt(0) ? null : nextItem
     }
 
-    canAccept: _contact !== null && name.hasContent
+    function hasDetailedContent() {
+        for (var i = 0; i < _editors.length; i++) {
+            if (_editors[i].hasContent) {
+                return true
+            }
+        }
+        return false
+    }
+
+    canAccept: hasDetailedContent()
 
     onAcceptBlocked: {
         // Name has not been entered. Focus the field to indicate it is required.

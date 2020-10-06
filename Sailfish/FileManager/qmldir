@@ -4,6 +4,8 @@ ArchivePage 1.0 ArchivePage.qml
 DirectoryPage 1.0 DirectoryPage.qml
 SortingPage 1.0 SortingPage.qml
 FileInfoItem 1.0 FileInfoItem.qml
+FileItem 1.0 FileItem.qml
+internal InternalFileItem InternalFileItem.qml
 singleton FileManager 1.0 FileManager.qml
 singleton FileOperationMonitor 1.0 FileOperationMonitor.qml
 typeinfo plugins.qmltypes

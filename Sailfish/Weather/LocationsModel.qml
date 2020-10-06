@@ -1,27 +1,45 @@
 import QtQuick 2.0
-import QtQuick.XmlListModel 2.0
+import Sailfish.Weather 1.0
 
-XmlListModel {
+ListModel {
+    id: root
+
     property string filter
+    property alias status: model.status
 
-    query: "/xml/searchresults/loc"
-    source: filter.length > 0 ? "http://feed-jll.foreca.com/jolla-jan14fi/search.php?q=" + filter.toLowerCase() + "&lang=" + Qt.locale().name.split("_")[0] : ""
+    onFilterChanged: if (filter.length === 0) clear()
 
-    // For example <loc id="102643743" name="London" adm1="England" country="United Kingdom" tz="Europe/London" lon="-0.125532746" lat="51.508415222">
-    XmlRole {
-        name: "locationId"
-        query: "@id/string()"
+    function reload() {
+        model.reload()
     }
-    XmlRole {
-        name: "city"
-        query: "@name/string()"
-    }
-    XmlRole {
-        name: "state"
-        query: "@adm1/string()"
-    }
-    XmlRole {
-        name: "country"
-        query: "@country/string()"
+
+    readonly property WeatherRequest model: WeatherRequest {
+        id: model
+
+        source: filter.length > 0 ? "https://pfa.foreca.com/api/v1/location/search/" + filter.toLowerCase() : ""
+        onRequestFinished: {
+            var locations = result["locations"]
+            if (result.length === 0 || locations === undefined) {
+                status = Weather.Error
+            } else {
+                while (root.count > locations.length) {
+                    root.remove(locations.length)
+                }
+                for (var i = 0; i < locations.length; i++) {
+                    if (i < root.count) {
+                        root.set(i, locations[i])
+                    } else {
+                        root.append(locations[i])
+                    }
+                }
+            }
+        }
+
+        onStatusChanged: {
+            if (status === Weather.Error) {
+                root.clear()
+                console.log("LocationsModel - location search failed with query string", filter)
+            }
+        }
     }
 }

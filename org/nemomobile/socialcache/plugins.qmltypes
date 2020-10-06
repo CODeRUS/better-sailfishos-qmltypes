@@ -183,17 +183,20 @@ Module {
             name: "OneDriveGalleryRole"
             values: {
                 "OneDriveId": 0,
-                "Thumbnail": 1,
-                "Image": 2,
-                "Title": 3,
-                "DateTaken": 4,
-                "Width": 5,
-                "Height": 6,
-                "Count": 7,
-                "MimeType": 8,
-                "AccountId": 9,
-                "UserId": 10,
-                "Description": 11
+                "AlbumId": 1,
+                "UserId": 2,
+                "AccountId": 3,
+                "Thumbnail": 4,
+                "ThumbnailUrl": 5,
+                "Image": 6,
+                "ImageUrl": 7,
+                "Title": 8,
+                "DateTaken": 9,
+                "Width": 10,
+                "Height": 11,
+                "Count": 12,
+                "MimeType": 13,
+                "Description": 14
             }
         }
         Enum {
@@ -227,7 +230,7 @@ Module {
             Parameter { name: "accountId"; type: "int" }
         }
         Method {
-            name: "accessTokenRetrived"
+            name: "accessTokenRetrieved"
             Parameter { name: "accessToken"; type: "string" }
             Parameter { name: "accountId"; type: "int" }
         }

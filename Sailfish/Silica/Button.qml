@@ -45,6 +45,7 @@ SilicaMouseArea {
     property color color: palette.primaryColor
     property color highlightColor: palette.highlightColor
     property color highlightBackgroundColor: palette.highlightBackgroundColor
+    property color backgroundColor: Theme.rgba(color, Theme.opacityFaint)
     property real preferredWidth: _implicitPreferredWidth
     property real _implicitPreferredWidth: Theme.buttonWidthSmall
     property bool __silica_button
@@ -75,7 +76,7 @@ SilicaMouseArea {
         }
         radius: Theme.paddingSmall
         color: _showPress ? Theme.rgba(button.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
-                          : Theme.rgba(button.color, Theme.opacityFaint)
+                          : button.backgroundColor
 
         opacity: button.enabled ? 1.0 : Theme.opacityLow
 

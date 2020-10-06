@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018 – 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
 import QtQuick 2.5
 import Sailfish.Silica 1.0
 import Sailfish.FileManager 1.0
@@ -34,7 +40,7 @@ Page {
         }
 
         anchors.fill: parent
-        delegate: FileItem {
+        delegate: ListItem {
 
             function cleanUp() {
                 //% "Deleted extracted directory"
@@ -47,6 +53,8 @@ Page {
                 })
             }
 
+            width: ListView.view.width
+            contentHeight: fileItem.height
             menu: contextMenu
             onClicked: {
                 if (model.extracted) {
@@ -74,7 +82,11 @@ Page {
                 }
             }
 
-            compressed: !model.extracted
+            InternalFileItem {
+                id: fileItem
+
+                compressed: !model.extracted
+            }
 
             Component {
                 id: contextMenu

@@ -70,17 +70,15 @@ PickerDialog {
             selectedModel: _selectedModel
         }
 
-        delegate: FileItem {
+        delegate: FileBackgroundItem {
             id: documentItem
 
-            leftMargin: listView.headerItem.searchFieldLeftMargin
             baseName: Theme.highlightText(documentModel.baseName(model.fileName), documentModel.filter, Theme.highlightColor)
             extension: Theme.highlightText(documentModel.extension(model.fileName), documentModel.filter, Theme.highlightColor)
             size: model.fileSize
             // Should be lastModified but QDocumentGallery (or tracker) doesn't return sane values
             // Worth adding QFileInfo Qml wrapper to nemo-qml-plugin-filemanager
             modified: model.lastAccessed
-            iconSource: model.mimeType ? Theme.iconForMimeType(model.mimeType) : ""
             selected: model.selected
             textFormat: Text.StyledText
 

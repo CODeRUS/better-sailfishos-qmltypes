@@ -4,7 +4,6 @@ import Sailfish.TransferEngine 1.0
 import org.nemomobile.thumbnailer 1.0
 import org.nemomobile.notifications 1.0
 import org.nemomobile.transferengine 1.0
-import org.nemomobile.contentaction 1.0
 
 Page {
     id: transfersPage
@@ -79,34 +78,11 @@ Page {
     }
 
     function mimeTypeIcon(mimeType, highlight) {
-        if (mimeType.length === 0)
-            return ""
-        var type = mimeType.split("/");
-        var imgSource = ""
-
-        // Handle basic media types
-        if (type[0] === "image") {
-            return ""   // no mime type icon for images
-        } else if (type[0] === "video") {
-            imgSource = "image://theme/icon-m-video"
-        } else if (type[0] === "audio") {
-            imgSource = "image://theme/icon-m-music"
-        } else if (type[1].indexOf("excel")
-                   || type[1].indexOf("pdf")
-                   || type[1].indexOf("word")
-                   || type[1].indexOf("powerpoint")) {
-            // TODO: CHECK the rest of document types
-            imgSource = "image://theme/icon-m-document"
-        } else if (type[1].indexOf("vcard")) {
-            // handle contacts
-            imgSource = "image://theme/icon-m-people"
+        if (mimeType.length > 0 && mimeType.split("/")[0] === "image") {
+            return "" // no icon for images as the preview is already shown
         } else {
-            imgSource = "image://theme/icon-m-other"
+            return Theme.iconForMimeType(mimeType) + (highlight ? "?" + Theme.highlightColor : "")
         }
-        if (highlight) {
-            imgSource += "?" + Theme.highlightColor
-        }
-        return imgSource
     }
 
     // Delegate for a transfer entry in a list
@@ -174,11 +150,12 @@ Page {
                 id: thumbnail
                 width: Theme.itemSizeLarge
                 height: Theme.itemSizeLarge
+                readonly property bool isNeeded: thumbnailItem == null || thumbnailItem.status === Thumbnail.Null || thumbnailItem.status === Thumbnail.Error
 
                 // Placeholder for entries without thumbnails
                 Rectangle {
                     anchors.fill: parent
-                    visible: thumbnailItem == null || thumbnailItem.status === Thumbnail.Null || thumbnailItem.status === Thumbnail.Error
+                    visible: thumbnail.isNeeded
                     gradient: Gradient {
                         GradientStop { position: 0.0; color: Theme.rgba(Theme.primaryColor, 0.1) }
                         GradientStop { position: 1.0; color: "transparent" }
@@ -188,7 +165,7 @@ Page {
                 Image {
                     id: mimeTypeImage
                     anchors.centerIn: parent
-                    source: mimeTypeIcon(mimeType, transferEntry.highlighted)
+                    source: thumbnail.isNeeded ? mimeTypeIcon(mimeType, transferEntry.highlighted) : ""
                     asynchronous: true
                     z: 1    // place above the image thumbnail
                 }
@@ -278,48 +255,17 @@ Page {
             onClicked: {
                 // Properly finished transfers with local filename should open that file
                 if (status === TransferModel.TransferFinished) {
-                    var path = url;
+                    var path = url
                     if (path.length > 0 && path[0] == '/') {
-                        path = 'file://' + path;
+                        path = 'file://' + path
                     }
 
                     // Only open the URL externally if it's not a http(s) URL
                     if (path.substr(0, 7) != 'http://' && path.substr(0, 8) != 'https://') {
-                        var ok = ContentAction.trigger(path)
-                        if (!ok) {
-                            switch (ContentAction.error) {
-                            case ContentAction.FileTypeNotSupported:
-                                if (mimeType != "") {
-                                    //: Notification text shown when user tries to open a file of a particular type that is not supported. %1 = the file type
-                                    //% "Cannot open file, '%1' file type not supported"
-                                    errorNotification.show(qsTrId("transferui-la-file_type_specific_not_supported").arg(mimeType))
-                                } else {
-                                    //: Notification text shown when user tries to open a file of a type that is not supported
-                                    //% "Cannot open file, file type not supported"
-                                    errorNotification.show(qsTrId("transferui-la-file_type_not_supported"))
-                                }
-                                break
-                            case ContentAction.FileDoesNotExist:
-                                //: Notification text shown when user tries to open a file but the file is not found locally.
-                                //% "Cannot open file, file was not found"
-                                errorNotification.show(qsTrId("transferui-la-file_not_found"))
-                                break
-                            case ContentAction.UrlSchemeNotSupported:
-                                //: Notification text shown when user tries to open a URL but the URL type is not supported. %1 = the URL
-                                //% "Cannot open URL, unsupported URL scheme for %1"
-                                errorNotification.show(qsTrId("transferui-la-url_scheme_not_supported").arg(url))
-                                break
-                            case ContentAction.InvalidUrl:
-                                //: Notification text shown when user tries to open a URL but the URL is invalid
-                                //% "Cannot open URL, URL is invalid"
-                                errorNotification.show(qsTrId("transferui-la-url_invalid"))
-                                break
-                            default:
-                                console.log("Unknown content action error!")
-                            }
-                        }
+                        Qt.openUrlExternally(path)
                     }
-                    return;
+
+                    return
                 }
 
                 openTransferContextMenu()

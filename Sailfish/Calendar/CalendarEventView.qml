@@ -47,7 +47,7 @@ Column {
             color: Theme.highlightColor
             font.pixelSize: Theme.fontSizeLarge
             maximumLineCount: 5
-            wrapMode: Text.WordWrap
+            wrapMode: Text.Wrap
             text: root.event ? root.event.displayLabel : ""
             truncationMode: TruncationMode.Fade
         }
@@ -130,7 +130,7 @@ Column {
             width: parent.width - reminderIcon.width
             anchors.left: parent.left
             color: Theme.highlightColor
-            wrapMode: Text.WordWrap
+            wrapMode: Text.Wrap
             //: %1 gets replaced with reminder time, e.g. "15 minutes before"
             //% "Reminder %1"
             text: root.event ? qsTrId("sailfish_calendar-view-reminder")
@@ -172,7 +172,7 @@ Column {
                 anchors.verticalCenter: lineCount > 1 ? undefined : locationIcon.verticalCenter
                 color: Theme.highlightColor
                 font.pixelSize: Theme.fontSizeSmall
-                wrapMode: Text.WordWrap
+                wrapMode: Text.Wrap
                 text: root.event ? root.event.location : ""
             }
         }
@@ -327,7 +327,7 @@ Column {
             x: Theme.horizontalPageMargin
             color: Theme.secondaryColor
             font.pixelSize: Theme.fontSizeSmall
-            wrapMode: Text.WordWrap
+            wrapMode: Text.Wrap
             plainText: root.event ? root.event.description : ""
         }
     }

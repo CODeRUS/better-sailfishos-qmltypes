@@ -97,6 +97,7 @@ Column {
         id: privateKeyPassphraseField
 
         visible: root.visible && network.privateKeyFile !== ''
+        text: network && network.privateKeyPassphrase
         onTextChanged: {
             if (immediateUpdate) network.privateKeyPassphrase = text
         }

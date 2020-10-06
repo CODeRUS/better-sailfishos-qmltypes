@@ -11,6 +11,7 @@ Page {
     property string albumName
     property string albumIdentifier
     property string userIdentifier
+    property url placeholderThumbnail: "image://theme/icon-m-image"
     property alias model: grid.model
     property SyncHelper syncHelper
 
@@ -50,6 +51,11 @@ Page {
             source: thumbnail
             size: grid.cellSize
             onReleased: gridPage.imageClicked()
+            Image {
+                anchors.fill: parent
+                visible: thumbnail.length === 0
+                source: placeholderThumbnail
+            }
         }
     }
 }
