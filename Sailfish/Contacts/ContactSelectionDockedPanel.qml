@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 - 2019 Jolla Pty Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+*/
+
 import QtQuick 2.5
 import Sailfish.Silica 1.0
 
@@ -21,6 +28,7 @@ DockedPanel {
         height: parent.height
         width: parent.width/2
         icon.source: "image://theme/icon-m-delete"
+
         onClicked: {
             root.deleteClicked()
         }

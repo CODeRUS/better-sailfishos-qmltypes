@@ -1,6 +1,12 @@
+/*
+ * Copyright (c) 2013 - 2020 Jolla Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+*/
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Silica.private 1.0 as SilicaPrivate
 import Sailfish.Ambience 1.0
 
 Page {
@@ -21,19 +27,19 @@ Page {
     }
     allowedOrientations: Orientation.All
 
-    SilicaPrivate.Wallpaper {
+    Wallpaper {
         id: wallpaper
         width: parent.width
         height: Math.max(0, -view.contentY +  view.backgroundHeight)
-        windowRotation: -root.rotation
-        source: ambience.applicationWallpaperUrl
+        sourceItem: view.applicationWallpaper
         palette.colorScheme: ambience.colorScheme
-
-        color: palette._wallpaperOverlayColor
     }
 
     AmbienceSettingsView {
         id: view
+
+        width: root.width
+        height: root.height
 
         PullDownMenu {
             visible: Ambience.source != ambience.url

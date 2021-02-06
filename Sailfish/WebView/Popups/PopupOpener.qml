@@ -1,6 +1,7 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 Jolla Ltd.
+** Copyright (c) 2016 - 2017 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
 ** Contact: Raine Makelainen <raine.makelainen@jolla.com>
 **
 ****************************************************************************/
@@ -10,8 +11,8 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import QtQuick 2.2
+import Sailfish.Silica 1.0
 import Sailfish.WebView.Popups 1.0 as Popups
-import "GeolocationHosts.js" as Geolocation
 
 Timer {
     id: root
@@ -33,6 +34,13 @@ Timer {
     property bool downloadsEnabled: true
 
     property Component _contextMenuComponent
+
+    property Notice positioningDisabledNotice: Notice {
+        duration: 3000
+        //% "Positioning is disabled"
+        text: qsTrId("sailfish_components_webview_popupopener-la-positioning_disabled")
+        anchor: Notice.Center
+    }
 
     signal aboutToOpenContextMenu(var data)
 
@@ -60,6 +68,11 @@ Timer {
         if (!pageStack) {
             console.log("PopupOpener has no pageStack. Add missing binding.")
             return false
+        }
+
+        if (data.text && data.text.length > 1000) {
+            console.log("Message is too big to show and will be truncated.")
+            data.text  = data.text.substring(0, 1000) + " ..."
         }
 
         var winId = data.winId
@@ -145,36 +158,21 @@ Timer {
             break
         }
         case "embed:permissions": {
-            if (data.title === "geolocation"
-                    && Popups.LocationSettings.locationEnabled) {
-                switch (Geolocation.response(data.host)) {
-                    case "accepted": {
+            if (data.title === "geolocation") {
+                var obj = pageStack.animatorPush(Qt.resolvedUrl("LocationDialog.qml"), {"host": data.host })
+                obj.pageCompleted.connect(function(dialog) {
+                    dialog.accepted.connect(function() {
                         contentItem.sendAsyncMessage("embedui:permissions",
-                                                 { "allow": true, "checkedDontAsk": false, "id": data.id })
-                        break
-                    }
-                    case "rejected": {
+                                                     { "allow": true, "checkedDontAsk": dialog.rememberValue, "id": data.id })
+                        if (!Popups.LocationSettings.locationEnabled) {
+                            positioningDisabledNotice.show()
+                        }
+                    })
+                    dialog.rejected.connect(function() {
                         contentItem.sendAsyncMessage("embedui:permissions",
-                                                 { "allow": false, "checkedDontAsk": false, "id": data.id })
-                        break
-                    }
-                    default: {
-                        var obj = pageStack.animatorPush(Qt.resolvedUrl("LocationDialog.qml"), {"host": data.host })
-                        obj.pageCompleted.connect(function(dialog) {
-                            dialog.accepted.connect(function() {
-                                contentItem.sendAsyncMessage("embedui:permissions",
-                                                             { "allow": true, "checkedDontAsk": false, "id": data.id })
-                                Geolocation.addResponse(data.host, "accepted")
-                            })
-                            dialog.rejected.connect(function() {
-                                contentItem.sendAsyncMessage("embedui:permissions",
-                                                             { "allow": false, "checkedDontAsk": false, "id": data.id })
-                                Geolocation.addResponse(data.host, "rejected")
-                            })
-                        })
-                        break
-                    }
-                }
+                                                     { "allow": false, "checkedDontAsk": dialog.rememberValue, "id": data.id })
+                    })
+                })
             } else {
                 // Currently we don't support other permission requests.
                 sendAsyncMessage("embedui:permissions",
@@ -296,7 +294,9 @@ Timer {
         // Warmup location settings.
         Popups.LocationSettings.locationEnabled
         if (contentItem) {
-            contentItem.addMessageListeners(listeners)
+            for (var i = 0; i < listeners.length; ++i) {
+                contentItem.addMessageListener(listeners[i])
+            }
         } else {
             console.log("PopupOpener has no contentItem. Each created WebView/WebPage",
                         "instance can have own PopupOpener. Add missing binding.")

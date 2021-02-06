@@ -74,7 +74,9 @@ QtObject {
 
     Component.onCompleted: {
         if (contentItem) {
-            contentItem.addMessageListeners(listeners)
+            for (var i = 0; i < listeners.length; ++i) {
+                contentItem.addMessageListener(listeners[i])
+            }
         } else {
             console.log("PickerOpener has no contentItem. Each created WebView/WebPage",
                         "instance can have own PickerOpener. Add missing binding.")

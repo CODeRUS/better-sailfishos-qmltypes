@@ -58,7 +58,7 @@ ZoomableFlickable {
 
         onStatusChanged: {
             if (status == Image.Error) {
-                errorLabel = errorLabelComponent.createObject(photo)
+                errorLabel = errorLabelComponent.createObject(flickable)
             }
         }
 

@@ -12,8 +12,8 @@ Column {
     property bool immediateUpdate
     property alias labelColor: keyComboBox.labelColor
     property alias valueColor: keyComboBox.valueColor
-    readonly property bool isPkcs12: network && network.privateKeyFile && network.privateKeyFile.match(/\.p(?:fx|12)$/)
-    readonly property bool canAccept: !network || network.eapMethod !== NetworkService.EapTLS || isPkcs12 || !network.privateKeyFile === !network.clientCertFile
+    readonly property bool isPkcs12: network && network.privateKeyFile && network.privateKeyFile.match(/\.p(?:fx|12)$/)
+    readonly property bool canAccept: !network || network.eapMethod !== NetworkService.EapTLS || isPkcs12 || !network.privateKeyFile === !network.clientCertFile
     readonly property Item passphraseField: privateKeyPassphraseField
 
     readonly property bool required: network && network.eapMethod === NetworkService.EapTLS
@@ -104,6 +104,5 @@ Column {
         onActiveFocusChanged: if (!immediateUpdate && !activeFocus) network.privateKeyPassphrase = text
         //% "Client key passphrase"
         label: qsTrId("settings_network-la-client_key_passphrase")
-        placeholderText: label
     }
 }

@@ -1,23 +1,16 @@
 /****************************************************************************
  **
- ** Copyright (C) 2013-2014 Jolla Ltd.
- ** Contact: Bea Lam <bea.lam@jollamobile.com>
+ ** Copyright (C) 2013-2015 Jolla Ltd.
+ ** Copyright (C) 2020 Open Mobile Platform LLC.
  **
  ****************************************************************************/
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import org.nemomobile.lipstick 0.1
+import Sailfish.Silica.Background 1.0
 
-BackgroundItem {
+NotificationBaseItem {
     id: root
-
-    property bool userRemovable
-    property real deleteIconCenterY
-
-    property alias contentWidth: content.width
-    property alias contentHeight: content.height
-    property real contentLeftMargin: Theme.horizontalPageMargin
 
     property bool animateAddition: defaultAnimateAddition
     property bool animateRemoval: defaultAnimateRemoval
@@ -28,41 +21,19 @@ BackgroundItem {
     property bool defaultAnimateAddition: ListView.view.count > 0
     property bool defaultAnimateRemoval: ListView.view.count > 0
 
-    property int animationDuration: 250
     property int pauseBeforeRemoval
 
-    signal removeRequested
-    signal triggered
-
-
-    default property alias _content: content.data
-    property Item _deleteIcon
-    property real _deleteIconMargin: Theme.paddingLarge
     property real _animatedHeight: 1
-    property real _animatedOpacity: 1
     property QtObject _addAnimation
     property QtObject _removeAnimation
+    property bool lastItem
 
     width: parent.width
     height: contentHeight * _animatedHeight
-    highlighted: down && !Lipstick.compositor.eventsLayer.housekeeping
+    contentHeight: Theme.itemSizeSmall
 
-    // Fade out item in housekeeping mode, if not removable
-    property real _baseOpacity: Lipstick.compositor.eventsLayer.housekeeping && !userRemovable ? Theme.opacityLow : 1.0
-    opacity: _baseOpacity * _animatedOpacity
-
-    Behavior on _baseOpacity {
-        FadeAnimation {
-            property: "_baseOpacity"
-            duration: 200
-        }
-    }
-
-    onUserRemovableChanged: {
-        if (userRemovable && !_deleteIcon) {
-            _deleteIcon = deleteIconComponent.createObject(root)
-        }
-    }
+    roundedCorners: lastItem ? Corners.BottomLeft | Corners.BottomRight
+                             : Corners.None
 
     ListView.onAdd: {
         if (!animateAddition) {
@@ -73,6 +44,7 @@ BackgroundItem {
         }
         _addAnimation.start()
     }
+
     ListView.onRemove: {
         if (!animateRemoval) {
             ListView.delayRemove = false
@@ -85,65 +57,6 @@ BackgroundItem {
     }
     ListView.delayRemove: true
 
-    onPressed: {
-        if (Lipstick.compositor.eventsLayer.housekeeping) {
-            mouse.accepted = false
-        }
-    }
-
-    onPressAndHold: {
-        Lipstick.compositor.eventsLayer.toggleHousekeeping()
-    }
-
-    onClicked: {
-        if (Lipstick.compositor.eventsLayer.housekeeping) {
-            Lipstick.compositor.eventsLayer.setHousekeeping(false)
-            return
-        }
-        root.triggered()
-    }
-
-    Component {
-        id: deleteIconComponent
-
-        IconButton {
-            x: content.x - width - _deleteIconMargin
-            y: root.deleteIconCenterY - height/2
-            enabled: Lipstick.compositor.eventsLayer.housekeeping && root.userRemovable
-            opacity: enabled ? 1.0 : 0
-            icon.source: "image://theme/icon-m-clear"
-            width: icon.width
-            height: width
-
-            Behavior on opacity {
-                FadeAnimation {
-                    duration: root.animationDuration
-                }
-            }
-
-            onClicked: {
-                root.removeRequested()
-            }
-        }
-    }
-
-    Item {
-        id: content
-        width: parent.width
-        height: Theme.itemSizeSmall
-
-        x:  Lipstick.compositor.eventsLayer.housekeeping && root.userRemovable
-            ? (_deleteIconMargin + Theme.iconSizeMedium + _deleteIconMargin)
-            : root.contentLeftMargin
-
-        Behavior on x {
-            NumberAnimation {
-                duration: root.animationDuration
-                easing.type: Easing.InOutQuad
-            }
-        }
-    }
-
     Component {
         id: addAnimationComponent
 
@@ -152,7 +65,6 @@ BackgroundItem {
             heightProperty: "_animatedHeight"
             opacityProperty: "_animatedOpacity"
             toHeight: 1
-            animationDuration: root.animationDuration
         }
     }
 
@@ -167,7 +79,7 @@ BackgroundItem {
                 target: root
                 heightProperty: "_animatedHeight"
                 opacityProperty: "_animatedOpacity"
-                animationDuration: root.animationDuration
+                animationDuration: 200
             }
             PropertyAction {
                 target: root

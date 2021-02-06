@@ -133,9 +133,15 @@ Container {
     }
 
     function playUrl(url) {
-        playModel.clear()
-        playModel.appendUrl(url)
-        playIndex(0)
+        if (!File.isLocalFile(url) || File.exists(url)) {
+            playModel.clear()
+            playModel.appendUrl(url)
+            playIndex(0)
+        } else {
+            //% "Unable to open: %1"
+            errorNotification.previewBody = qsTrId("mediaplayer-la-unable_to_open").arg(File.fileName(url))
+            errorNotification.publish()
+        }
     }
 
     function playPause() {

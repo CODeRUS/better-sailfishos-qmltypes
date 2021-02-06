@@ -78,9 +78,10 @@ TextBase {
 
         onHorizontalAlignmentChanged: textArea.setImplicitHorizontalAlignment(horizontalAlignment)
 
-        x: -parent.contentX
-        y: -parent.contentY
-        width: textArea.width - Theme.paddingSmall - textArea.textLeftMargin - textArea.textRightMargin
+        x: -parent.contentX + textArea.textLeftPadding
+        y: -parent.contentY + textArea.textTopPadding
+        width: textArea.width - Theme.paddingSmall - textArea._totalLeftMargins
+               - textArea._totalRightMargins - textArea._rightItemWidth
         focus: true
         activeFocusOnPress: false
         color: textArea.color

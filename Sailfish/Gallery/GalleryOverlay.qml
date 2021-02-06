@@ -56,6 +56,33 @@ Item {
         seek(-10000, true /*relative*/)
     }
 
+    function triggerAction(action, immediately) {
+        if (action === "edit") {
+            if (!editPageLoader.active && pageStack.currentPage !== editPageLoader.item) {
+                editPageLoader.active = true
+                pageStack.animatorPush(editPageLoader.item,
+                                       {},
+                                       immediately ? PageStackAction.Immediate : PageStackAction.Animated)
+            }
+        } else if (action === "share") {
+            if (player && player.playing) {
+                player.pause()
+            }
+
+            pageStack.animatorPush("Sailfish.TransferEngine.SharePage",
+                                   {
+                                       "source": overlay.source,
+                                       "mimeType": localFile ? fileInfo.mimeType
+                                                             : "text/x-url",
+                                                               "content": localFile ? undefined
+                                                                                    : { "type": "text/x-url", "status": overlay.source },
+                                       "serviceFilter": ["sharing", "e-mail"],
+                                       "additionalShareComponent": additionalShareComponent
+                                   },
+                                   immediately ? PageStackAction.Immediate : PageStackAction.Animated)
+        }
+    }
+
     Connections {
         id: delayedRelativeSeek
 
@@ -154,7 +181,6 @@ Item {
         }
     }
 
-
     Column {
         id: toolbarParent
         width: parent.width
@@ -220,6 +246,8 @@ Item {
 
             IconButton {
                 id: downIcon
+
+                visible: !overlay.error || (localFile && fileInfo.exists)
                 onClicked: toolbar.expanded = !toolbar.expanded
                 icon.source: "image://theme/icon-m-change-type"
                 icon.rotation: toolbar.expanded ? 0 : 180
@@ -245,58 +273,28 @@ Item {
 
             IconButton {
                 visible: !isImage
-                icon.source: "image://theme/icon-m-page-up"
-                icon.rotation: -90
+                icon.source: "image://theme/icon-m-10s-back"
                 anchors.verticalCenter: parent.verticalCenter
                 enabled: !overlay.error && (player && player.position !== 0)
                 opacity: overlay.error ? 0.0 : 1.0
 
                 onClicked: seekBackward()
-
-                width: Theme.itemSizeSmall + rewindLabel.width
-                icon.anchors.horizontalCenterOffset: rewindLabel.width/2 + rewindLabel.x/2
-                Label {
-                    id: rewindLabel
-                    text: "-10s"
-                    opacity: parent.enabled ? 1.0 : Theme.opacityLow
-                    font.pixelSize: Theme.fontSizeSmall
-                    x: Theme.paddingMedium
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        verticalCenterOffset: -Math.round(Theme.paddingSmall/2)
-                    }
-                }
             }
 
             IconButton {
                 visible: !isImage
-                icon.source: "image://theme/icon-m-page-up"
-                icon.rotation: 90
+                icon.source: "image://theme/icon-m-10s-forward"
                 anchors.verticalCenter: parent.verticalCenter
                 enabled: !overlay.error && (!player || player.position !== player.duration)
                 opacity: overlay.error ? 0.0 : 1.0
 
                 onClicked: seekForward()
-                width: Theme.itemSizeSmall + forwardLabel.width
-                icon.anchors.horizontalCenterOffset: -forwardLabel.width/2 - forwardLabel.anchors.rightMargin/2
-                Label {
-                    id: forwardLabel
-                    text: "+10s"
-                    opacity: parent.enabled ? 1.0 : Theme.opacityLow
-                    font.pixelSize: Theme.fontSizeSmall
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        verticalCenterOffset: -Math.round(Theme.paddingSmall/2)
-                        right: parent.right
-                        rightMargin: Theme.paddingMedium
-                    }
-                }
             }
 
             IconButton {
                 id: deleteButton
                 icon.source: "image://theme/icon-m-delete"
-                visible: localFile
+                visible: localFile && fileInfo.exists
                 anchors.verticalCenter: parent.verticalCenter
                 onClicked: overlay.remove()
             }
@@ -304,11 +302,10 @@ Item {
             IconButton {
                 id: editButton
                 icon.source: "image://theme/icon-m-edit"
-                visible: fileInfo.editableImage && isImage && !viewerOnlyMode
+                visible: !overlay.error && fileInfo.editableImage && isImage && !viewerOnlyMode
                 anchors.verticalCenter: parent.verticalCenter
                 onClicked: {
-                    editPageLoader.active = true
-                    pageStack.animatorPush(editPageLoader.item)
+                    overlay.triggerAction("edit")
                 }
 
                 Loader {
@@ -342,22 +339,10 @@ Item {
             IconButton {
                 id: shareButton
                 icon.source: "image://theme/icon-m-share"
+                visible: !overlay.error
                 anchors.verticalCenter: parent.verticalCenter
                 onClicked: {
-                    if (player && player.playing) {
-                        player.pause()
-                    }
-
-                    pageStack.animatorPush("Sailfish.TransferEngine.SharePage",
-                                           {
-                                               "source": overlay.source,
-                                               "mimeType": localFile ? fileInfo.mimeType
-                                                                     : "text/x-url",
-                                                                       "content": localFile ? undefined
-                                                                                            : { "type": "text/x-url", "status": overlay.source },
-                                               "serviceFilter": ["sharing", "e-mail"],
-                                               "additionalShareComponent": additionalShareComponent
-                                           })
+                    overlay.triggerAction("share")
                 }
             }
 
@@ -366,7 +351,7 @@ Item {
 
                 property bool suppressClick
 
-                visible: isImage
+                visible: isImage && !overlay.error
                 icon.source: "image://theme/icon-m-ambience"
                 anchors.verticalCenter: parent.verticalCenter
                 onClicked: {

@@ -3,6 +3,7 @@ import QtMultimedia 5.0
 import Sailfish.Media 1.0
 import org.nemomobile.policy 1.0
 import Nemo.KeepAlive 1.2
+import Nemo.Notifications 1.0
 
 MediaPlayer {
     id: root
@@ -36,8 +37,8 @@ MediaPlayer {
         if (error === MediaPlayer.FormatError) {
             //: %1 is replaced with specific codec
             //% "Unsupported codec: %1"
-            errorNotification.previewBody = qsTrId("components_gallery-la-unsupported-codec").arg(errorString)
-            errorNotification.publish()
+            _errorNotification.body = qsTrId("components_gallery-la-unsupported-codec").arg(errorString)
+            _errorNotification.publish()
         }
     }
     onStatusChanged: {
@@ -61,6 +62,12 @@ MediaPlayer {
         stop()
         _reseting = true
         _reseting = false
+    }
+
+    property QtObject _errorNotification: Notification {
+        isTransient: true
+        urgency: Notification.Critical
+        icon: "icon-system-warning"
     }
 
     property Item _content: Item {

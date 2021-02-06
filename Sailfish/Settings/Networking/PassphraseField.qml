@@ -26,11 +26,12 @@ SystemPasswordField {
         if (text.length > 0) errorHighlight = false
     }
 
-    width: parent.width
-    placeholderText: label
     enabled: network && network.passphraseAvailable
     text: enabled && network ? network.passphrase : ""
     visible: required
     //% "Passphrase"
     label: qsTrId("settings_network-la-passphrase")
+
+    //% "Passphrase is required"
+    description: errorHighlight ? qsTrId("settings_network-la-passphrase_required") : ""
 }

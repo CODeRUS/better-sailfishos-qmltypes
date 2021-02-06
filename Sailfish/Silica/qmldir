@@ -25,6 +25,8 @@ FirstTimeUseCounter 1.0 FirstTimeUseCounter.qml
 GridItem 1.0 GridItem.qml
 HighlightBar 1.0 HighlightBar.qml
 IconButton 1.0 IconButton.qml
+IconComboBox 1.0 IconComboBox.qml
+IconMenuItem 1.0 IconMenuItem.qml
 InfoLabel 1.0 InfoLabel.qml
 MiniComboBox 1.0 MiniComboBox.qml
 InteractionHintLabel 1.0 InteractionHintLabel.qml
@@ -32,6 +34,7 @@ SilicaListView 1.0 SilicaListView.qml
 SilicaGridView 1.0 SilicaGridView.qml
 SilicaFlickable 1.0 SilicaFlickable.qml
 SilicaWebView 1.0 SilicaWebView.qml
+TextEditorLabel 1.0 TextEditorLabel.qml
 Label 1.0 Label.qml
 LinkedLabel 1.0 LinkedLabel.qml
 MenuItem 1.0 MenuItem.qml
@@ -83,4 +86,5 @@ ExpandingSectionGroup 1.0 ExpandingSectionGroup.qml
 HighlightImage 1.0 HighlightImage.qml
 Icon 1.0 Icon.qml
 singleton Remorse 1.0 Remorse.qml
+SecondaryButton 1.0 SecondaryButton.qml
 typeinfo plugins.qmltypes

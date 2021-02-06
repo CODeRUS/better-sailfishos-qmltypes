@@ -14,14 +14,10 @@ Page {
 
     signal contactClicked(var contact)
     signal shareClicked(var content)
-    signal deleteClicked(var contacts)
+    signal deleteClicked(var contactIds)
 
     function _deleteSelection() {
-        var allSelectedContacts = []
-        for (var i = 0; i < root.selectedContacts.count; ++i) {
-            allSelectedContacts.push(contactBrowser.allContactsModel.personById(root.selectedContacts.get(i)))
-        }
-        root.deleteClicked(allSelectedContacts)
+        root.deleteClicked(selectedContacts.allContactIds())
     }
 
     function _shareSelection() {
@@ -85,18 +81,6 @@ Page {
                     //: Hint that the user should select contacts
                     //% "Select contacts"
                    : qsTrId("components_pickers-la-select_contacts")
-
-            _titleItem.color: headerMouseArea.containsPress ? Theme.highlightColor : Theme.primaryColor
-
-            MouseArea {
-                id: headerMouseArea
-                parent: browserPageHeader._titleItem
-                anchors.fill: parent
-
-                onClicked: {
-                    pageStack.navigateForward(PageStackAction.Animated)
-                }
-            }
         }
 
         PullDownMenu {

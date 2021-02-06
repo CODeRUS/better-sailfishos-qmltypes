@@ -137,10 +137,6 @@ Dialog {
                 id: passwordField
                 errorHighlight: !text && _checkMandatoryFields
 
-                //: Placeholder text for password
-                //% "Enter password"
-                placeholderText: qsTrId("components_accounts-ph-enter_new_password")
-
                 EnterKey.iconSource: "image://theme/icon-m-enter-close"
                 EnterKey.onClicked: root.focus = true
             }

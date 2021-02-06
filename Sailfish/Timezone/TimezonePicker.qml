@@ -4,8 +4,10 @@ import Sailfish.Timezone 1.0
 
 Page {
     id: page
+    property bool showNoTimezoneOption
+    property bool showUniversalTimeOption
 
-    signal timezoneClicked(variant name)
+    signal timezoneClicked(string name)
 
     SilicaListView {
         id: view
@@ -16,6 +18,17 @@ Page {
         model: TimezoneModel { }
         header: Column {
             width: view.width
+
+            // When the extra "No time zone" and "UTC" options are shown/hidden, the header size
+            // changes and causes the contentY to jump, so adjust the contentY for this change.
+            property real _prevHeight: height
+            onHeightChanged: {
+                var delta = (height - _prevHeight)
+                _prevHeight = height
+                if (delta > 0) {
+                    view.contentY -= delta
+                }
+            }
 
             PageHeader {
                 id: pageHeader
@@ -57,6 +70,30 @@ Page {
                         searchField.focus = false
                     }
                 }
+            }
+
+            BackgroundItem {
+                visible: page.showNoTimezoneOption && (searchField.text.length == 0)
+                height: Theme.itemSizeSmall
+                Label {
+                    x: Theme.horizontalPageMargin
+                    anchors.verticalCenter: parent.verticalCenter
+                    //% "No time zone"
+                    text: qsTrId("components_timezone-la-no_time_zone")
+                }
+                onClicked: page.timezoneClicked("")
+            }
+
+            BackgroundItem {
+                visible: page.showUniversalTimeOption && (searchField.text.length == 0)
+                height: Theme.itemSizeSmall
+                Label {
+                    x: Theme.horizontalPageMargin
+                    anchors.verticalCenter: parent.verticalCenter
+                    //% "Coordinated universal time (UTC)"
+                    text: qsTrId("components_timezone-la-utc")
+                }
+                onClicked: page.timezoneClicked("UTC")
             }
         }
         delegate: BackgroundItem {

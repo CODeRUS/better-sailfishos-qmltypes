@@ -16,15 +16,12 @@ Item {
 
     readonly property int avatarSize: {
         // use the maximum size available depending on the minimum number of columns
-        var minColumnCount = Math.floor(width / _minAvatarSize)
+        var minColumnCount = Math.floor(width / AvatarSize.minimumSize)
         return width / minColumnCount
     }
 
-    // Avatar area fits minimum of 2 name lines + 2 company info lines + padding.
-    readonly property int _minAvatarSize: Theme.paddingMedium + (nameFont.height * 2)
-                                          + Theme.paddingSmall + (companyInfoFont.height * 2)
-                                          + Theme.paddingMedium
-    property bool _transitionsEnabled: allowAnimations.running && !pageStack.currentPage.orientationTransitionRunning
+    readonly property bool _transitionsEnabled: allowAnimations.running
+                                                && !pageStack.currentPage.orientationTransitionRunning
 
     signal contactClicked(var delegateItem, var contact)
     signal contactPressed()
@@ -32,16 +29,6 @@ Item {
 
     width: parent.width
     height: grid.height
-
-    FontMetrics {
-        id: nameFont
-        font.pixelSize: Theme.fontSizeMedium
-    }
-
-    FontMetrics {
-        id: companyInfoFont
-        font.pixelSize: Theme.fontSizeTiny
-    }
 
     Timer {
         id: allowAnimations

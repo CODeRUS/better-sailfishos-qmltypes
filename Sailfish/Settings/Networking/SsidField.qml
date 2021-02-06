@@ -20,4 +20,7 @@ TextField {
         if (text.length > 0) errorHighlight = false
     }
     onActiveFocusChanged: if (!activeFocus && text === "") errorHighlight = true
+
+    //% "Network name is required"
+    description: errorHighlight ? qsTrId("settings_network-la-wlan_network_name_required") : ""
 }

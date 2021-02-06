@@ -1,7 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Sami Kananoja <sami.kananoja@jollamobile.com>
+** Copyright (c) 2013 - 2019 Jolla Pty Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Sailfish text linking component package.
@@ -79,11 +79,11 @@ Item {
             } else {
                 person.phoneDetails = [ {
                     'type': Person.PhoneNumberType,
-                    'number': address,
+                    'number': decodeURIComponent(address),
                     'index': -1
                 } ]
             }
-            pageStack.animatorPush("Sailfish.Contacts.TemporaryContactCardPage", { contact: person })
+            pageStack.animatorPush("Sailfish.Contacts.ContactCardPage", { contact: person })
         } else {
             Qt.openUrlExternally(link)
         }

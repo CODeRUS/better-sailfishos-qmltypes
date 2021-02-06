@@ -6,13 +6,6 @@ import Sailfish.Settings.Networking 1.0
 
 Column {
     function setProperties(providerProperties) {
-        var getProperty = function(name) {
-            if (providerProperties) {
-                return providerProperties[name] || ''
-            }
-            return ''
-        }
-
         var getBoolProperty = function(name) {
             if (getProperty(name) === 'true') {
                 return true
@@ -45,13 +38,6 @@ Column {
     }
 
     function updateProperties(providerProperties) {
-        var updateProvider = function(name, value) {
-            // If the value is empty/default, do not include the property in the configuration
-            if (value != '' && value != '_default') {
-                providerProperties[name] = value
-            }
-        }
-
         updateProvider('PPPD.ReqMPPE', pppdReqMPPE.currentIndex === 1 ? 'true' : 'false')
         updateProvider('PPPD.ReqMPPE40', pppdReqMPPE.currentIndex === 2 ? 'true' : 'false')
         updateProvider('PPPD.ReqMPPE128', pppdReqMPPE.currentIndex === 3 ? 'true' : 'false')
@@ -70,8 +56,8 @@ Column {
 
         updateProvider('PPPD.UseAccomp', pppdAddrCtrlComp.checked.toString())
 
-        updateProvider('PPPD.EchoInterval', pppdEchoInterval.text)
-        updateProvider('PPPD.EchoFailure', pppdEchoFailure.text)
+        updateProvider('PPPD.EchoInterval', pppdEchoInterval.filteredText)
+        updateProvider('PPPD.EchoFailure', pppdEchoFailure.filteredText)
     }
 
     function enableMSCHAP() {
@@ -205,21 +191,26 @@ Column {
         text: qsTrId("settings_network-he-vpn_ppp_echo_options")
     }
 
-    ConfigTextField {
+    ConfigIntField {
         id: pppdEchoInterval
+        intUpperLimit: 86400
 
         //% "Seconds between packets"
         label: qsTrId("settings_network-la-vpn_pppd_echo_interval")
-        inputMethodHints: Qt.ImhDigitsOnly
+        //% "Select interval between 1 and 86400 seconds"
+        description: errorHighlight ? qsTrId("settings_network_la-vpn_pppd_echo_interval_error") : ""
+
         nextFocusItem: pppdEchoFailure
     }
 
-    ConfigTextField {
+    ConfigIntField {
         id: pppdEchoFailure
+        intUpperLimit: 1024
 
         //% "Fail after missed count"
         label: qsTrId("settings_network-la-vpn_pppd_echo_failure")
-        inputMethodHints: Qt.ImhDigitsOnly
+        //% "Select count between 1 and 1024"
+        description: errorHighlight ? qsTrId("settings_network_la-vpn_pppd_echo_failure_error") : ""
     }
 }
 

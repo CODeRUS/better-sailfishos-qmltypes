@@ -9,7 +9,9 @@ LauncherIcon 1.0 LauncherIcon.qml
 LauncherGridItem 1.0 LauncherGridItem.qml
 PartnerspaceModel 1.0 PartnerspaceModel.qml
 NotificationExpansionButton 1.0 NotificationExpansionButton.qml
+NotificationAppIcon 1.0 NotificationAppIcon.qml
 NotificationIndicator 1.0 NotificationIndicator.qml
+NotificationGroupItem 1.0 NotificationGroupItem.qml
 NotificationGroupHeader 1.0 NotificationGroupHeader.qml
 NotificationGroupMember 1.0 NotificationGroupMember.qml
 NotificationAddAnimation 1.0 NotificationAddAnimation.qml
@@ -21,4 +23,5 @@ PannableItem 1.0 PannableItem.qml
 BatteryStatusIndicator 1.0 BatteryStatusIndicator.qml
 ClockItem 1.0 ClockItem.qml
 SwitcherGrid 1.0 SwitcherGrid.qml
+singleton Notifications 1.0 Notifications.qml
 typeinfo plugins.qmltypes

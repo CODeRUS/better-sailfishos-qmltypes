@@ -36,7 +36,7 @@ import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "private/Util.js" as Util
 
-SilicaItem {
+SilicaControl {
     id: pageHeader
 
     property alias title: headerText.text
@@ -49,6 +49,13 @@ SilicaItem {
     property alias titleColor: headerText.color
     property real leftMargin: Theme.horizontalPageMargin
     property real rightMargin: Theme.horizontalPageMargin
+    property real descriptionRightMargin: rightMargin
+
+    property bool interactive: enabled && page && page.canNavigateForward
+    readonly property bool defaultHighlighted: interactive
+                                               && ((_navigateForwardMouseArea && _navigateForwardMouseArea.containsMouse)
+                                                   || (pageStack._pageStackIndicator && pageStack._pageStackIndicator.forwardIndicatorDown))
+
     property Item _descriptionLabel
     property real _preferredHeight: page && page.isLandscape ? Theme.itemSizeSmall : Theme.itemSizeLarge
     onDescriptionChanged: {
@@ -63,6 +70,19 @@ SilicaItem {
         }
     }
 
+    property Item _navigateForwardMouseArea
+    onInteractiveChanged: {
+        if (interactive && !_navigateForwardMouseArea) {
+            var component = Qt.createComponent(Qt.resolvedUrl("private/PageHeaderMouseArea.qml"))
+            if (component.status === Component.Ready) {
+                _navigateForwardMouseArea = component.createObject(pageHeader)
+            } else {
+                console.warn("PageHeaderMouseArea.qml instantiation failed " + component.errorString())
+            }
+
+        }
+    }
+
     Component.onCompleted: {
         if (!page) {
             page = Util.findPage(pageHeader)
@@ -73,12 +93,19 @@ SilicaItem {
     // set height that keeps the first line of text aligned with the page indicator
     height: Math.max(_preferredHeight, headerText.y + headerText.height + ((_descriptionLabel && description.length > 0) ? _descriptionLabel.height : 0) + Theme.paddingMedium)
 
+    highlighted: defaultHighlighted
+
     Label {
         id: headerText
         // Don't allow the label to extend over the page stack indicator
         width: Math.min(implicitWidth, parent.width - leftMargin - rightMargin)
         truncationMode: TruncationMode.Fade
-        color: highlighted ? palette.primaryColor : palette.highlightColor
+
+        // color should indicate if interactive
+        color: interactive
+               ? (highlighted ? palette.highlightColor : palette.primaryColor)
+               : (highlighted ? palette.primaryColor : palette.highlightColor)
+
         // align first line with page indicator
         y: Math.floor(_preferredHeight/2 - metrics.height/2)
         anchors {
@@ -95,13 +122,17 @@ SilicaItem {
             text: "X"
         }
     }
+
     Item {
         id: extraContentPlaceholder
+
+        // Extend extraContent to the full area to the left of the title.
         anchors {
             left: parent.left
             leftMargin: pageHeader.leftMargin
             right: headerText.left
-            verticalCenter: parent.verticalCenter
+            top: parent.top
+            bottom: parent.bottom
         }
     }
 }

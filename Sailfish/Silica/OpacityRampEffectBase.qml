@@ -1,6 +1,7 @@
 /****************************************************************************************
 **
 ** Copyright (C) 2015 Jolla Ltd.
+** Copyright (C) 2020 Open Mobile Platform LLC.
 ** Contact: Gunnar Sletta <gunnar.sletta@jollamobile.com>
 ** All rights reserved.
 **
@@ -52,7 +53,7 @@ ShaderEffect {
     property real clampMin: 0.0
     property real clampMax: 1.0
 
-    // LtR = 0, RtL = 1, TtB = 2, BtT = 3
+    // LtR = 0, RtL = 1, TtB = 2, BtT = 3, BothSides = 4, BothEnds = 5
     property int direction: 0 // default = LeftToRight-OpaqueToTranslucent
 
     // impl. ---------------------
@@ -66,7 +67,7 @@ ShaderEffect {
 
         uniform lowp float slope;
         uniform lowp float offset;
-        uniform int direction;
+        uniform lowp int direction;
 
         varying highp vec2 vTC;
         varying lowp float vLevel;
@@ -80,7 +81,7 @@ ShaderEffect {
                 vLevel = 1.0 + slope * (qt_MultiTexCoord0.x - 1.0 + offset);
 
             // Top-to-bottom
-            else if (direction == 2)
+            else if (direction == 2 || direction == 5)
                 vLevel = 1.0 - slope * (qt_MultiTexCoord0.y - offset);
 
             // Bottom-to-top
@@ -88,7 +89,7 @@ ShaderEffect {
                 vLevel = 1.0 + slope * (qt_MultiTexCoord0.y - 1.0 + offset);
 
             // Left-to-right (and any bogus value)
-            else
+            else if (direction == 0 || direction == 4)
                 vLevel = 1.0 - slope * (qt_MultiTexCoord0.x - offset);
         }
         "
@@ -101,11 +102,23 @@ ShaderEffect {
         uniform lowp float clampMin;
         uniform lowp float clampMax;
 
+        uniform lowp float slope;
+        uniform lowp float offset;
+        uniform lowp int direction;
+
         varying highp vec2 vTC;
         varying lowp float vLevel;
 
         void main(void) {
-            gl_FragColor = qt_Opacity * texture2D(source, vTC) * (clamp(clampFactor + vLevel, clampMin, clampMax));
+            if (direction == 4) {
+                // Both sides
+                gl_FragColor = qt_Opacity * texture2D(source, vTC) * (clamp(clampFactor + (0.5 - slope * (abs(vTC.x - 0.5) - offset * 0.5)), clampMin, clampMax));
+            } else if (direction == 5) {
+                // Both ends
+                gl_FragColor = qt_Opacity * texture2D(source, vTC) * (clamp(clampFactor + (0.5 - slope * (abs(vTC.y - 0.5) - offset * 0.5)), clampMin, clampMax));
+            } else {
+                gl_FragColor = qt_Opacity * texture2D(source, vTC) * (clamp(clampFactor + vLevel, clampMin, clampMax));
+            }
         }
         "
 }

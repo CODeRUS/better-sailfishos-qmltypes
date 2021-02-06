@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Sailfish.Accounts 1.0
 import Nemo.FileManager 1.0
 import com.jolla.settings.accounts 1.0
 
@@ -149,6 +150,32 @@ Dialog {
         }
     }
 
+    Account {
+        id: account
+
+        // Once the account is created, enable the account and its services. Jolla account services
+        // are always enabled, so don't need to wait until the settings page to enable them (and
+        // also the settings page is not shown when creating a Jolla account from the start-up
+        // wizard or the store).
+        onStatusChanged: {
+            if (status == Account.Initialized) {
+                var services = supportedServiceNames
+                for (var i in services) {
+                    var service = accountManager.service(services[i])
+                    enableWithService(service.name)
+                }
+                enabled = true
+                sync()
+            } else if (status == Account.Synced) {
+                root.accountCreated(identifier)
+            }
+        }
+    }
+
+    AccountManager {
+        id: accountManager
+    }
+
     JollaAccountUtilities {
         id: jollaAccountUtil
     }
@@ -269,7 +296,7 @@ Dialog {
                     }
                 }
                 onAccountSignInSuccess: {
-                    root.accountCreated(accountId)
+                    account.identifier = accountId
                 }
                 onAccountSignInError: {
                     pageStack.pop(root)
@@ -398,7 +425,7 @@ Dialog {
                 }
             }
             onAccountCreated: {
-                root.accountCreated(newAccountId)
+                account.identifier = newAccountId
             }
             onAccountCreationTypedError: {
                 root.accountCreationError(errorMessage)

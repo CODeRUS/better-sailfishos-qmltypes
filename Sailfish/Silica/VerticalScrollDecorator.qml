@@ -3,7 +3,7 @@
 ** Copyright (C) 2013 Jolla Ltd.
 ** Contact: Martin Jones <martin.jones@jollamobile.com>
 ** All rights reserved.
-** 
+**
 ** This file is part of Sailfish Silica UI component package.
 **
 ** You may use this file under the terms of BSD license as follows:
@@ -18,7 +18,7 @@
 **     * Neither the name of the Jolla Ltd nor the
 **       names of its contributors may be used to endorse or promote products
 **       derived from this software without specific prior written permission.
-** 
+**
 ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -49,24 +49,25 @@ Private.SilicaRectangle {
     property real _bottomMenuSpacing: flickable.pushUpMenu ? flickable.pushUpMenu.spacing : 0
     property bool _inBounds: (!flickable.pullDownMenu || !flickable.pullDownMenu.active) && (!flickable.pushUpMenu || !flickable.pushUpMenu.active)
     property real _sizeRatio: (flickable.height - _headerSpacing) / (flickable.contentHeight + _topMenuSpacing + _bottomMenuSpacing)
+    property Item _forcedParent
 
     function showDecorator() {
         timer.showDecorator = true
     }
 
     // If we were declared in a Flickable then our parent is contentItem rather than the Flickable itself
-    onFlickableChanged: parent = flickable
+    onFlickableChanged: parent = _forcedParent ? _forcedParent : flickable
 
     width: Math.round(Theme.paddingSmall/2)
-    height: _sizeRatio * flickable.height
+    height: _sizeRatio * (parent ? parent.height : 0)
     anchors.right: parent ? parent.right : undefined
     color: palette.primaryColor
     opacity: (timer.moving && _inBounds) || timer.running ? 1.0 : 0.0
     visible: flickable.contentHeight > flickable.height
     Behavior on opacity { FadeAnimation { duration: 400 } }
     y: Math.max(0, Math.min(
-                (_headerSpacing + (flickable.contentY - flickable.originY + _topMenuSpacing) * _sizeRatio),
-                (flickable.height - height)))
+                (parent.height / flickable.height) * (_headerSpacing + (flickable.contentY - flickable.originY + _topMenuSpacing) * _sizeRatio),
+                (parent.height - height)))
 
     Component.onCompleted: {
         if (!flickable) {

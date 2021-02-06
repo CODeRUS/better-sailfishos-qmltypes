@@ -85,7 +85,6 @@ GridView {
     }
 
     pixelAligned: true
-    pressDelay: 50
     flickDeceleration: Theme.flickDeceleration
     maximumFlickVelocity: Theme.maximumFlickVelocity
     cacheBuffer: Theme.itemSizeMedium * 8

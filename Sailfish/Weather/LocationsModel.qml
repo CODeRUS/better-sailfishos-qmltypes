@@ -16,7 +16,16 @@ ListModel {
     readonly property WeatherRequest model: WeatherRequest {
         id: model
 
-        source: filter.length > 0 ? "https://pfa.foreca.com/api/v1/location/search/" + filter.toLowerCase() : ""
+        property string language: {
+            var locale = Qt.locale().name
+            if (locale === "zh_CN" || locale === "zh_TW") {
+                return locale
+            } else {
+                return locale.split("_")[0]
+            }
+        }
+
+        source: filter.length > 0 ? "https://pfa.foreca.com/api/v1/location/search/" + filter.toLowerCase() + "&lang=" + language : ""
         onRequestFinished: {
             var locations = result["locations"]
             if (result.length === 0 || locations === undefined) {

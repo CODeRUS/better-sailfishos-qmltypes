@@ -167,15 +167,18 @@ Item {
             elide: Text.ElideRight
             font.pixelSize: Theme.fontSizeSmall
         }
-        Separator {
-            // Must match with separator positioning in TextField
+
+        Rectangle {
+            // Must match with separator positioning and style in TextField
             anchors {
                 left: summaryLabel.left
                 right: summaryLabel.right
                 bottom: summaryLabel.bottom
                 bottomMargin: -(Theme.paddingMedium - (Theme.paddingSmall / 2))
             }
+            height: Math.round(Theme.pixelRatio)
             color: summaryLabel.color
+            opacity: Theme.opacityHigh
         }
     }
 }

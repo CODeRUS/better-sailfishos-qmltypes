@@ -31,7 +31,7 @@ Item {
     height: Theme.iconSizeExtraSmall
     width: signalStrengthIndicator.width * opacity
 
-    Image {
+    Icon {
         anchors {
             bottom: signalStrengthIndicator.bottom
             left: signalStrengthIndicator.left
@@ -58,15 +58,18 @@ Item {
         height: img.height
         visible: img.source != ''
 
-        property variant source: img
-        property variant maskSource: mask
+        property var source: img
+        property var maskSource: mask
+        property color color: palette.primaryColor
+
         fragmentShader: "
             varying highp vec2 qt_TexCoord0;
             uniform highp float qt_Opacity;
+            uniform lowp vec4 color;
             uniform lowp sampler2D source;" + (_masked
                 ? "uniform lowp sampler2D maskSource;
-                   void main(void) { gl_FragColor = texture2D(source, qt_TexCoord0.st) * texture2D(maskSource, qt_TexCoord0.st).a * qt_Opacity; }"
-                : "void main(void) { gl_FragColor = texture2D(source, qt_TexCoord0.st) * qt_Opacity; }")
+                   void main(void) { gl_FragColor = color * texture2D(source, qt_TexCoord0.st).a * texture2D(maskSource, qt_TexCoord0.st).a * qt_Opacity; }"
+                : "void main(void) { gl_FragColor = color * texture2D(source, qt_TexCoord0.st).a * qt_Opacity; }")
 
         Image {
             id: img

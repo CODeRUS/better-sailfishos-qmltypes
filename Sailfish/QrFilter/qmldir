@@ -1,0 +1,3 @@
+module Sailfish.QrFilter
+plugin qrfilter
+typeinfo plugins.qmltypes

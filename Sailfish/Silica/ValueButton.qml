@@ -1,8 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Bea Lam <bea.lam@jollamobile.com>
-** All rights reserved.
+** Copyright (C) 2013 - 2019 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
 **
 ** This file is part of Sailfish Silica UI component package.
 **
@@ -45,7 +44,8 @@ BackgroundItem {
     property alias valueColor: valueText.color
     property color descriptionColor: root.down ? palette.secondaryHighlightColor : palette.secondaryColor
 
-    property alias labelMargin: root.leftMargin
+    property real labelMargin: root.leftMargin
+    property real minimumContentHeight: Theme.itemSizeSmall
     property real leftMargin: Theme.horizontalPageMargin
     property real rightMargin: Theme.horizontalPageMargin
 
@@ -54,18 +54,17 @@ BackgroundItem {
 
     width: parent ? parent.width : 0
     height: contentItem.height
-    contentHeight: visible ? Math.max(column.height + 2*Theme.paddingMedium, Theme.itemSizeSmall) : 0
+    contentHeight: visible ? Math.max(column.height + 2*Theme.paddingMedium, minimumContentHeight) : 0
     opacity: enabled ? 1.0 : Theme.opacityLow
 
     onDescriptionChanged: if (!_descriptionLabel && description.length > 0) _descriptionLabel = descriptionComponent.createObject(column)
-
 
     Column {
         id: column
 
         anchors {
             left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter
-            leftMargin: root.leftMargin; rightMargin: root.rightMargin
+            leftMargin: root.labelMargin; rightMargin: root.rightMargin
         }
         Flow {
             id: flow

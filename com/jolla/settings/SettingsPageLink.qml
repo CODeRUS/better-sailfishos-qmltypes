@@ -13,6 +13,8 @@ SettingItem {
 
     onClicked: pageStack.animatorPush(pageSource.toString())
 
+    implicitHeight: Math.max(Theme.itemSizeSmall, label.height + 2 * Theme.paddingMedium)
+
     Image {
         id: icon
         x: root.leftMargin

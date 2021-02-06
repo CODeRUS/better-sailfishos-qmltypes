@@ -131,7 +131,7 @@ Dialog {
             onEdited: editStep()
             onFailed: {
                 //% "Editing image failed"
-                errorNotification.previewBody = qsTrId("components_gallery-la-editing_image_failed")
+                errorNotification.body = qsTrId("components_gallery-la-editing_image_failed")
                 errorNotification.publish()
                 root.editInProgress = false
                 finished()
@@ -262,7 +262,6 @@ Dialog {
     Notification {
         id: errorNotification
         isTransient: true
-        urgency: Notification.Critical
-        icon: "icon-system-warning"
+        appIcon: "icon-system-warning"
     }
 }

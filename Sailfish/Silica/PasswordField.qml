@@ -1,6 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013-2015 Jolla Ltd.
+** Copyright (C) 2020 Open Mobile Platform LLC.
 ** Contact: Bea Lam <bea.lam@jollamobile.com>
 ** All rights reserved.
 **
@@ -37,50 +38,21 @@ import Sailfish.Silica 1.0
 TextField {
     id: root
 
-    property bool showEchoModeToggle: activeFocus
+    property bool showEchoModeToggle: true
     property int passwordEchoMode: TextInput.Password
 
     property bool _usePasswordEchoMode: true
-    property int _buttonLeftMargin: Theme.paddingLarge
 
     // Used by SettingsPasswordField for overriding toggle behavior
     property bool _automaticEchoModeToggle: true
     signal _echoModeToggleClicked
 
     width: parent ? parent.width : Screen.width
-    textRightMargin: textMargin
     echoMode: _usePasswordEchoMode ? passwordEchoMode : TextInput.Normal
     inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
 
     //% "Password"
-    placeholderText: qsTrId("components-ph-password")
-
-    //% "Password"
     label: qsTrId("components-la-password")
-
-    states: State {
-        name: "showToggle"
-        when: root.showEchoModeToggle
-        PropertyChanges {
-            target: root
-            textRightMargin: root._buttonLeftMargin/2 + passwordVisibilityButton.width + root.textMargin
-        }
-        PropertyChanges {
-            target: passwordVisibilityButton
-            opacity: 1
-            enabled: true
-        }
-    }
-
-    transitions: Transition {
-        from: ""; to: "showToggle"
-        reversible: true
-        NumberAnimation {
-            property: "textRightMargin"
-            duration: 50
-        }
-        FadeAnimation { target: passwordVisibilityButton }
-    }
 
     // Hide the password when user leaves the app
     Connections {
@@ -88,14 +60,15 @@ TextField {
         onActiveChanged: if (!Qt.application.active && text.length > 0) _usePasswordEchoMode = true
     }
 
-    MouseArea {
+    rightItem: IconButton {
         id: passwordVisibilityButton
-        parent: root    // ensure the field is visible, avoid auto-parenting to TextBase contentItem
-        x: root.width - width - root.textMargin
-        width: Math.max(textAbc.implicitWidth, textDots.implicitWidth) + root._buttonLeftMargin/2
-        height: root.height - Theme.paddingLarge
-        opacity: 0
-        enabled: false
+
+        width: icon.width + 2*Theme.paddingMedium
+        height: icon.height
+
+        enabled: showEchoModeToggle
+        opacity: showEchoModeToggle ? 1.0 : 0.0
+        Behavior on opacity { FadeAnimation {}}
 
         onClicked: {
             if (_automaticEchoModeToggle) {
@@ -104,32 +77,14 @@ TextField {
             _echoModeToggleClicked()
         }
 
-        Text {
-            id: textAbc
-            anchors {
-                top: parent.top
-                topMargin: root.textTopMargin
-                horizontalCenter: parent.horizontalCenter
+        icon.source: "image://theme/icon-splus-" + (root.echoMode == TextInput.Password ? "show-password"
+                                                                                        : "hide-password")
+        states: State {
+            when: root.errorHighlight
+            PropertyChanges {
+                target: root
+                rightItem: root._errorIcon
             }
-            visible: root.echoMode == TextInput.Password
-            font.pixelSize: Theme.fontSizeMedium
-            text: "abc"
-            textFormat: Text.PlainText
-            color: parent.pressed && parent.containsMouse ? root.palette.highlightColor : root.palette.primaryColor
-        }
-
-        Text {
-            id: textDots
-            anchors {
-                top: parent.top
-                topMargin: root.textTopMargin
-                horizontalCenter: parent.horizontalCenter
-            }
-            visible: root.echoMode == TextInput.Normal
-            font.pixelSize: Theme.fontSizeMedium
-            text: "\u2022\u2022\u2022"
-            textFormat: Text.PlainText
-            color: parent.pressed && parent.containsMouse ? root.palette.highlightColor : root.palette.primaryColor
         }
     }
 }

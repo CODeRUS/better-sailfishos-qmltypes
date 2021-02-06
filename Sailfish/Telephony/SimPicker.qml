@@ -1,6 +1,6 @@
 import QtQuick 2.1
 import Sailfish.Silica 1.0
-import Sailfish.Silica.private 1.0 as SilicaPrivate
+import Sailfish.Silica.Background 1.0
 import Sailfish.Telephony 1.0
 
 // TODO: replace with standard component
@@ -20,7 +20,7 @@ MouseArea {
         return simSelector.simInfo(sim)
     }
 
-    SilicaPrivate.GlassBackground {
+    KeyboardBackground {
         id: background
         anchors.fill: parent
         visible: false

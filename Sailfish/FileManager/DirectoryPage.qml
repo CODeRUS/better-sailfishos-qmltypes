@@ -256,8 +256,7 @@ Page {
                         //% "Rename"
                         text: qsTrId("filemanager-me-rename")
                         onClicked: pageStack.animatorPush("RenameDialog.qml", {
-                                                      oldPath: model.absolutePath,
-                                                      oldName: model.fileName
+                                                      oldPath: model.absolutePath
                                                   })
                     }
 

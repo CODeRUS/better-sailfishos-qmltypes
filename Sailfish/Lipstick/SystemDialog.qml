@@ -19,7 +19,9 @@ SystemDialogWindow {
     property alias contentHeight: layout.contentHeight
 
     property alias allowedOrientations: window.allowedOrientations
-    readonly property alias orientation: window.orientation
+    readonly property int orientation: window.pageStack.currentPage
+            ? window.pageStack.currentPage.orientation
+            : window.orientation
     readonly property alias screenHeight: window._screenHeight
     property alias backgroundVisible: window._backgroundVisible
     property alias backgroundRect: window._backgroundRect
@@ -31,6 +33,7 @@ SystemDialogWindow {
     property alias __silica_applicationwindow_instance: window
 
     signal dismissed()
+    signal closed()
 
     function activate() {
         _closing = false
@@ -49,6 +52,7 @@ SystemDialogWindow {
     onVisibilityChanged: {
         if (_closing && visibility == QtQuick.Window.Hidden) {
             dialog.close()
+            closed()
         } else {
             _closing = false
         }

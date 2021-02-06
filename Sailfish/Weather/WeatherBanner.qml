@@ -75,7 +75,8 @@ ListItem {
         Row {
             id: row
 
-            property int margin: (column.width - image.width - Theme.paddingMedium - temperatureLabel.width - cityLabel.width)/2
+            property int margin: (column.width - image.width - Theme.paddingMedium - temperatureLabel.width
+                                  - Theme.paddingSmall - cityLabel.width)/2
 
             x: margin
             width: parent.width - x
@@ -99,12 +100,13 @@ ListItem {
             Label {
                 id: temperatureLabel
                 text: weather ? TemperatureConverter.format(weather.temperature) : ""
-                color: highlighted ? Theme.highlightColor : Theme.primaryColor
-                font {
-                    pixelSize: Theme.fontSizeExtraLarge
-                    family: Theme.fontFamilyHeading
-                }
+                font.pixelSize: Theme.fontSizeExtraLarge
                 anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Item {
+                width: Theme.paddingSmall
+                height: 1
             }
 
             Label {
@@ -117,30 +119,28 @@ ListItem {
                 }
                 anchors.baseline: temperatureLabel.baseline
                 truncationMode: TruncationMode.Fade
-                width: Math.min(implicitWidth, column.width - image.width - Theme.paddingMedium - temperatureLabel.width - expandButton.width)
+                width: Math.min(implicitWidth,
+                                column.width - image.width - Theme.paddingMedium - Theme.paddingSmall
+                                - temperatureLabel.width - expandButton.width - Theme.horizontalPageMargin)
             }
 
             Item {
                 height: 1
-                width: parent.margin - expandButton.width
+                width: parent.margin - expandButton.width - Theme.horizontalPageMargin + Theme.paddingLarge
             }
 
-            MouseArea {
+            IconButton {
                 id: expandButton
-                property bool down: pressed && containsMouse
-                onClicked: expanded = !expanded
 
-                width: Theme.itemSizeSmall
                 height: Math.max(parent.height, Theme.itemSizeSmall)
-
-                Icon {
-                    highlighted: parent.down
+                width: icon.width + 2*Theme.paddingLarge
+                onClicked: expanded = !expanded
+                icon {
                     transformOrigin: Item.Center
-                    anchors.centerIn: parent
-                    source: "image://theme/icon-m-change-type"
+                    source: "image://theme/icon-s-arrow"
                     rotation: expanded ? 180 : 0
-                    Behavior on rotation { RotationAnimator { duration: 200 }}
                 }
+                Behavior on icon.rotation { RotationAnimator { duration: 200 }}
             }
         }
         Column {
@@ -322,7 +322,8 @@ ListItem {
 
                     Image {
                         anchors.verticalCenter: parent.verticalCenter
-                        source: "image://theme/graphic-foreca-small?" + (highlighted || footer.down ? Theme.highlightColor : Theme.primaryColor)
+                        source: "image://theme/graphic-foreca-small?"
+                                + (highlighted || footer.down ? Theme.highlightColor : Theme.primaryColor)
                     }
                     Label {
                         //: Indicates when the shown forecast information was updated

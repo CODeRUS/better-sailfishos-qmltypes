@@ -9,6 +9,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Contacts 1.0 as Contacts
 import org.nemomobile.contacts 1.0
+import Nemo.Thumbnailer 1.0
 
 GridItem {
     id: favoriteItem
@@ -19,7 +20,8 @@ GridItem {
     readonly property int selectionModelIndex: selectionModel !== null ? (selectionModel.count > 0, selectionModel.findContactId(model.contactId)) : -1 // count to retrigger on change.
     property var propertyPicker
 
-    property bool _hasAvatar: model.avatarUrl != ''
+    property bool _hasAvatar: favoriteImage.status !== Thumbnail.Null
+                              && favoriteImage.status !== Thumbnail.Error
 
     property bool _pendingDeletion: Contacts.ContactModelCache._deletingContactId === contactId
 
@@ -38,7 +40,7 @@ GridItem {
 
     function deleteContact() {
         var item = remorseDelete(function () {
-            favoritesModel.removePerson(model.person)
+            Contacts.ContactModelCache.deleteContact(person)
         })
         if (openRemorseBelow) {
             item.rightMargin = Theme.paddingMedium + symbolScrollBarWidth
@@ -52,11 +54,18 @@ GridItem {
     contentItem.clip: !_hasAvatar
 
     Image {
+        anchors.fill: parent
+        source: _hasAvatar ? "" : "image://theme/graphic-avatar-text-back"
+    }
+
+    Thumbnail {
         id: favoriteImage
         anchors.fill: parent
-        fillMode: Image.PreserveAspectCrop
-        source: _hasAvatar ? model.avatarUrl : "image://theme/graphic-avatar-text-back"
-        clip: _hasAvatar
+        source: model.avatarUrl
+        sourceSize {
+            width: Contacts.AvatarSize.thumbnailSize
+            height: Contacts.AvatarSize.thumbnailSize
+        }
 
         Rectangle {
             anchors.fill: parent

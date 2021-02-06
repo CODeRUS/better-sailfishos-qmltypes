@@ -5,9 +5,7 @@ import com.jolla.settings.system 1.0
 SystemPasswordField {
     property Item nextFocusItem
 
-    width: parent.width
     inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
-    placeholderText: label
 
     EnterKey.iconSource: "image://theme/icon-m-enter-" + (nextFocusItem ? "next" : "close")
     EnterKey.onClicked: {

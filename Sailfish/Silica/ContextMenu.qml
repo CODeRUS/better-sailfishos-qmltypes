@@ -209,7 +209,11 @@ SilicaMouseArea {
 
     // Called from number animation of _displayHeight behavior when animation has finished.
     function _reset() {
-        if (!active && height <= 0) {
+        // The _contentHeight (and the animated _displayHeight following it) may be reduced to 0 if
+        // active is false or all of the items in the menu are hidden which can happen as a
+        // side effect of the menu or its window being hidden.
+        if (_contentHeight <= 0) {
+            close() // If the menu was effectively closed as a result of being hidden, explicitly close it now.
             parent = null
             _page = null
             contextMenu.closed()
@@ -427,7 +431,8 @@ SilicaMouseArea {
         onTriggered: contextMenu.close()
     }
 
-    property real _displayHeight: contentColumn.children.length, active && contentColumn.height > 0 ? _getDisplayHeight() : 0
+    readonly property real _contentHeight: contentColumn.children.length, active && contentColumn.height > 0 ? _getDisplayHeight() : 0
+    property real _displayHeight: _contentHeight
     Behavior on _displayHeight {
         NumberAnimation {
             id: displayHeightAnimation

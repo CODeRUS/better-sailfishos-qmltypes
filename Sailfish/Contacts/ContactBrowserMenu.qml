@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 - 2019 Jolla Pty Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+*/
+
 import Sailfish.Silica 1.0
 import Sailfish.Contacts 1.0
 import QtQuick 2.5
@@ -10,6 +17,7 @@ ContextMenu {
     property bool _favorite
 
     signal editContact()
+    signal changeFavoriteStatus(bool favorite)
 
     onActiveChanged: {
         if (active) {
@@ -17,10 +25,10 @@ ContextMenu {
         }
     }
 
-    MenuItem {
-        //: Edit contact, from list
-        //% "Edit"
-        text: qsTrId("components_contacts-me-edit_contact")
+    ContactEditMenuItem {
+        contact: root.person
+        peopleModel: root.peopleModel
+
         onClicked: root.editContact()
     }
 
@@ -35,16 +43,17 @@ ContextMenu {
 
         // Delay click action to prevent menu open/close from affecting favorite/recent list
         // height calculations.
-        onDelayedClick: {
+        onClicked: {
             root.person = ContactsUtil.ensureContactComplete(root.person, root.peopleModel)
-            person.favorite = !root._favorite
-            peopleModel.savePerson(person)
+            root.changeFavoriteStatus(!person.favorite)
         }
     }
 
-    MenuItem {
+    ContactDeleteMenuItem {
         //% "Delete contact"
         text: qsTrId("components_contacts-me-delete_contact")
+        contact: root.person
+        peopleModel: root.peopleModel
         visible: root.parent && root.parent.canDeleteContact
 
         onClicked: root.parent.deleteContact()

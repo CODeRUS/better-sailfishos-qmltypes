@@ -24,13 +24,14 @@ ContactItem {
         if (contactId && peopleModel && getPerson()) {
             // Retrieve the person to delete; it will be no longer accessible if the
             // remorse function is triggered by delegate destruction
+            // Similarly, cache a reference to the contact model cache.
+            var contactModelCache = Contacts.ContactModelCache
             var person = getPerson()
-            var model = peopleModel
-
             var item = remorseDelete(function () {
-                model.removePerson(person)
+                contactModelCache.deleteContact(person)
             })
-            item.rightMargin = Theme.paddingMedium + symbolScrollBarWidth
+            item.rightMargin = searchString.length > 0 ? Theme.horizontalPageMargin
+                                                       : Theme.paddingMedium + symbolScrollBarWidth
         }
     }
 

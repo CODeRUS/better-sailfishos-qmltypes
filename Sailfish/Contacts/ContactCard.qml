@@ -1,12 +1,14 @@
-/****************************************************************************
-**
-** Copyright (C) 2013-2019 Jolla Ltd.
-** Copyright (c) 2019-2020 Open Mobile Platform LLC.
-**
-****************************************************************************/
+/*
+ * Copyright (c) 2013 - 2019 Jolla Pty Ltd.
+ * Copyright (c) 2019 - 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+*/
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
+import Sailfish.Telephony 1.0
 import Sailfish.Contacts 1.0 as SailfishContacts
 import Sailfish.AccessControl 1.0
 import MeeGo.QOfono 0.2
@@ -20,10 +22,9 @@ SilicaFlickable {
 
     property var contact
     property string activeDetail
-    property bool readOnly
     readonly property bool actionPermitted: AccessControl.hasGroup(AccessControl.RealUid, "sailfish-phone")
                                          || AccessControl.hasGroup(AccessControl.RealUid, "sailfish-messages")
-    property bool hidePhoneActions: cellular1Status.disabled && cellular2Status.disabled || !actionPermitted
+    property bool hidePhoneActions: cellular1Status.modemPath.length === 0 && cellular2Status.modemPath.length === 0 || !actionPermitted
     property bool disablePhoneActions: !cellular1Status.registered && !cellular2Status.registered
 
     property QtObject _messagesInterface
@@ -118,21 +119,7 @@ SilicaFlickable {
         id: header
 
         contact: root.contact
-        readOnly: root.readOnly
-
-        onContactModified: {
-            if (root.contact.id !== 0) {
-                SailfishContacts.ContactModelCache.unfilteredModel().savePerson(root.contact)
-            }
-        }
-        onEditClicked: {
-            // Ensure we're modifying the canonical instance of this contact
-            var c = root.contact.id !== 0
-                  ? SailfishContacts.ContactModelCache.unfilteredModel().personById(root.contact.id)
-                  : root.contact
-            var ff = { "detailType": "name", "detailIndex": 0 }
-            pageStack.animatorPush("ContactEditorDialog.qml", { "subject": c, "focusField": ff })
-        }
+        simManager: _simManager
     }
 
     ListView {
@@ -164,9 +151,11 @@ SilicaFlickable {
                     width: details.width
                     previousDetailType: model.index > 0 ? details.model.get(model.index - 1).detailsType : ""
                     detailType: detailsType
+                    detailIndex: detailsIndex
                     detailValue: detailsValue
                     detailData: detailsData
                     detailMetadata: detailsLabel
+                    constituentId: model.detailsOriginId || 0
 
                     hidePhoneActions: root.hidePhoneActions
                     disablePhoneActions: root.disablePhoneActions
@@ -182,7 +171,7 @@ SilicaFlickable {
                     }
 
                     onEmailClicked: {
-                        pageStack.animatorPush(Qt.resolvedUrl("EmailComposer.qml"), { emailTo: email })
+                        Qt.openUrlExternally("mailto:" + email)
                     }
 
                     onImClicked: {
@@ -223,26 +212,6 @@ SilicaFlickable {
                         var formatted = Qt.formatDate(nextDate, Qt.ISODate)
                         console.log("Date: " + formatted)
                         calendarInterface.showDate(formatted)
-                    }
-
-                    onEditDetailClicked: {
-                        // Calculate the per-detail-type index of this detail.
-                        var globalIndex = model.index
-                        var detailIndex = globalIndex
-                        for (var i = globalIndex-1; i >= 0; --i) {
-                            var currDet = details.model.get(i)
-                            if (currDet.detailsType !== detailType) {
-                                detailIndex = globalIndex - (i + 1)
-                                break
-                            }
-                        }
-
-                        // Ensure we're modifying the canonical instance of this contact
-                        var c = root.contact.id !== 0
-                              ? SailfishContacts.ContactModelCache.unfilteredModel().personById(root.contact.id)
-                              : root.contact
-                        var ff = { "detailType": detailType, "detailIndex": detailIndex }
-                        pageStack.animatorPush("ContactEditorDialog.qml", { "subject": c, "focusField": ff })
                     }
 
                     onContentResized: {
@@ -306,6 +275,7 @@ SilicaFlickable {
                                 limit: 15
                                 hidePhoneActions: root.hidePhoneActions
                                 today: root._today
+                                simManager: _simManager
 
                                 opacity: count === 0 ? 0 : 1
                                 Behavior on opacity { FadeAnimation {} }
@@ -378,6 +348,7 @@ SilicaFlickable {
                                         hidePhoneActions: root.hidePhoneActions
                                         contact: root.contact
                                         modelFactory: ModelFactory
+                                        simManager: _simManager
 
                                         onStartPhoneCall: root.startPhoneCall(number, modemPath)
                                         onStartSms: root.startSms(number)
@@ -450,6 +421,10 @@ SilicaFlickable {
         property bool registered: status == "registered" || status == "roaming"
 
         modemPath: ofonoManager.modems[1] || ""
+    }
+
+    SimManager {
+        id: _simManager
     }
 
     VerticalScrollDecorator {}

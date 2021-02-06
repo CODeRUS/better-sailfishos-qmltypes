@@ -8,8 +8,8 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
-import MeeGo.Connman 0.2
 import Nemo.DBus 2.0
+import Nemo.Connectivity 1.0
 import com.jolla.settings.accounts 1.0
 
 Dialog {
@@ -22,15 +22,8 @@ Dialog {
 
     signal skipClicked()
 
-    property bool _connectionSelected: networkManagerFactory.instance.state == "online"
-    property bool _connectionSelectorClosed
     property bool _shouldAccept
     readonly property bool _applicationActive: Qt.application.active
-
-    function _showConnSelector() {
-        connectionSelector.openConnection()
-        _connectionSelectorClosed = false
-    }
 
     function _checkStatus() {
         if (status === PageStatus.Active) {
@@ -53,16 +46,16 @@ Dialog {
         if (status === PageStatus.Active) {
             canAccept = false
             forwardNavigation = false
-            _showConnSelector()
+            connectionHelper.attemptToConnectNetwork()
         }
     }
 
     on_ApplicationActiveChanged: {
-        if (_applicationActive && status === PageStatus.Active, _connectionSelected, _connectionSelectorClosed) {
-            if (_connectionSelected) {
+        if (_applicationActive && status === PageStatus.Active) {
+            if (connectionHelper.online) {
                 _tryAccept()
-            } else if (!_connectionSelectorClosed) {
-                _showConnSelector()
+            } else if (!connectionHelper.selectorVisible) {
+                connectionHelper.attemptToConnectNetwork()
             }
         }
     }
@@ -71,50 +64,30 @@ Dialog {
         _shouldAccept = false
     }
 
-    Connections {
-        target: networkManagerFactory.instance
-        onStateChanged: {
-            if (networkManagerFactory.instance.state == "online"
-                    && root == pageStack.currentPage) {
-                root._connectionSelected = true
-                root._connectionSelectorClosed = true
+    ConnectionHelper {
+        id: connectionHelper
+
+        onOnlineChanged: {
+            if (online && root == pageStack.currentPage) {
                 root._tryAccept()
             }
-        }
-    }
-
-    NetworkManagerFactory {
-        id: networkManagerFactory
-    }
-
-    DBusInterface {
-        id: connectionSelector
-
-        service: "com.jolla.lipstick.ConnectionSelector"
-        path: "/"
-        iface: "com.jolla.lipstick.ConnectionSelectorIf"
-        signalsEnabled: true
-
-        function openConnection() {
-            call('openConnectionNow', 'wifi')
-        }
-
-        function connectionSelectorClosed(connectionSelected) {
-            root._connectionSelected = connectionSelected
-            root._connectionSelectorClosed = true
         }
     }
 
     // The dialog may be visible briefly after the connection dialog is closed and
     // before the dialog is auto-accepted, so show a busy indicator as a placeholder.
     PageBusyIndicator {
-        running: root._connectionSelectorClosed && root._connectionSelected
+        running: connectionHelper.status == ConnectionHelper.Connecting
+                || (connectionHelper.online && !connectionHelper.selectorVisible)
     }
 
     Column {
         id: retryText
 
-        property bool display: root._connectionSelectorClosed && !root._connectionSelected
+        property bool display: root.status === PageStatus.Active
+                                && !connectionHelper.online
+                                && !connectionHelper.selectorVisible
+                                && connectionHelper.status != ConnectionHelper.Connecting
 
         width: parent.width
 
@@ -161,7 +134,7 @@ Dialog {
             //% "Connect"
             text: qsTrId("settings_accounts-bt-connect")
 
-            onClicked: root._showConnSelector()
+            onClicked: connectionHelper.attemptToConnectNetwork()
         }
     }
 

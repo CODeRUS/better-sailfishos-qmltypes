@@ -81,17 +81,6 @@ RawWebView {
         }
     }
 
-    onViewInitialized: {
-        webview.loadFrameScript("chrome://embedlite/content/embedhelper.js");
-        webview.addMessageListeners([
-                                        "embed:linkclicked",
-                                        "Content:ContextMenu",
-                                        "Content:SelectionRange",
-                                        "Content:SelectionCopied",
-                                        "Content:SelectionSwap"
-                                    ]);
-    }
-
     onContentOrientationChanged: {
         orientationFadeOut.restart()
     }
@@ -247,5 +236,14 @@ RawWebView {
                 webview.virtualKeyboardMargin = 0
             }
         }
+    }
+
+    Component.onCompleted: {
+        webview.loadFrameScript("chrome://embedlite/content/embedhelper.js")
+        webview.addMessageListener("embed:linkclicked")
+        webview.addMessageListener("Content:ContextMenu")
+        webview.addMessageListener("Content:SelectionRange")
+        webview.addMessageListener("Content:SelectionCopied")
+        webview.addMessageListener("Content:SelectionSwap")
     }
 }

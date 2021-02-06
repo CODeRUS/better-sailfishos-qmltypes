@@ -90,7 +90,7 @@ SilicaMouseArea {
         enabled: !_widthChanged && animateValue
         SmoothedAnimation {
             duration: 300
-            velocity: 1500*Theme.pixelRatio
+            velocity: Theme.dp(1500)
         }
     }
 
@@ -99,7 +99,7 @@ SilicaMouseArea {
         enabled: !_widthChanged && animateValue
         SmoothedAnimation {
             duration: 300
-            velocity: 1500*Theme.pixelRatio
+            velocity: Theme.dp(1500)
         }
     }
 

@@ -68,7 +68,7 @@ SilicaFlickable {
 
     property int _managedDock: dock
     property bool _isVertical: _managedDock == Dock.Top || _managedDock == Dock.Bottom
-    property real _threshold: Math.min((_isVertical ? height / 3 : width / 3), Theme.pixelRatio*90)
+    property real _threshold: Math.min((_isVertical ? height / 3 : width / 3), Theme.dp(90))
     property bool _initialized
     property bool _wasOpen
 

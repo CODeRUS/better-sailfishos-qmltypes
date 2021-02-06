@@ -6,16 +6,6 @@ import com.jolla.settings.accounts 1.0
 StandardAccountSettingsDisplay {
     id: root
 
-    onAccountInitialized: {
-        if (autoEnableAccount) {
-            var services = account.supportedServiceNames
-            for (var i in services) {
-                var service = accountManager.service(services[i])
-                account.enableWithService(service.name)
-            }
-        }
-    }
-
     Label {
         x: Theme.horizontalPageMargin
         width: parent.width - x*2

@@ -11,9 +11,11 @@ SettingsPage 1.0 SettingsPage.qml
 FavoritesZone 1.0 FavoritesZone.qml
 FavoriteMenu 1.0 FavoriteMenu.qml
 ApplicationsGridView 1.0 ApplicationsGridView.qml
-SettingsExpandedPage 1.0 SettingsExpandedPage.qml
 SettingsSectionView 1.0 SettingsSectionView.qml
 SettingsListView 1.0 SettingsListView.qml
 SettingsMenuItem 1.0 SettingsMenuItem.qml
 SettingsErrorNotification 1.0 SettingsErrorNotification.qml
+SettingsTabItem 1.0 SettingsTabItem.qml
+ApplicationSettings 1.0 ApplicationSettings.qml
+PermissionsSection 1.0 PermissionsSection.qml
 typeinfo plugins.qmltypes

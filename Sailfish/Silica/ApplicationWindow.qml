@@ -36,6 +36,7 @@ import QtQuick 2.1
 import QtQuick.Window 2.1 as QtQuick
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
+import Sailfish.Silica.Background 1.0
 import "CoverLoader.js" as CoverLoader
 import "private"
 
@@ -80,6 +81,27 @@ Window {
     property bool _dimScreen: { return false }
     readonly property bool _dimmingActive: _dimScreen || dimAnimation.running
 
+    property color _pageColor: {
+        if (Config.desktop) {
+            // Use black background when running Silica on desktop without ambiences
+            return palette.colorScheme === Theme.LightOnDark ? "black" : "white"
+        } else if (stack.currentPage
+                    && stack._currentContainer
+                    && stack._currentContainer.soleVisiblePage) {
+            return stack.currentPage.backgroundColor
+        } else {
+            return Theme.rgba(palette.overlayBackgroundColor, 0)
+        }
+    }
+
+    property color _pageDimmerColor: {
+        var opacity = (palette.colorScheme === Theme.LightOnDark) ? Theme.opacityFaint : Theme.opacityLow
+        var highContrast = stack.currentPage && stack.currentPage.highContrast
+        return Theme.rgba(palette.overlayBackgroundColor, highContrast ? opacity : 0)
+    }
+
+    Behavior on _pageDimmerColor { enabled: window.visible; ColorAnimation { duration: stack._transitionDuration } }
+
     property bool _autoGcWhenInactive: Config.wayland
     property int allowedOrientations: Orientation.All
     property int _defaultPageOrientations: Orientation.Portrait
@@ -87,9 +109,6 @@ Window {
 
     property bool _roundedCorners: true
     property bool _resizeContent: true
-
-    property alias _overlayBackgroundSource: overlayBackgroundSource
-    readonly property Item _applicationBlur: applicationBlur.blur ? applicationBlur : null
 
     // TODO minimization gc is temporary disabled while v4 gc does not
     // release memory allocated for js heap. See JB#22508 and JB#22814
@@ -99,6 +118,7 @@ Window {
     //     interval: Math.random()*15000+15000 // 15-30 seconds?
     //     onTriggered: gc()
     // }
+
 
     property QtObject __quickWindow
     onWindowChanged: {
@@ -159,21 +179,25 @@ Window {
     // For page stack applications, bind orientation to the Page at the top of the stack
     _allowedOrientations: stack.currentPage ? stack.currentPage._allowedOrientations : allowedOrientations
     _pageOrientation: stack.currentPage ? stack.currentPage._windowOrientation : undefined
-    _backgroundVisible: !stack.currentPage
-                || !stack.currentPage._opaqueBackground
-                || !stack._currentContainer
+    _backgroundVisible: !stack._currentContainer
+                || !stack._currentContainer.opaqueBackground
                 || !stack._currentContainer.soleVisiblePage
-    _backgroundColor: {
-        if (stack.currentPage
-                && stack._currentContainer
-                && stack._currentContainer.soleVisiblePage) {
-            return stack.currentPage.backgroundColor
-        } else if (Config.desktop) {
-            // Use black background when running Silica on desktop without ambiences
-            return "black"
-        } else {
-            return "transparent"
+    _backgroundColor: Qt.tint(_pageDimmerColor, _pageColor)
+
+    _windowOpacity: (stack.currentPage && stack.currentPage.orientationTransitionRunning), 1
+
+    background {
+        wallpaper: {
+            if (background.image == "") {
+                return undefined
+            } else if (background.filter === "") {
+                return imageWallpaper
+            } else {
+                return themeWallpaper
+            }
         }
+
+        _windowComponent: wallpaperWindowComponent
     }
 
     focus: true
@@ -189,32 +213,6 @@ Window {
         if ( pageStack.currentPage) {
             _loadCover()
         }
-    }
-
-    OverlayBackgroundSource {
-        id: overlayBackgroundSource
-
-        width: Screen.width
-        height: Screen.height
-
-        sourceItem: wallpaper
-        backgroundItem: Wallpaper {
-            width: Screen.width
-            height: Screen.height
-        }
-    }
-
-    BlurEffect {
-        id: applicationBlur
-        sourceItem: overlayBackgroundSource
-        visible: false
-        blur: overlayBackgroundSource.capturing
-
-        iterations: 2
-        kernel: BlurEffect.Gaussian17
-//        levels: Theme.pixelRatio >= 1.5 ? 4 : 3         // Homescreen values
-        levels: Theme.pixelRatio >= 1.5 ? 3 : 2
-        deviation: 5
     }
 
     // background image
@@ -321,6 +319,8 @@ Window {
 
                 property alias _windowOpacity: content.opacity
 
+                opacity: (stack.currentPage && stack.currentPage.orientationTransitionRunning), 1
+
                 // Content is now being resized. We need to add a property to skip resizing if there
                 // is such requirement in an app.
                 anchors.fill: parent
@@ -422,9 +422,156 @@ Window {
                 }
             ]
         }
+
+        Item {
+            z: 1
+            width: rotatingItem.width
+            height: rotatingItem.height
+
+            rotation: {
+                // This is derived independently of rotatingItem as that changes at the mid point
+                // of the page transitions when the page is fully transparent whereas this should
+                // change immediately to kick off its own animation.
+                switch (stack.currentPage ? stack.currentPage._windowOrientation : window.orientation) {
+                case Orientation.Landscape:
+                    return 90
+                case Orientation.PortraitInverted:
+                    return 180
+                case Orientation.LandscapeInverted:
+                    return 270
+                default:
+                    return 0
+                }
+            }
+
+            Behavior on rotation {
+                enabled: window.visible
+
+                SequentialAnimation {
+                    FadeAnimation { target: noticeLoader; to: 0 }
+                    PropertyAction {}
+                    FadeAnimation { target: noticeLoader; to: 1 }
+                }
+            }
+
+            anchors.centerIn: parent
+
+            AnimatedLoader {
+                id: noticeLoader
+
+                property var notice: Notices._currentNotice
+
+                width: rotatingItem.width
+                height: rotatingItem.height - Math.max(window.bottomMargin, stack.panelSize)
+
+                animating: noticeAnimation.running
+
+                onNoticeChanged: {
+                    if (notice.empty) {
+                        source = undefined
+                    } else {
+                        load(Qt.resolvedUrl("private/NoticeItem.qml"), "", {
+                            "notice": notice
+                        })
+                    }
+                }
+
+                onAnimate: {
+                    if (replacedItem) {
+                        replacedItem.enabled = false
+                    }
+
+                    if (item) {
+                        item.opacity = 0
+                    }
+
+                    noticeAnimation.restart()
+                }
+
+                onCompleteAnimation: {
+                    noticeAnimation.complete()
+                }
+
+                ParallelAnimation {
+                    id: noticeAnimation
+
+                    FadeAnimation {
+                        target: noticeLoader.replacedItem
+                        to: 0
+                    }
+                    FadeAnimation {
+                        target: noticeLoader.item
+                        to: 1
+                    }
+                }
+            }
+        }
     }
 
     ReturnToHomeHintCounter {}
+
+    Component {
+        id: wallpaperWindowComponent
+
+        WallpaperWindow {
+            id: wallpaperWindow
+
+            windowWidth: wallpaperLoader.width
+            windowHeight: wallpaperLoader.height
+
+            windowVisible: (wallpaperLoader.item || wallpaperLoader.replacedItem)
+
+            WallpaperLoader {
+                id: wallpaperLoader
+
+                properties: ({
+                    "imageUrl": window.background.image,
+                    "wallpaperFilter": window.background.filter,
+                })
+
+                asynchronous: !!window.__quickWindow && window.__quickWindow.visible
+                transitionEnabled: !!window.__quickWindow && window.__quickWindow.visible
+
+                wallpaper: window.background.wallpaper
+                animating: opacityAnimationRunning || lowerAnimation.running
+
+                onAnimate: {
+                    if (!replacedItem) {
+                        wallpaperWindow.raise()
+                    } else if (!item) {
+                        wallpaperWindow.lower()
+                        lowerAnimation.restart()
+                    } else {
+                        animateOpacity()
+                    }
+                }
+                onCompleteAnimation: {
+                    completeOpacityAnimation()
+                    lowerAnimation.complete()
+                }
+
+                PauseAnimation {
+                    id: lowerAnimation
+                    duration:  1000
+                    running: false
+                }
+            }
+        }
+    }
+
+    Component {
+        id: imageWallpaper
+
+        ImageWallpaper {
+        }
+    }
+
+    Component {
+        id: themeWallpaper
+
+        ThemeImageWallpaper {
+        }
+    }
 
     Component.onCompleted: {
         if (initialPage) {

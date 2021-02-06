@@ -199,9 +199,9 @@ Rectangle {
         DownloadMenuItem {
             visible: root.downloadsEnabled && root.isImage && downloadFileTargetUrl
             //: This menu item saves image to Gallery application
-            //% "Save to Gallery"
-            text: qsTrId("sailfish_components_webview_popups-me-save_image_to_gallery")
-            targetDirectory: StandardPaths.pictures
+            //% "Save image"
+            text: qsTrId("sailfish_components_webview_popups-me-save_image")
+            targetDirectory: StandardPaths.download
             linkUrl: root.imageSrc
             contentType: root.contentType
             viewId: root.viewId

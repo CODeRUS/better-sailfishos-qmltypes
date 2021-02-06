@@ -1,7 +1,7 @@
 /****************************************************************************
  **
- ** Copyright (C) 2013-2014 Jolla Ltd.
- ** Contact: Bea Lam <bea.lam@jollamobile.com>
+ ** Copyright (C) 2013-2019 Jolla Ltd.
+ ** Copyright (C) 2020 Open Mobile Platform LLC.
  **
  ****************************************************************************/
 
@@ -13,48 +13,39 @@ import org.nemomobile.lipstick 0.1
 BackgroundItem {
     id: root
 
+    //% "Show more..."
+    property string defaultTitle: qsTrId("lipstick-jolla-home-bt-show_more")
     property alias title: showMore.text
+    property alias showRemainingCount: remainingCountLabel.visible
+    property int remainingCount
     property bool expandable: true
-    property bool inRemovableGroup
-    property int animationDuration: 250
 
-    property alias defaultTitle: showMore.defaultText
+    onPressAndHold: if (!Lipstick.compositor.eventsLayer.housekeeping) Lipstick.compositor.eventsLayer.setHousekeeping(true)
 
-    property real _expandedHeight: showMore.height + 2*Theme.paddingMedium
+    opacity: enabled ? 1 : 0
+    implicitHeight: row.height + 2*Theme.paddingMedium
+    height: Math.max(Theme.paddingSmall, (expandable ? 1 : opacity) * implicitHeight)
+    Behavior on opacity { FadeAnimation {} }
 
-    property real contentLeftMargin: inRemovableGroup && Lipstick.compositor.eventsLayer.housekeeping
-                                     ? (_deleteIconMargin + Theme.iconSizeMedium + _deleteIconMargin)
-                                     : Theme.horizontalPageMargin
-
-    property real _deleteIconMargin: Theme.paddingLarge
-
-    opacity: expandable ? 1 : 0
-    implicitHeight: _expandedHeight * opacity
-
-    Behavior on opacity {
-        FadeAnimation {
-            duration: root.animationDuration
-        }
-    }
-
-    Behavior on contentLeftMargin {
-        NumberAnimation {
-            duration: root.animationDuration
-            easing.type: Easing.InOutQuad
-        }
-    }
-
-    ShowMoreButton {
-        id: showMore
-
+    Row {
+        id: row
         anchors {
-            left: parent.left
-            leftMargin: contentLeftMargin
             right: parent.right
-            rightMargin: Theme.paddingMedium
+            rightMargin: Theme.horizontalPageMargin
             verticalCenter: parent.verticalCenter
         }
-        enabled: false
-        highlighted: root.highlighted
+        spacing: Theme.paddingMedium
+
+        Label {
+            id: showMore
+            text: defaultTitle
+            font.pixelSize: Theme.fontSizeExtraSmall
+        }
+        Label {
+            id: remainingCountLabel
+            visible: root.remainingCount > 0
+            text: "+" + root.remainingCount.toLocaleString()
+            font.pixelSize: Theme.fontSizeExtraSmall
+        }
     }
 }

@@ -77,6 +77,7 @@
 
 import QtQuick 2.2
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 import "PageStack.js" as PageStack
 import "private"
 
@@ -99,6 +100,10 @@ PageStackBase {
 
     readonly property real _currentWidth: currentPage ? currentPage.width : 0
     readonly property real _currentHeight: currentPage ? currentPage.height : 0
+
+    property real _pageOpacity: 1
+
+    property Component pageBackground
 
     // Duration of transition animations (in ms)
     property int _transitionDuration: 400
@@ -207,13 +212,14 @@ PageStackBase {
         snapBackAnimation.clearTarget(false)
 
         operationType = _normalizeOperationType(operationType)
-        if (_currentContainer.attached) {
-            return PageStack.exitAttached(operationType)
-        }
 
-        if (currentPage !== null) {
-            currentPage._navigation = PageNavigation.Back
-            currentPage._direction = direction
+        if (_currentContainer !== null) {
+            if (_currentContainer.attached) {
+                return PageStack.exitAttached(operationType)
+            }
+
+            _currentContainer.navigation = PageNavigation.Back
+            _currentContainer.direction = direction
         }
         return pop(undefined, operationType)
     }
@@ -241,14 +247,15 @@ PageStackBase {
         snapBackAnimation.clearTarget(false)
 
         operationType = _normalizeOperationType(operationType)
-        if (_currentContainer.attachedContainer) {
-            return PageStack.enterAttached(_currentContainer.attachedContainer, operationType)
-        }
 
-        if (currentPage !== null) {
-            currentPage._navigationPending = PageNavigation.Forward
-            currentPage._navigation = PageNavigation.Forward
-            currentPage._direction = PageNavigation.Right
+        if (_currentContainer !== null) {
+            if (_currentContainer.attachedContainer) {
+                return PageStack.enterAttached(_currentContainer.attachedContainer, operationType)
+            }
+
+            _currentContainer.navigationPending = PageNavigation.Forward
+            _currentContainer.navigation = PageNavigation.Forward
+            _currentContainer.direction = PageNavigation.Right
         }
         if (_pendingContainer !== null) {
             return PageStack.pushPending(operationType)
@@ -294,25 +301,6 @@ PageStackBase {
         return input
     }
 
-    // Sets the page status.
-    function _setPageStatus(page, status) {
-        if (page !== null && page.status !== undefined) {
-            if ((page._navigation !== PageNavigation.NoNavigation) &&
-                (page.status !== status) &&
-                (status === PageStatus.Active || status === PageStatus.Activating)) {
-                // If we have previously navigated away from this page, set back to None
-                page._navigation = PageNavigation.NoNavigation
-                page._navigationPending = PageNavigation.NoNavigation
-            }
-
-            if (status === PageStatus.Active && page.status === PageStatus.Inactive) {
-                page.status = PageStatus.Activating
-            } else if (status === PageStatus.Inactive && page.status === PageStatus.Active) {
-                page.status = PageStatus.Deactivating
-            }
-            page.status = status
-        }
-    }
     function _calculateDuration(destination, location, transitionLength) {
         var distance = (destination - location)
         if (distance == 0) {
@@ -406,13 +394,13 @@ PageStackBase {
 
     property int dragDirection: PageNavigation.NoDirection
     onDragDirectionChanged: {
-        if (currentPage && (currentPage._navigation == PageNavigation.NoNavigation)) {
+        if (_currentContainer && (_currentContainer.navigation == PageNavigation.NoNavigation)) {
             if (dragDirection === PageNavigation.Right) {
-                currentPage._navigationPending = PageNavigation.Forward
+                _currentContainer.navigationPending = PageNavigation.Forward
             } else if (dragDirection === PageNavigation.NoDirection) {
-                currentPage._navigationPending = PageNavigation.NoNavigation
+                _currentContainer.navigationPending = PageNavigation.NoNavigation
             } else {
-                currentPage._navigationPending = PageNavigation.Back
+                _currentContainer.navigationPending = PageNavigation.Back
             }
         }
     }
@@ -751,185 +739,45 @@ PageStackBase {
     }
 
     Component {
-        id: asyncObjectComponent
-        QtObject {
-            property bool __asyncObject
-            property Page page
-            signal pageCompleted(Page page)
-            signal pageError(string errorString)
-            property Timer simulateCompletionTimer: Timer {
-                interval: 1
-                onTriggered: pageCompleted(page)
-            }
-        }
-    }
-
-    Component {
-        id: placeholderPage
-
-        Page {
-            id: placeholder
-
-            property var page
-            property FadeAnimator pageFade
-            property var startTime
-            property var properties
-            property Item newPage
-            property bool __placeholder: true
-            property QtObject asyncObject
-
-            function createPage(container) {
-                startTime = new Date().getTime()
-                createTimer.start()
-                visible = true
-                busyIndicator.opacity = 0.0
-                busyFade.duration = 1500
-                busyFade.to = 1.0
-                busyFade.restart()
-            }
-
-            function reset() {
-                page = undefined
-                properties = undefined
-                asyncObject = null
-                pageFade = null
-                busyFade.stop()
-                busyIndicator.opacity = 0.0
-                errorLabel.enabled = false
-                newPage = null
-            }
-
-            function error(errorString) {
-                busyFade.stop()
-                busyIndicator.opacity = 0.0
-                errorLabel.enabled = true
-                asyncObject.pageError(errorString)
-                throw new Error(errorString)
-            }
-
-            Component {
-                id: pageFadeComponent
-                FadeAnimator {
-                    target: newPage
-                    to: 1.0
-                    onStopped: {
-                        placeholder.newPage._backgroundParent = placeholder.parent
-                        placeholder.newPage.parent.backgroundParent = placeholder.parent
-                        destroy()
-                    }
-                }
-            }
-
-            PageBusyIndicator {
-                id: busyIndicator
-                running: (page || (pageFade && pageFade.running)) && Qt.application.active
-                opacity: 0.0
-
-                FadeAnimator {
-                    id: busyFade
-                    target: busyIndicator
-                    duration: 1500
-                    easing.type: Easing.InExpo
-                    to: 1.0
-                }
-            }
-
-            InfoLabel {
-                id: errorLabel
-                //% "Page loading failed"
-                text: qsTrId("components-la-page_loading_failed")
-                anchors.verticalCenter: parent.verticalCenter
-                opacity: enabled ? 1.0 : 0.0
-                enabled: false
-                Behavior on opacity { FadeAnimator {}}
-            }
-
-            Timer {
-                id: createTimer
-                interval: 1
-
-                onTriggered: {
-                    var pageComp
-                    if (page.createObject) {
-                        // page defined as component
-                        pageComp = page;
-                    } else if (typeof page == "string") {
-                        // If 'page' is a string but does not end in .qml, assume it is an
-                        // import-path style import (e.g. push(Sailfish.Contacts.Foo))
-                        if (page.indexOf(".qml", page.length - ".qml".length) === -1) {
-                            page = root.resolveImportPage(page)
-                        }
-
-                        // page defined as string (a url)
-                        pageComp = Qt.createComponent(page);
-                        if (!pageComp) {
-                            error("Unable to locate component: " + page)
-                        }
-
-                    }
-                    if (pageComp) {
-                        if (pageComp.status == Component.Error) {
-                            error("Error while loading page: " + pageComp.errorString())
-                        } else {
-                            // instantiate page from component
-                            var container = placeholder.parent
-                            newPage = pageComp.createObject(container, properties || {})
-                            newPage.visible = true
-                            newPage.opacity = 0.0
-                            newPage.pageContainer = placeholder.pageContainer
-                            newPage._backgroundParent = newPage
-                            newPage._navigation = placeholder._navigation
-                            newPage.pageContainer._setPageStatus(newPage, placeholder.status)
-                            container.page = newPage
-                            container.owner = container
-                            container.backgroundParent = newPage
-                            PageStack.connectForwardDestinationHandlers(container)
-                            var creationTime = new Date().getTime() - startTime
-                            var differentOrientation = container.transitionPartner.page.orientation === newPage.orientation
-                            var multiplier = Math.max(0.0, Math.min(1.0, creationTime/_transitionDuration))
-                            placeholder._exposed = false
-
-                            pageFade = pageFadeComponent.createObject(placeholder)
-                            pageFade.duration = multiplier * (differentOrientation ? 250 : 400)
-
-                            pageFade.restart()
-                            busyFade.duration = 100
-                            busyFade.to = 0.0
-                            busyFade.restart()
-                            placeholder.page = null
-                            asyncObject.page = newPage
-                            asyncObject.pageCompleted(newPage)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    Component {
         id: containerComponent
 
         FocusScope {
             id: container
 
-            property Item page
-            property Item owner
+            property var source
+            property var properties
+            property var asyncLoad
+
+            property alias asyncObject: asyncStatus
+            readonly property Item page: pageLoader.item
+                    ? (pageLoader.item.hasOwnProperty("__silica_page") ? pageLoader.item : null)
+                    : (!!source && source.parent !== undefined ? source : null)
+            property Item owner: container
             property int pageStackIndex: -1
             property Item transitionPartner
             property QtObject animation
             property bool expired
             property bool animationRunning: animation ? animation.running || useAnimator : false
-            property bool justCreated: true
             property bool attached
             property Item attachedContainer
             property bool containsDialog: page !== null && page.hasOwnProperty('__silica_dialog')
             property bool fixDragPosition
             property int __silica_pagestack_container
+            property int status: PageStatus.Inactive
             property int direction
+            property int navigation: PageNavigation.NoNavigation
+            property int navigationPending: PageNavigation.NoNavigation
             property bool useAnimator
             readonly property bool soleVisiblePage: direction === PageNavigation.NoDirection
+                        && status === PageStatus.Active
                         && dragOffset === 0
-            property alias backgroundParent: background.parent
+            readonly property bool opaqueBackground: pageLoader.status === Private.AnimatedLoader.Ready
+                        && pageLoader.item
+                        && (pageLoader.item._opaqueBackground || pageLoader.item.backgroundColor.a === 1)
+                        && backgroundLoader.status === Private.AnimatedLoader.Ready
+                        && !backgroundAnimation.running
+
+            property var startTime: new Date().getTime()
 
             property real transitionDistance: {
                 switch (direction) {
@@ -982,15 +830,20 @@ PageStackBase {
                     return 0
                 }
             }
-            width: parent ? parent.width : Screen.width
-            height: parent ? parent.height : Screen.height
+            width: root.width
+            height: root.height
+            visible: false
+
+            onVisibleChanged: {
+                if (!visible && useAnimator) {
+                    useAnimator = false
+                    fixDragPosition = true
+                }
+            }
 
             Behavior on x {
                 enabled: useAnimator && (_currentOrientation == Orientation.Portrait || _currentOrientation == Orientation.PortraitInverted)
                 SequentialAnimation {
-                    // We need to ensure that the XAnimator starts before the page creation,
-                    // in order to synchronize it with the page edge transition.
-                    // However, we can't use XAnimator onRunningChanged because it doesn't work inside a group.
                     ParallelAnimation {
                         XAnimator {
                             target: container
@@ -1003,8 +856,8 @@ PageStackBase {
                             }
                             ScriptAction {
                                 script: {
-                                    if (page.hasOwnProperty("__placeholder")) {
-                                        page.createPage(container)
+                                    if (container.asyncLoad && pageLoader.source === loadingComponent) {
+                                        container.loadPage()
                                     }
                                 }
                             }
@@ -1031,8 +884,8 @@ PageStackBase {
                             }
                             ScriptAction {
                                 script: {
-                                    if (page.hasOwnProperty("__placeholder")) {
-                                        page.createPage(container)
+                                    if (container.asyncLoad && pageLoader.source === loadingComponent) {
+                                        container.loadPage()
                                     }
                                 }
                             }
@@ -1047,19 +900,31 @@ PageStackBase {
             // This needs to be a binding rather than static assignment so that the value is restored by the Binding element
             opacity: { return 1.0 }
 
-            focus: page !== null && page.status === PageStatus.Active
+            focus: status === PageStatus.Active && pageLoader.status === Private.AnimatedLoader.Ready
 
             // Return to the event loop on animation end, because the page status change handler might
             // start another animation, which would then be detected as a binding loop
             onAnimationRunningChanged: if (!animationRunning) animationCompletedTimer.restart()
 
+            function loadPage() {
+                var source = container.source
+
+                if (typeof source === "string") {
+                    // If 'source' is a string but does not end in .qml, assume it is an
+                    // import-path style import (e.g. push(Sailfish.Contacts.Foo))
+                    if (source.indexOf(".qml", source.length - ".qml".length) === -1) {
+                        source = root.resolveImportPage(source)
+                    }
+                }
+
+                pageLoader.load(source, "", properties)
+            }
+
             function show() {
                 visible = true
-                page.visible = true
             }
             function hide() {
                 visible = false
-                page.visible = false
             }
             function removeAnimation() {
                 if (animation) {
@@ -1069,14 +934,6 @@ PageStackBase {
             }
             function resetPending(noWarnings) {
                 // Ensure that we don't have any actions pending
-                if (delayedTransitionTimer.running) {
-                    if (!noWarnings) {
-                        console.log('WARNING - preventing animation on reset!')
-                    }
-                    delayedTransitionTimer.stop()
-                    animation.restart()
-                    animation.complete()
-                }
                 if (animationCompletedTimer.running) {
                     if (!noWarnings) {
                         console.log('WARNING - previous animation not yet completed!')
@@ -1085,17 +942,38 @@ PageStackBase {
                     transitionEnded()
                 }
             }
+
+            function delayEmitCompleted() {
+                completedTimer.start()
+            }
+
+            function setStatus(newStatus) {
+                if ((navigation !== PageNavigation.NoNavigation) &&
+                    (status !== newStatus) &&
+                    (newStatus === PageStatus.Active || newStatus === PageStatus.Activating)) {
+                    // If we have previously navigated away from this page, set back to None
+                    navigation = PageNavigation.NoNavigation
+                    navigationPending = PageNavigation.NoNavigation
+                }
+
+                if (newStatus === PageStatus.Active && status === PageStatus.Inactive) {
+                    status = PageStatus.Activating
+                } else if (newStatus === PageStatus.Inactive && status === PageStatus.Active) {
+                    status = PageStatus.Deactivating
+                }
+                status = newStatus
+            }
+
             function enterImmediate() {
                 resetPending()
                 opacity = 1.0
                 dragOffset = 0
-                page.pageContainer = root
-                _setPageStatus(page, PageStatus.Active)
+                setStatus(PageStatus.Active)
             }
             function exitImmediate() {
                 resetPending()
                 hide()
-                _setPageStatus(page, PageStatus.Inactive)
+                setStatus(PageStatus.Inactive)
                 if (expired) {
                     cleanup()
                 }
@@ -1136,7 +1014,7 @@ PageStackBase {
             function pushEnter(partner, operationType, useAnimator) {
                 resetPending()
 
-                direction = page.navigationStyle == PageNavigation.Horizontal ? PageNavigation.Right : PageNavigation.Up
+                direction = page && page.navigationStyle == PageNavigation.Horizontal ? PageNavigation.Right : PageNavigation.Up
                 if (testSlideTransition(partner, true)) {
                     var length = (fixDragPosition ? partner.transitionLength : transitionLength)
                     dragOffset = partner.dragOffset + length
@@ -1153,17 +1031,16 @@ PageStackBase {
                 }
 
                 transitionPartner = partner
-                page.pageContainer = root
                 transitionStarted()
             }
             function popEnter(partner) {
                 resetPending()
                 transitionPartner = partner
 
-                if (transitionPartner.page._navigation === PageNavigation.NoNavigation) {
+                if (transitionPartner.navigation === PageNavigation.NoNavigation) {
                     direction = transitionPartner.page._horizontalNavigationStyle ? PageNavigation.Left : PageNavigation.Up
                 } else {
-                    direction = transitionPartner.page._direction
+                    direction = transitionPartner.direction
                 }
 
                 if (testSlideTransition(transitionPartner, false)) {
@@ -1180,36 +1057,28 @@ PageStackBase {
                     animation = fadeAnimation
                 }
 
-                page.pageContainer = root
                 transitionStarted()
             }
             function pushExit(partner) {
                 resetPending()
                 transitionPartner = partner
                 direction = PageNavigation.Right
-                _setPageStatus(page, PageStatus.Deactivating)
+                setStatus(PageStatus.Deactivating)
             }
             function popExit(partner) {
                 resetPending()
                 transitionPartner = partner
-                direction = page._direction
-                _setPageStatus(page, PageStatus.Deactivating)
+                setStatus(PageStatus.Deactivating)
             }
             function transitionStarted() {
                 // Animation runs on the activating page
-                _setPageStatus(page, PageStatus.Activating)
+                setStatus(PageStatus.Activating)
 
                 if (animation) {
                     _ongoingTransitionCount++
                     animation.setTarget(container)
 
-                    // Is this helpful?
-                    if (justCreated) {
-                        justCreated = false
-                        delayedTransitionTimer.restart()
-                    } else {
-                        animation.restart()
-                    }
+                    animation.restart()
 
                     // Block touch input until the animation is nearly finished
                     touchBlockTimer.interval = useAnimator ? _transitionDuration : Math.max(animation.duration - 50, 1)
@@ -1244,13 +1113,13 @@ PageStackBase {
 
                 // if the page hasn't been manually destroyed, visually reparent it back.
                 if (page !== null) {
-                    if (page.status === PageStatus.Activating) {
-                        _setPageStatus(page, PageStatus.Active)
+                    if (status === PageStatus.Activating) {
+                        setStatus(PageStatus.Active)
 
                         // Ensure we are fully opaque
                         opacity = 1.0
-                    } else if (page.status === PageStatus.Deactivating){
-                        _setPageStatus(page, PageStatus.Inactive)
+                    } else if (status === PageStatus.Deactivating){
+                        setStatus(PageStatus.Inactive)
                         hide()
                         if (expired) {
                             cleanup()
@@ -1266,15 +1135,14 @@ PageStackBase {
                 }
                 // if the page hasn't been manually destroyed, visually reparent it back.
                 if (page !== null) {
-                    if (page.status === PageStatus.Active) {
-                        _setPageStatus(page, PageStatus.Inactive)
-                    }
+                    page.__stack_container = null
+
                     if (owner != container) {
                         // container is not the owner of the page - re-parent back to original owner
-                        page.visible = false
                         page.parent = owner
                     }
                     page.pageContainer = null
+                    page.__stack_container = null
                 }
                 container.destroy()
             }
@@ -1283,21 +1151,6 @@ PageStackBase {
                 return (container === dragBinding.targetItem) || (container === slideAnimation.target) || (container === snapBackAnimation.target)
             }
 
-            Binding {
-                // When the container is top of the stack, or involved in a transition with the top of stack
-                target: container.page
-                property: '_exposed'
-                value: __silica_applicationwindow_instance.visible
-                        && __silica_applicationwindow_instance.__quickWindow
-                        && __silica_applicationwindow_instance.__quickWindow.visible
-                        && ((_currentContainer === container) || (_currentContainer !== null && (_currentContainer === container.transitionPartner)))
-            }
-            Binding {
-                // When the container is active, but not the top of the stack
-                target: container.page
-                property: '_belowTop'
-                value: (_currentContainer === container) && (container.attachedContainer !== null)
-            }
             Binding {
                 // When the container is involved in a transition with an animated container
                 target: container
@@ -1331,34 +1184,240 @@ PageStackBase {
                 property: "opacity"
                 when: container.dragOffset !== 0 && transitionPartner && container.page.rotation !== transitionPartner.page.rotation
                 value: transitionPartner
-                       ? (!fixDragPosition && (page.status === PageStatus.Activating
-                         || (_currentContainer == transitionPartner && page.status !== PageStatus.Deactivating))
+                       ? (!fixDragPosition && (container.status === PageStatus.Activating
+                         || (_currentContainer == transitionPartner && container.status !== PageStatus.Deactivating))
                           ? 1.0
                           : 1.0 - Math.abs(container.dragOffset) / (fixDragPosition ? transitionPartner.transitionLength : transitionLength))
                        : 0
             }
+
             Timer {
                 id: animationCompletedTimer
                 interval: 1
                 onTriggered: container.transitionEnded()
             }
 
-            Timer {
-                id: delayedTransitionTimer
-                interval: 1
-                onTriggered: container.animation.restart()
+            QtObject {
+                id: asyncStatus
+
+                property int __asyncObject
+                property alias __animating: pageLoader.animating
+
+                property string errorString
+
+                property Item page: (pageLoader.status === Private.AnimatedLoader.Ready
+                            || pageLoader.status === Private.AnimatedLoader.Null)
+                            && (container.page && !container.page.hasOwnProperty("__placeholder"))
+                        ? container.page
+                        : null
+
+                signal pageCompleted(Page page)
+                signal pageError(string errorString)
+
+                onPageChanged: {
+                    if (container.asyncLoad) {
+                        pageCompleted(page)
+                    }
+                }
             }
 
-            Rectangle {
-                id: background
+            Timer {
+                id: completedTimer
+
+                interval: 1
+                onTriggered: {
+                    if (asyncStatus.page) {
+                        asyncStatus.pageCompleted(asyncStatus.page)
+                    } else {
+                        asyncStatus.pageError(asyncStatus.errorString)
+                    }
+                }
+            }
+
+            Private.AnimatedLoader {
+                id: backgroundLoader
+
+                width: Screen.width
+                height: Screen.height
+
+                source: container.page && !!container.page.background
+                        ? container.page.background
+                        : undefined
+
+                visible: !container.soleVisiblePage || (container.page && container.page._opaqueBackground)
+
+                onInitializeItem: {
+                    item.width = Qt.binding(function() { return backgroundLoader.width })
+                    item.height = Qt.binding(function () { return backgroundLoader.height })
+                }
+
+                onAnimate: {
+                    animating = backgroundAnimation.running
+
+                    if (item) {
+                        item.opacity = 0
+                        backgroundAnimation.to = 1
+                        backgroundAnimation.target = item
+                    } else if (replacedItem) {
+                        backgroundAnimation.to = 0
+                        backgroundAnimation.target = replacedItem
+                    }
+
+                    var creationTime = new Date().getTime() - container.startTime
+                    var multiplier = Math.max(0.0, Math.min(1.0, creationTime / root._transitionDuration))
+
+                    backgroundAnimation.duration = multiplier * 250
+
+                    backgroundAnimation.restart()
+
+                    animating = Qt.binding(function () { return backgroundAnimation.running })
+                }
+
+                FadeAnimator {
+                    id: backgroundAnimation
+
+                    duration: 100
+                }
+            }
+
+            Private.AnimatedLoader {
+                id: pageLoader
 
                 width: container.width
                 height: container.height
-                z: -10000
 
-                color: container.page ? container.page.backgroundColor : "transparent"
-                visible: !container.soleVisiblePage
+                asynchronous: false
 
+                onError: {
+                    source = errorComponent
+
+                    if (container.asyncLoad) {
+                        asyncStatus.pageError(errorString)
+                    } else {
+                        asyncStatus.errorString = errorString
+
+                        completedTimer.start()
+                    }
+                }
+
+                onAboutToComplete: {
+                    if (container.page !== null) {
+                        container.asyncLoad = false
+
+                        var page = container.page
+                        container.owner = page.parent
+                        page.parent = pageLoader
+
+                        for (var prop in container.properties) {
+                            if (prop in page) {
+                                page[prop] = container.properties[prop]
+                            }
+                        }
+
+                        initializeItem(page)
+                    } else if (container.asyncLoad) {
+                        load(loadingComponent)
+                    } else {
+                        container.loadPage()
+                    }
+                }
+
+                Component.onCompleted: {
+                    if (!container.asyncLoad && asyncStatus.page !== null) {
+                        completedTimer.start()
+                    }
+                }
+
+                onInitializeItem: {
+                    if (item.hasOwnProperty("__silica_page")) {
+                        item.pageContainer = root
+                        item.__stack_container = container
+
+                        item._forwardDestinationChanged.connect(function () {
+                            PageStack.forwardDestinationChanged(container)
+                        })
+                        item._forwardDestinationActionChanged.connect(function () {
+                            PageStack.forwardDestinationChanged(container)
+                        })
+                    }
+                }
+
+                animating: loadedAnimation.running
+
+                onAnimate: {
+                    if (item) {
+                        item.opacity = 0
+
+                        var creationTime = new Date().getTime() - container.startTime
+                        var differentOrientation = container.transitionPartner && container.transitionPartner.page.orientation === item.orientation
+                        var multiplier = Math.max(0.0, Math.min(1.0, creationTime / root._transitionDuration))
+
+                        pageFadeIn.duration = multiplier * (differentOrientation ? 250 : 400)
+                    }
+
+                    loadedAnimation.restart()
+                }
+
+                ParallelAnimation {
+                    id: loadedAnimation
+
+                    FadeAnimation {
+                        target: pageLoader.replacedItem
+                        to: 0
+                        duration: 100
+                    }
+                    FadeAnimation {
+                        id: pageFadeIn
+
+                        target: pageLoader.item
+                        to: 1
+                        duration: 250
+                    }
+                }
+            }
+
+            Component {
+                id: loadingComponent
+
+                Page {
+                    property int __placeholder
+
+                    focus: false
+
+                    PageBusyIndicator {
+                        id: busyIndicator
+
+                        running: Qt.application.active
+                        z: 1
+
+                        FadeAnimator {
+                            id: busyFade
+                            target: busyIndicator
+                            duration: 1500
+                            easing.type: Easing.InExpo
+                            to: 1.0
+                        }
+                    }
+                }
+            }
+
+            Component {
+                id: errorComponent
+
+                Page {
+                    property int __placeholder
+
+                    InfoLabel {
+                        id: errorLabel
+
+                        readonly property Component background: root.pageBackground
+
+                        //% "Page loading failed"
+                        text: qsTrId("components-la-page_loading_failed")
+                        anchors.verticalCenter: parent.verticalCenter
+                        enabled: false
+                    }
+                }
             }
         }
     }

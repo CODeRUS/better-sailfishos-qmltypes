@@ -51,19 +51,6 @@ Column {
         return storageListModel.get(storageCombo.currentIndex)
     }
 
-    function reselectLastStorageSelection() {
-        var accountIdOrPath = lastSelectedStorage.value
-        if (accountIdOrPath != null) {
-            for (var i = 0; i < storageListModel.count; ++i) {
-                if (_matchesComboIndex(i, accountIdOrPath)) {
-                    root.currentIndex = i
-                    _update()
-                    break
-                }
-            }
-        }
-    }
-
     function _matchesComboIndex(index, accountIdOrPath) {
         var data = storageListModel.get(index)
         return (typeof accountIdOrPath === 'number' && data.accountId === accountIdOrPath)
@@ -131,17 +118,6 @@ Column {
         currentIndex: -1
         enabled: root.enabled
 
-        onCurrentIndexChanged: {
-            if (currentIndex >= 0) {
-                var data = root.storageListModel.get(currentIndex)
-                if (data.accountId > 0) {
-                    lastSelectedStorage.value = data.accountId
-                } else {
-                    lastSelectedStorage.value = data.devPath
-                }
-            }
-        }
-
         menu: ContextMenu {
             id: storageMenu
 
@@ -159,6 +135,12 @@ Column {
                     text: model.name
 
                     onClicked: {
+                        if (model.accountId > 0) {
+                            lastSelectedStorage.value = model.accountId
+                        } else {
+                            lastSelectedStorage.value = model.devPath
+                        }
+
                         storageCombo.currentIndex = index
                         root._update()
                         storageMenu.close()

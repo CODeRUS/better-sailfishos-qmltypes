@@ -33,4 +33,7 @@ FingerEnrollmentDialog 1.0 FingerEnrollmentDialog.qml
 FingerEnrollmentWelcomeDialog 1.0 FingerEnrollmentWelcomeDialog.qml
 DeviceLockFeedback 1.0 DeviceLockFeedback.qml
 UserIcon 1.0 UserIcon.qml
+LicensesPage 1.0 LicensesPage.qml
+PackagesPage 1.0 PackagesPage.qml
+PackageDetailsPage 1.0 PackageDetailsPage.qml
 typeinfo plugins.qmltypes

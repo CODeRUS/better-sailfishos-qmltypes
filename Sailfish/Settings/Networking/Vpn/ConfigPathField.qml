@@ -49,7 +49,6 @@ BackgroundItem {
 
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width - iconButton.width
-        placeholderText: label
         highlighted: activeFocus || root.highlighted
         text: {
             if (root.path) {

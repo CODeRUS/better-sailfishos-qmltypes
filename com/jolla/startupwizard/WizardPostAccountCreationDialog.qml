@@ -37,7 +37,8 @@ Dialog {
     readonly property bool _sailfishAppInstallationAllowed: !sailfishAppSelectionSuppressed.value && policy.value
     readonly property bool _androidAppInstallationAllowed: !androidSelectionSuppressed.value && policy.value
 
-    canAccept: sailfishAppsModel.populated && androidAppsModel.populated && androidAppsModel.androidSupportStatus != StartupApplicationModel.Unknown
+    canAccept: (sailfishAppsModel.populated && androidAppsModel.populated && androidAppsModel.androidSupportStatus != StartupApplicationModel.Unknown)
+               || !pageTimeout.running
     acceptDestination: {
         if (canAccept) {
             _skipAppPage ? (_skipAndroidPage ? root.endDestination : root._androidAppsInstallDialog)
@@ -51,6 +52,13 @@ Dialog {
     acceptDestinationProperties: _skipAppPage ? (_skipAndroidPage ? root.endDestinationProperties : undefined)
                                               : undefined
     acceptDestinationReplaceTarget: acceptDestination == root.endDestination ? root.endDestinationReplaceTarget : undefined
+
+    Timer {
+        id: pageTimeout
+
+        interval: 30 * 1000
+        running: root.status === PageStatus.Activating || root.status === PageStatus.Active
+    }
 
     StartupApplicationModel {
         id: sailfishAppsModel

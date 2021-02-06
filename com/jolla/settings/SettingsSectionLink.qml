@@ -8,7 +8,7 @@ SettingItem {
     property url iconSource
     property int depth
 
-    height: row.height
+    implicitHeight: Math.max(Theme.itemSizeSmall, label.height + 2 * Theme.paddingMedium)
 
     onClicked: {
         pageStack.animatorPush("SettingsPage.qml", {

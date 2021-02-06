@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (c) 2019 Open Mobile Platform LLC
+** Copyright (c) 2019-2020 Open Mobile Platform LLC
 ** All rights reserved.
 **
 ** License: Proprietary.
@@ -22,11 +22,9 @@ NotificationGroupMember {
     property string eventUrl
 
     width: parent.width
-    contentWidth: width - contentLeftMargin
     contentHeight: Math.max(image.y + image.height, content.y + content.height) + Theme.paddingLarge
-    deleteIconCenterY: image.y + image.height/2
 
-    onClicked: {
+    onTriggered: {
         if (eventUrl.length > 0) {
             Qt.openUrlExternally(eventUrl)
         }
@@ -35,8 +33,8 @@ NotificationGroupMember {
     Image {
         id: image
         y: Theme.paddingLarge
-        width: Theme.itemSizeMedium
-        height: Theme.itemSizeMedium
+        width: Theme.iconSizeMedium
+        height: Theme.iconSizeMedium
     }
 
     Column {
@@ -49,7 +47,7 @@ NotificationGroupMember {
             topMargin: -Theme.paddingSmall
         }
 
-        width: root.contentWidth - x - Theme.paddingMedium
+        width: root.width - x - root.contentLeftMargin - Theme.paddingMedium
         spacing: Theme.paddingSmall
 
         Label {
@@ -57,7 +55,7 @@ NotificationGroupMember {
             width: parent.width
             elide: Text.ElideRight
             wrapMode: Text.Wrap
-            font.pixelSize: Theme.fontSizeSmall
+            font.bold: true
         }
 
         Label {
@@ -72,7 +70,7 @@ NotificationGroupMember {
         Label {
             id: timestampLabel
             text: Format.formatDate(root.timestamp, Format.DurationElapsed)
-            font.pixelSize: Theme.fontSizeTiny
+            font.pixelSize: Theme.fontSizeExtraSmall
             color: Theme.secondaryColor
         }
     }

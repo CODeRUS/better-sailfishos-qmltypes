@@ -1,5 +1,6 @@
 /****************************************************************************************
 **
+** Copyright (c) 2020 Open Mobile Platform LLC.
 ** Copyright (C) 2013 Jolla Ltd.
 ** Contact: Joona Petrell <joona.petrell@jollamobile.com>
 ** All rights reserved.
@@ -32,7 +33,7 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 
@@ -44,11 +45,14 @@ SilicaMouseArea {
     property bool _showPress: down || pressTimer.running
     property color color: palette.primaryColor
     property color highlightColor: palette.highlightColor
-    property color highlightBackgroundColor: palette.highlightBackgroundColor
+    property color highlightBackgroundColor: Theme.rgba(palette.highlightBackgroundColor, Theme.opacityFaint)
     property color backgroundColor: Theme.rgba(color, Theme.opacityFaint)
     property real preferredWidth: _implicitPreferredWidth
     property real _implicitPreferredWidth: Theme.buttonWidthSmall
     property bool __silica_button
+    property alias icon: image
+    property alias layoutDirection: content.layoutDirection
+    property alias border: borderColors
 
     onPressedChanged: {
         if (pressed) {
@@ -64,14 +68,19 @@ SilicaMouseArea {
 
     height: implicitHeight
     implicitHeight: Theme.itemSizeExtraSmall
-    implicitWidth: Math.max(preferredWidth, buttonText.width+Theme.paddingLarge)
+    implicitWidth: image.progress !== 0.0 && text === "" ? Theme.buttonWidthTiny :
+                                                        Math.max(preferredWidth, content.fullWidth)
 
     highlighted: _showPress
+
+    ButtonBorderColors {
+        id: borderColors
+    }
 
     Rectangle {
         anchors {
             fill: parent
-            topMargin: (button.height - button.implicitHeight)/2
+            topMargin: (button.height - button.implicitHeight) / 2
             bottomMargin: anchors.topMargin
         }
         radius: Theme.paddingSmall
@@ -79,13 +88,46 @@ SilicaMouseArea {
                           : button.backgroundColor
 
         opacity: button.enabled ? 1.0 : Theme.opacityLow
+        border {
+            width: Qt.colorEqual(borderColors.color, "transparent") ? 0 : Theme.dp(2)
+            color: button._showPress ? borderColors.highlightColor : borderColors.color
+        }
 
-        Label {
-            id: buttonText
-            anchors.centerIn: parent
-            color: _showPress ? button.highlightColor : button.color
-            font.pixelSize: preferredWidth > Theme.buttonWidthExtraSmall ? Theme.fontSizeMedium
-                                                                         : Theme.fontSizeSmall
+        Row {
+            id: content
+
+            property bool alignLeft
+            readonly property real fullWidth: image.implicitWidth + spacing +
+                                     buttonText.implicitWidth + 2 * Theme.paddingMedium
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: alignLeft ? undefined : parent.horizontalCenter
+
+            spacing: image.progress !== 0.0 && buttonText.text !== "" ? Theme.paddingSmall : 0
+            objectName: "contentRow"
+
+            Icon {
+                id: image
+
+                anchors.verticalCenter: parent.verticalCenter
+                objectName: "image"
+            }
+
+            Label {
+                id: buttonText
+
+                property real _externalSize: Math.max(0, button.width - image.width -
+                                                      2 * Theme.paddingSmall - content.spacing)
+
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(_externalSize, implicitWidth)
+
+                color: _showPress ? button.highlightColor : button.color
+                font.pixelSize: preferredWidth > Theme.buttonWidthExtraSmall ? Theme.fontSizeMedium
+                                                                             : Theme.fontSizeSmall
+                truncationMode: TruncationMode.Fade
+                objectName: "label"
+            }
         }
     }
 

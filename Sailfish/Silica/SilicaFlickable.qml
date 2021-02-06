@@ -62,7 +62,6 @@ Flickable {
     }
 
     pixelAligned: true
-    pressDelay: 50
     flickDeceleration: Theme.flickDeceleration
     maximumFlickVelocity: Theme.maximumFlickVelocity
     boundsBehavior: (pullDownMenu && pullDownMenu._activationPermitted) || (pushUpMenu && pushUpMenu._activationPermitted)

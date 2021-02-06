@@ -4,9 +4,7 @@ import Sailfish.Silica 1.0
 TextField {
     property Item nextFocusItem
 
-    width: parent.width
     inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
-    placeholderText: label
 
     EnterKey.iconSource: "image://theme/icon-m-enter-" + (nextFocusItem ? "next" : "close")
     EnterKey.onClicked: {

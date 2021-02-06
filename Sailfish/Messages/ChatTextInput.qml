@@ -10,13 +10,13 @@ import org.nemomobile.configuration 1.0
 InverseMouseArea {
     id: chatInputArea
 
-    property alias text: textField.text
-    property alias cursorPosition: textField.cursorPosition
-    property alias editorFocus: textField.focus
-    property alias empty: textField.empty
+    property alias text: textArea.text
+    property alias cursorPosition: textArea.cursorPosition
+    property alias editorFocus: textArea.focus
+    property alias empty: textArea.empty
     property bool canSend: text.length > 0
 
-    property alias placeholderText: textField.placeholderText
+    property alias placeholderText: textArea.placeholderText
     property string messageTypeName
     property int presenceState
     property string phoneNumberDescription
@@ -28,33 +28,31 @@ InverseMouseArea {
     //% "Type message"
     readonly property string defaultPlaceholderText: qsTrId("messages-ph-chat_placeholder_generic")
 
-    readonly property int _rightMargin: Theme.horizontalPageMargin + button.width
-
     signal readyToSend()
 
     function forceActiveFocus() {
-        textField.forceActiveFocus()
+        textArea.forceActiveFocus()
     }
 
     function _prepareToSend() {
         // Reset keyboard state
-        if (textField.focus) {
-            textField.focus = false
-            textField.focus = true
+        if (textArea.focus) {
+            textArea.focus = false
+            textArea.focus = true
         }
         readyToSend()
     }
 
     width: parent.width
-    height: textField.y + textField.height + ((typeMenu.height + simSelector.height) || Theme.paddingMedium)
+    height: textArea.y + textArea.height + ((typeMenu.height + simSelector.height) || Theme.paddingMedium)
 
     TextArea {
-        id: textField
+        id: textArea
 
         width: parent.width
         y: Theme.paddingMedium
         focusOutBehavior: FocusBehavior.KeepFocus
-        textRightMargin: chatInputArea._rightMargin
+        textRightMargin: Theme.horizontalPageMargin + button.width + Theme.paddingLarge
         font.pixelSize: Theme.fontSizeSmall
         enabled: chatInputArea.enabled
         placeholderText: defaultPlaceholderText
@@ -86,7 +84,7 @@ InverseMouseArea {
                     visible: active && chatInputArea.text.length > 0
                     active: chatInputArea.needsSimFeatures
                             && characterCountSetting.value
-                    messageText: visible ? textField.text : ""
+                    messageText: visible ? textArea.text : ""
                     font.pixelSize: Theme.fontSizeExtraSmallBase
                 }
 
@@ -109,7 +107,7 @@ InverseMouseArea {
                     text: chatInputArea.phoneNumberDescription
 
                     width: Math.min(Math.ceil(implicitWidth),
-                                    chatInputArea.width - textField.textLeftMargin - chatInputArea._rightMargin
+                                    chatInputArea.width - textArea.textLeftMargin - chatInputArea._rightMargin
                                     - (messageType.visible ? (messageType.width + parent.spacing) : 0)
                                     - (presence.visible ? (presence.width + parent.spacing) : 0)
                                     - (characterCountLabel.visible ? (characterCountLabel.width
@@ -160,20 +158,20 @@ InverseMouseArea {
 
             enabled: chatInputArea.enabled
                      && (typeMenu.enabled || canSend)
-            parent: textField
+            parent: textArea
             width: Theme.iconSizeMedium + 2 * Theme.paddingSmall
             height: width
             anchors {
                 right: parent.right
                 rightMargin: Theme.horizontalPageMargin
-                bottom: parent.bottom
-                bottomMargin: Theme.paddingSmall
             }
+            y: textArea.contentItem.y + textArea.contentItem.height - height/2
+
             onClicked: {
-                if (textField.empty && typeMenu.enabled) {
+                if (textArea.empty && typeMenu.enabled) {
                     typeMenu.openMenu(chatInputArea)
                 } else {
-                    if (!textField.empty) {
+                    if (!textArea.empty) {
                         Qt.inputMethod.commit()
                     }
                     if (chatInputArea.needsSimFeatures && Telephony.promptForMessageSim) {
@@ -185,43 +183,32 @@ InverseMouseArea {
             }
             onPressAndHold: if (typeMenu.enabled) typeMenu.openMenu(chatInputArea)
 
-            HighlightImage {
-                id: image
-
-                source: textField.empty && typeMenu.enabled ? "image://theme/icon-m-change-type"
+            icon.source: textArea.empty && typeMenu.enabled ? "image://theme/icon-m-change-type"
                                                             : "image://theme/icon-m-send"
-                color: !button.enabled ? Theme.secondaryColor
-                                       : (button._showPress ? Theme.highlightColor
-                                                            : Theme.primaryColor)
-                highlighted: parent.down
-                anchors.centerIn: parent
-                opacity: parent.enabled ? 1.0 : Theme.opacityLow
-                Behavior on opacity { FadeAnimator {} }
 
-                Behavior on source {
-                    SequentialAnimation {
-                        FadeAnimation {
-                            target: image
-                            to: 0.0
-                        }
-                        PropertyAction {} // This is where the property assignment really happens
-                        FadeAnimation {
-                            target: image
-                            to: image.parent.enabled ? 1.0 : Theme.opacityLow
-                        }
+            Behavior on icon.source {
+                SequentialAnimation {
+                    FadeAnimation {
+                        target: button.icon
+                        to: 0.0
+                    }
+                    PropertyAction {} // This is where the property assignment really happens
+                    FadeAnimation {
+                        target: button.icon
+                        to: 1.0
                     }
                 }
             }
         }
     }
 
-    onClickedOutside: textField.focus = false
+    onClickedOutside: textArea.focus = false
 
     ConversationTypeMenu {
         id: typeMenu
 
         enabled: count > 1
-        onCloseKeyboard: textField.focus = false
+        onCloseKeyboard: textArea.focus = false
     }
 
     ContextMenu {
@@ -241,7 +228,7 @@ InverseMouseArea {
         function openMenu(parentItem) {
             // close keyboard if necessary
             if (Qt.inputMethod.visible) {
-                textField.focus = false
+                textArea.focus = false
                 lateParentItem = parentItem
             } else {
                 open(parentItem)

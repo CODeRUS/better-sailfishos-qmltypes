@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2019 Open Mobile Platform LLC.
+** Copyright (C) 2019 - 2020 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Sailfish Silica UI component package.
@@ -31,7 +31,7 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Silica.private 1.0
 import "Util.js" as Util
@@ -41,18 +41,26 @@ MouseArea {
 
     property int tabIndex: -1
     property bool isCurrentTab: _tabView && _tabView.currentIndex >= 0 && _tabView.currentIndex === tabIndex
-    property alias title: label.text
+
+    property string title
+    property alias icon: highlightImage
+    property int count
 
     property Item _page
     readonly property bool _portrait: _page && _page.isPortrait
     readonly property Item _tabView: Util.findParentWithProperty(root, '__silica_tab_view')
     readonly property bool _becomingCurrentTab: _tabView && _tabView._nextIndex === tabIndex
     property bool _activatingByClick
+    property alias contentItem: contentColumn
+    property alias contentState: contentColumn.state
+    property real extraMargin
+    // contentWidth is used to calculate TabButtonRow width except of extraMargin
+    property real contentWidth: 2 * Theme.paddingLarge + contentColumn.implicitWidth
+                                + (bubble.active && highlightImage.width === 0 ? bubble.width : 0)
+    implicitWidth: contentWidth + extraMargin
 
-    implicitWidth: 2 * label.x + label.width
     implicitHeight: Math.max(_portrait ? Theme.itemSizeLarge : Theme.itemSizeSmall,
-                             label.implicitHeight + 2 * (_portrait ? Theme.paddingLarge : Theme.paddingMedium))
-
+                             contentColumn.implicitHeight + 2 * (_portrait ? Theme.paddingLarge : Theme.paddingMedium))
 
     Component.onCompleted: {
         if (!parent.hasOwnProperty("__silica_tab_button_row")) {
@@ -120,17 +128,143 @@ MouseArea {
         }
     }
 
-    Label {
-        id: label
+    Column {
+        id: contentColumn
 
-        height: parent.height
-        x: Theme.paddingMedium
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenterOffset: bubble.active && highlightImage.width === 0 ? -bubble.width*0.5 : 0
 
-        color: (pressed && containsMouse) || _activatingByClick
-               ? Theme.highlightColor
-               : colorInterpolator.value
-        verticalAlignment: Text.AlignVCenter
-        font.pixelSize: root.parent && root.parent._buttonFontSize ? root.parent._buttonFontSize
-                                                                   : Theme.fontSizeLarge
+        HighlightImage {
+            id: highlightImage
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            highlighted: (pressed && containsMouse)
+                         || _activatingByClick || root.isCurrentTab
+        }
+
+        Loader {
+            active: root.title
+            visible: active
+            anchors.horizontalCenter: parent.horizontalCenter
+            sourceComponent: Component {
+                Label {
+                    text: root.title
+                    color: (pressed && containsMouse)
+                           || _activatingByClick ? Theme.highlightColor : colorInterpolator.value
+                    verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: {
+                        if (highlightImage.height > 0) {
+                            return Theme.fontSizeTiny
+                        } else if (root.parent && root.parent._buttonFontSize) {
+                            return root.parent._buttonFontSize
+                        } else {
+                            return Theme.fontSizeLarge
+                        }
+                    }
+                }
+            }
+        }
+
+        state: "between"
+
+        states: [
+            State {
+                name: "first"
+                AnchorChanges {
+                    target: contentColumn
+                    anchors {
+                        horizontalCenter: undefined
+                        left: undefined
+                        right: parent.right
+                    }
+                }
+                PropertyChanges {
+                    target: contentColumn
+                    anchors.rightMargin: Theme.paddingMedium
+                }
+            },
+            State {
+                name: "between"
+                AnchorChanges {
+                    target: contentColumn
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                }
+            },
+            State {
+                name: "last"
+                AnchorChanges {
+                    target: contentColumn
+                    anchors {
+                        horizontalCenter: undefined
+                        right: undefined
+                        left: parent.left
+                    }
+                }
+                PropertyChanges {
+                    target: contentColumn
+                    anchors.leftMargin: Theme.paddingMedium
+                }
+            }
+        ]
+    }
+
+    Loader {
+        id: bubble
+
+        y: Theme.paddingLarge
+        active: root.count
+        asynchronous: true
+        opacity: (pressed && containsMouse) || _activatingByClick ? 0.8 : 1.0
+        anchors {
+            left: contentColumn.right
+            leftMargin: Theme.dp(4)
+        }
+        sourceComponent: Component {
+            Rectangle {
+                color: Theme.highlightBackgroundColor
+                width: bubbleLabel.text ? Math.max(bubbleLabel.implicitWidth + Theme.paddingSmall*2, height) : Theme.paddingMedium + Theme.paddingSmall
+                height: bubbleLabel.text ? bubbleLabel.implicitHeight : Theme.paddingMedium + Theme.paddingSmall
+                radius: Theme.dp(2)
+
+                Label {
+                    id: bubbleLabel
+
+                    text: {
+                        if (root.count < 0) {
+                            return ""
+                        } else if (root.count > 99) {
+                            return "99+"
+                        } else {
+                            return root.count
+                        }
+                    }
+
+                    anchors.centerIn: parent
+                    font.pixelSize: Theme.fontSizeTiny
+                    font.bold: true
+                }
+            }
+        }
+        states: State {
+            when: highlightImage.width > 0
+            name: "withicon"
+            AnchorChanges {
+                target: bubble
+                anchors {
+                    horizontalCenter: contentColumn.horizontalCenter
+                    verticalCenter: undefined
+                    left: undefined
+                }
+            }
+            PropertyChanges {
+                target: bubble
+                anchors {
+                    horizontalCenterOffset: highlightImage.width * 0.5
+                    leftMargin: 0
+                }
+            }
+        }
     }
 }

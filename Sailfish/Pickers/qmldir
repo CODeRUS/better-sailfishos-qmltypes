@@ -14,4 +14,6 @@ MultiMusicPickerDialog 1.0 MultiMusicPickerDialog.qml
 MultiVideoPickerDialog 1.0 MultiVideoPickerDialog.qml
 MusicPickerPage 1.0 MusicPickerPage.qml
 VideoPickerPage 1.0 VideoPickerPage.qml
+FolderPickerDialog 1.0 FolderPickerDialog.qml
+FolderPickerPage 1.0 FolderPickerPage.qml
 typeinfo plugins.qmltypes

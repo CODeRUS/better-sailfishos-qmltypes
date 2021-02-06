@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (c) 2019 Open Mobile Platform LLC.
+** Copyright (c) 2019-2020 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** License: Proprietary.
@@ -12,8 +12,9 @@ import Sailfish.Silica 1.0
 import Sailfish.Accounts 1.0
 import Sailfish.Lipstick 1.0
 import com.jolla.eventsview.nextcloud 1.0
+import Sailfish.Silica.private 1.0
 
-Item {
+NotificationGroupItem {
     id: root
 
     property int accountId
@@ -23,20 +24,20 @@ Item {
                                  || eventModel.supportedActions & NextcloudEventModel.DeleteAllEvents
     property int hasRemovableItems: userRemovable && listView.count > 0
     property alias mainContentHeight: listView.contentHeight
+    property bool hasOnlyOneItem: eventModel.count === 1
 
     property int _modelCount: listView.model.count
     property int _expansionThreshold: 5
     property int _expansionMaximum: 10
-    property bool _manuallyExpanded
     property string _hostUrl
 
     signal expanded(int itemPosY)
 
     function findMatchingRemovableItems(filterFunc, matchingResults) {
-        if (!userRemovable || !filterFunc(headerItem)) {
+        if (!userRemovable || !filterFunc(groupHeader)) {
             return
         }
-        matchingResults.push(headerItem)
+        matchingResults.push(groupHeader)
         var yPos = listView.contentY
         while (yPos < listView.contentHeight) {
             var item = listView.itemAt(0, yPos)
@@ -53,9 +54,8 @@ Item {
         }
     }
 
-
     function removeAllNotifications() {
-        if (headerItem.userRemovable) {
+        if (groupHeader.userRemovable) {
             removeComponent.createObject(root, { "target": root })
         }
     }
@@ -63,26 +63,20 @@ Item {
     visible: _modelCount > 0
     width: parent.width
     height: _modelCount === 0 ? 0 : expansionToggle.y + expansionToggle.height
+    draggable: groupHeader.draggable
 
-    onCollapsedChanged: {
-        if (!collapsed) {
-            root._manuallyExpanded = false
-        }
-    }
+    onSwipedAway: if (model) removeComponent.createObject(root, { "target": root })
 
     NotificationGroupHeader {
-        id: headerItem
+        id: groupHeader
 
         name: account.displayName
-        indicator.iconSource: "image://theme/graphic-service-nextcloud"
-        totalItemCount: root._modelCount
-        memberCount: totalItemCount
+        iconSource: "image://theme/graphic-service-nextcloud"
         userRemovable: eventModel.supportedActions & NextcloudEventModel.DeleteAllEvents
+        extraBackgroundPadding: root.hasOnlyOneItem
+        enabled: !housekeeping
 
-        onRemoveRequested: {
-            removeComponent.createObject(root, { "target": root })
-        }
-
+        groupHighlighted: root.highlighted
         onTriggered: {
             if (root._hostUrl.length > 0) {
                 Qt.openUrlExternally(root._hostUrl)
@@ -106,7 +100,7 @@ Item {
 
     ListView {
         id: listView
-        anchors.top: headerItem.bottom
+        anchors.top: groupHeader.bottom
         width: parent.width
         height: Screen.height * 1000 // Ensures the view is fully populated without needing to bind height: contentHeight
 
@@ -117,19 +111,20 @@ Item {
     NotificationExpansionButton {
         id: expansionToggle
 
-        y: headerItem.height + listView.contentHeight
+        y: groupHeader.height + listView.contentHeight
         expandable: eventModel.count > _expansionThreshold
                     || eventModel.count > _expansionMaximum
+        enabled: expandable && !groupHeader.drag.active
 
-        title: !item._manuallyExpanded
+        title: root.collapsed
                ? defaultTitle
-                //% "Show more in Nextcloud"
+                 //% "Show more in Nextcloud"
                : qsTrId("lipstick-jolla-home-la-show-more-in-nextcloud")
+        remainingCount: eventModel.count - boundedModel.count
 
         onClicked: {
-            if (!root._manuallyExpanded) {
-                var itemPosY = listView.contentHeight + headerItem.height - Theme.paddingLarge
-                root._manuallyExpanded = true
+            if (root.collapsed) {
+                var itemPosY = listView.contentHeight + groupHeader.height - Theme.paddingLarge
                 root.expanded(itemPosY)
             } else {
                 if (root._hostUrl.length > 0) {
@@ -166,7 +161,7 @@ Item {
     BoundedModel {
         id: boundedModel
         model: eventModel
-        maximumCount: root._manuallyExpanded ? root._expansionMaximum : root._expansionThreshold
+        maximumCount: !root.collapsed ? root._expansionMaximum : root._expansionThreshold
 
         delegate: NextcloudFeedItem {
             id: delegateItem
@@ -179,6 +174,11 @@ Item {
             timestamp: model.timestamp
             eventUrl: model.eventUrl
             userRemovable: eventModel.supportedActions & NextcloudEventModel.DeleteEvent
+            enabled: !housekeeping || !root.hasOnlyOneItem
+            groupHighlighted: root.highlighted
+            contentLeftMargin: groupHeader.textLeftMargin
+
+            lastItem: model.index === boundedModel.count - 1
 
             onRemoveRequested: {
                 removeComponent.createObject(delegateItem, { "target": delegateItem })

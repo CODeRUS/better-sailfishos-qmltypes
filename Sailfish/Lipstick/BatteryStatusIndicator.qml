@@ -38,7 +38,7 @@ SilicaItem {
         height: chargeCableIcon.height
         width: chargeCableIcon.width + chargeCableIcon.x
         clip: chargeCableAnim.running
-        Image {
+        Icon {
             id: chargeCableIcon
             source: "image://theme/icon-status-charge-cable" + iconSuffix
             anchors.verticalCenter: parent.verticalCenter

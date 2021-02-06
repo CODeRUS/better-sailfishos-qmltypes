@@ -8,6 +8,7 @@ MouseArea {
     property alias icon: appIcon.icon
     property alias iconStatus: appIcon.status
     property alias text: appTitle.text
+    property alias textColor: appTitle.color
 
     property bool down: pressed && containsMouse
     property bool highlighted: down

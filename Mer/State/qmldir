@@ -1,3 +1,0 @@
-module Mer.State
-plugin statefs-declarative
-typeinfo plugins.qmltypes

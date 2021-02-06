@@ -40,11 +40,12 @@ BusyIndicator {
     id: root
 
     property Item _page
-    readonly property bool _portrait: _page && _page.isPortrait
+    readonly property bool _portrait: !_page || _page.isPortrait
 
     Component.onCompleted: _page = Util.findPage(root)
 
-    y: Math.round(_portrait ? Screen.height/4 : Screen.width/4)
+    y: _page || !parent ? Math.round(_portrait ? Screen.height/4 : Screen.width/4)
+                        : parent.height/4
     anchors.horizontalCenter: parent.horizontalCenter
     size: BusyIndicatorSize.Large
 }

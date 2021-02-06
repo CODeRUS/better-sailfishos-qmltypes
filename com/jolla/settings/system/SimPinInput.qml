@@ -26,6 +26,7 @@ PinInput {
     warningTextColor: emergency ? Theme.lightPrimaryColor : keypadTextColor
     pinDisplayColor: keypadTextColor
     keypadTextColor: Theme.colorScheme === Theme.LightOnDark ? Theme.highlightDimmerColor : Theme.lightPrimaryColor
+    keypadSecondaryTextColor: Theme.colorScheme === Theme.LightOnDark ? Theme.darkSecondaryColor : Theme.lightSecondaryColor
     dimmerBackspace: true
 
     Rectangle {

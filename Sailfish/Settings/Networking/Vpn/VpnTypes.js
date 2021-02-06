@@ -20,6 +20,14 @@ function editDialogPath(vpnType) {
     return settingsPath + vpnType + "/edit.qml"
 }
 
+function importPath(vpnType) {
+    return settingsPath + vpnType + "/import.qml"
+}
+
+function importDialogPath(vpnType) {
+    return settingsPath + vpnType + "/importdialog.qml"
+}
+
 function advancedSettingsPath(vpnType) {
     return settingsPath + vpnType + "/advanced.qml"
 }
@@ -157,34 +165,34 @@ function presentationName(input) {
     case "auth-chap-required":
         //% "CHAP required"
         return qsTrId("settings_network-me-vpn_auth_required_chap")
+    case "SIGHUP":
+        //% "SIGHUP"
+        return qsTrId("settings_network_me-vpn_signal_hup")
+    case "SIGTERM":
+        //% "SIGTERM"
+        return qsTrId("settings_network_me-vpn_signal_term")
     default:
         console.log("Warning: No translation found for attribute", input)
     }
     return ""
 }
 
-var ovpnImportPath = ""
-
-function importOvpnFile(pageStack, mainPage, path) {
-    var props = SystemSettings.SettingsVpnModel.processProvisioningFile(path, "openvpn")
+function importFile(pageStack, mainPage, path, vpnType, parser) {
+    var props = parser(path)
     if (Object.keys(props).length == 0) {
-        console.warn("Invalid .ovpn file:", path)
-
-        var failureDialog = settingsPath + "openvpn/OvpnFileFailureDialog.qml"
+        var failureDialog = importDialogPath(vpnType)
         if (pageStack.currentPage != mainPage) {
-            pageStack.animatorReplaceAbove(mainPage, failureDialog, { mainPage: mainPage })
+            pageStack.animatorReplaceAbove(mainPage, failureDialog, { mainPage: mainPage, vpnType: vpnType, importFailed: true })
         } else {
             pageStack.push(failureDialog, { mainPage: mainPage }, Silica.PageStackAction.Immediate)
         }
     } else {
-        ovpnImportPath = path
-
         var connectionProperties = {}
         var providerProperties = {}
 
         for (var name in props) {
-            if (name == 'Host') {
-                connectionProperties['host'] = props[name]
+            if (name == 'Host' || name == 'Name') {
+                connectionProperties[name.toLowerCase()] = props[name]
             } else {
                 providerProperties[name] = props[name]
             }
@@ -193,7 +201,7 @@ function importOvpnFile(pageStack, mainPage, path) {
         props = {
             newConnection: true,
             importPath: path,
-            vpnType: "openvpn",
+            vpnType: vpnType,
             connectionProperties: connectionProperties,
             providerProperties: providerProperties
         }

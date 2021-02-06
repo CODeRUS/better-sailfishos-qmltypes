@@ -23,7 +23,6 @@ Column {
     Label {
         text: TemperatureConverter.format(model.high)
         anchors.horizontalCenter: parent.horizontalCenter
-        color: highlighted ? Theme.highlightColor : Theme.primaryColor
     }
     Image {
         property string prefix: "image://theme/icon-" + (Screen.sizeCategory >= Screen.Large ? "l" : "m")

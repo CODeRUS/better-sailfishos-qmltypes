@@ -84,7 +84,7 @@ Private.SilicaMouseArea {
     //      PageStatus.Activating - the page is transitioning into becoming the active page
     //      PageStatus.Active - the page is the current active page
     //      PageStatus.Deactivating - the page is transitioning into becoming inactive
-    property int status: PageStatus.Inactive
+    readonly property int status: __stack_container ? __stack_container.status : PageStatus.Inactive
 
     property bool backNavigation: true
     property bool showNavigationIndicator: true
@@ -93,8 +93,20 @@ Private.SilicaMouseArea {
     property int navigationStyle: PageNavigation.Horizontal
     readonly property bool _horizontalNavigationStyle: navigationStyle === PageNavigation.Horizontal
     property Item pageContainer
+    property Item __stack_container
 
-    property color backgroundColor: "transparent"
+    property color backgroundColor: Theme.rgba(palette.overlayBackgroundColor, 0)
+    property Component background: {
+        if (backgroundColor.a !== 0) {
+            return backgroundComponent
+        } else if (pageContainer) {
+            return pageContainer.pageBackground
+        } else {
+            return null
+        }
+    }
+
+    property bool highContrast
 
     property int allowedOrientations: __silica_applicationwindow_instance._defaultPageOrientations
     property int orientation: orientationState.orientation
@@ -106,9 +118,9 @@ Private.SilicaMouseArea {
     property bool isPortrait: (orientation === Orientation.Portrait || orientation === Orientation.PortraitInverted || orientation === Orientation.None)
     property bool isLandscape: (orientation === Orientation.Landscape || orientation === Orientation.LandscapeInverted)
 
-    property int _navigation: PageNavigation.NoNavigation
-    property int _navigationPending: PageNavigation.NoNavigation
-    property int _direction: PageNavigation.NoDirection
+    readonly property int _navigation: __stack_container ? __stack_container.navigation : PageNavigation.NoNavigation
+    readonly property int _navigationPending: __stack_container ? __stack_container.navigationPending : PageNavigation.NoNavigation
+    readonly property int _direction: __stack_container ? __stack_container.direction : PageNavigation.NoDirection
 
     property int _allowedOrientations: {
         var allowed = allowedOrientations & __silica_applicationwindow_instance.allowedOrientations
@@ -131,23 +143,46 @@ Private.SilicaMouseArea {
     property int _depth: parent && parent.hasOwnProperty("pageStackIndex") ? parent.pageStackIndex : -1
 
     property alias _windowOpacity: page.opacity
-    property Item _backgroundParent: parent
 
-    property bool _opaqueBackground: backgroundColor.a === 1
-    property bool _exposed: { return false }
-    property bool _belowTop
+    property bool _opaqueBackground: background !== null && background != backgroundComponent
+    readonly property bool _exposed:  pageContainer
+                && __stack_container
+                && pageContainer.visible
+                && ((pageContainer._currentContainer === __stack_container)
+                    || (pageContainer._currentContainer !== null && (pageContainer._currentContainer === __stack_container.transitionPartner)))
+    readonly property bool _belowTop: pageContainer
+                && __stack_container
+                && pageContainer._currentContainer === __stack_container
+                && __stack_container.attachedContainer !== null
     property bool _clickablePageIndicators: true
 
     property int __silica_page
 
     rotation: orientationState.rotation
-    visible: false
+    visible: __stack_container && __stack_container.visible
     focus: true
     // This unusual binding avoids a warning when the page is destroyed.
     anchors.centerIn: page ? parent : null
 
     width: orientationState.width
     height: orientationState.height
+
+    opacity: orientationTransitionRunning, 1
+    scale: orientationTransitionRunning, 1
+
+    Component {
+        id: backgroundComponent
+
+        Rectangle {
+            property color backgroundColor: page.backgroundColor
+
+            onBackgroundColorChanged: {
+                if (backgroundColor.a !== 0) {
+                    color = backgroundColor
+                }
+            }
+        }
+    }
 
     StateGroup {
         id: orientationState
@@ -201,8 +236,6 @@ Private.SilicaMouseArea {
                     // If a transition is interrupted part way through reset page constants a
                     // transition may have animated to fixed values and not finalised.
                     orientationTransitionRunning: false
-                    opacity: 1
-                    scale: 1
                 }
             },
             State {

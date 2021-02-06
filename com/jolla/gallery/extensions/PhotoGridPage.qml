@@ -15,7 +15,7 @@ Page {
     property alias model: grid.model
     property SyncHelper syncHelper
 
-    property bool loading: syncHelper ? syncHelper.loading : false
+    property bool loading: syncHelper && syncHelper.loading
     property alias currentIndex: grid.currentIndex
     allowedOrientations: window.allowedOrientations
 
@@ -35,7 +35,6 @@ Page {
             id: pageHeader
             title: gridPage.albumName
             BusyIndicator {
-                id: busyIndicator
                 parent: pageHeader.extraContent
                 anchors {
                     verticalCenter: parent.verticalCenter
@@ -43,7 +42,7 @@ Page {
                     rightMargin: Theme.paddingLarge
                 }
                 size: BusyIndicatorSize.ExtraSmall
-                running: syncHelper.loading
+                running: gridPage.loading
             }
         }
 

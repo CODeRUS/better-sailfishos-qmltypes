@@ -57,7 +57,8 @@ Dialog {
     // --- end public api ---
 
     property bool checkMandatoryFields
-    property Person _selfPerson: peopleModel.selfPerson()
+    property Person _selfPerson
+    property Person _selfPersonAggregate
 
     // Check that the email is basically in the format "blah@blah.com[...]", without any whitespace.
     // We don't want the regex to be too strict because a wide variety of characters are acceptable in an email address.
@@ -152,6 +153,27 @@ Dialog {
 
     PeopleModel {
         id: peopleModel
+
+        onPopulatedChanged: {
+            if (!root._selfPersonAggregate) {
+                root._selfPersonAggregate = peopleModel.selfPerson()
+                root._selfPersonAggregate.fetchConstituents()
+            }
+        }
+    }
+
+    Connections {
+        target: root._selfPersonAggregate
+        onConstituentsChanged: {
+            if (root._selfPerson == null) {
+                var constituents = root._selfPersonAggregate.constituents
+                if (constituents.length === 0) {
+                    console.warn("Cannot find constituent for self-contact")
+                } else {
+                    root._selfPerson = peopleModel.personById(constituents[0])
+                }
+            }
+        }
     }
 
     AccountFactory {

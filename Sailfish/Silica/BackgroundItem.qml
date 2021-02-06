@@ -39,11 +39,12 @@ import Sailfish.Silica.private 1.0
 SilicaMouseArea {
     id: item
 
-    property bool down: pressed && containsMouse && !DragFilter.canceled
+    property bool down: pressed && containsMouse && !DragFilter.canceled && !pressDelayTimer.running
     property color highlightedColor: Theme.rgba(palette.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
     property alias contentHeight: content.height
     property alias contentWidth: content.width
     property alias contentX: content.x
+    property bool _pressEffectDelay: true
 
     property bool _showPress: highlighted || pressTimer.running
     property alias contentItem: content
@@ -59,15 +60,8 @@ SilicaMouseArea {
 
     highlighted: down
 
-    onPressed: {
-        item.DragFilter.begin(mouse.x, mouse.y)
-        pressTimer.start()
-    }
-
-    onCanceled: {
-        item.DragFilter.end()
-        pressTimer.stop()
-    }
+    onPressed: item.DragFilter.begin(mouse.x, mouse.y)
+    onCanceled: item.DragFilter.end()
 
     onPreventStealingChanged: if (preventStealing) item.DragFilter.end()
 
@@ -81,5 +75,12 @@ SilicaMouseArea {
     Timer {
         id: pressTimer
         interval: Theme.minimumPressHighlightTime
+        running: item.pressed && !pressDelayTimer.running
+    }
+
+    Timer {
+        id: pressDelayTimer
+        interval: 48
+        running: item.pressed && item._pressEffectDelay
     }
 }

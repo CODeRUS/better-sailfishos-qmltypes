@@ -243,11 +243,11 @@ Item {
 
         isTransient: true
         urgency: Notification.Critical
-        icon: "icon-lock-warning"
+        appIcon: "icon-lock-warning"
 
         //: %1 is operating system name without OS suffix
         //% "Account creation disabled by %1 Device Manager"
-        previewBody: qsTrId("settings_accounts-la-account_creation_disabled_by_device_manager").arg(aboutSettings.baseOperatingSystemName)
+        body: qsTrId("settings_accounts-la-account_creation_disabled_by_device_manager").arg(aboutSettings.baseOperatingSystemName)
     }
 
     AboutSettings {

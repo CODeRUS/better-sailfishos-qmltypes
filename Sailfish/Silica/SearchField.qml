@@ -46,19 +46,15 @@ TextField {
 
     signal hideClicked()
 
-    implicitWidth: _editor.implicitWidth + Theme.paddingSmall
-                   + Theme.itemSizeSmall*2  // width of two icons
     implicitHeight: Math.max(Theme.itemSizeMedium, _editor.height + Theme.paddingMedium + Theme.paddingSmall)  + (labelVisible ? _labelItem.height : 0)
 
+    textMargin: Theme.horizontalPageMargin - Theme.paddingSmall
     focusOutBehavior: FocusBehavior.ClearPageFocus
     font {
         pixelSize: Theme.fontSizeLarge
         family: Theme.fontFamilyHeading
     }
 
-    textLeftMargin: Theme.itemSizeSmall + Theme.paddingMedium + Theme.horizontalPageMargin - Theme.paddingLarge
-    textRightMargin: text.length == 0 ? Theme.horizontalPageMargin
-                                      : Theme.itemSizeSmall + Theme.paddingMedium + Theme.horizontalPageMargin - Theme.paddingLarge
     textTopMargin: height/2 - _editor.implicitHeight/2
     labelVisible: false
 
@@ -74,49 +70,25 @@ TextField {
         _initialized = true
     }
 
-    Item {
-        parent: searchField // avoid TextBase contentItem auto-parenting
-        anchors.fill: parent
+    leftItem: Icon {
+        source: "image://theme/icon-m-search"
+    }
 
-        IconButton {
-            x: searchField.textLeftMargin - width - Theme.paddingSmall
-            width: icon.width
-            height: parent.height
-            icon.source: "image://theme/icon-m-search"
-            highlighted: down || searchField._editor.activeFocus
+    rightItem: IconButton {
+        icon.source: searchField.canHide && searchField.text.length === 0
+                     ? "image://theme/icon-m-input-remove"
+                     : "image://theme/icon-m-clear"
 
-            enabled: searchField.enabled
+        enabled: searchField.canHide || searchField.text.length > 0
 
-            onClicked: {
-                searchField._editor.forceActiveFocus()
-            }
-        }
+        opacity: enabled ? 1.0 : 0.0
+        Behavior on opacity { FadeAnimation {} }
 
-        IconButton {
-            id: clearButton
-            anchors {
-                right: parent.right
-                rightMargin: Theme.horizontalPageMargin
-            }
-            width: icon.width
-            height: parent.height
-            icon.source: searchField.canHide
-                         ? "image://theme/icon-m-input-remove"
-                         : (searchField.text.length > 0 ? "image://theme/icon-m-clear" : "")
-
-            enabled: searchField.enabled
-
-            opacity: icon.status === Image.Ready ? 1 : 0
-            Behavior on opacity {
-                FadeAnimation {}
-            }
-
-            onClicked: {
-                if (searchField.canHide) {
-                    searchField.hideClicked()
-                } else {
-                    searchField.text = ""
-                }
+        onClicked: {
+            if (searchField.canHide && text.length === 0) {
+                searchField.hideClicked()
+            } else {
+                searchField.text = ""
             }
         }
     }

@@ -111,6 +111,16 @@ Item {
             indeterminate: sailfishBackup.status == "Preparing"
                     || sailfishBackup.status == "UploadingBackup"
                     || sailfishBackup.status == "DownloadingBackup"
+
+            Behavior on value {
+                id: progressBarBehavior
+
+                enabled: false
+                NumberAnimation {
+                    duration: 100
+                    easing.type: Easing.InOutQuad
+                }
+            }
         }
 
         IconButton {
@@ -235,9 +245,12 @@ Item {
 
             if (root._liveUpdates) {
                 progressBar.label = statusText
+
+                progressBarBehavior.enabled = status !== "Canceled" && status !== "Error"
                 progressBar.value = (status == "Finished")
                         ? 1
                         : (status == "Canceled" || status == "Error" ? 0 : progress)
+                progressBarBehavior.enabled = false
             }
 
             if (_isDoneStatus(status)) {

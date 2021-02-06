@@ -3,13 +3,19 @@ import Sailfish.Silica 1.0
 import Sailfish.Settings.Networking.Vpn 1.0
 
 BackgroundItem {
-    property string vpnType
+    property string _vpnType
     property alias name: nameLabel.text
     property alias description: descriptionLabel.text
     property Page _mainPage
-    property bool handleClick: vpnType.length > 0
+    property bool canImport
 
-    onClicked: if (handleClick) pageStack.animatorPush(VpnTypes.editDialogPath(vpnType), { newConnection: true, acceptDestination: _mainPage })
+    onClicked: {
+        if (canImport) {
+            pageStack.animatorPush(VpnTypes.importDialogPath(_vpnType), { _mainPage: _mainPage, _vpnType: _vpnType })
+        } else {
+            pageStack.animatorPush(VpnTypes.editDialogPath(_vpnType), { newConnection: true, acceptDestination: _mainPage, vpnType: _vpnType })
+        }
+    }
 
     height: Math.max(Theme.itemSizeLarge, column.height) + column.y * 2
 

@@ -33,9 +33,9 @@ Page {
         }
         domainName.text = domain
 
-        // By default default route is not being set, in ConnMan it defaults to true for all.
-        var defroute = connectionProperties['defaultRoute']
-        defaultRoute.checked = defroute !== false
+        // By default split routing is not set, in ConnMan it defaults to false for all. Split routing as "false" or missing means that the VPN is used as default route.
+        var splitRoute = connectionProperties['splitRouting']
+        defaultRoute.checked = !splitRoute
 
         if (providerOptions.item) {
             _propertiesAlreadySet = {}
@@ -59,7 +59,7 @@ Page {
             connectionProperties['domain'] = domainName.text
         }
 
-        connectionProperties['defaultRoute'] = defaultRoute.checked
+        connectionProperties['splitRouting'] = !defaultRoute.checked
 
         userRoutes = []
         for (var i = 0; i < routesModel.count; i++) {

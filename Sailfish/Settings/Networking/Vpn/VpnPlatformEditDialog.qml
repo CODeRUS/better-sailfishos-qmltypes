@@ -15,7 +15,12 @@ import Sailfish.Settings.Networking.Vpn 1.0
 VpnEditDialog {
     id: root
 
+    property string newTitle
+    property string editTitle
+    property string importTitle
+
     property alias subtitle: subtitleText.text
+    property string importPath
 
     property string vpnType
     property var connectionProperties: ({})
@@ -25,10 +30,19 @@ VpnEditDialog {
     property Item firstAdditionalItem
 
     property alias vpnName: connectionName.text
-    property bool validSettings: connectionName.text.length > 0
-                                 && serverAddress.text.length > 0
+    property bool validSettings: connectionName.acceptableInput && serverAddress.acceptableInput
 
     canAccept: validSettings
+    title: newConnection ? (importPath ? importTitle : newTitle) : editTitle
+
+    onAcceptBlocked: {
+        if (!connectionName.acceptableInput) {
+            connectionName.errorHighlight = true
+        }
+        if (!serverAddress.acceptableInput) {
+            serverAddress.errorHighlight = true
+        }
+    }
 
     function setValue(combo, value) {
         for (var i = 0; i < combo.values.length; ++i) {
@@ -75,7 +89,7 @@ VpnEditDialog {
                 storeCredentials: connection.storeCredentials,
                 networks: connection.networks,
                 userRoutes: connection.userRoutes,
-                defaultRoute: connection.defaultRoute
+                splitRouting: connection.splitRouting
             }
 
             providerProperties = connection.providerProperties
@@ -123,9 +137,9 @@ VpnEditDialog {
             props['userRoutes'] = routeArray
         }
 
-        // If default route is not set it defaults to true in ConnMan
-        var defaultRoute = root.connectionProperties['defaultRoute']
-        props['defaultRoute'] = defaultRoute !== false
+        // If split routing is not set it defaults to false in ConnMan
+        var splitRoute = root.connectionProperties['splitRouting']
+        props['splitRouting'] = splitRoute === true
 
         if (newConnection) {
             SettingsVpnModel.createConnection(props)
@@ -177,6 +191,13 @@ VpnEditDialog {
                 label: qsTrId("settings_network-la-vpn_connection_name")
                 inputMethodHints: Qt.ImhNoPredictiveText
                 nextFocusItem: serverAddress
+
+                acceptableInput: text.length > 0
+                onActiveFocusChanged: if (!activeFocus) errorHighlight = !acceptableInput
+                onAcceptableInputChanged: if (acceptableInput) errorHighlight = false
+
+                //% "VPN name is required"
+                description: errorHighlight ? qsTrId("settings_network_la-vpn_connection_name_error") : ""
             }
 
             ConfigTextField {
@@ -185,6 +206,13 @@ VpnEditDialog {
                 //% "Server address"
                 label: qsTrId("settings_network-la-vpn_server_address")
                 nextFocusItem: root.firstAdditionalItem
+
+                acceptableInput: text.length > 0
+                onActiveFocusChanged: if (!activeFocus) errorHighlight = !acceptableInput
+                onAcceptableInputChanged: if (acceptableInput) errorHighlight = false
+
+                //% "Server address is required"
+                description: errorHighlight ? qsTrId("settings_network_la-vpn_server_address_error") : ""
             }
 
             Column {

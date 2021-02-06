@@ -41,8 +41,9 @@ FocusScope {
     property bool highlightTitle: !_inputOrCancelEnabled && !emergency
     property color pinDisplayColor: Theme.highlightColor
     property color keypadTextColor: Theme.primaryColor
+    property color keypadSecondaryTextColor: palette.secondaryColor
     property bool dimmerBackspace
-    property color emergencyTextColor: "red"
+    property color emergencyTextColor: "#ff4d4d"
 
     property int inputMethodHints: showDigitPad ? Qt.ImhDigitsOnly : Qt.ImhNone
     property int echoMode: TextInput.Password
@@ -302,13 +303,6 @@ FocusScope {
             text: root.subTitleText
         }
 
-        BusyIndicator {
-            running: root.busy
-            visible: running
-            anchors.horizontalCenter: parent.horizontalCenter
-            size: BusyIndicatorSize.Medium
-        }
-
         Label {
             width: parent.width
             wrapMode: Text.Wrap
@@ -329,6 +323,14 @@ FocusScope {
                 }
             }
         }
+    }
+
+    BusyIndicator {
+        y: headingColumn.y + headingLabel.height + ((pinInput.y - headingColumn.y - headingLabel.height - height) / 2)
+        running: root.busy
+        visible: running
+        anchors.horizontalCenter: parent.horizontalCenter
+        size: BusyIndicatorSize.Medium
     }
 
     TextInput {
@@ -519,7 +521,7 @@ FocusScope {
                 : "image://theme/icon-m-backspace-keypad"
             color: {
                 if (root.emergency) {
-                    return root.emergencyTextColor
+                    return Theme.lightPrimaryColor
                 } else if (!root.dimmerBackspace) {
                     return Theme.primaryColor
                 } else if (Theme.colorScheme == Theme.LightOnDark) {
@@ -528,7 +530,7 @@ FocusScope {
                     return Theme.lightPrimaryColor
                 }
             }
-            highlightColor: root.emergency ? Theme.lightPrimaryColor : Theme.highlightColor
+            highlightColor: root.emergency ? emergencyTextColor : Theme.highlightColor
         }
 
         opacity: root.enteredPin === "" && !root._showSuggestionButton ? 0 : 1
@@ -592,7 +594,7 @@ FocusScope {
         opacity: root.requirePin && pinInput.inputMethodHints & (Qt.ImhDigitsOnly | Qt.ImhDialableCharactersOnly) ? 1 : 0
         textColor: {
             if (root.emergency) {
-                return root.emergencyTextColor
+                return Theme.lightPrimaryColor
             } else if (pinInput.interactive) {
                 return root.keypadTextColor
             } else {
@@ -602,8 +604,12 @@ FocusScope {
 
         pressedTextColor: root.emergency ? "black" : (Theme.colorScheme === Theme.LightOnDark ? Theme.highlightColor : Theme.highlightDimmerColor)
         pressedButtonColor: root.emergency
-                            ? "white"
+                            ? emergencyTextColor
                             : Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
+
+        secondaryTextColor: root.emergency ? Theme.lightSecondaryColor : root.keypadSecondaryTextColor
+        pressedSecondaryTextColor: root.emergency ? Theme.darkSecondaryColor : palette.secondaryHighlightColor
+
         enabled: pinInput.activeFocus
         onPressed:  {
             root._feedback()

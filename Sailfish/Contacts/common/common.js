@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 - 2019 Jolla Pty Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+*/
+
 .pragma library
 .import Sailfish.Silica 1.0 as Silica
 .import org.nemomobile.contacts 1.0 as Contacts
@@ -505,47 +512,12 @@ function getAddressSummary(addressString) {
     return ret
 }
 
-function syncTargetDisplayName(person)
-{
-    if (!person) {
-        console.log("syncTargetName(): invalid person specified")
-        return ""
-    }
-    // user doesn't need to see these target types
-    if (person.syncTarget === "aggregate"
-            || person.syncTarget === "local"
-            || person.syncTarget === "was_local") {
-        return ""
-    }
-    return person.syncTarget
-}
-
-function syncTargetStringIcon(syncTarget)
-{
-    if (syncTarget === "aggregate"
-            || syncTarget === "local"
-            || syncTarget === "was_local") {
-        return "image://theme/icon-m-phone"
-    }
-    return "image://theme/icon-m-region"
-}
-
-function syncTargetIcon(person)
-{
-    if (!person) {
-        console.log("syncTargetIcon(): invalid person specified")
-        return ""
-    }
-    return syncTargetStringIcon(person.syncTarget)
-}
-
 function isWritableContact(person) {
     if (!person) {
         console.log("isWritableContact(): invalid person specified")
         return false
     }
-    // empty contacts, aggregates and local constituents are editable
-    return (!person.syncTarget || person.syncTarget === "aggregate" || person.syncTarget === "local")
+    return !person.addressBook.isAggregate && !person.addressBook.readOnly
 }
 
 function getDateButtonText(formatObject, dateValue) {
@@ -737,41 +709,125 @@ function descriptionForAccountUri(source, localUid, remoteUid, deduplicator) {
     return ""
 }
 
-function ensureContactComplete(contact, seasideFilteredModel) {
-    if (contact.id) {
+function ensureContactComplete(contactOrId, seasideFilteredModel) {
+    var contact = isNaN(contactOrId) ? contactOrId : null
+    if (contact) {
+        if (!contact.id) {
+            return contact
+        }
         // Ensure that we use the cache's canonical version of this contact
         contact = seasideFilteredModel.personById(contact.id)
+    } else {
+        contact = seasideFilteredModel.personById(contactOrId)
     }
+
     if (!contact.complete) {
         contact.ensureComplete()
     }
     return contact
 }
 
-function editContact(contact, peopleModel, pageStack, pageStackOperationType) {
+function firstPhoneNumber(contact)
+{
+    var phoneDetails = contact.phoneDetails
+    for (var i = 0; i < phoneDetails.length; ++i) {
+        if (phoneDetails[i].number.length > 0) {
+            return phoneDetails[i].number
+        }
+    }
+    return ""
+}
+
+function editNewContact(contactOrId, peopleModel, pageStack, extraProperties) {
+    var savePageProperties = {
+        "peopleModel": peopleModel,
+        "contactId": isNaN(contactOrId) ? contactOrId.id : contact.id
+    }
+
+    extraProperties = extraProperties || {}
+    extraProperties["acceptDestination"] = "Sailfish.Contacts.ContactCardPostSavePage"
+    extraProperties["acceptDestinationAction"] = Silica.PageStackAction.Replace
+    extraProperties["acceptDestinationProperties"] = savePageProperties
+
+    editContact(contactOrId, peopleModel, pageStack, extraProperties)
+}
+
+function editContact(contactOrId, peopleModel, pageStack, extraProperties) {
     if (pageStack.currentPage.status !== Silica.PageStatus.Active) {
-        console.log("Cannot push contact editor onto pagestack, status != PageStatus.Active for current page:",
+        console.warn("Cannot push contact editor onto pagestack, status != PageStatus.Active for current page:",
                     pageStack.currentPage)
         return
     }
-    if (!contact || !peopleModel || !pageStack) {
-        console.log("editContact() failed, invalid arguments!", contact, peopleModel, pageStack)
+    if (!contactOrId || !peopleModel || !pageStack) {
+        console.warn("editContact() failed, invalid arguments!", contactOrId, peopleModel, pageStack)
         return
     }
 
-    var savePageProperties = {
-        "peopleModel": peopleModel,
-        "contactId": contact.id
+    var contact = ensureContactComplete(contactOrId, peopleModel)
+
+    if (contact.id === 0    // new contact
+            || !contact.addressBook.isAggregate) {
+        _showEditorDialog(contact,
+                          peopleModel,
+                          pageStack,
+                          extraProperties,
+                          false,
+                          Silica.PageStackAction.Animated)
+    } else {
+        // Aggregates cannot be edited, only constituents, so choose or allow the user to choose a
+        // constituent. The picker is always shown to ensure it loads the latest constituent data.
+        var obj = pageStack.animatorPush("Sailfish.Contacts.ConstituentPicker",
+                                         { "aggregateContact": contact, "peopleModel": peopleModel })
+        obj.pageCompleted.connect(function(page) {
+            page.constituentClicked.connect(function(constituentId) {
+                _showEditorDialog(constituentId,
+                                  peopleModel,
+                                  pageStack,
+                                  extraProperties,
+                                  true,
+                                  contact.constituents.length === 1
+                                        ? Silica.PageStackAction.Immediate
+                                        : Silica.PageStackAction.Animated)
+            })
+        })
     }
+}
+
+function _showEditorDialog(contactOrId, peopleModel, pageStack, extraProperties, replacePage, pageStackOperationType) {
+    var contact = ensureContactComplete(contactOrId, peopleModel)
 
     var editorProperties = {
         "peopleModel": peopleModel,
-        "subject": contact.id === 0
-                   ? contact
-                   : peopleModel.personById(contact.id),  // Ensure we're modifying the canonical instance of this contact
-        "acceptDestination": "Sailfish.Contacts.ContactCardPostSavePage",
-        "acceptDestinationAction": Silica.PageStackAction.Replace,
-        "acceptDestinationProperties": savePageProperties,
+        "subject": contact
     }
-    pageStack.animatorPush("Sailfish.Contacts.ContactEditorDialog", editorProperties, pageStackOperationType)
+    if (extraProperties) {
+        for (var p in extraProperties) {
+            editorProperties[p] = extraProperties[p]
+        }
+    }
+
+    if (replacePage) {
+        pageStack.animatorReplace("Sailfish.Contacts.ContactEditorDialog", editorProperties, pageStackOperationType)
+    } else {
+        pageStack.animatorPush("Sailfish.Contacts.ContactEditorDialog", editorProperties, pageStackOperationType)
+    }
+}
+
+function iconMonochromeWeight(icon) {
+    // Don't use full highlight on color icons as it drowns out the color graphics
+    return icon.source.toString().indexOf("image://theme/graphic-") === 0
+            ? 0
+            : 1
+}
+
+function addressBookIconUrl(addressBook, accountProvider) {
+    if (addressBook.image) {
+        return addressBook.image
+    } else if (addressBook.isAggregate) {
+        return "image://theme/icon-m-contact"
+    } else if (addressBook.isLocal) {
+        return "image://theme/icon-m-phone"
+    } else {
+        return !!accountProvider ? accountProvider.iconName : "image://theme/icon-m-region"
+    }
 }

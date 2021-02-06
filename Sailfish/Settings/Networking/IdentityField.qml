@@ -7,15 +7,16 @@ NetworkField {
     property bool immediateUpdate
     readonly property bool required: network && network.securityType === NetworkService.SecurityIEEE802
 
-    width: parent.width
     inputMethodHints: Qt.ImhNoAutoUppercase
     enabled: network && network.identityAvailable
     text: enabled ? network.identity : ""
     visible: required
     //% "Identity"
-    placeholderText: qsTrId("settings_network-la-identity")
-    label: placeholderText
+    label: qsTrId("settings_network-la-identity")
     onTextChanged: if (immediateUpdate && network) network.identity = text
     onActiveFocusChanged: if (!activeFocus && network) network.identity = text
-    validInput: text.length > 0
+    acceptableInput: text.length > 0
+
+    //% "Identity is required"
+    description: errorHighlight ? qsTrId("settings_network-la-identity_required") : ""
 }

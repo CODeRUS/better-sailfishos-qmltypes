@@ -1,8 +1,16 @@
+/****************************************************************************************
+**
+** Copyright (c) 2013 - 2019 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC
+** All rights reserved.
+**
+** License: Proprietary.
+**
+****************************************************************************************/
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Sailfish.TransferEngine 1.0
 import org.nemomobile.thumbnailer 1.0
-import org.nemomobile.notifications 1.0
 import org.nemomobile.transferengine 1.0
 
 Page {
@@ -387,20 +395,5 @@ Page {
         model: transferModel
         delegate: transferDelegate
         cacheBuffer: transferList.height
-    }
-
-    Notification {
-        id: errorNotification
-
-        //% "Transfers"
-        appName: qsTrId("transferui-ap-name")
-        appIcon: "icon-lock-warning"
-        icon: "icon-lock-warning"
-        isTransient: true
-
-        function show(summary) {
-            previewSummary = summary
-            publish()
-        }
     }
 }

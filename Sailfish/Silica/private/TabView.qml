@@ -1,7 +1,7 @@
 /****************************************************************************************
 **
 ** Copyright (C) 2019 Jolla Ltd.
-** Copyright (C) 2019 Open Mobile Platform LLC.
+** Copyright (C) 2020 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Sailfish Silica UI component package.
@@ -43,15 +43,18 @@ SilicaControl {
 
     property alias model: delegateModel.model
     property int currentIndex
-    property alias header: headerLoader.sourceComponent
-    property alias headerItem: headerLoader.item
-    property real headerHeight: headerItem ? headerItem.height : 0
+    property Component header
+    property Component footer
+    property bool hasFooter: footer
+    property alias tabBarItem: tabBarLoader.item
+    property real tabBarHeight: tabBarItem ? tabBarItem.height : 0
     property alias moving: slideable.moving
     property alias panning: slideable.panning
     readonly property int count: delegateModel.items.count
     property real yOffset: slideable.currentItem && slideable.currentItem.hasOwnProperty("__silica_tab_container") ? slideable.currentItem.yOffset : 0
     readonly property alias slideProgress: slideable.progress
     property bool _initialized
+    property alias _headerBackgroundVisible: backgroundRectangle.visible
 
     property Item _page: Util.findPage(root)
     property int _nextIndex: -1
@@ -110,30 +113,33 @@ SilicaControl {
     }
 
     Item {
-        z: 1
+        z: yOffset < 0 && !root.hasFooter ? 0 : 1
         width: parent.width
-        height: headerLoader.height
+        height: tabBarLoader.height
         Loader {
-            id: headerLoader
+            id: tabBarLoader
 
+            sourceComponent: root.hasFooter ? root.footer : root.header
             width: parent.width
-            y: Math.max(0, -root.yOffset)
+            y: root.hasFooter ? root.height - tabBarLoader.height : Math.max(0, -root.yOffset)
 
-            Wallpaper {
+            BackgroundRectangle {
+                id: backgroundRectangle
                 anchors.fill: parent
-                visible: root.yOffset >= 0
-                anchors.topMargin: Math.max(0, Theme.paddingLarge - root.yOffset)
-                anchors.rightMargin: root.moving ? 0 : Theme.paddingMedium
-                windowRotation: _page ? _page.rotation : 0
+                anchors.topMargin: (root.yOffset > Theme.paddingSmall) || root.hasFooter ?  0 : Theme.paddingSmall
+                anchors.rightMargin: Theme.paddingSmall
+                color: __silica_applicationwindow_instance._backgroundColor
             }
         }
+
     }
 
     Slideable {
         id: slideable
-        y: headerLoader.height
+
+        y: root.hasFooter ? 0 : tabBarLoader.height
         width: parent.width
-        height: parent.height - y
+        height: root.hasFooter ? parent.height - tabBarLoader.height : parent.height - y
 
         // Offload any tab that has been inactive for more than 5 minutes (5*60*1000)
         cacheSize: 0
@@ -241,7 +247,7 @@ SilicaControl {
                 asynchronous: true
                 anchors {
                     fill: parent
-                    topMargin: hasPulley ? -root.headerHeight : 0
+                    topMargin: hasPulley && !root.hasFooter ? -root.tabBarHeight : 0
                 }
             }
 
@@ -249,7 +255,7 @@ SilicaControl {
                 property bool loading: Qt.application.active && isCurrentItem && tabLoader.status !== Loader.Ready
                 running: !delayBusy.running && loading
 
-                y: root.height/3 - height/2 - headerLoader.height
+                y: root.height/3 - height/2 - tabBarLoader.height
                 anchors.horizontalCenter: parent.horizontalCenter
                 size: BusyIndicatorSize.Large
 

@@ -101,8 +101,8 @@ Connections {
             warn(data.warning || qsTrId("settings_devicelock-he-reentered_security_code_mismatch"), !data.persistWarning)
             break
         case AuthenticationInput.SecurityCodeInHistory:
-            //: Shown when the new security code is not allowed because it is the same as the current security code.
-            //% "The new security code cannot be the same as the current security code."
+            //: Shown when the new security code is not allowed because it is the same as a previous security code.
+            //% "The new security code cannot be the same as a previous security code."
             warn(data.warning || qsTrId("settings_devicelock-he-new_security_code_same_as_old"), !data.persistWarning)
             break
         case AuthenticationInput.SecurityCodeExpired:
@@ -130,11 +130,19 @@ Connections {
             warn(data.warning || qsTrId("settings_devicelock-la-fingerprint_feedback_swipe_slower"), !data.persistWarning)
             break
         case AuthenticationInput.UnrecognizedFinger:
-            warn(data.message || (attemptsRemaining === 0
-                    //% "Too many unrecognized fingers. Enter your security code"
-                    ? qsTrId("settings_devicelock-la-devicelock_unrecognized_finger_enter_security_code")
-                    //% "Unrecognized finger"
-                    : qsTrId("settings_devicelock-la-devicelock_unrecognized_finger")), !data.persistWarning)
+            if (attemptsRemaining > 0) {
+                //% "Unrecognized finger"
+                warn(data.warning || qsTrId("settings_devicelock-la-devicelock_unrecognized_finger"), !data.persistWarning)
+                break
+            }
+            // Fall through
+        case AuthenticationInput.UnrecognizedFingerLimitExceeded:
+            //% "Too many unrecognized fingers. Enter your security code"
+            warn(data.warning || qsTrId("settings_devicelock-la-devicelock_unrecognized_finger_enter_security_code"), !data.persistWarning)
+            break
+        case AuthenticationInput.SecurityCodeRequiredAfterReboot:
+            //% "Security code needed after boot"
+            warn(data.warning || qsTrId("settings_devicelock-la-devicelock_security_code_needed_after_boot"), !data.persistWarning)
             break
         case AuthenticationInput.IncorrectSecurityCode:
             if (attemptsRemaining === 0) {

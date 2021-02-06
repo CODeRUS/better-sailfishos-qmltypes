@@ -3,13 +3,13 @@ import Sailfish.Silica 1.0
 import org.nemomobile.socialcache 1.0
 import Nemo.DBus 2.0
 import Sailfish.Accounts 1.0
+import com.jolla.gallery 1.0
 import com.jolla.gallery.extensions 1.0
 import Nemo.Connectivity 1.0
 
-Page {
+MediaSourcePage {
     id: root
 
-    property string title
     property alias accessTokenService: _accessTokensProvider.service
     property alias clientId: _accessTokensProvider.clientId
     property string syncService

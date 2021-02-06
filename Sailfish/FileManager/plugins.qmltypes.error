@@ -1,16 +1,16 @@
 Suspicious DPI value (100.0). Check your device configuration!
 file:///usr/lib/qt5/qml/Sailfish/Silica/InfoLabel.qml:46: TypeError: Cannot read property of null
-file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:114: ReferenceError: __silica_applicationwindow_instance is not defined
-file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:99: ReferenceError: __silica_applicationwindow_instance is not defined
+file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:126: ReferenceError: __silica_applicationwindow_instance is not defined
+file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:111: ReferenceError: __silica_applicationwindow_instance is not defined
 file:///usr/lib/qt5/qml/Sailfish/Silica/private/PageOrientationTransition.qml:60: ReferenceError: __silica_applicationwindow_instance is not defined
-file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:159: ReferenceError: __silica_applicationwindow_instance is not defined
-file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:158: ReferenceError: __silica_applicationwindow_instance is not defined
-file:///usr/lib/qt5/qml/Sailfish/Silica/PageBusyIndicator.qml:48: TypeError: Cannot read property of null
+file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:194: ReferenceError: __silica_applicationwindow_instance is not defined
+file:///usr/lib/qt5/qml/Sailfish/Silica/Page.qml:193: ReferenceError: __silica_applicationwindow_instance is not defined
+file:///usr/lib/qt5/qml/Sailfish/Silica/PageBusyIndicator.qml:49: TypeError: Cannot read property of null
 file:///usr/lib/qt5/qml/Sailfish/Silica/private/PageEdgeTransition.qml:45: TypeError: Cannot read property '_currentContainer' of null
 PageOrientationTransition: target property is missing
 file:///usr/lib/qt5/qml/Sailfish/Silica/private/PageOrientationTransition.qml:58: TypeError: Cannot read property '_opaqueBackground' of null
-file:///usr/lib/qt5/qml/Sailfish/Silica/PageStack.qml:116: TypeError: Cannot read property of null
-file:///usr/lib/qt5/qml/Sailfish/Silica/PageStack.qml:115: TypeError: Cannot read property of null
+file:///usr/lib/qt5/qml/Sailfish/Silica/PageStack.qml:121: TypeError: Cannot read property of null
+file:///usr/lib/qt5/qml/Sailfish/Silica/PageStack.qml:120: TypeError: Cannot read property of null
+file:///usr/lib/qt5/qml/Sailfish/Silica/PageStack.qml:88: TypeError: Cannot read property of null
 file:///usr/lib/qt5/qml/Sailfish/Silica/PageStack.qml:87: TypeError: Cannot read property of null
-file:///usr/lib/qt5/qml/Sailfish/Silica/PageStack.qml:86: TypeError: Cannot read property of null
-file:///usr/lib/qt5/qml/Sailfish/Silica/PageStack.qml:737: ReferenceError: __silica_applicationwindow_instance is not defined
+file:///usr/lib/qt5/qml/Sailfish/Silica/PageStack.qml:725: ReferenceError: __silica_applicationwindow_instance is not defined

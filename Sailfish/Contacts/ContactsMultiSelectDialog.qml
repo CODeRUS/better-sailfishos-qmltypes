@@ -32,7 +32,8 @@ Dialog {
                     //: Indicates number of selected contacts
                     //% "%n selected"
                    ? qsTrId("components_pickers-la-count_selected", root.selectedContacts.count)
-                   : ""
+                     //% "Select"
+                   : qsTrId("components_contacts-la-select")
             spacing: 0
         }
 

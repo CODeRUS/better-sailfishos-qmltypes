@@ -1,2 +1,10 @@
 Suspicious DPI value (100.0). Check your device configuration!
-Starting favorites query at 56 ms
+Manager could not be created. DB is locked
+"Failed to attach key memory region for qtcontacts-sqlite-np: QSharedMemory::attach (shmget): doesn't exist"
+"Failed to open contacts transient store"
+"Unable to open synchronous engine database connection"
+QSqlQuery::prepare: database not open
+"Failed to prepare query for collection details:\n \nQuery:\nSELECT collectionId, aggregable, name, description, color, secondaryColor, image, applicationName, accountId, remotePath, changeFlags FROM Collections  ORDER BY collectionId ASC"
+QSqlQuery::prepare: database not open
+"Failed to prepare distinct display label group selection query:  \n SELECT DISTINCT DisplayLabelGroup FROM DisplayLabels ORDER BY DisplayLabelGroupSortOrder ASC"
+Starting favorites query at 32 ms

@@ -11,11 +11,19 @@ ContactCardPage {
 
     property bool _loaded
 
-    onStatusChanged: {
+    function _loadSavedContact() {
         if (!_loaded && contactId > 0) {
             contact = root.peopleModel.personById(contactId)
             _loaded = true
         }
+    }
+
+    onContactIdChanged: {
+        _loadSavedContact()
+    }
+
+    Component.onCompleted: {
+        _loadSavedContact()
     }
 
     // Detect when a new contact is created.

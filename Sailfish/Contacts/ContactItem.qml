@@ -1,3 +1,10 @@
+/*
+* Copyright (c) 2013 - 2020 Jolla Pty Ltd.
+* Copyright (c) 2020 Open Mobile Platform LLC.
+*
+* License: Proprietary
+*/
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.contacts 1.0
@@ -5,10 +12,10 @@ import org.nemomobile.contacts 1.0
 ListItem {
     id: root
 
-    property string firstText
-    property string secondText
+    property alias firstText: row.firstText
+    property alias secondText: row.secondText
     property string matchText
-    property bool unnamed
+    property alias unnamed: row.unnamed
     property int presenceState
     property alias iconSource: icon.source
 
@@ -20,7 +27,7 @@ ListItem {
     // Same as: SearchField.textLeftMargin
     property real searchLeftMargin: Theme.itemSizeSmall + Theme.paddingMedium
 
-    property bool _matchTextVisible: searchString.length > 0 && matchText.length > 0
+    property bool _matchTextVisible: searchString.length > 0 && matchText.length > 0 && firstText != matchText
     contentHeight: _matchTextVisible ? Theme.itemSizeMedium : Theme.itemSizeSmall
 
     function _regExpFor(term) {
@@ -29,9 +36,8 @@ ListItem {
         return new RegExp(term, 'i')
     }
 
-    Row {
+    ContactNameRow {
         id: row
-        spacing: Format._needsSpaceBetweenNames(firstText, secondText) ? Theme.paddingSmall : 0
 
         anchors {
             left: parent.left
@@ -40,30 +46,6 @@ ListItem {
             rightMargin: icon.width ? spacing : 0
             verticalCenter: parent.verticalCenter
             verticalCenterOffset: _matchTextVisible ? -matchDataText.height/2 : 0
-        }
-        Label {
-            id: firstNameText
-            text: root.unnamed
-                    //: Default text shown instead of a contact name, if the contact name is not known
-                    //% "Unnamed"
-                  ? qsTrId("components_contacts-la-unnamed_contact")
-                  : firstText
-            color: highlighted ? Theme.highlightColor: (root.unnamed ? Theme.secondaryColor : Theme.primaryColor)
-            width: Math.min(implicitWidth, row.width)
-            truncationMode: width == row.width ? TruncationMode.Fade : TruncationMode.None
-            textFormat: Text.AutoText
-        }
-        Label {
-            id: lastNameText
-
-            property real remainingWidth: Math.max(row.width - firstNameText.width - parent.spacing, 0)
-
-            text: secondText
-            color: highlighted ? Theme.secondaryHighlightColor: Theme.secondaryColor
-            width: Math.min(implicitWidth, remainingWidth)
-            truncationMode: width > 0 && width == remainingWidth ? TruncationMode.Fade : TruncationMode.None
-            textFormat: Text.AutoText
-            visible: width > 0
         }
     }
 
@@ -103,7 +85,7 @@ ListItem {
         visible: !offline
         anchors {
             top: row.top
-            topMargin: firstNameText.baselineOffset + Theme.paddingMedium
+            topMargin: row.firstNameLabel.baselineOffset + Theme.paddingMedium
             left: row.left
             right: undefined
         }
@@ -118,12 +100,12 @@ ListItem {
             leftMargin: root.searchLeftMargin
         }
         PropertyChanges {
-            target: firstNameText
+            target: row.firstNameLabel
             text: Theme.highlightText(firstText, _regExpFor(searchString), Theme.highlightColor)
             textFormat: Text.StyledText
         }
         PropertyChanges {
-            target: lastNameText
+            target: row.lastNameLabel
             text: Theme.highlightText(secondText, _regExpFor(searchString), Theme.highlightColor)
             textFormat: Text.StyledText
         }

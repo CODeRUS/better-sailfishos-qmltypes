@@ -4,12 +4,13 @@
  * License: Proprietary
  */
 
-import Nemo.Notifications 1.0
+import Sailfish.Silica 1.0
 
-Notification {
-    icon: "icon-lock-warning"
-    isTransient: true
+Notice {
+    function publish() {
+        show()
+    }
 
     //% "At least one service must be enabled"
-    previewSummary: qsTrId("settings-accounts-la-enable_at_least_one_service")
+    text: qsTrId("settings-accounts-la-enable_at_least_one_service")
 }

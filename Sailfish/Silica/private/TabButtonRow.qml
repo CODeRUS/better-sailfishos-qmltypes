@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2019 Open Mobile Platform LLC.
+** Copyright (C) 2020 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Sailfish Silica UI component package.
@@ -37,19 +37,27 @@ import "Util.js" as Util
 
 Row {
     id: row
+
     readonly property Item _tabView: Util.findParentWithProperty(row, '__silica_tab_view')
     property var _buttons: []
     property int _buttonFontSize: Theme.fontSizeLarge
     property int __silica_tab_button_row
     property bool _initialized
+    property bool _animated
+    property bool flickable
+    property real contentWidth
 
-    width: parent.width
+    signal updatePosition(real pos, bool animated)
 
-    onWidthChanged: _updateButtonFontSize()
+    onWidthChanged: {
+        _updateButtonFontSize()
+        _updateContentWidth()
+    }
     onImplicitWidthChanged: _updateX()
     Component.onCompleted: {
         _initialized = true
         _updateButtonFontSize()
+        _updateContentWidth()
     }
 
     function _registerButton(button) {
@@ -57,6 +65,7 @@ Row {
         buttons.push(button)
         _buttons = buttons
         _updateButtonFontSize()
+        _updateContentWidth()
     }
 
     function _deregisterButton(button) {
@@ -64,16 +73,20 @@ Row {
         buttons.splice(buttons.indexOf(button), 1)
         _buttons = buttons
         _updateButtonFontSize()
+        _updateContentWidth()
     }
 
     function _updateButtonFontSize() {
-        if (!_initialized || width <= 0) return
+        if (!_initialized || width <= 0 || !_tabView) return
+
         var fontSize = Theme.fontSizeLarge
-        var availableWidth = width - (2 * Theme.horizontalPageMargin)
-        var largeWidth = (_buttons.length - 1)* Theme.paddingLarge // spacings
-        for (var i = 0; i < _buttons.length; i++) {
+        var availableWidth = _tabView.width
+        var largeWidth = 0
+        var i = 0
+        for (; i < _buttons.length; i++) {
             var button = _buttons[i]
-            largeWidth = largeWidth + fontMetrics.advanceWidth(button.title)
+            largeWidth = largeWidth + largeFontMetrics.advanceWidth(button.title) + Theme.paddingMedium * 2
+                       + (button.count >= 0 ? tinyFontMetrics.advanceWidth(button.count) + Theme.paddingSmall * 2 : "")
             if (largeWidth > availableWidth) {
                 fontSize = Theme.fontSizeMedium
                 break
@@ -82,31 +95,50 @@ Row {
         _buttonFontSize = fontSize
     }
 
-    function _updateX() {
-        if (!_tabView || _tabView.width <= 0) return 0
+    function _updateContentWidth() {
+        var buttonsWidth = 0
+        var i = 0
+        for (; i < _buttons.length; i++) {
+            var button = _buttons[i]
+            buttonsWidth += button.contentWidth
+        }
+        row.contentWidth = buttonsWidth
+    }
 
+    function _updateX() {
+        if (!_tabView || _tabView.width <= 0)
+            return 0
+
+        var contentPos = 0
         var currentButtonX = _buttonPosition(_tabView.currentIndex)
         if (_tabView._nextIndex === -1 || !_tabView.panning) {
-            x = currentButtonX
+            contentPos = currentButtonX
         } else {
             var nextButtonX = _buttonPosition(_tabView._nextIndex)
-            x = (1 - _tabView.slideProgress) * currentButtonX + _tabView.slideProgress * nextButtonX
+            contentPos = (1 - _tabView.slideProgress) * currentButtonX
+                    + _tabView.slideProgress * nextButtonX
         }
+
+        updatePosition(contentPos, _animated)
     }
 
     function _buttonPosition(index) {
-        var margin = Theme.horizontalPageMargin - Theme.paddingMedium
-        var leftAlign = margin
-        var rightAlign = _tabView.width - implicitWidth - margin
+        var leftAlign = 0
+        var rightAlign = _tabView.width - implicitWidth
 
-        if ((index === _tabView.count - 1) || // last
-                (implicitWidth < _tabView.width - 2 * margin)) { // fits
+        if (implicitWidth < _tabView.width) { // fits
+            row.flickable = false
             return rightAlign
+        } else if (index === _tabView.count - 1) { // last
+            row.flickable = true
+            return _tabView.width - implicitWidth
         } else if (index === 0) { // first
+            row.flickable = true
             return leftAlign
         } else { // somewhere in between
+            row.flickable = true
             var button = _buttonAt(index)
-            var centerAlign = -button.x - margin + (_tabView.width - button.width)/2
+            var centerAlign = -button.x + (_tabView.width - button.width) * 0.5
             return Math.max(rightAlign, Math.min(leftAlign, centerAlign))
         }
     }
@@ -115,35 +147,33 @@ Row {
         return children[index]
     }
 
-    Behavior on x {
-        id: xBehavior
-        enabled: false
-        XAnimator { duration: 200; easing.type: Easing.InOutQuad }
-    }
-
     Connections {
         target: _tabView
         onWidthChanged: {
-            xBehavior.enabled = false
+            _animated = false
             _updateX()
         }
         onPanningChanged: {
-            if (_tabView.panning) {
-                xBehavior.enabled = false
-            } else {
-                xBehavior.enabled = true
-            }
+            _animated = true
             _updateX()
         }
         onCurrentIndexChanged: {
-            xBehavior.enabled = true
+            _animated = true
             _updateX()
         }
-        onSlideProgressChanged: _updateX()
+        onSlideProgressChanged: {
+            _animated = true
+            _updateX()
+        }
     }
 
     FontMetrics {
-        id: fontMetrics
+        id: largeFontMetrics
         font.pixelSize: Theme.fontSizeLarge
+    }
+
+    FontMetrics {
+        id: tinyFontMetrics
+        font.pixelSize: Theme.fontSizeTiny
     }
 }

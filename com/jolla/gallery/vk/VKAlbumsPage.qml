@@ -37,9 +37,9 @@ AlbumsPage {
                     pageStack.push(Qt.resolvedUrl("VKFullscreenPhotoPage.qml"), {
                                                   "currentIndex": currentIndex,
                                                   "model": model,
-                                                  "downloader": Qt.binding(function() { return root.fullSizeDownloader }),
+                                                  "downloader": root.fullSizeDownloader,
                                                   "connectedToNetwork": Qt.binding(function() { return root.connectedToNetwork }),
-                                                  "accessTokensProvider": Qt.binding(function() { return root.accessTokensProvider })
+                                                  "accessTokensProvider": root.accessTokensProvider
                                                 })
                 }
             }
@@ -52,9 +52,7 @@ AlbumsPage {
                                               "albumIdentifier": albumIdentifier,
                                               "userIdentifier": userIdentifier,
                                               "model": imagesModel,
-                                              "fullSizeDownloader": Qt.binding(function() { return root.fullSizeDownloader }),
-                                              "syncHelper": Qt.binding(function() { return root.syncHelper }),
-                                              "accessTokensProvider": Qt.binding(function() { return root.accessTokensProvider }) })
+                                              "syncHelper": root.syncHelper })
         }
     }
 

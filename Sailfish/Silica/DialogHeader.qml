@@ -34,6 +34,7 @@
 
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import Sailfish.Silica.private 1.0 as Private
 import "private"
 import "private/Util.js" as Util
 
@@ -54,7 +55,7 @@ BackgroundItem {
 
     default property alias _children: acceptButton.data
     property int _depth: dialog && dialog._depth ? dialog._depth+2 : 1
-    property alias _glassOnly: wallpaper.glassOnly
+    property bool _glassOnly
 
     property bool _navigatingBack: dialog && dialog._navigationPending === PageNavigation.Back
     property bool _navigatingForward: dialog && dialog._navigationPending === PageNavigation.Forward
@@ -113,19 +114,31 @@ BackgroundItem {
         y: flickable ? Math.max(flickable.contentY, flickable.originY) : 0
         x: flickable ? dialogHeader.x : 0
 
-        Wallpaper {
-            id: wallpaper
-            width: overlay.width
-            height: overlay.height
+        Item {
             visible: dialogHeader._backgroundVisible
-            source: glassOnly ? "" : Theme.backgroundImage
-            windowRotation: dialog.rotation
-        }
 
-        PanelBackground {
-            anchors.fill: parent
-            position: Dock.Top
-            visible: dialogHeader._backgroundVisible
+            Private.BackgroundRectangle {
+                id: wallpaper
+                width: overlay.width
+                height: overlay.height
+                visible: backgroundLoader.status !== Loader.Ready
+                color: __silica_applicationwindow_instance._backgroundColor
+            }
+
+            Loader {
+                id: backgroundLoader
+
+                width: overlay.width
+                height: overlay.height
+
+                sourceComponent: dialogHeader.dialog ? dialogHeader.dialog.background : null
+            }
+
+            PanelBackground {
+                width: overlay.width
+                height: overlay.height
+                position: Dock.Top
+            }
         }
 
         FontMetrics {

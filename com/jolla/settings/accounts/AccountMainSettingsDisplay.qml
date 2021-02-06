@@ -97,12 +97,10 @@ Item {
     TextField {
         id: accountDisplayNameField
         anchors.top: statusCombo.bottom
-        width: parent.width
 
         //: Short name or summary for a user account
         //% "Description"
         label: qsTrId("components_accounts-la-account_description")
-        placeholderText: label
 
         EnterKey.iconSource: !!root.nextFocusItem
                              ? "image://theme/icon-m-enter-next"

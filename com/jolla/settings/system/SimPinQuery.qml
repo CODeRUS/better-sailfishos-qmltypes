@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 – 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.notifications 1.0
@@ -12,6 +19,7 @@ Item {
     property alias showCancelButton: pinInput.showCancelButton
     property alias showBackgroundGradient: pinInput.showBackgroundGradient
     property alias cancelText: pinInput.cancelText
+    property alias emergency: pinInput.emergency
 
     property int _confirmedPinType
     property string _enteredPuk
@@ -43,19 +51,19 @@ Item {
             pinInput.clear()
             break
         case OfonoSimManager.NoError:
-            notification.previewBody = ""
+            notification.body = ""
             if (_confirmedPinType === OfonoSimManager.ServiceProviderPersonalizationPin) {
                 //: Indicates that the user entered the correct operator unlock code.
                 //% "Unlock code correct"
-                notification.previewBody = qsTrId("settings_pin-la-notify_correct_unlock_code")
+                notification.body = qsTrId("settings_pin-la-notify_correct_unlock_code")
             } else if (ofonoSimManager.isPukType(_confirmedPinType)) {
                 //: Indicates that the user entered the correct PUK (Pin Unblocking Key).
                 //% "PUK code correct"
-                notification.previewBody = qsTrId("settings_pin-la-notify_correct_puk")
+                notification.body = qsTrId("settings_pin-la-notify_correct_puk")
             } else {
                 // no notification after the user entered the correct PIN
             }
-            if (notification.previewBody.length > 0) {
+            if (notification.body.length > 0) {
                 notification.publish()
             }
 
@@ -135,6 +143,6 @@ Item {
 
         isTransient: true
         urgency: Notification.Critical
-        icon: "icon-system-resources"
+        appIcon: "icon-system-resources"
     }
 }

@@ -5,7 +5,7 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.4
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Calendar 1.0 as Calendar // QTBUG-27645
 import org.nemomobile.calendar.lightweight 1.0
@@ -16,6 +16,7 @@ Column {
     id: calendarWidget
 
     property bool enableUpdates
+    property bool deviceLocked
     property alias expiryDate: eventsModel.expiryDate
     property alias time: wallClock.time
     property date modelDate: new Date()
@@ -26,12 +27,17 @@ Column {
     property int maximumDaysHence: 6 // less than one week to prevent ambiguity in weekday names
     property int eventDisplayTime: 900
 
-    // In the future, these values should be passed in from the EventsView loader
-    property real leftMargin: Theme.horizontalPageMargin
+    property int labelLeftMargin: icon.x + icon.width + Theme.paddingMedium + Theme.paddingSmall
     property real rightMargin: Screen.sizeCategory >= Screen.Large ? Theme.paddingLarge : Theme.horizontalPageMargin
-    property real maxDateLabelWidth
+    property real maxTimeLabelWidth
+
+    signal requestUnlock
+    signal checkPendingAction
+    signal cancelPendingAction
 
     height: implicitHeight
+    clip: heightAnimation.running
+    Behavior on height { NumberAnimation { id: heightAnimation; easing.type: Easing.InOutQuad; duration: 200 } }
 
     function collapse() {
         // e.g. on screen blank or inactivity timeout
@@ -66,11 +72,11 @@ Column {
 
     // Used to calculate the pixel width of a long time
     TextMetrics {
-        id: dateLabelMetrics
+        id: timeLabelMetrics
         font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSizeExtraSmall
+        font.pixelSize: Theme.fontSizeSmall
         text: Format.formatDate(new Date(2015, 1, 1, 18, 59, 0), Formatter.TimeValue)
-        onWidthChanged: dateLabelUpdater.restart()
+        onWidthChanged: timeLabelUpdater.restart()
     }
 
     WallClock {
@@ -90,14 +96,14 @@ Column {
     }
 
     Timer {
-        id: dateLabelUpdater
+        id: timeLabelUpdater
         interval: 10
         onTriggered: {
-            var max = dateLabelMetrics.width
+            var max = timeLabelMetrics.width
             for (var i = 0; i < repeater.count; ++i) {
-                max = Math.max(max, repeater.itemAt(i).dateWidth)
+                max = Math.max(max, repeater.itemAt(i).timeWidth)
             }
-            maxDateLabelWidth = max
+            maxTimeLabelWidth = max
         }
     }
 
@@ -124,31 +130,73 @@ Column {
         eventLimit: calendarWidget.maximumEvents
     }
 
-    Column {
-        clip: true
-        width: parent.width
-        // spacing used also after last event
-        height: Math.min(eventsModel.count, calendarWidget.shownEvents) * (Theme.itemSizeSmall + spacing)
-        spacing: Math.round(Theme.pixelRatio * (Screen.sizeCategory <= Screen.Medium ? 1 : 2))
+    Item {
+        visible: eventsModel.count > 0
+        HighlightImage {
+            id: icon
+            source: "image://theme/icon-lock-calendar"
+            x: Theme.horizontalPageMargin
+        }
+    }
 
-        Behavior on height { NumberAnimation { duration: 250 } }
+    Repeater {
+        id: repeater
+        model: eventsModel
+        onItemAdded: timeLabelUpdater.restart()
+        onItemRemoved: timeLabelUpdater.restart()
+        delegate: Column {
+            property alias dateLabel: delegate.dateLabel
+            property alias timeWidth: delegate.timeWidth
+            property bool active: model.index < calendarWidget.shownEvents
+            property Item previousItem: repeater.itemAt(model.index - 1)
+            property bool showHeader: model.index === 0 || (previousItem && previousItem.dateLabel !== dateLabel)
+            property bool actionPending // action postponed until device is unlocked
 
-        Repeater {
-            id: repeater
-            model: eventsModel
-            onItemAdded: dateLabelUpdater.restart()
-            onItemRemoved: dateLabelUpdater.restart()
-            delegate: CalendarWidgetDelegate {
-                width: calendarWidget.width
-                dateLabelPixelSize: dateLabelMetrics.font.pixelSize
-                maxDateLabelWidth: calendarWidget.maxDateLabelWidth
-                dateLabelLeftMargin: calendarWidget.leftMargin
+            enabled: active
+            width: parent.width
+            opacity: active ? 1.0 : 0.0
+            Behavior on opacity { FadeAnimator {} }
+            height: active ? implicitHeight : 0
+            topPadding: model.index !== 0 && showHeader ? Theme.paddingMedium : 0
+
+            Label {
+                visible: showHeader
+                x: labelLeftMargin
+                width: parent.width - x
+                truncationMode: TruncationMode.Fade
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.highlightColor
+                text: showHeader ? dateLabel : ""
+            }
+
+            CalendarWidgetDelegate {
+                id: delegate
+                labelLeftMargin: calendarWidget.labelLeftMargin
+                pixelSize: timeLabelMetrics.font.pixelSize
+                maxTimeLabelWidth: calendarWidget.maxTimeLabelWidth
                 // event started yesterday or earlier is still today on list
                 isToday: startTime.getDate() == eventsModel.startDate.getDate()
                          || startTime < eventsModel.startDate
-                onClicked: showEvent(uid, recurrenceId, startTime)
-                opacity: index < calendarWidget.shownEvents ? 1.0 : 0.0
-                Behavior on opacity { FadeAnimation { duration: 400 } }
+
+                onClicked: {
+                    if (calendarWidget.deviceLocked) {
+                        calendarWidget.requestUnlock()
+                        actionPending = true
+                    } else {
+                        showEvent(uid, recurrenceId, startTime)
+                    }
+                }
+
+                Connections {
+                    target: calendarWidget
+                    onCheckPendingAction: {
+                        if (actionPending) {
+                            calendarWidget.showEvent(uid, recurrenceId, startTime)
+                            actionPending = false
+                        }
+                    }
+                    onCancelPendingAction: actionPending = false
+                }
             }
         }
     }
@@ -157,44 +205,27 @@ Column {
         id: showMoreItem
 
         property int showMoreCount: eventsModel.totalCount - calendarWidget.shownEvents
+        property bool actionPending
 
         enabled: showMoreCount > 0
         width: parent.width
-        height: enabled ? Theme.itemSizeSmall : 0
+        height: enabled ? moreEventsLabel.height + 2*Theme.paddingMedium : 0
         opacity: enabled ? 1.0 : 0.0
-        visible: height > 0 && (calendarWidget.shownEvents != calendarWidget.maximumEvents || Calendar.CalendarUtils.calendarAppInstalled)
-
-        Behavior on height { NumberAnimation { duration: 250 } } // decrease in parallel with event list expansion
+        visible: calendarWidget.shownEvents != calendarWidget.maximumEvents || Calendar.CalendarUtils.calendarAppInstalled
 
         Label {
             id: moreEventsLabel
             anchors {
+                right: parent.right
+                rightMargin: Theme.horizontalPageMargin
                 verticalCenter: parent.verticalCenter
-                left: parent.left
-                leftMargin: calendarWidget.leftMargin
+                verticalCenterOffset: -Theme.paddingSmall
             }
-            width: Math.min(implicitWidth, parent.width - x - Theme.paddingMedium*2 - moreEventsImg.width)
-            height: Theme.itemSizeExtraSmall
-            color: showMoreItem.highlighted ? Theme.highlightColor : Theme.primaryColor
-            verticalAlignment: Text.AlignVCenter
             truncationMode: TruncationMode.Fade
-            font.italic: true
             font.pixelSize: Theme.fontSizeExtraSmall
 
-            //% "Show more"
+            //% "Show more..."
             text: qsTrId("sailfish_calendar-la-show_more")
-        }
-        Image {
-            id: moreEventsImg
-            anchors {
-                verticalCenter: parent.verticalCenter
-                left: moreEventsLabel.right
-                leftMargin: Theme.paddingMedium
-            }
-            source: "image://theme/icon-lock-more?" + (showMoreItem.highlighted ? Theme.highlightColor : Theme.primaryColor)
-            width: Theme.iconSizeMedium * 0.7
-            height: width
-            sourceSize.width: width
         }
 
         onClicked: {
@@ -202,11 +233,32 @@ Column {
                 // expand the view to include the other events
                 calendarWidget.expanded = true
             } else {
-                // open up the calendar application and de-expand the view
-                showCalendar(calendarWidget.modelDate.toString())
-                collapseTimer.interval = 1000
-                collapseTimer.start()
+                if (calendarWidget.deviceLocked) {
+                    calendarWidget.requestUnlock()
+                    actionPending = true
+                } else {
+                    showCalendar()
+                }
             }
+        }
+
+        function showCalendar() {
+            // open up the calendar application and de-expand the view
+            calendarWidget.showCalendar(calendarWidget.modelDate.toString())
+            collapseTimer.interval = 1000
+            collapseTimer.start()
+
+        }
+
+        Connections {
+            target: calendarWidget
+            onCheckPendingAction: {
+                if (showMoreItem.actionPending) {
+                    showMoreItem.showCalendar()
+                    showMoreItem.actionPending = false
+                }
+            }
+            onCancelPendingAction: showMoreItem.actionPending = false
         }
     }
 }

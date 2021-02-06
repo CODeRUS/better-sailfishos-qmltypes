@@ -24,7 +24,7 @@ WeatherRequest {
             this.timestamp = weather.timestamp
 
             weather.temperature = current.temperature
-            weather.feelsLikeTemperature = current.feelslikeTemp
+            weather.feelsLikeTemperature = current.feelsLikeTemp
             var json = {
                 "temperature": weather.temperature,
                 "feelsLikeTemperature": weather.feelsLikeTemperature,

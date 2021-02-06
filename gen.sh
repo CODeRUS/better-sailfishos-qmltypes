@@ -3,29 +3,29 @@
 CURRENT_DIR=$(readlink -f $(dirname $0))
 QML_IMPORTS="/usr/lib/qt5/qml"
 TYPEINFO="plugins.qmltypes"
-EMPTY_DEPS="$CURRENT_DIR/empty.json"
-# DEPENDENCIES="dependencies.json"
+EMPTY_DEPS="dependencies/empty.json"
 
-# DEFAULT_EXCLUDES="QtQuick QtWebKit QtWebKit.experimental org.nemomobile.lipstick Sailfish.Lipstick Sailfish.Silica Sailfish.Silica.private"
+if [ "$1" = "dump" ]
+then
+  for qmldir in $(find /usr/lib/qt5/qml -name qmldir)
+  do
+    # echo $qmldir
+    DIRNAME=$(dirname $qmldir)
+    PLUGIN=${DIRNAME:17}
+    PLUGIN=${PLUGIN//\//.}
+    if [[ $PLUGIN == org.nemomobile* ]] \
+    || [[ $PLUGIN == Mer* ]] \
+    || [[ $PLUGIN == Nemo* ]] \
+    || [[ $PLUGIN == io* ]] \
+    || [[ $PLUGIN == com.jolla* ]] \
+    || [[ $PLUGIN == Sailfish* ]]
+    then
+      echo $PLUGIN
+    fi
+  done
 
-# for qmldir in $(find /usr/lib/qt5/qml -name qmldir)
-# do
-#   # echo $qmldir
-#   DIRNAME=$(dirname $qmldir)
-#   PLUGIN=${DIRNAME:17}
-#   PLUGIN=${PLUGIN//\//.}
-#   if [[ $PLUGIN == org.nemomobile* ]] \
-#   || [[ $PLUGIN == Mer* ]] \
-#   || [[ $PLUGIN == Nemo* ]] \
-#   || [[ $PLUGIN == io* ]] \
-#   || [[ $PLUGIN == com.jolla* ]] \
-#   || [[ $PLUGIN == Sailfish* ]]
-#   then
-#     echo $PLUGIN
-#   fi
-# done
-
-# exit 0
+  exit 0
+fi
 
 QML=$(find /usr/share -name "*.qml" 2>/dev/null)
 
@@ -107,10 +107,16 @@ import() {
     #   sed -i -e "/\"$d\"/,/{/d" "$DEPS"
     # done
 
+    local DEPS="$EMPTY_DEPS"
+    if [ -f "dependencies/$PLUGIN.json" ]
+    then
+      DEPS="dependencies/$PLUGIN.json"
+    fi
+
     qmlplugindump \
       -nonrelocatable \
       -noinstantiate \
-      -dependencies "$EMPTY_DEPS" \
+      -dependencies "$DEPS" \
       "$PLUGIN" "$VERSION" \
       1> "$QMLTYPES" \
       2>"$QMLTYPES.error"
@@ -123,8 +129,12 @@ import() {
   fi
 }
 
-import Mer.Cutes 1.1
-import Mer.State 1.1
+if [ "x$1" != "x" ]
+then
+  import $@
+  exit 0
+fi
+
 import Nemo.Alarms 1.0
 import Nemo.Configuration 1.0
 import Nemo.Connectivity 1.0
@@ -161,6 +171,7 @@ import Sailfish.Office.PDF 1.0
 import Sailfish.Pickers 1.0
 import Sailfish.Pickers.private 1.0
 import Sailfish.Policy 1.0
+import Sailfish.QrFilter 1.0
 import Sailfish.Secrets.Ui 1.0
 import Sailfish.Settings.Networking 1.0
 import Sailfish.Settings.Networking.Vpn 1.0

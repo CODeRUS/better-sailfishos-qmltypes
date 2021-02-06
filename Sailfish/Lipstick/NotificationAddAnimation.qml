@@ -1,12 +1,13 @@
 /****************************************************************************
  **
  ** Copyright (C) 2015 Jolla Ltd.
- ** Contact: Matt Vogt <matthew.vogt@jollamobile.com>
+ ** Copyright (C) 2020 Open Mobile Platform LLC.
  **
  ****************************************************************************/
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import com.jolla.lipstick 0.1
 
 ParallelAnimation {
     id: root
@@ -15,7 +16,7 @@ ParallelAnimation {
     property string heightProperty: "height"
     property string opacityProperty: "opacity"
     property alias toHeight: heightAnimation.to
-    property int animationDuration: 400
+    property int animationDuration: Desktop.eventsViewVisible ? 200 : 0
 
     NumberAnimation {
         id: heightAnimation

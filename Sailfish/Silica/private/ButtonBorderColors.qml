@@ -1,7 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2014 Jolla Ltd.
-** Contact: Joona Petrell <joona.petrell@jollamobile.com>
+** Copyright (C) 2020 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Sailfish Silica UI component package.
@@ -32,44 +31,9 @@
 **
 ****************************************************************************************/
 
-import QtQuick 2.1
-import QtQuick.Window 2.1
-import Sailfish.Silica 1.0
-import Sailfish.Silica.private 1.0
+import QtQuick 2.6
 
-GlassBackgroundBase {
-    id: wallpaper
-
-    property alias source: wallpaperTextureImage.source
-    property real windowRotation
-    property alias asynchronous: wallpaperTextureImage.asynchronous
-    property alias status: wallpaperTextureImage.status
-
-    property bool glassOnly
-
-    color: Theme._wallpaperOverlayColor
-
-    visible: wallpaperTextureImage.status === Image.Ready || glassOnly
-
-    // wallpaper orientation
-    contentAngle: Math.floor(windowRotation / 90) * 90
-
-    patternItem: glassTextureImage
-    backgroundItem: wallpaperTextureImage
-
-    blending: !__silica_applicationwindow_instance._dimmingActive
-
-    fillMode: GlassBackgroundBase.PreserveAspectSquare
-
-    Image {
-        id: glassTextureImage
-        visible: false
-        source: "image://theme/graphic-shader-texture"
-    }
-
-    Image {
-        id: wallpaperTextureImage
-        visible: false
-        source: Theme.backgroundImage
-    }
+QtObject {
+    property color color: "transparent"
+    property color highlightColor: "transparent"
 }

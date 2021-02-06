@@ -26,11 +26,11 @@ Page {
     property int originalMessageId
     property int accountId
 
-    property bool _emailInstalled
-
     property var popDestination
 
     _clickablePageIndicators: !(isLandscape && emailComposer.item && emailComposer.item.toFieldHasFocus)
+
+    highContrast: true
 
     DBusInterface {
         id: storeInterface
@@ -51,10 +51,10 @@ Page {
 
     SilicaFlickable {
         anchors.fill: parent
-        visible: placeholder.enabled
+        visible: installEmail.enabled
         interactive: visible
         ViewPlaceholder {
-            id: placeholder
+            id: installEmail
             //: Email application is not installed, user should be guided to Jolla store for installing it.
             //% "Install Email from Jolla Store."
             text: qsTrId("components_email-la-install-email-application-from-store")
@@ -62,7 +62,7 @@ Page {
             //: "Placeholder hint text to guide user to trigger email application install from store"
             //% "Pull down to install"
             hintText: qsTrId("components_email-la-pulldown-to-install-email-application")
-            enabled: emailComposer.status === Loader.Error || !_emailInstalled
+            enabled: emailComposer.status === Loader.Error
         }
 
         PullDownMenu {
@@ -78,8 +78,6 @@ Page {
     Loader {
         id: emailComposer
         anchors.fill: parent
-        visible: _emailInstalled
-        property bool loaderCompleted
 
         onLoaded: {
             messageComposer.attachmentsModel = Qt.binding(function() { return item.attachmentsModel })
@@ -89,48 +87,29 @@ Page {
             }
         }
 
-        function loadComposer(version) {
-            if (!loaderCompleted) {
-                return
-            } else if (version === "1.1") {
-                _emailInstalled = true
-                emailComposer.setSource("EmailComposerComponent.1.1.qml",
-                                        {
-                                            "emailSubject": emailSubject,
-                                            "emailTo": emailTo,
-                                            "emailCc": emailCc,
-                                            "emailBcc": emailBcc,
-                                            "emailBody": emailBody,
-                                            "messageId": messageId,
-                                            "action": action,
-                                            "originalMessageId": originalMessageId,
-                                            "accountId": accountId,
-                                            "popDestination": popDestination,
-                                            "popOnDraftSaved": true
-                                        })
-            } else {
-                _emailInstalled = false
-            }
+        function loadComposer() {
+            emailComposer.setSource("EmailComposerComponent.1.1.qml",
+                                    {
+                                        "emailSubject": emailSubject,
+                                        "emailTo": emailTo,
+                                        "emailCc": emailCc,
+                                        "emailBcc": emailBcc,
+                                        "emailBody": emailBody,
+                                        "messageId": messageId,
+                                        "action": action,
+                                        "originalMessageId": originalMessageId,
+                                        "accountId": accountId,
+                                        "popDestination": popDestination,
+                                        "popOnDraftSaved": true
+                                    })
         }
 
         Component.onCompleted: {
-            loaderCompleted = true
             if (ImportChecker.hasImportComponent) {
-                loadComposer("1.1")
+                loadComposer()
             } else {
-                loadComposer(emailInstalled.value)
+                installEmail.enabled = true
             }
         }
-    }
-
-    ConfigurationValue {
-        id: emailInstalled
-
-        key: "/apps/jolla-email/version"
-        defaultValue: "1.0"
-
-        // For case of uninstall and install back so that
-        // application using this was not closed in between.
-        onValueChanged: emailComposer.loadComposer(value)
     }
 }

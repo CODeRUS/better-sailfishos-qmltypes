@@ -20,6 +20,9 @@ NetworkField {
 
     onTextChanged: errorHighlight = !(text == "" || weakRegExp.test(text))
 
+    //% "Valid network address is required"
+    description: errorHighlight ? qsTrId("settings_network_la-network_address_field_error") : ""
+
     regExp: new RegExp(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$|^([a-z]+:\/\/\w+.*)+$|^([\w-]+(-[\w-]+)*)+(\.([\w-]+(-[\w-\.]+)*))*$/)
     inputMethodHints: Qt.ImhUrlCharactersOnly
 }

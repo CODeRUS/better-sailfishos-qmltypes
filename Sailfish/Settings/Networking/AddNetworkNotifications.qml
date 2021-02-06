@@ -1,3 +1,11 @@
+/****************************************************************************
+**
+** Copyright (c) 2017 - 2019 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
+** License: Proprietary
+**
+****************************************************************************/
+
 import QtQuick 2.0
 import MeeGo.Connman 0.2
 import Nemo.Notifications 1.0
@@ -11,7 +19,7 @@ NetworkService {
         root.path = path
         if (path == "") {
             //% "Adding network failed"
-            errorNotification.previewBody = qsTrId("settings_network-la-adding_network_failed")
+            errorNotification.body = qsTrId("settings_network-la-adding_network_failed")
             errorNotification.publish()
         } else if (timeout) {
             timer.restart()
@@ -30,7 +38,7 @@ NetworkService {
                 return
             }
             //% "Network out of range"
-            errorNotification.previewBody = qsTrId("settings_network-la-network_out_of_range")
+            errorNotification.body = qsTrId("settings_network-la-network_out_of_range")
             errorNotification.publish()
             timer.stop()
             path = ""
@@ -40,14 +48,14 @@ NetworkService {
         interval: 6000
         onTriggered: {
             //% "Connecting to network failed"
-            errorNotification.previewBody = qsTrId("settings_network-la-connecting_failed")
+            errorNotification.body = qsTrId("settings_network-la-connecting_failed")
             errorNotification.publish()
         }
     }
     property Timer outOfRangeTimer: Timer {
         interval: 5000
         onTriggered: {
-            errorNotification.previewBody = qsTrId("settings_network-la-network_out_of_range")
+            errorNotification.body = qsTrId("settings_network-la-network_out_of_range")
             errorNotification.publish()
             timer.stop()
             path = ""
@@ -56,6 +64,6 @@ NetworkService {
     property Notification errorNotification: Notification {
         isTransient: true
         urgency: Notification.Critical
-        icon: "icon-system-warning"
+        appIcon: "icon-system-warning"
     }
 }

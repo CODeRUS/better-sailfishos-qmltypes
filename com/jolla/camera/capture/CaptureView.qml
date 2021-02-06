@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2020 Open Mobile Platform LLC.
+ *
+ * License: Proprietary
+ */
 import QtQuick 2.4
 import QtMultimedia 5.4
 import Sailfish.Silica 1.0
@@ -58,10 +64,19 @@ FocusScope {
 
     readonly property bool isPortrait: orientation == Orientation.Portrait
                 || orientation == Orientation.PortraitInverted
-    readonly property bool effectiveActive: (active || recording) && _applicationActive
+    readonly property bool effectiveActive: (active || recording) && _applicationActive && pageStack.depth < 2
 
-    readonly property bool _canCapture: (camera.captureMode == Camera.CaptureStillImage && camera.imageCapture.ready)
-                || (camera.captureMode == Camera.CaptureVideo && camera.videoRecorder.recorderStatus >= CameraRecorder.LoadedStatus)
+    readonly property bool _canCapture: {
+        switch (camera.captureMode) {
+            case Camera.CaptureStillImage: 
+                return camera.imageCapture.ready
+            case Camera.CaptureVideo:
+                return camera.videoRecorder.recorderStatus >= CameraRecorder.LoadedStatus 
+                    && captureOverlay != null && captureOverlay._recSecsRemaining > 0
+            default: 
+                return false
+        }
+    }
 
     property bool _captureQueued
     property bool captureBusy
@@ -146,14 +161,16 @@ FocusScope {
             startRecordTimer.running = false
         } else if (camera.videoRecorder.recorderState == CameraRecorder.RecordingState) {
             camera.videoRecorder.stop()
-        } else if (Settings.mode.timer != 0) {
-            microphoneWarningNotification.publishIfNeeded()
-            captureTimer.restart()
-        } else if (camera.captureMode == Camera.CaptureStillImage) {
-            camera.captureImage()
-        } else {
-            microphoneWarningNotification.publishIfNeeded()
-            camera.record()
+        } else if (_canCapture) {
+            if (Settings.mode.timer != 0) {
+                microphoneWarningNotification.publishIfNeeded()
+                captureTimer.restart()
+            } else if (camera.captureMode == Camera.CaptureStillImage) {
+                camera.captureImage()
+            } else {
+                microphoneWarningNotification.publishIfNeeded()
+                camera.record()
+            }
         }
     }
 
@@ -166,10 +183,10 @@ FocusScope {
             }
         }
 
-        category: "x-nemo.general.warning"
+        urgency: Notification.Critical
         //: %1 is an operating system name without the OS suffix
         //% "Camera audio won't be recorded, microphone disabled by %1 Device Manager"
-        previewBody: qsTrId("jolla-camera-la-microphone_disallowed_by_policy")
+        body: qsTrId("jolla-camera-la-microphone_disallowed_by_policy")
             .arg(aboutSettings.baseOperatingSystemName)
     }
 
@@ -207,6 +224,8 @@ FocusScope {
     }
 
     onEffectiveActiveChanged: {
+        qrFilter.clearResult()
+
         if (!effectiveActive) {
             _resetFocus()
             captureTimer.reset()

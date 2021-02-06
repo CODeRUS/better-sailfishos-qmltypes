@@ -1,6 +1,13 @@
+/****************************************************************************
+**
+** Copyright (c) 2018 - 2019 Jolla Ltd.
+** Copyright (c) 2020 Open Mobile Platform LLC.
+** License: Proprietary
+**
+****************************************************************************/
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import Sailfish.Silica.private 1.0 as SilicaPrivate
 import Sailfish.Ambience 1.0
 
 Dialog {
@@ -28,45 +35,48 @@ Dialog {
 
     allowedOrientations: Orientation.All
 
-    SilicaPrivate.Wallpaper {
-        anchors.fill: parent
-        source: ambience.applicationWallpaperUrl
-        windowRotation: -dialog.rotation
+    background: Wallpaper {
+        palette {
+            primaryColor: ambience.primaryColor
+            secondaryColor: ambience.secondaryColor
+            highlightColor: ambience.highlightColor
+            secondaryHighlightColor: ambience.secondaryHighlightColor
+            colorScheme: ambience.colorScheme
+        }
 
-        color: palette._wallpaperOverlayColor
+        sourceItem: view.applicationWallpaper
+    }
+
+    DialogHeader {
+        id: dialogHeader
+
+        spacing: 0
     }
 
     AmbienceSettingsView {
         id: view
 
+        y: dialogHeader.height
+
+        width: dialog.width
+        height: dialog.height - y
+
         showWallpaper: false
         fadeAmbiencePicture: true
         enableColorSchemeSelection: true
 
-        topHeader: DialogHeader {
-            id: dialogHeader
+        clip: true
 
-            Label {
-                //% "Create ambience"
-                text: qsTrId("jolla-gallery-ambience-la-create-ambience")
+        Label {
+            //% "Create ambience"
+            text: qsTrId("jolla-gallery-ambience-la-create-ambience")
 
-                parent: dialogHeader
-                color: ambience.highlightColor
-                x: Theme.horizontalPageMargin
-                y: parent.height + Theme.paddingMedium
-                width: parent.width - 2*x
-                font.pixelSize: Theme.fontSizeExtraLarge
-                wrapMode: Text.Wrap
-            }
-
-            SilicaPrivate.Wallpaper {
-                z: -1
-                parent: dialogHeader
-                anchors.fill: parent
-                source: ambience.applicationWallpaperUrl
-                windowRotation: -dialog.rotation
-                color: palette._wallpaperOverlayColor
-            }
+            color: ambience.highlightColor
+            x: Theme.horizontalPageMargin
+            y: Theme.paddingMedium
+            width: parent.width - 2*x
+            font.pixelSize: Theme.fontSizeExtraLarge
+            wrapMode: Text.Wrap
         }
     }
 }

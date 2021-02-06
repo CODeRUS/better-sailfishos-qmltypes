@@ -23,12 +23,15 @@ Dialog {
 
     property var peopleModel
     property Person subject
-    property var focusField
+    property var focusField: ({})
 
     property var _originalContactData
-    property Person _contact: subject && subject.complete ? subject : null
+    property Person _contact: subject && subject.complete && !_readOnly ? subject : null
     property var _peopleModel: peopleModel || SailfishContacts.ContactModelCache.unfilteredModel()
     property var _editors: [name, company, phone, email, note, address, date, website, info]
+    readonly property bool _readOnly: !subject
+                                      || !subject.complete
+                                      || !ContactsUtil.isWritableContact(subject)
 
     function findNextItemInFocusChain(fromItem, editor) {
         // When focused on last editor, don't loop focus back to the first editor.
@@ -45,18 +48,31 @@ Dialog {
         return false
     }
 
-    canAccept: hasDetailedContent()
+    InfoLabel {
+        anchors.centerIn: parent
+        visible: !flick.visible
+        //% "This contact cannot be modified"
+        text: qsTrId("components_contacts-la-contact_cannot_be_modified")
+    }
+
+    canAccept: !_readOnly && hasDetailedContent() && addressBookCombo.currentIndex >= 0
 
     onAcceptBlocked: {
         // Name has not been entered. Focus the field to indicate it is required.
-        name.focusFieldAt(0)
+        root.focusField = { detailType: "name", detailIndex: 0 }
     }
 
     onDone: {
         if (result === DialogResult.Accepted) {
+            // Break the binding so that if contact state changes while saving and this affects the
+            // id and readOnly state, the editor will not suddenly disappear.
+            flick.visible = true
+
             flick.save()
             if (!_peopleModel.savePerson(_contact)) {
                 console.log("Contact save failed!")
+            } else {
+                addressBookCombo.saveDefaultAddressBook()
             }
         } else {
             // Reset the contact back to its initial state
@@ -70,54 +86,32 @@ Dialog {
         focus = true
     }
 
+    on_ContactChanged: {
+        if (_contact) {
+            _originalContactData = _contact.contactData()
+        }
+    }
+
     SilicaFlickable {
         id: flick
-
-        property bool completed
-        property bool activated
-
-        property Person contact: root._contact
-        onContactChanged: {
-            if (contact && completed) {
-                activate()
-            }
-        }
-
-        function activate() {
-            if (!activated) {
-                activated = true
-
-                nicknames.reload(contact[nicknames.propertyAccessor])
-                for (var i = 0; i < _editors.length; ++i) {
-                    _editors[i].populateFieldEditor()
-                    _editors[i].populated = true
-                }
-
-                root._originalContactData = root._contact.contactData()
-                if (_contact.id == 0) {
-                    editorsColumn.focusInitialField()
-                } else if (!!focusField) {
-                    editorsColumn.focusSpecificField()
-                }
-            }
-        }
 
         function save() {
             for (var i = 0; i < _editors.length; ++i) {
                 _editors[i].aboutToSave()
             }
-            nicknames.copyMultiTypeDetailChanges(contact, nicknames.propertyAccessor)
+            nicknames.copyMultiTypeDetailChanges(root._contact, nicknames.propertyAccessor)
         }
 
         anchors.fill: parent
         contentHeight: editorsColumn.height + header.height
         contentWidth: parent.width
+        visible: !root._readOnly
 
-        Component.onCompleted: {
-            completed = true
-            if (root._contact != null) {
-                activate()
-            }
+        // Delay loading so that the editor doesn't appear abruptly when pushing immediately from
+        // the constituent picker.
+        NumberAnimation on opacity {
+            from: 0
+            to: 1
         }
 
         SailfishContacts.ContactDetailSuggestions {
@@ -145,48 +139,15 @@ Dialog {
             anchors.top: header.bottom
             width: parent.width
 
-            property bool focusOnActivated
-            property bool appActivated: Qt.application.active && root.status == PageStatus.Active
-            onAppActivatedChanged: {
-                if (appActivated && focusOnActivated) {
-                    focusOnActivated = false
-                    focusInitialField()
-                }
-            }
-            function focusInitialField() {
-                if (appActivated) {
-                    name.focusFieldAt(0)
-                } else {
-                    editorsColumn.focusOnActivated = true
-                }
-            }
-            function focusSpecificField() {
-                var editor = null
-                switch (focusField.detailType) {
-                    case "name":    editor = name;    break;
-                    case "company": editor = company; break;
-                    case "phone":   editor = phone;   break;
-                    case "email":   editor = email;   break;
-                    case "note":    editor = note;    break;
-                    case "address": editor = address; break;
-                    case "date":    editor = date;    break;
-                    case "website": editor = website; break;
-                    case "info":    editor = info;    break;
-                    default: console.log("Unknown detail type: " + focusField.detailType); return;
-                }
-                editor.focusFieldAt(focusField.detailIndex, editor.animationDuration)
-            }
-
             Item {
                 width: parent.width
-                height: name.height + avatarMenuContainer.height + company.height
+                height: addressBookCombo.y + addressBookCombo.height
 
-                // Background highlight behind name and company sections
+                // Background highlight behind name, company and address book sections
                 Rectangle {
                     y: -Theme.paddingLarge // compensate for DialogHeader padding
                     width: parent.width
                     height: parent.height - y
-                            - Theme.paddingSmall    // prevent highlight from running into 'clear' icon in the following textfield
                     color: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
                 }
 
@@ -213,9 +174,11 @@ Dialog {
 
                     contact: root._contact
                     peopleModel: root._peopleModel
-                    acceptMouseClicks: !flick.moving
                     nicknameModel: nicknames
                     flickable: flick
+                    initialFocusIndex: focusField.detailType === "name" || focusField.detailType === undefined
+                                       ? focusField.detailIndex || 0
+                                       : -1
                 }
 
                 Item {
@@ -233,7 +196,15 @@ Dialog {
                     contact: root._contact
                     peopleModel: root._peopleModel
                     suggestions: fieldSuggestions
-                    acceptMouseClicks: !flick.moving
+                    initialFocusIndex: focusField.detailType === "company" ? focusField.detailIndex : -1
+                }
+
+                ContactAddressBookComboBox {
+                    id: addressBookCombo
+
+                    anchors.top: company.bottom
+                    contact: root._contact
+                    enabled: root._contact != null && root._contact.id === 0
                 }
             }
 
@@ -242,7 +213,7 @@ Dialog {
 
                 contact: root._contact
                 peopleModel: root._peopleModel
-                acceptMouseClicks: !flick.moving
+                initialFocusIndex: focusField.detailType === "phone" ? focusField.detailIndex : -1
             }
 
             EmailEditor {
@@ -250,7 +221,7 @@ Dialog {
 
                 contact: root._contact
                 peopleModel: root._peopleModel
-                acceptMouseClicks: !flick.moving
+                initialFocusIndex: focusField.detailType === "email" ? focusField.detailIndex : -1
             }
 
             NoteEditor {
@@ -258,7 +229,7 @@ Dialog {
 
                 contact: root._contact
                 peopleModel: root._peopleModel
-                acceptMouseClicks: !flick.moving
+                initialFocusIndex: focusField.detailType === "note" ? focusField.detailIndex : -1
             }
 
             AddressEditor {
@@ -266,7 +237,7 @@ Dialog {
 
                 contact: root._contact
                 peopleModel: root._peopleModel
-                acceptMouseClicks: !flick.moving
+                initialFocusIndex: focusField.detailType === "address" ? focusField.detailIndex : -1
             }
 
             DateEditor {
@@ -274,7 +245,7 @@ Dialog {
 
                 contact: root._contact
                 peopleModel: root._peopleModel
-                acceptMouseClicks: !flick.moving
+                // initialFocusIndex not set, date field cannot be focused
             }
 
             WebsiteEditor {
@@ -282,7 +253,7 @@ Dialog {
 
                 contact: root._contact
                 peopleModel: root._peopleModel
-                acceptMouseClicks: !flick.moving
+                initialFocusIndex: focusField.detailType === "website" ? focusField.detailIndex : -1
             }
 
             InfoEditor {
@@ -290,9 +261,9 @@ Dialog {
 
                 contact: root._contact
                 peopleModel: root._peopleModel
-                acceptMouseClicks: !flick.moving
                 nicknameModel: nicknames
                 suggestions: fieldSuggestions
+                initialFocusIndex: focusField.detailType === "info" ? focusField.detailIndex : -1
             }
         }
 
@@ -301,5 +272,7 @@ Dialog {
 
     NicknameDetailModel {
         id: nicknames
+
+        contact: root._contact
     }
 }

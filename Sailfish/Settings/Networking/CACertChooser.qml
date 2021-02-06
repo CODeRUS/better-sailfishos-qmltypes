@@ -85,12 +85,10 @@ Column {
         id: domainSuffixField
         text: network ? network.domainSuffixMatch : ""
         visible: root.visible && certComboBox.currentIndex === 0
-        width: parent.width
 
         //: Option to restrict accepted certificates to certain domain
         //% "Domain"
-        placeholderText: qsTrId("settings_network-la-vpn_domain")
-        label: placeholderText
+        label: qsTrId("settings_network-la-vpn_domain")
 
         onTextChanged: if (immediateUpdate) {
             network.domainSuffixMatch = text

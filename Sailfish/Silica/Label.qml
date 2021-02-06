@@ -70,7 +70,9 @@ Private.SilicaText {
             direction: horizontalAlignment == Text.AlignRight ? OpacityRamp.RightToLeft
                                                               : OpacityRamp.LeftToRight
             source: root
-            slope: 1 + 6 * root.width / Screen.width
+            slope: Math.max(
+                       1 + 6 * root.width / Screen.width,
+                       root.width / Math.max(1, 2 * (root.implicitWidth - width)))
             offset: 1 - 1 / slope
         }
     }
